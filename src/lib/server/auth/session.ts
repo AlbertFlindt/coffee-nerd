@@ -66,3 +66,14 @@ export function signOut(db: Db, token: string): void {
 export function signOutEverywhere(db: Db, userId: string): void {
   db.delete(session).where(eq(session.userId, userId)).run();
 }
+
+/** Cookie settings: not readable by scripts, sent on normal navigation, secure when served over https. */
+export function sessionCookieOptions(url: URL) {
+  return {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax' as const,
+    secure: url.protocol === 'https:',
+    maxAge: SESSION_LIFETIME / 1000
+  };
+}

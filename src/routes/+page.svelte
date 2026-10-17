@@ -6,6 +6,10 @@
 <main>
   <img src={logo} width="64" height="64" alt="" />
   <h1 class="cn-type-display">Coffee Nerd</h1>
+  <!-- Until Settings exists (M11), signing out lives here; not designed (docs/open-items.md). -->
+  <form method="POST" action="/logout">
+    <button class="cn-btn-secondary" type="submit">Sign out</button>
+  </form>
 </main>
 
 <style>
@@ -21,5 +25,10 @@
 
   h1 {
     margin: 0;
+  }
+
+  form {
+    width: 100%;
+    margin-top: var(--space-6);
   }
 </style>

@@ -282,7 +282,9 @@ function seedOtherAccount() {
   const now = T0 + 1000;
   const stamps = { createdAt: now, updatedAt: now };
   const userId = newId(now);
-  db.insert(user).values({ id: userId, name: 'Other', passwordHash: 'x', ...stamps }).run();
+  db.insert(user)
+    .values({ id: userId, name: 'Other', passwordHash: 'x', ...stamps })
+    .run();
   insertBuiltInTags(db, userId, now);
   const machineId = newId(now);
   db.insert(gear)
