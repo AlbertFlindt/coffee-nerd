@@ -31,6 +31,8 @@ Every merge to `main` is published as the image `ghcr.io/albertflindt/coffee-ner
      data:
    ```
 
+   Do steps 3 and 4 right away: until the seed has run, anyone who can reach the server can claim the app, and until you set your own password the published Demo password works.
+
 3. **Fill it with the reference setup before signing in.** Gear and My setup cannot be added in the app until milestone M6, so start from the seed (Lelit Bianca, Timemore 064S, VST 18 g, Daily routine, one bean). In Dockge open the stack's terminal (`sh`) and run `node scripts/seed.mjs`. It only works while the app has no account yet.
 4. **Sign in** at `http://<server>:3000` as **Demo** with the password **coffee-nerd**. Then set your own password in the same terminal with `node scripts/reset-password.mjs`.
 5. **Update to the latest build:** press **Update** on the stack. Dockge pulls the new image and restarts it; your shots stay in the `data` volume, and database changes are applied when the app starts.
