@@ -1,0 +1,66 @@
+import { error, fail, redirect } from '@sveltejs/kit';
+import { getDb } from '#lib/server/db/connection.ts';
+import { loadShotForm } from '#lib/server/db/shot-form.ts';
+import { clearBrewNext, saveShot, shotRequestSchema, ShotRejected } from '#lib/server/db/shots.ts';
+import { setFlash } from '#lib/server/flash.ts';
+import { bean } from '#lib/server/db/schema.ts';
+import { and, eq } from 'drizzle-orm';
+import type { Actions, PageServerLoad } from './$types';
+
+// New shot (screens 1–5 and 11): "+" opens it prefilled (D-03, D-31); ?bean= picks another open bean (D-94).
+const NOT_SAVED = 'The shot could not be saved. Nothing was changed.';
+
+export const load: PageServerLoad = ({ locals, url }) => {
+  if (!locals.user) error(401);
+  return { form: loadShotForm(getDb(), locals.user.id, url.searchParams.get('bean') ?? undefined) };
+};
+
+export const actions: Actions = {
+  save: async ({ locals, request, cookies }) => {
+    if (!locals.user) error(401);
+    const data = await request.formData();
+    let json: unknown;
+    try {
+      json = JSON.parse(String(data.get('shot') ?? ''));
+    } catch {
+      return fail(400, { problems: [NOT_SAVED] });
+    }
+    const parsed = shotRequestSchema.safeParse(json);
+    if (!parsed.success) return fail(400, { problems: [NOT_SAVED] });
+
+    const db = getDb();
+    const now = Date.now();
+    try {
+      // The server recomputes the fingerprint and finds or creates the recipe (data-model §4.1).
+      const result = saveShot(db, locals.user.id, { ...parsed.data, brewedAt: now }, now);
+      if (result.autoFinished) {
+        const finished = db
+          .select({ name: bean.name })
+          .from(bean)
+          .where(and(eq(bean.id, parsed.data.beanId), eq(bean.ownerId, locals.user.id)))
+          .get();
+        setFlash(cookies, request, {
+          kind: 'finished',
+          beanId: parsed.data.beanId,
+          beanName: finished?.name ?? ''
+        });
+      } else setFlash(cookies, request, { kind: 'saved' });
+    } catch (e) {
+      if (e instanceof ShotRejected) {
+        // The details are for the server log; the form says it in plain words (D-20).
+        console.error('Shot rejected:', e.problems.join('; '));
+        return fail(400, { problems: [NOT_SAVED] });
+      }
+      throw e;
+    }
+    // D-95: back to where "+" was pressed; until Home and the tab bar exist (M8), that is the start page.
+    redirect(303, '/');
+  },
+
+  // D-43: "Use last shot recipe" clears the mark; the form starts from the last shot again.
+  useLastShot: ({ locals }) => {
+    if (!locals.user) error(401);
+    clearBrewNext(getDb(), locals.user.id, Date.now());
+    redirect(303, '/shot/new');
+  }
+};

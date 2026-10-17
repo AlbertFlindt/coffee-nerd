@@ -41,7 +41,7 @@ Pure TypeScript in `src/lib/domain/`, fully unit-tested, used later by both brow
 
 **Done when:** integration tests against a temporary SQLite file cover save-shot → recipe reuse → edit-shot → recipe cleanup, and Brew next clearing; the seed runs on an empty database.
 
-## M3 — Shot form ☐  (screens 1–5, 11)
+## M3 — Shot form ☑  (screens 1–5, 11)
 New shot with prefill, deltas, recipe tag, balance, score, More sheet (Setup and Tasting), Brew next banner. Uses seeded gear and beans; pickers can be minimal until M5–M6.
 
 **Done when:** screenshots of each state match `Main`, `Rated`, `RecipeChanged`, `MoreSetup`, `MoreTasting`, `BrewNext`; end-to-end test: log three shots, go back to the first grind, tag says "Recipe reused".

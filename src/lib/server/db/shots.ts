@@ -2,6 +2,7 @@
 // fingerprint on the server, find or create the recipe, write the shot, clear Brew next, finish the bean
 // when the bag runs out. Every query is scoped by the owner (D-60).
 import { and, count, eq, inArray, sql } from 'drizzle-orm';
+import { z } from 'zod';
 import { shouldAutoFinish } from '../../domain/bean';
 import { recipeFingerprint } from '../../domain/fingerprint';
 import {
@@ -34,9 +35,36 @@ export type ShotInput = {
   time: Thousandths | null;
   taste: Taste;
   tagIds: string[];
+  /** Flavor notes added with "Add your own", created in "Other" when the shot is saved (D-101). */
+  newTagNames?: string[];
   notes: string | null;
   brewedAt: number;
 };
+
+const wholeNumber = z.number().int();
+
+/**
+ * The shape of a shot sent by the shot form; the values themselves are checked again by `saveShot`.
+ * `brewedAt` is set by the server.
+ */
+export const shotRequestSchema = z.object({
+  id: z.uuid(),
+  beanId: z.string(),
+  machineId: z.string(),
+  grinderId: z.string(),
+  basketId: z.string().nullable(),
+  routineId: z.string().nullable(),
+  grind: wholeNumber,
+  dose: wholeNumber,
+  setup: setupSnapshotSchema,
+  yield: wholeNumber.nullable(),
+  time: wholeNumber.nullable(),
+  taste: tasteSchema,
+  tagIds: z.array(z.string()).max(100),
+  newTagNames: z.array(z.string()).max(20),
+  notes: z.string().max(5000).nullable()
+});
+export type ShotRequest = z.infer<typeof shotRequestSchema>;
 
 export type SaveResult = {
   status: 'saved' | 'duplicate';
@@ -75,6 +103,7 @@ export function saveShot(db: Db, ownerId: string, input: ShotInput, now: number)
     }
 
     const setup = validate(tx, ownerId, input);
+    const tagIds = [...input.tagIds, ...addTags(tx, ownerId, input.newTagNames ?? [], now)];
     const { recipeId, newRecipe } = findOrCreateRecipe(tx, ownerId, { ...input, setup }, now);
     tx.insert(shot)
       .values({
@@ -86,10 +115,10 @@ export function saveShot(db: Db, ownerId: string, input: ShotInput, now: number)
         updatedAt: now
       })
       .run();
-    writeTags(tx, input.id, input.tagIds);
-    // D-43: the mark is used up by the shot it started.
+    writeTags(tx, input.id, tagIds);
+    // D-43: the mark is used up by the shot it started. D-32: Home follows the bean you last brewed.
     tx.update(appState)
-      .set({ brewNextRecipeId: null, updatedAt: now })
+      .set({ brewNextRecipeId: null, currentBeanId: input.beanId, updatedAt: now })
       .where(eq(appState.userId, ownerId))
       .run();
     const autoFinished = finishBeanIfUsedUp(tx, ownerId, input, now);
@@ -126,13 +155,14 @@ export function editShot(
     if (!existing) throw new ShotRejected(['shot: not found']);
 
     const setup = validate(tx, ownerId, input);
+    const tagIds = [...input.tagIds, ...addTags(tx, ownerId, input.newTagNames ?? [], now)];
     const { recipeId, newRecipe } = findOrCreateRecipe(tx, ownerId, { ...input, setup }, now);
     tx.update(shot)
       .set({ recipeId, ...shotValues(input), updatedAt: now })
       .where(and(eq(shot.id, shotId), eq(shot.ownerId, ownerId)))
       .run();
     tx.delete(shotTag).where(eq(shotTag.shotId, shotId)).run();
-    writeTags(tx, shotId, input.tagIds);
+    writeTags(tx, shotId, tagIds);
 
     if (existing.recipeId !== recipeId && recipeShotCount(tx, ownerId, existing.recipeId) === 0) {
       const marked = tx
@@ -256,6 +286,10 @@ function validate(tx: Queryable, ownerId: string, input: ShotInput): SetupSnapsh
     if (found.length !== tagIds.length) problems.push('tag: not found');
   }
 
+  for (const name of input.newTagNames ?? [])
+    if (typeof name !== 'string' || name.trim().length === 0 || name.trim().length > MAX_TAG_NAME)
+      problems.push('tag: a new flavor note needs a name of 1 to 40 characters');
+
   if (problems.length > 0) throw new ShotRejected(problems);
   return setup.data;
 }
@@ -301,6 +335,29 @@ function findOrCreateRecipe(
     })
     .run();
   return { recipeId, newRecipe: true };
+}
+
+const MAX_TAG_NAME = 40;
+
+/**
+ * The ids of flavor notes added on the Tasting tab: an existing note with the same name (ignoring case
+ * and surrounding spaces, D-53) is reused; otherwise a new note is created in "Other" (D-101).
+ */
+function addTags(tx: Queryable, ownerId: string, names: string[], now: number): string[] {
+  return names.map((raw) => {
+    const name = raw.trim();
+    const existing = tx
+      .select({ id: tag.id })
+      .from(tag)
+      .where(and(eq(tag.ownerId, ownerId), sql`lower(${tag.name}) = lower(${name})`))
+      .get();
+    if (existing) return existing.id;
+    const id = newId(now);
+    tx.insert(tag)
+      .values({ id, ownerId, name, family: 'other', createdAt: now, updatedAt: now })
+      .run();
+    return id;
+  });
 }
 
 function writeTags(tx: Queryable, shotId: string, tagIds: string[]): void {
@@ -355,4 +412,37 @@ function finishBeanIfUsedUp(
     .where(and(eq(bean.id, input.beanId), eq(bean.ownerId, ownerId)))
     .run();
   return true;
+}
+
+/** "Use last shot recipe" (D-43): the next shot starts from the last shot again. */
+export function clearBrewNext(db: Db, ownerId: string, now: number): void {
+  db.update(appState)
+    .set({ brewNextRecipeId: null, updatedAt: now })
+    .where(eq(appState.userId, ownerId))
+    .run();
+}
+
+/**
+ * Undo after a shot finished the bean automatically (D-40, D-95): reopens the bean. Only a bean that was
+ * finished automatically; one finished by hand stays finished. True when the bean was reopened.
+ */
+export function reopenAutoFinishedBean(
+  db: Db,
+  ownerId: string,
+  beanId: string,
+  now: number
+): boolean {
+  const result = db
+    .update(bean)
+    .set({ status: 'open', finishedAt: null, finishedAutomatically: false, updatedAt: now })
+    .where(
+      and(
+        eq(bean.id, beanId),
+        eq(bean.ownerId, ownerId),
+        eq(bean.status, 'finished'),
+        eq(bean.finishedAutomatically, true)
+      )
+    )
+    .run();
+  return result.changes > 0;
 }

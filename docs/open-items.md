@@ -28,12 +28,22 @@ Last updated: 2026-10-17
 | Gear: the message on an item My setup uses, "Used in My setup · choose another default first" | M6 | D-83 |
 | Tag sheet: rename, merge, remove | M7 | Open topic 14, D-29, D-53 |
 | Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency) | M8 | Open topic 15, D-32 |
-| Home: replace the placeholder start page (logo, name and a temporary "Sign out" button) | M8 | M0, M2 |
+| Home: replace the placeholder start page (logo, name, a temporary "New shot" link standing in for the tab bar's "+", and a temporary "Sign out" button) | M8 | M0, M2, M3 |
+| The "Shot saved" message, the automatic-finish message with Undo, and "… is open again" (built as a plain card on the start page) | M8 | D-95 |
+| Shot form when there is nothing to brew with (no My setup or no open bean): built as a plain "Nothing to brew with yet" message | M6 | D-88, M3 |
+| Shot form: the bean list behind the bean card (D-94), built as a plain "Open beans" list in a sheet | M5 | D-94, M3 |
+| Taste sliders: the "Clear" control (D-98), built as small text after the value words | M4 | D-98, M3 |
+| Shot form: the message when the server refuses a shot ("The shot could not be saved. Nothing was changed.", above Save) | M10 | M3 |
+| Shot form: the message when a switched-on feature has no value yet ("Set Low bar end first.", above Save) | M6 | D-78, M3 |
+| More › Setup: rows for custom features that are on/off or "Pick from a list" (built as a switch with "On"/"Off", and a value that cycles through the options on tap) | M6 | D-46, M3 |
+| More › Setup: the basket and puck prep pickers (built as a plain list inside the sheet) | M6, M7 | D-22, D-25, M3 |
 | Where "Sign out" lives (for now on the placeholder start page; Settings is the likely home) | M11 | M2 |
 | **Insights: the Dial-in tab has no design** (What I like, Progress and Comparisons do); more Dial-in cards, e.g. grind vs. time, sour/bitter vs. ratio | M9 | Open topic 16, D-55, D-56 |
 | Journal: how a shot that is still waiting to sync looks | M10 | Open topic 23, D-61 |
 | App icon for the home screen (PWA) | M10 | Open topic 17 |
 | Settings (units, backup, export, and the dose, yield and time steps of D-89) | M11 | Roadmap M11, D-89 |
+| Shot form: choosing another machine or grinder (D-94 waits for the Gear pages) | M6 | D-94 |
+| Shot form: the gentle hint when the dose is outside the basket's dose range | M6 | D-49 |
 | Tablet layouts, light theme, focus and hover styles | Not scheduled | Open topic 5, design-system README |
 
 ## 3. Product topics not decided yet
@@ -57,6 +67,11 @@ Last updated: 2026-10-17
 | Playwright is pinned to 1.56.1 and CI to `ubuntu-24.04`, to match the browser in the development environment. Upgrade both together. | Any time | PR #1 |
 | Install guide: create the account right after starting the server, before others can reach it; until then anyone who can open the app can claim it (D-88) | M11 | M2 |
 | Install guide: behind a reverse proxy with https, forward `X-Forwarded-Proto` (and `X-Forwarded-Host` if the proxy changes the host), so the sign-in cookie is marked secure and forms are accepted | M11 | M2 |
-| End-to-end tests start from an empty database to test first run; screen tests from M3 need the reference seed (testing rule: seeded data only). Plan: a second Playwright project whose server runs `npm run db:seed` first | M3 | M2 |
+| The Brew next end-to-end test sets the mark directly in the test database, since nothing in the app can mark a recipe before the bean detail page; switch it to the button | M5 | M3 |
+| "Back" and "Save shot" always return to the start page; once the tab bar exists they return to where "+" was pressed (D-95) | M8 | M3 |
+| The basket and puck prep pickers offer no "None", so once set they cannot be removed for one shot | M6 | M3 |
+| Switching the bean (D-94) or "Use last shot recipe" (D-43) starts the form again and drops edits already made, without a warning; the local draft of D-61 may cover it | M10 | M3 |
+| Basket row on the Setup tab shows the basket's name ("VST 18 g"); the design shows brand · size ("VST · 18 g"), which needs separate fields on the basket | M6 | D-49, M3 |
+| Shot form: a puck prep step's value is taken from the routine (D-76) and cannot be changed for one shot; only the routine can be switched | M7 | D-51, M3 |
 | `npm audit`: 4 moderate advisories from an old esbuild inside drizzle-kit (development only, not in the Docker image). Recheck when drizzle-kit updates. | Each dependency update | PR #1 |
 | The push guard still blocks a command whose single-line commit text looks like a push to `main` (e.g. a literal `push\nto main`). Safe side; a fix needs a shell parser. | Only if it gets in the way | PR #2 |
