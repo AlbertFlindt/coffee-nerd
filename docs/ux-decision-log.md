@@ -105,10 +105,20 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 ## 7. Shot form (espresso)
 
-- **D-03 — Prefill from last shot.** *(Revised 2026-10-17: see D-72.)* A new shot starts as a copy of the last shot (bean and core values). Changed values are highlighted against the previous shot. Ratio is calculated automatically. When there is no last shot for this bean, the shot starts from **My setup** defaults (D-38). When a recipe is marked **"Brew next"** (D-43), the next shot starts from that recipe instead.
+- **D-03 — Prefill from last shot.** *(Revised 2026-10-17: see D-72, D-75, D-76.)* A new shot starts as a copy of the last shot (bean and core values). Changed values are highlighted against the previous shot. Ratio is calculated automatically. When there is no last shot for this bean, the shot starts from **My setup** defaults (D-38). When a recipe is marked **"Brew next"** (D-43), the next shot starts from that recipe instead.
   - *Why:* the most valuable action is "brew again, change one thing."
-- **D-72 — A bean's first shot starts with an empty time.** When a shot starts from My setup (D-38), grind, dose and yield come from My setup; the time has no default and stays empty until it is set. Refines D-03.
+- **D-72 — A bean's first shot starts with an empty time.** *(Revised 2026-10-17: see D-80.)* When a shot starts from My setup (D-38), grind, dose and yield come from My setup; the time has no default and stays empty until it is set. Refines D-03.
   - *Why:* My setup holds what you choose before brewing; time is a result, so inventing one would be a guess (same reasoning as D-11).
+- **D-80 — Tapping an empty time starts at 0 s.** When the time card is empty (D-72), its −/+ buttons count from 0 s: the first + gives 1 s, and − stays at 0 s. Tap-to-type still works for entering the time directly. Refines D-72.
+  - *Why:* the buttons keep doing exactly what their label says ("+ 1 s", D-07), without guessing a typical time.
+- **D-74 — A re-buy from a bag without rated shots starts from its latest shot.** When the nearest earlier bag with shots (D-73) has no rated shot, and so no best recipe (D-66), the new bag starts from that bag's latest shot: its recipe, yield and time. Refines D-73.
+  - *Why:* keeps "the nearest bag with shots" true even when nothing was scored.
+- **D-75 — Archived gear or routines are swapped for My setup's.** When the shot a new shot starts from used a machine, grinder, basket or puck prep routine that has since been archived, only that item is replaced by My setup's default (D-38); everything else is copied as usual, and the recipe tag names what changed. Refines D-03.
+  - *Why:* archived items can no longer be picked, so the form should not start with one.
+- **D-76 — A copied routine starts as the routine is now.** When the routine was edited since the copied shot, the new shot uses its current steps and names, with values from the copied shot where a step is still in the routine and the routine's own value for new steps. Refines D-03 and D-51.
+  - *Why:* matches how machine features are brought up to date, and editing a routine only affects future shots (D-65).
+- **D-78 — A feature without an off switch waits for a value.** When temperature or flat pressure (which cannot be switched off) has no value from the copied shot or My setup, it starts switched on with an empty value for you to set. Refines D-38.
+  - *Why:* switching it off is impossible and inventing a value would be a guess (same reasoning as D-11).
 - **D-04 — Core fields: grind, dose, yield, time.** Bean is prefilled. Everything else lives behind a **More** button.
   - *Why:* these four are what a home barista adjusts shot to shot.
 - **D-05 — Standing setup vs. shot variables.** Temperature, basket, pressure profile, puck prep etc. are *standing setup*: set on the machine before brewing, carried over automatically, shown as a compact summary line, editable under More. Changes are highlighted like any other.
@@ -123,11 +133,13 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the grid keeps all four core values visible at once with large touch targets; one primary action at the bottom suits one-handed use. A row-based "instrument" layout was tried and felt cluttered.
 - **D-15 — Changes vs. last shot shown as a delta.** A changed value is colored (see D-19) with a small delta pill (e.g. "+2.5"). No "was X" text.
   - *Why:* the delta is the information the barista acts on; extra text added clutter.
-- **D-16 — Recipe tag on the bean card.** *(Revised 2026-10-17: see D-71.)* Shows **"Recipe reused Nx"** when this exact recipe has been brewed before, or **"New recipe · <what> changed"** (e.g. "grind changed") when it has not. Replaces an "attempt N" counter.
+- **D-16 — Recipe tag on the bean card.** *(Revised 2026-10-17: see D-71, D-77.)* Shows **"Recipe reused Nx"** when this exact recipe has been brewed before, or **"New recipe · <what> changed"** (e.g. "grind changed") when it has not. Replaces an "attempt N" counter.
   - Matching is against **all past shots for the same bean and machine**, not only the previous shot. Returning to an earlier setting is recognized as that recipe, with its count and its last score (D-12).
   - *Why:* dialing in often goes back and forth; matching all history keeps the counter, score reference and bean-aging signal reliable. Naming the cause makes the tag understandable — a bare "New recipe" left users unsure why it appeared.
-- **D-71 — Recipe tag names up to two changes.** When a new recipe differs from the last shot's recipe in more than one thing, the tag names the first two and counts the rest: "New recipe · grind changed", "New recipe · grind and dose changed", "New recipe · grind, dose and 1 more changed". Refines D-16.
+- **D-71 — Recipe tag names up to two changes.** *(Revised 2026-10-17: see D-77.)* When a new recipe differs from the last shot's recipe in more than one thing, the tag names the first two and counts the rest: "New recipe · grind changed", "New recipe · grind and dose changed", "New recipe · grind, dose and 1 more changed". Refines D-16.
   - *Why:* says exactly what changed in the common one- or two-change case, and still fits on the bean card when more changed.
+- **D-77 — Order of changes in the recipe tag, and a plain "New recipe".** Changes are named in this order: grind, dose, machine, grinder, basket, routine, then machine features, so D-71's first two follow it (e.g. "grind and grinder changed"). When nothing can be named — a bean's first shot, or the last shot was another bean with the same setup — the tag says just "New recipe". Refines D-16 and D-71.
+  - *Why:* the values you change most come first; a bare "New recipe" is honest when there is nothing earlier to compare with.
 - **D-17 — Bean age lives on the bean overview and Home, not the shot form.**
   - *Why:* bean age matters when choosing a bean; on the shot form it is clutter, since the bean is usually unchanged from the last shot.
 - **D-20 — Plain words, no abbreviations.** UI text spells things out (e.g. "Preinfusion 4 s", not "PI 4 s"); units are written in full or as standard symbols (°C, g, s, bar).
@@ -197,7 +209,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - Full-width **"Add bean"** button at the bottom.
   - Only the two required fields are marked ("Required"); everything else is optional without saying so, which keeps the form quiet.
   - *Why:* roast date powers freshness and bean-aging data, so it is worth requiring; the rest is nice-to-have. Re-buying the same bean is common, and the shortcut turns a 10-field form into one tap plus a date. Country is a picker, not free text, so Insights can reliably compare origins (free text would split "Ethiopia", "ethiopia" and "Ethiopa"); region stays free text because region names are too varied for a fixed list.
-- **D-73 — A re-buy starts from the nearest earlier bag with shots.** The first shot of a bag added with "Same as before" follows the chain of earlier bags back to the nearest one that has shots, and starts from that bag's best recipe (D-66), with yield and time from that recipe's latest shot, as a new recipe for this bag. If no earlier bag has shots, it starts from My setup (D-38). Refines D-41.
+- **D-73 — A re-buy starts from the nearest earlier bag with shots.** *(Revised 2026-10-17: see D-74.)* The first shot of a bag added with "Same as before" follows the chain of earlier bags back to the nearest one that has shots, and starts from that bag's best recipe (D-66), with yield and time from that recipe's latest shot, as a new recipe for this bag. If no earlier bag has shots, it starts from My setup (D-38). Refines D-41.
   - *Why:* a bag that was re-bought but never brewed should not hide the dial-in work of the bags before it.
 - **D-42 — Bean detail page.** Opens by tapping a bean on the Beans overview (open or finished). It is everything about one bag; nothing on it is needed while brewing. Top to bottom:
   - Header: back to Beans, bean name, **Edit** (opens the Add bean form, filled in).
@@ -216,24 +228,26 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* some baristas track stock, many don't; an optional field serves both without nagging.
 - **D-40 — Finishing a bean.** A bean moves from Open to Finished with **"Mark as finished"**, always available on the bean. When a bag weight is set (D-35) and grams left reach zero, the app **finishes the bean automatically** and says so, with an undo. A finished bean can always be reopened.
   - *Why:* manual works for everyone; automatic saves a step for those who track weight, but weights drift (spills, sharing), so the manual option and undo must always be there.
-- **D-38 — Gear page: "My setup" card on top, gear list below.**
+- **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-17: see D-78.)*
   - **My setup** (a light cream card so it stands out): default machine, grinder, basket and puck prep routine, plus **default values** (dose, yield, grind, temperature, pressure profile). One "Edit" button.
   - Defaults are the **starting point for a bean's first shot** (and when switching gear). After that, D-03 applies: new shots copy the last shot.
   - **Gear list** grouped by type (Machines, Grinders, Baskets, later Other). Each row shows a short capability summary (e.g. "Semi-auto · Preinfusion, low bar start, low bar end"; "Stepless · steps of 0.1"); the default item carries a "Default" chip. Tapping a row opens the item, where its capability profile (D-02) and step sizes (D-07) are set.
   - "Add gear" sits in the header.
   - *Why:* one place answers "what do I brew with and what do new shots start from"; per-item details stay one tap away for tinkering.
-- **D-44 — Gear detail (machine): capabilities are set by hand.** Opens from a row on the Gear page. Name, **type** (Automatic, Semi-auto, Lever, Manual) and a **"What it can do"** list of switches — for the Lelit Bianca: Temperature (°C, steps of 1), Flat pressure (bar, steps of 0.5), Preinfusion (s), Low bar start (s at bar), Low bar end (s at bar) — plus **"Add your own feature"** for anything unusual, and group size. Switched-on features are exactly what the shot form shows (D-02). Full-width Save.
+- **D-44 — Gear detail (machine): capabilities are set by hand.** *(Revised 2026-10-17: see D-79.)* Opens from a row on the Gear page. Name, **type** (Automatic, Semi-auto, Lever, Manual) and a **"What it can do"** list of switches — for the Lelit Bianca: Temperature (°C, steps of 1), Flat pressure (bar, steps of 0.5), Preinfusion (s), Low bar start (s at bar), Low bar end (s at bar) — plus **"Add your own feature"** for anything unusual, and group size. Switched-on features are exactly what the shot form shows (D-02). Full-width Save.
   - No built-in model catalog: the user sets everything. Type only labels the machine; it does not switch features on or off.
   - Grinders get the same pattern (dial type: stepped/stepless, step size, range) — to be drawn.
   - *Why:* a hand-set profile works for any machine, including modified or rare ones, and keeps the app free of a catalog to maintain.
-- **D-48 — Gear detail (grinder).** Same pattern as the machine page (D-44), set by hand. Name; **type** (Electric / Hand) and **burrs** (Flat / Conical) side by side; **burr size** (mm). Then **"How the dial works"**, which drives the grind control on the shot form:
+- **D-48 — Gear detail (grinder).** *(Revised 2026-10-17: see D-79.)* Same pattern as the machine page (D-44), set by hand. Name; **type** (Electric / Hand) and **burrs** (Flat / Conical) side by side; **burr size** (mm). Then **"How the dial works"**, which drives the grind control on the shot form:
   - **Dial:** Stepped (clicks or numbers) or Stepless (any point on the dial).
   - **Step per tap:** how much − or + moves the grind (0.1 for the Timemore 064S).
   - **Finest** and **Coarsest** dial values (0.0 and 16.0 for the 064S).
   - A **Preview** of the shot form's Grind card, framed like the custom-feature preview (D-46), with the step on its buttons ("− 0.1", "+ 0.1") and the range beside it.
   - *Why:* the dial is the one grinder detail that changes how you log every shot; burr info is nerd context for Insights (e.g. comparing grinders) at no cost on the shot form.
-- **D-49 — Gear detail (basket).** Same pattern as machine and grinder. Name; **type** (Precision, Standard, Pressurized); **shot size** (Single, Double, Triple); **diameter** (mm) with a fit check against your machines ("Fits Lelit Bianca"); optional **dose range** (from–to, e.g. 17.0–19.0 g). When a dose on the shot form falls outside the range, the form shows a gentle hint — never a block.
+- **D-49 — Gear detail (basket).** *(Revised 2026-10-17: see D-79.)* Same pattern as machine and grinder. Name; **type** (Precision, Standard, Pressurized); **shot size** (Single, Double, Triple); **diameter** (mm) with a fit check against your machines ("Fits Lelit Bianca"); optional **dose range** (from–to, e.g. 17.0–19.0 g). When a dose on the shot form falls outside the range, the form shows a gentle hint — never a block.
   - *Why:* basket choice changes extraction and is part of the recipe (D-13); the dose range turns the basket's spec into a useful nudge without extra input per shot.
+- **D-79 — Gear sizes can have decimals.** Group size, burr size and basket diameter accept decimals (e.g. 58.5 mm), stored like every other decimal number. Refines D-44, D-48 and D-49.
+  - *Why:* real gear comes in sizes such as 58.5 mm and 63.5 mm; rounding them would make the fit check and grinder comparisons wrong.
 - **D-46 — "Add your own feature".** From the machine detail page (D-44), a bottom sheet lets the user define any capability of that machine the app doesn't know (e.g. a bloom pause, a paddle position). Fields:
   - **Name.**
   - **Kind of value:** Number with unit, Seconds, On / off, Pick from a list. The fields below adapt (unit for numbers, options for lists).
@@ -250,7 +264,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* one familiar form for "what new beans start from"; reusing the shot form's controls means nothing new to learn.
 - **D-26 — Puck prep routines as flowcharts.** A Puck prep overview where the user creates **steps** (individual prep methods, e.g. WDT, distributor, tamp, puck screen, RDT, or anything custom) and links them into one or more **routines** shown as flowcharts. The shot form references a routine (D-25).
   - *Why:* covers any prep style, however unusual, without a fixed list; coffee nerds will enjoy building and seeing the flow.
-- **D-51 — Puck prep: overview and routine builder.** Refines D-26.
+- **D-51 — Puck prep: overview and routine builder.** *(Revised 2026-10-17: see D-76.)* Refines D-26.
   - **Routines are a straight line**, top to bottom — no branches. Reorder by dragging, insert between any two steps.
   - **Steps can carry optional settings** (e.g. WDT 20 s, Tamp 15 kg, RDT 2 sprays). The values are recorded with each shot, so Insights can compare them.
   - **Overview** (Library › Puck prep): "New routine" in the header. **Routines** as cards: name, "In use" chip on the routine My setup / the last shot uses, the steps as a mini flow (WDT → Distributor → Tamp → Puck screen), and "23 shots · average score 7.4" — so routines can be compared at a glance. Below, **Your steps**: the step library as chips with their setting unit ("WDT · seconds"), plus a dashed "New step".

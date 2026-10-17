@@ -69,7 +69,7 @@ const paddle: FeatureDefinition = {
 };
 const bianca: MachineSpec = {
   type: 'semi_auto',
-  groupSizeMm: 58,
+  groupSizeMm: 58000,
   features: [temperature, flatPressure, preinfusion, lowBarEnd, paddle]
 };
 
@@ -195,7 +195,7 @@ describe('gear specs (D-68: one table, a spec per kind)', () => {
     const sculptor = {
       type: 'electric',
       burrs: 'flat',
-      burrSizeMm: 64,
+      burrSizeMm: 64000,
       dial: { mode: 'stepless', step: 100, finest: 0, coarsest: 16000 }
     };
     expect(grinderSpecSchema.safeParse(sculptor).success).toBe(true);
@@ -208,7 +208,7 @@ describe('gear specs (D-68: one table, a spec per kind)', () => {
   });
 
   it('D-49: a basket has an optional dose range from low to high', () => {
-    const vst = { type: 'precision', shotSize: 'double', diameterMm: 58 };
+    const vst = { type: 'precision', shotSize: 'double', diameterMm: 58000 };
     expect(basketSpecSchema.safeParse(vst).success).toBe(true);
     expect(
       basketSpecSchema.safeParse({ ...vst, doseRange: { from: 17000, to: 19000 } }).success
@@ -216,6 +216,16 @@ describe('gear specs (D-68: one table, a spec per kind)', () => {
     expect(
       basketSpecSchema.safeParse({ ...vst, doseRange: { from: 19000, to: 17000 } }).success
     ).toBe(false);
+  });
+
+  it('D-79: gear sizes can have decimals, stored in thousandths (58.5 mm → 58500)', () => {
+    expect(machineSpecSchema.safeParse({ ...bianca, groupSizeMm: 58500 }).success).toBe(true);
+    expect(
+      basketSpecSchema.safeParse({ type: 'precision', shotSize: 'double', diameterMm: 58500 })
+        .success
+    ).toBe(true);
+    expect(machineSpecSchema.safeParse({ ...bianca, groupSizeMm: 58.5 }).success).toBe(false);
+    expect(machineSpecSchema.safeParse({ ...bianca, groupSizeMm: 0 }).success).toBe(false);
   });
 
   it('D-68: the spec is checked against the gear kind', () => {
