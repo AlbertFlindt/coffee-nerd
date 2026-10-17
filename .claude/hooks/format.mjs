@@ -8,7 +8,18 @@ const input = JSON.parse(readFileSync(0, 'utf8'));
 const file = input?.tool_input?.file_path;
 const root = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const prettier = join(root, 'node_modules', '.bin', 'prettier');
-const formatted = new Set(['.ts', '.js', '.mjs', '.svelte', '.css', '.json', '.md', '.html', '.yml', '.yaml']);
+const formatted = new Set([
+  '.ts',
+  '.js',
+  '.mjs',
+  '.svelte',
+  '.css',
+  '.json',
+  '.md',
+  '.html',
+  '.yml',
+  '.yaml'
+]);
 
 if (file && existsSync(file) && existsSync(prettier) && formatted.has(extname(file))) {
   try {

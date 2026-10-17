@@ -22,3 +22,8 @@ CLAUDE.local.md
 .claude/settings.local.json
 
 .DS_Store
+
+# SvelteKit / Vite
+.output/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
