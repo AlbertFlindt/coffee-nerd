@@ -82,7 +82,7 @@
         <span class="tile-label">{tile.label}</span>
         <span class="tile-value">
           {#if tile.value === null}
-            <!-- An empty yield or time (D-72, D-82); not designed yet (docs/open-items.md). -->
+            <!-- An empty yield or time (D-91); not designed yet (docs/open-items.md). -->
             <span class="unit">Not set</span>
           {:else}
             {tile.value}{#if tile.unit}<span class="unit">{` ${tile.unit}`}</span>{/if}
@@ -173,8 +173,8 @@
     flex-direction: column;
     gap: var(--space-3);
     padding: var(--space-1) var(--space-5) var(--space-3);
-    /* D-36: a long note can make the page taller than the screen; then it scrolls here. */
-    overflow-y: auto;
+    /* D-36: the screen fits; a long note scrolls inside its own card. */
+    overflow: hidden;
   }
 
   .soft {
@@ -325,7 +325,7 @@
 
   .flavors li {
     padding: var(--space-1) 10px;
-    border-radius: var(--space-3);
+    border-radius: var(--radius-sm);
     background: var(--bg);
     font-size: 13px;
     font-weight: 600;
@@ -335,6 +335,8 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
+    min-height: 0;
+    flex-shrink: 1;
     padding: var(--space-3) 14px;
   }
 
@@ -348,5 +350,7 @@
     line-height: 1.4;
     white-space: pre-line;
     overflow-wrap: anywhere;
+    min-height: 0;
+    overflow-y: auto;
   }
 </style>

@@ -95,7 +95,7 @@ describe('coreValuesText', () => {
     ).toBe('15 · 18.0 → 36.0 g · 28.0 s');
   });
 
-  it('D-82, D-72: a missing yield or time is left out', () => {
+  it('D-91: a missing yield or time is left out', () => {
     expect(coreValuesText({ grind: 1600, dose: 18000, yield: null, time: 25500 }, steps)).toBe(
       '1.6 · 18.0 g · 25.5 s'
     );

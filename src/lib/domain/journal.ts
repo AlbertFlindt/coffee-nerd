@@ -68,7 +68,7 @@ export type CoreValues = {
 
 /**
  * "1.6 · 18.0 → 38.5 g · 25.5 s" (D-54). Decimals as on the shot form: the grind follows its dial, dose,
- * yield and time keep at least one (D-07). A missing yield or time is left out (D-72, D-82).
+ * yield and time keep at least one (D-07). A missing yield or time is left out (D-91).
  */
 export function coreValuesText(
   values: CoreValues,

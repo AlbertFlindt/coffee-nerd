@@ -31,7 +31,7 @@
     aria-haspopup="dialog"
     onclick={() => (beanSheet = true)}
   >
-    {beanName ?? 'All beans'}
+    <span class="chip-label">{beanName ?? 'All beans'}</span>
     <svg
       width="14"
       height="14"
@@ -131,6 +131,13 @@
     height: var(--touch-min);
     flex: none;
     max-width: 200px;
+  }
+
+  .chip-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   main {

@@ -65,7 +65,7 @@
     height: 52px;
     flex: none;
     box-sizing: border-box;
-    border-radius: var(--space-3);
+    border-radius: var(--radius-sm);
   }
 
   .score {

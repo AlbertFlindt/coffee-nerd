@@ -115,9 +115,14 @@ test('D-54: the bean filter lists the beans that have shots', async () => {
     'true'
   );
   await sheet.getByRole('button', { name: 'Guji Hambela' }).click();
-  await expect(page.getByRole('button', { name: 'Guji Hambela' })).toBeVisible();
+  const chip = page.getByRole('group', { name: 'Filters' }).getByRole('button', {
+    name: 'Guji Hambela'
+  });
+  await expect(chip).toHaveClass(/is-on/);
+  await expect(sheet).toBeHidden();
+  await expect(page).toHaveURL(/[?&]bean=/);
   await expect(rows()).toHaveCount(total);
-  await page.getByRole('button', { name: 'Guji Hambela' }).click();
+  await chip.click();
   await sheet.getByRole('button', { name: 'All beans' }).click();
   await expect(page.getByRole('button', { name: 'All beans' })).toBeVisible();
 });
