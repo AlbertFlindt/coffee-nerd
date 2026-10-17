@@ -16,12 +16,7 @@ Last updated: 2026-10-17
 
 | Question | Needed by | Source |
 |---|---|---|
-| Can a shot be saved without a time or yield? Both can start empty (D-72, D-82); the database allows empty for now | M3 | M2 |
-| Where do the dose, yield and time steps live? D-07 gives 0.1 g, 0.1 g and 1 s, but no gear holds them (the grinder holds the grind step) | M3 | M2 |
-| A password needs at least 8 characters (my default, not decided). Keep, change, or drop the minimum? | M3 | M2, D-85 |
-| Sign-in details chosen without a decision: the name ignores upper/lower case and spaces; after 5 wrong passwords in 15 minutes sign-in waits a minute ("Too many tries. Wait a minute and try again."). Keep? | M3 | M2, D-85 |
-| Editing a shot (D-57) does not finish or reopen a bean, even when the edit changes the dose so the bag is used up (or no longer used up). Should an edit apply D-40 too? | M4 | M2, D-40 |
-| Edit My setup shows yield steps of 0.5 g; D-07 and the shot form use 0.1 g. Which is right? | M6 | M2, `docs/screens/EditSetup.png` |
+| *(none open)* | | |
 
 ## 2. Screens and states not designed yet
 
@@ -29,7 +24,6 @@ Last updated: 2026-10-17
 |---|---|---|
 | Proper design for the sign-in and "Create your account" pages (built simple for now) | Before release (M11) | D-84 |
 | First-run guide: after creating the account, how you add your gear, puck prep and My setup | M6 | D-88 |
-| Setup sheet: how a changed setup value is highlighted | M3 | Open topic 11, D-22 |
 | Recipe detail (a recipe's shots), opened from the bean detail page | M5 | Open topic 9, D-42 |
 | Gear: the message on an item My setup uses, "Used in My setup · choose another default first" | M6 | D-83 |
 | Tag sheet: rename, merge, remove | M7 | Open topic 14, D-29, D-53 |
@@ -39,7 +33,7 @@ Last updated: 2026-10-17
 | **Insights: the Dial-in tab has no design** (What I like, Progress and Comparisons do); more Dial-in cards, e.g. grind vs. time, sour/bitter vs. ratio | M9 | Open topic 16, D-55, D-56 |
 | Journal: how a shot that is still waiting to sync looks | M10 | Open topic 23, D-61 |
 | App icon for the home screen (PWA) | M10 | Open topic 17 |
-| Settings (units, backup, export) | M11 | Roadmap M11 |
+| Settings (units, backup, export, and the dose, yield and time steps of D-89) | M11 | Roadmap M11, D-89 |
 | Tablet layouts, light theme, focus and hover styles | Not scheduled | Open topic 5, design-system README |
 
 ## 3. Product topics not decided yet
