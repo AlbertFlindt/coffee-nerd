@@ -10,7 +10,10 @@ export default defineConfig({
         runes: ({ filename }) =>
           filename.split(/[/\\]/).includes('node_modules') ? undefined : true
       },
-      adapter: adapter()
+      adapter: adapter(),
+      // The image cannot know its address, so SvelteKit's https-based origin check would refuse every
+      // form on a plain-http home network; hooks.server.ts checks hosts instead (csrf.ts).
+      csrf: { trustedOrigins: ['*'] }
     })
   ],
   test: {

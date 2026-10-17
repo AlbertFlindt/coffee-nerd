@@ -21,7 +21,8 @@
     "test:e2e": "playwright test",
     "screenshot": "node scripts/screenshot.mjs",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx scripts/seed.ts"
   },
   "imports": {
     "#lib": "./src/lib/index.js",
@@ -31,6 +32,7 @@
     "@noble/hashes": "^2.4.0",
     "better-sqlite3": "^13.0.3",
     "drizzle-orm": "^0.45.4",
+    "uuid": "^13.0.2",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -51,6 +53,7 @@
     "prettier-plugin-svelte": "^4.1.1",
     "svelte": "^5.57.2",
     "svelte-check": "^4.7.7",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.2",
     "vite": "^8.3.4",

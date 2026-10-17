@@ -23,11 +23,13 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - `npm run check`: svelte-check + TypeScript
 - `npm run lint` (Prettier check + ESLint) / `npm run format`
 - `npm test`: Vitest unit and integration tests (`src/**/*.test.ts`), then the hook tests (`.claude/hooks/*.test.mjs`). Single file: `npx vitest run <path>`
-- `npm run test:e2e`: Playwright (`tests/e2e/`), builds and serves the app at 412 × 915 with its own database in `test-results/`
+- `npm run test:e2e`: Playwright (`tests/e2e/`), builds and runs the production server (`node build`) at 412 × 915 with a fresh database in `test-results/`; the tests run in order from first run
 - `npm run build` / `npm start`: production build in `build/`, served on port 3000
 - `npm run screenshot -- <route> [name]`: 412 × 915 screenshot (2×) into `screenshots/`; needs `npm run dev` running (or `BASE_URL`)
 - `npm run db:generate`: new migration in `drizzle/` from `src/lib/server/db/schema.ts`. Migrations are applied when the server starts (`npm run db:migrate` applies them without starting it); the database is `DATABASE_PATH` (default `./data/coffee-nerd.db`)
+- `npm run db:seed`: fill an empty database with the reference setup (sign in as "Demo" / "coffee-nerd"); development and screenshots only (D-88)
 - `docker compose up --build`: the production image on port 3000, data in the `/data` volume
+- `docker compose exec coffee-nerd node scripts/reset-password.mjs`: set a new password and sign out every device (D-87)
 - `node design-system/build-tokens.mjs`: regenerate `tokens.css`. Only as part of a design-system sync the owner starts; `design-system/` is otherwise read-only (D-69).
 
 ## Architecture
