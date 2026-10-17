@@ -21,7 +21,7 @@ export type FormMatch =
 /**
  * The recipe these values make (D-16): an earlier recipe of this bean on this machine with the same
  * fingerprint, or a new one whose changes are named against the bean's last shot (D-71, D-77, D-81). A
- * recipe without shots (kept only by its Brew next mark) has not been brewed, so it counts as new.
+ * recipe without shots (kept only by its Brew next mark) has not been brewed, so it counts as new (D-104).
  */
 export function matchRecipe(
   form: RecipeIdentity,

@@ -95,7 +95,7 @@ describe('matchRecipe', () => {
     expect(match.kind).toBe('new');
   });
 
-  it('D-16: a recipe kept only by its Brew next mark (no shots) has not been brewed: new', () => {
+  it('D-104: a recipe kept only by its Brew next mark (no shots) has not been brewed: new', () => {
     const match = matchRecipe(base, [known(base, { shotCount: 0 })], null);
     expect(match.kind).toBe('new');
   });

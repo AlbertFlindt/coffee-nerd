@@ -16,9 +16,7 @@ Last updated: 2026-10-17
 
 | Question | Needed by | Source |
 |---|---|---|
-| Setup tab: a changed phase pressure turns its amber "at 2.0 bar" sage, and a changed basket or puck prep shows its name in sage without a pill (no number to show). Built so; is that right? | M4 | M3, D-90 |
-| A Brew next recipe that has no shots (kept only by its mark): built to show "New recipe · …" named against the last shot, not "Recipe reused 0x". Keep? | M5 | M3, D-43, D-16 |
-| Started from Brew next, the deltas and ratio compare with the bean's last shot (D-81), so they show when the marked recipe differs from it; the BrewNext screen shows none. Keep? | M5 | M3, D-43, D-81 |
+| *(none open)* | | |
 
 ## 2. Screens and states not designed yet
 
