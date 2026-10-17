@@ -346,7 +346,23 @@ describe('prefill', () => {
     });
   });
 
-  it('D-24: a feature without an off switch and without a value starts on, waiting for a value', () => {
+  it('D-78: a copied shot without a value for a feature with no off switch leaves it on and empty', () => {
+    const copied = recipe();
+    delete copied.setup.features.flat_pressure;
+    const result = prefill(
+      context({
+        latestShotOfBean: { recipe: copied, shot: { yield: 36000, time: 28000 } },
+        mySetup: { ...mySetup, features: {} }
+      })
+    );
+    expect(result.setup.features.flat_pressure).toEqual({
+      label: 'Flat pressure',
+      unit: 'bar',
+      on: true
+    });
+  });
+
+  it('D-78: a feature without an off switch and without a value starts on, waiting for a value', () => {
     const result = prefill(
       context({ mySetup: { ...mySetup, features: {} }, machines: { [BIANCA]: biancaSpec() } })
     );
@@ -393,9 +409,16 @@ describe('prefill', () => {
     const result = prefill(
       context({
         latestShotOfBean: {
+          // The archived routine shares My setup routine's WDT step, with another value.
           recipe: recipe({
             routineId: OTHER_ROUTINE,
-            setup: { ...recipe().setup, routine: otherRoutine }
+            setup: {
+              ...recipe().setup,
+              routine: {
+                name: 'Old routine',
+                steps: [{ ...routineSnapshot.steps[0], value: 45000 }]
+              }
+            }
           }),
           shot: { yield: 36000, time: 28000 }
         },

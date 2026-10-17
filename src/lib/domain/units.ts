@@ -104,8 +104,9 @@ export function applyStep(
   range: { min?: Thousandths; max?: Thousandths } = {}
 ): Thousandths {
   const { min, max } = range;
-  const from = value ?? 0;
-  const next = direction === '+' ? from + step : from - step;
+  // D-80: an empty time counts from 0 — the first + gives one step, − stays at 0, whatever the range.
+  if (value === null) return direction === '+' ? step : 0;
+  const next = direction === '+' ? value + step : value - step;
   if (min !== undefined && next < min) return min;
   if (max !== undefined && next > max) return max;
   return next;

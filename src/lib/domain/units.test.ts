@@ -156,7 +156,8 @@ describe('applyStep', () => {
 
   it('D-80: an empty value counts from 0: the first + gives one step, − stays at 0', () => {
     expect(applyStep(null, 1000, '+')).toBe(1000);
-    expect(applyStep(null, 1000, '-', { min: 0 })).toBe(0);
+    expect(applyStep(null, 1000, '-')).toBe(0);
+    expect(applyStep(null, 1000, '+', { min: 0, max: 60000 })).toBe(1000);
   });
 
   it('D-07: a value stays inside its range', () => {

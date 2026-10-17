@@ -109,7 +109,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the most valuable action is "brew again, change one thing."
 - **D-72 — A bean's first shot starts with an empty time.** *(Revised 2026-10-17: see D-80.)* When a shot starts from My setup (D-38), grind, dose and yield come from My setup; the time has no default and stays empty until it is set. Refines D-03.
   - *Why:* My setup holds what you choose before brewing; time is a result, so inventing one would be a guess (same reasoning as D-11).
-- **D-80 — Tapping an empty time starts at 0 s.** When the time card is empty (D-72), its −/+ buttons count from 0 s: the first + gives 1 s, and − stays at 0 s. Tap-to-type still works for entering the time directly.
+- **D-80 — Tapping an empty time starts at 0 s.** When the time card is empty (D-72), its −/+ buttons count from 0 s: the first + gives 1 s, and − stays at 0 s. Tap-to-type still works for entering the time directly. Refines D-72.
   - *Why:* the buttons keep doing exactly what their label says ("+ 1 s", D-07), without guessing a typical time.
 - **D-74 — A re-buy from a bag without rated shots starts from its latest shot.** When the nearest earlier bag with shots (D-73) has no rated shot, and so no best recipe (D-66), the new bag starts from that bag's latest shot: its recipe, yield and time. Refines D-73.
   - *Why:* keeps "the nearest bag with shots" true even when nothing was scored.
@@ -138,7 +138,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* dialing in often goes back and forth; matching all history keeps the counter, score reference and bean-aging signal reliable. Naming the cause makes the tag understandable — a bare "New recipe" left users unsure why it appeared.
 - **D-71 — Recipe tag names up to two changes.** *(Revised 2026-10-17: see D-77.)* When a new recipe differs from the last shot's recipe in more than one thing, the tag names the first two and counts the rest: "New recipe · grind changed", "New recipe · grind and dose changed", "New recipe · grind, dose and 1 more changed". Refines D-16.
   - *Why:* says exactly what changed in the common one- or two-change case, and still fits on the bean card when more changed.
-- **D-77 — Order of changes in the recipe tag, and a plain "New recipe".** Changes are named in this order: grind, dose, machine, grinder, basket, routine, then machine features in the machine's order, so D-71's first two follow it (e.g. "grind and grinder changed"). When nothing can be named — a bean's first shot, or the last shot was another bean with the same setup — the tag says just "New recipe". Refines D-16 and D-71.
+- **D-77 — Order of changes in the recipe tag, and a plain "New recipe".** Changes are named in this order: grind, dose, machine, grinder, basket, routine, then machine features, so D-71's first two follow it (e.g. "grind and grinder changed"). When nothing can be named — a bean's first shot, or the last shot was another bean with the same setup — the tag says just "New recipe". Refines D-16 and D-71.
   - *Why:* the values you change most come first; a bare "New recipe" is honest when there is nothing earlier to compare with.
 - **D-17 — Bean age lives on the bean overview and Home, not the shot form.**
   - *Why:* bean age matters when choosing a bean; on the shot form it is clutter, since the bean is usually unchanged from the last shot.
@@ -234,19 +234,19 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - **Gear list** grouped by type (Machines, Grinders, Baskets, later Other). Each row shows a short capability summary (e.g. "Semi-auto · Preinfusion, low bar start, low bar end"; "Stepless · steps of 0.1"); the default item carries a "Default" chip. Tapping a row opens the item, where its capability profile (D-02) and step sizes (D-07) are set.
   - "Add gear" sits in the header.
   - *Why:* one place answers "what do I brew with and what do new shots start from"; per-item details stay one tap away for tinkering.
-- **D-44 — Gear detail (machine): capabilities are set by hand.** Opens from a row on the Gear page. Name, **type** (Automatic, Semi-auto, Lever, Manual) and a **"What it can do"** list of switches — for the Lelit Bianca: Temperature (°C, steps of 1), Flat pressure (bar, steps of 0.5), Preinfusion (s), Low bar start (s at bar), Low bar end (s at bar) — plus **"Add your own feature"** for anything unusual, and group size. Switched-on features are exactly what the shot form shows (D-02). Full-width Save.
+- **D-44 — Gear detail (machine): capabilities are set by hand.** *(Revised 2026-10-17: see D-79.)* Opens from a row on the Gear page. Name, **type** (Automatic, Semi-auto, Lever, Manual) and a **"What it can do"** list of switches — for the Lelit Bianca: Temperature (°C, steps of 1), Flat pressure (bar, steps of 0.5), Preinfusion (s), Low bar start (s at bar), Low bar end (s at bar) — plus **"Add your own feature"** for anything unusual, and group size. Switched-on features are exactly what the shot form shows (D-02). Full-width Save.
   - No built-in model catalog: the user sets everything. Type only labels the machine; it does not switch features on or off.
   - Grinders get the same pattern (dial type: stepped/stepless, step size, range) — to be drawn.
   - *Why:* a hand-set profile works for any machine, including modified or rare ones, and keeps the app free of a catalog to maintain.
-- **D-48 — Gear detail (grinder).** Same pattern as the machine page (D-44), set by hand. Name; **type** (Electric / Hand) and **burrs** (Flat / Conical) side by side; **burr size** (mm). Then **"How the dial works"**, which drives the grind control on the shot form:
+- **D-48 — Gear detail (grinder).** *(Revised 2026-10-17: see D-79.)* Same pattern as the machine page (D-44), set by hand. Name; **type** (Electric / Hand) and **burrs** (Flat / Conical) side by side; **burr size** (mm). Then **"How the dial works"**, which drives the grind control on the shot form:
   - **Dial:** Stepped (clicks or numbers) or Stepless (any point on the dial).
   - **Step per tap:** how much − or + moves the grind (0.1 for the Timemore 064S).
   - **Finest** and **Coarsest** dial values (0.0 and 16.0 for the 064S).
   - A **Preview** of the shot form's Grind card, framed like the custom-feature preview (D-46), with the step on its buttons ("− 0.1", "+ 0.1") and the range beside it.
   - *Why:* the dial is the one grinder detail that changes how you log every shot; burr info is nerd context for Insights (e.g. comparing grinders) at no cost on the shot form.
-- **D-49 — Gear detail (basket).** Same pattern as machine and grinder. Name; **type** (Precision, Standard, Pressurized); **shot size** (Single, Double, Triple); **diameter** (mm) with a fit check against your machines ("Fits Lelit Bianca"); optional **dose range** (from–to, e.g. 17.0–19.0 g). When a dose on the shot form falls outside the range, the form shows a gentle hint — never a block.
+- **D-49 — Gear detail (basket).** *(Revised 2026-10-17: see D-79.)* Same pattern as machine and grinder. Name; **type** (Precision, Standard, Pressurized); **shot size** (Single, Double, Triple); **diameter** (mm) with a fit check against your machines ("Fits Lelit Bianca"); optional **dose range** (from–to, e.g. 17.0–19.0 g). When a dose on the shot form falls outside the range, the form shows a gentle hint — never a block.
   - *Why:* basket choice changes extraction and is part of the recipe (D-13); the dose range turns the basket's spec into a useful nudge without extra input per shot.
-- **D-79 — Gear sizes can have decimals.** Group size, burr size and basket diameter accept decimals (e.g. 58.5 mm), stored like every other decimal number.
+- **D-79 — Gear sizes can have decimals.** Group size, burr size and basket diameter accept decimals (e.g. 58.5 mm), stored like every other decimal number. Refines D-44, D-48 and D-49.
   - *Why:* real gear comes in sizes such as 58.5 mm and 63.5 mm; rounding them would make the fit check and grinder comparisons wrong.
 - **D-46 — "Add your own feature".** From the machine detail page (D-44), a bottom sheet lets the user define any capability of that machine the app doesn't know (e.g. a bloom pause, a paddle position). Fields:
   - **Name.**
