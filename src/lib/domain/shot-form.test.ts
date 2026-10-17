@@ -5,6 +5,7 @@ import {
   coreChanges,
   matchRecipe,
   setupChanges,
+  setupDetail,
   setupSummary,
   type KnownRecipe
 } from './shot-form';
@@ -193,64 +194,64 @@ describe('setupChanges', () => {
   });
 });
 
-describe('setupSummary', () => {
-  const features: FeatureDefinition[] = [
-    {
-      key: 'temperature',
-      label: 'Temperature',
-      builtIn: true,
-      enabled: true,
-      switchable: false,
-      value: { kind: 'number', unit: '°C', step: 1000 }
-    },
-    {
-      key: 'flat_pressure',
-      label: 'Flat pressure',
-      builtIn: true,
-      enabled: true,
-      switchable: false,
-      value: { kind: 'number', unit: 'bar', step: 500 }
-    },
-    {
-      key: 'preinfusion',
-      label: 'Preinfusion',
-      builtIn: true,
-      enabled: true,
-      switchable: true,
-      value: { kind: 'phase', step: 1000 }
-    },
-    {
-      key: 'low_bar_start',
-      label: 'Low bar start',
-      builtIn: true,
-      enabled: true,
-      switchable: true,
-      value: { kind: 'phase', step: 1000, pressure: { step: 500, min: 0, max: 12000 } }
-    },
-    {
-      key: 'low_bar_end',
-      label: 'Low bar end',
-      builtIn: true,
-      enabled: true,
-      switchable: true,
-      value: { kind: 'phase', step: 1000 }
-    },
-    {
-      key: PADDLE,
-      label: 'Paddle',
-      builtIn: false,
-      enabled: true,
-      switchable: true,
-      value: {
-        kind: 'choice',
-        options: [
-          { id: 'low', label: 'Low' },
-          { id: 'mid', label: 'Middle' }
-        ]
-      }
+const features: FeatureDefinition[] = [
+  {
+    key: 'temperature',
+    label: 'Temperature',
+    builtIn: true,
+    enabled: true,
+    switchable: false,
+    value: { kind: 'number', unit: '°C', step: 1000 }
+  },
+  {
+    key: 'flat_pressure',
+    label: 'Flat pressure',
+    builtIn: true,
+    enabled: true,
+    switchable: false,
+    value: { kind: 'number', unit: 'bar', step: 500 }
+  },
+  {
+    key: 'preinfusion',
+    label: 'Preinfusion',
+    builtIn: true,
+    enabled: true,
+    switchable: true,
+    value: { kind: 'phase', step: 1000 }
+  },
+  {
+    key: 'low_bar_start',
+    label: 'Low bar start',
+    builtIn: true,
+    enabled: true,
+    switchable: true,
+    value: { kind: 'phase', step: 1000, pressure: { step: 500, min: 0, max: 12000 } }
+  },
+  {
+    key: 'low_bar_end',
+    label: 'Low bar end',
+    builtIn: true,
+    enabled: true,
+    switchable: true,
+    value: { kind: 'phase', step: 1000 }
+  },
+  {
+    key: PADDLE,
+    label: 'Paddle',
+    builtIn: false,
+    enabled: true,
+    switchable: true,
+    value: {
+      kind: 'choice',
+      options: [
+        { id: 'low', label: 'Low' },
+        { id: 'mid', label: 'Middle' }
+      ]
     }
-  ];
+  }
+];
 
+describe('setupSummary', () => {
   it('D-100: switched-on phases and custom features, then temperature; no flat pressure', () => {
     expect(setupSummary(base.setup, features)).toBe('Preinfusion 4 s · Low bar start 5 s · 93 °C');
     const withPaddle = withFeatures({ [PADDLE]: { label: 'Paddle', on: true, choice: 'mid' } });
@@ -271,5 +272,30 @@ describe('setupSummary', () => {
   it('D-78: a feature waiting for its value is left out until it has one', () => {
     const waiting = withFeatures({ temperature: { label: 'Temperature', unit: '°C', on: true } });
     expect(setupSummary(waiting.setup, features)).toBe('Preinfusion 4 s · Low bar start 5 s');
+  });
+});
+
+describe('setupDetail', () => {
+  it('D-57: the whole pressure profile: temperature, flat pressure, then each phase with its pressure', () => {
+    expect(setupDetail(base.setup, features)).toBe(
+      '93 °C · Flat 9.0 bar · Preinfusion 4 s · Low bar start 5 s at 2.0 bar'
+    );
+  });
+
+  it('D-57: custom features follow in the machine’s order; switched-off ones are left out', () => {
+    const withPaddle = withFeatures({
+      [PADDLE]: { label: 'Paddle', on: true, choice: 'mid' },
+      preinfusion: { label: 'Preinfusion', on: false }
+    });
+    expect(setupDetail(withPaddle.setup, features)).toBe(
+      '93 °C · Flat 9.0 bar · Low bar start 5 s at 2.0 bar · Paddle Middle'
+    );
+  });
+
+  it('D-78: a feature without a value is left out', () => {
+    const waiting = withFeatures({ temperature: { label: 'Temperature', unit: '°C', on: true } });
+    expect(setupDetail(waiting.setup, features)).toBe(
+      'Flat 9.0 bar · Preinfusion 4 s · Low bar start 5 s at 2.0 bar'
+    );
   });
 });

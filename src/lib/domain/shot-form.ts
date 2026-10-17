@@ -137,8 +137,36 @@ export function setupSummary(setup: SetupSnapshot, features: readonly FeatureDef
   return parts.join(' · ');
 }
 
-/** "Preinfusion 4 s", "93 °C" (temperature without its label), "Paddle Middle"; null without a value. */
-function featureText(definition: FeatureDefinition, value: FeatureValue): string | null {
+/**
+ * The setup line on the shot detail (D-57): the whole pressure profile, so temperature, then flat pressure,
+ * then every other switched-on feature in the machine's order, phases with their pressure. A feature still
+ * waiting for its value (D-78) is left out.
+ */
+export function setupDetail(setup: SetupSnapshot, features: readonly FeatureDefinition[]): string {
+  const first = ['temperature', 'flat_pressure'];
+  const ordered = [
+    ...first.flatMap((key) => features.filter((f) => f.key === key)),
+    ...features.filter((f) => !first.includes(f.key))
+  ];
+  const parts: string[] = [];
+  for (const definition of ordered) {
+    const value = setup.features[definition.key];
+    if (!value?.on) continue;
+    const text = featureText(definition, value, true);
+    if (text !== null) parts.push(text);
+  }
+  return parts.join(' · ');
+}
+
+/**
+ * "Preinfusion 4 s", "93 °C" (temperature without its label), "Paddle Middle"; null without a value. In
+ * `detail`, flat pressure reads "Flat 9.0 bar" and a phase adds its pressure: "Low bar start 5 s at 2.0 bar".
+ */
+function featureText(
+  definition: FeatureDefinition,
+  value: FeatureValue,
+  detail = false
+): string | null {
   const kind = definition.value;
   const quantity = (unit: string, step: number) =>
     value.value === undefined
@@ -154,12 +182,24 @@ function featureText(definition: FeatureDefinition, value: FeatureValue): string
     case 'number': {
       const text = quantity(kind.unit, kind.step);
       if (text === null) return null;
-      return definition.key === SUMMARY_LAST ? text : `${definition.label} ${text}`;
+      if (definition.key === SUMMARY_LAST) return text;
+      if (detail && definition.key === 'flat_pressure') return `Flat ${text}`;
+      return `${definition.label} ${text}`;
     }
     case 'seconds':
+      return quantity('s', kind.step) === null
+        ? null
+        : `${definition.label} ${quantity('s', kind.step)}`;
     case 'phase': {
       const text = quantity('s', kind.step);
-      return text === null ? null : `${definition.label} ${text}`;
+      if (text === null) return null;
+      const pressure = value.pressure;
+      if (!detail || !kind.pressure || pressure === undefined) return `${definition.label} ${text}`;
+      const bar = formatQuantity(pressure, {
+        decimals: decimalsFor(pressure, kind.pressure.step),
+        unit: 'bar'
+      });
+      return `${definition.label} ${text} at ${bar}`;
     }
   }
 }
