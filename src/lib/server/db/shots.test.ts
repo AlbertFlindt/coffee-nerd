@@ -8,7 +8,14 @@ import { newId } from './ids';
 import { insertBuiltInTags } from './built-in-tags';
 import { appState, bean, gear, recipe, shot, shotTag, tag, user } from './schema';
 import { REFERENCE, seedReferenceSetup, type SeededIds } from './seed';
-import { editShot, saveShot, ShotRejected, type ShotInput } from './shots';
+import {
+  clearBrewNext,
+  editShot,
+  reopenAutoFinishedBean,
+  saveShot,
+  ShotRejected,
+  type ShotInput
+} from './shots';
 
 const dir = mkdtempSync(join(tmpdir(), 'coffee-nerd-shots-'));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -161,6 +168,69 @@ describe('saveShot', () => {
     db.update(bean).set({ status: 'open', finishedAt: null, finishedAutomatically: false }).run();
     expect(save(input({}, 3)).autoFinished).toBe(false);
     expect(db.select().from(bean).get()?.status).toBe('open');
+  });
+
+  it('D-91: a shot is saved with an empty time and yield, stored as not set', () => {
+    const { shotId } = save(input({ time: null, yield: null }, 1));
+    expect(db.select().from(shot).where(eq(shot.id, shotId)).get()).toMatchObject({
+      time: null,
+      yield: null
+    });
+  });
+
+  it('D-32: saving a shot makes its bean the current bean', () => {
+    db.update(appState).set({ currentBeanId: null }).run();
+    save(input({}, 1));
+    expect(db.select().from(appState).get()?.currentBeanId).toBe(ids.beanId);
+  });
+
+  it('D-101: a note added on the Tasting tab is created in "Other" when the shot is saved', () => {
+    const { shotId } = save(input({ newTagNames: [' Blood orange '] }, 1));
+    const created = db.select().from(tag).where(eq(tag.name, 'Blood orange')).get();
+    expect(created).toMatchObject({ family: 'other', builtIn: false, ownerId: ids.userId });
+    expect(db.select().from(shotTag).where(eq(shotTag.shotId, shotId)).all()).toEqual([
+      { shotId, tagId: created!.id }
+    ]);
+  });
+
+  it('D-53, D-101: an added note that already exists (ignoring case) is reused, not duplicated', () => {
+    const berry = db.select().from(tag).where(eq(tag.name, 'Berry')).get()!;
+    const { shotId } = save(input({ tagIds: [berry.id], newTagNames: ['berry', 'BERRY'] }, 1));
+    expect(db.select().from(tag).where(sql`lower(${tag.name}) = 'berry'`).all()).toHaveLength(1);
+    expect(db.select().from(shotTag).where(eq(shotTag.shotId, shotId)).all()).toEqual([
+      { shotId, tagId: berry.id }
+    ]);
+  });
+
+  it('D-101: a rejected shot leaves no new note behind', () => {
+    expect(() => save(input({ dose: 0, newTagNames: ['Blood orange'] }))).toThrow(ShotRejected);
+    expect(db.select().from(tag).where(eq(tag.name, 'Blood orange')).get()).toBeUndefined();
+  });
+
+  it('D-95, D-40: Undo reopens a bean that a shot finished automatically', () => {
+    db.update(bean).set({ bagWeight: 18000 }).where(eq(bean.id, ids.beanId)).run();
+    expect(save(input({}, 1)).autoFinished).toBe(true);
+    expect(reopenAutoFinishedBean(db, ids.userId, ids.beanId, T0 + 2 * MINUTE)).toBe(true);
+    expect(db.select().from(bean).get()).toMatchObject({
+      status: 'open',
+      finishedAt: null,
+      finishedAutomatically: false
+    });
+  });
+
+  it('D-95, D-40: Undo does not reopen a bean that was finished by hand, or another owner’s', () => {
+    db.update(bean).set({ status: 'finished', finishedAt: T0 }).where(eq(bean.id, ids.beanId)).run();
+    expect(reopenAutoFinishedBean(db, ids.userId, ids.beanId, T0)).toBe(false);
+    const other = seedOtherAccount();
+    expect(reopenAutoFinishedBean(db, other.userId, ids.beanId, T0)).toBe(false);
+    expect(db.select().from(bean).where(eq(bean.id, ids.beanId)).get()?.status).toBe('finished');
+  });
+
+  it('D-43: "Use last shot recipe" clears the Brew next mark', () => {
+    const { recipeId } = save(input({}, 1));
+    db.update(appState).set({ brewNextRecipeId: recipeId }).run();
+    clearBrewNext(db, ids.userId, T0 + 2 * MINUTE);
+    expect(db.select().from(appState).get()?.brewNextRecipeId).toBeNull();
   });
 
   describe('rejects invalid shots without writing anything', () => {
