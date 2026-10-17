@@ -45,7 +45,7 @@ Last updated: 2026-10-17
 | Shot form: choosing another machine or grinder (D-94 waits for the Gear pages) | M6 | D-94 |
 | Shot form: the gentle hint when the dose is outside the basket's dose range | M6 | D-49 |
 | Tablet layouts, light theme, focus and hover styles | Not scheduled | Open topic 5, design-system README |
-| Design system: the empty slider handle (D-106, built as a hollow dashed circle in ink-muted) and the pressed state of buttons (D-107, built as an amber flash, and a slight press for amber buttons) are not in the design system yet; add them to the master and sync | M4 | D-106, D-107 |
+| Design system: the empty slider handle (D-106, built as a hollow dashed circle in ink-muted) and the pressed state of buttons (D-107, built as an amber flash, and a slight press for amber buttons) are not in the design system yet; the sheet handle now sits in the middle of a 44 px drag strip, with more room around it than the screens show (owner feedback, D-108); add them to the master and sync | M4 | D-106, D-107 |
 | Shorter screens: the shot form tightens its spacing below 880 px and 760 px of height (D-36). Below about 740 px it no longer fits and the form area scrolls inside itself, so More can scroll out of view; a design for small phones is still to do | M10 | D-36 |
 
 ## 3. Product topics not decided yet
