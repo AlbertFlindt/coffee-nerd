@@ -33,7 +33,7 @@ Pure TypeScript in `src/lib/domain/`, fully unit-tested, used later by both brow
 
 **Done when:** every function above has tests whose names cite the D-number they protect, including the edge cases in data-model §4 (feature switched off, renamed label, returning to an earlier grind, re-buy, no shots yet).
 
-## M2 — Database, seed and login ☐
+## M2 — Database, seed and login ☑
 - Drizzle schema exactly as `docs/data-model.md` §3, with the unique recipe key and indexes from §5.
 - Repository functions for find-or-create recipe + save shot in one transaction (data-model §4.1, step 5).
 - Seed script with the reference setup: Lelit Bianca (all five built-in features), Timemore Sculptor 064S (stepless, 0.1, 0.0–16.0), VST 18 g basket, "Daily routine" (WDT 20 s → Distributor → Tamp 15 kg → Puck screen), the built-in flavor tags, My setup, one open bean.

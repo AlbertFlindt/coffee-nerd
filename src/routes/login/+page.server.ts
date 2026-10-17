@@ -8,7 +8,7 @@ import type { Actions } from './$types';
 const throttle = new SignInThrottle();
 
 export const actions: Actions = {
-  default: async ({ request, cookies, url }) => {
+  default: async ({ request, cookies }) => {
     const form = await request.formData();
     const name = String(form.get('name') ?? '');
     const now = Date.now();
@@ -22,7 +22,7 @@ export const actions: Actions = {
       return fail(400, { name, error: 'That name and password do not match.' });
     }
     throttle.reset();
-    cookies.set(SESSION_COOKIE, createSession(db, user.id, now), sessionCookieOptions(url));
+    cookies.set(SESSION_COOKIE, createSession(db, user.id, now), sessionCookieOptions(request));
     redirect(303, '/');
   }
 };

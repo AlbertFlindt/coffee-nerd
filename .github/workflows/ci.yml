@@ -56,3 +56,11 @@ jobs:
           done
           docker logs coffee-nerd
           exit 1
+      - name: First run, password reset and sign-in work in the container
+        run: |
+          post() { curl --silent --output /dev/null --write-out '%{http_code}' -X POST \
+            -H 'Origin: http://localhost:3000' -H 'Accept: text/html' --data "$2" "http://localhost:3000$1"; }
+          test "$(post /welcome 'name=Albert&password=old-password&repeat=old-password&timeZone=UTC')" = 303
+          printf 'new-password\nnew-password\n' | docker exec -i coffee-nerd node scripts/reset-password.mjs
+          test "$(post /login 'name=Albert&password=new-password')" = 303
+          test "$(post /login 'name=Albert&password=old-password')" = 400

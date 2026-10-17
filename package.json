@@ -21,7 +21,8 @@
     "test:e2e": "playwright test",
     "screenshot": "node scripts/screenshot.mjs",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx scripts/seed.ts"
   },
   "imports": {
     "#lib": "./src/lib/index.js",

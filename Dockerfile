@@ -22,6 +22,9 @@ ENV NODE_ENV=production \
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/build ./build
 COPY --from=build /app/drizzle ./drizzle
+# Password reset on the server (D-87): docker compose exec coffee-nerd node scripts/reset-password.mjs
+COPY --from=build /app/scripts/reset-password.mjs ./scripts/reset-password.mjs
+COPY --from=build /app/src/lib/server/auth/password.js ./src/lib/server/auth/password.js
 COPY package.json ./
 RUN mkdir -p /data && chown node:node /data
 USER node

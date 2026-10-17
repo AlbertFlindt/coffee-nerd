@@ -14,9 +14,10 @@ export default defineConfig({
   },
   webServer: {
     // A fresh database each run: the flow starts with the first-run account creation.
-    command: 'rm -f test-results/e2e.db* && npm run build && npm run preview',
+    command: 'rm -f test-results/e2e.db* && npm run build && node build',
     port: 4173,
     reuseExistingServer: !process.env.CI,
-    env: { DATABASE_PATH: 'test-results/e2e.db' }
+    // The real production server (adapter-node), not vite preview: it is what the Docker image runs.
+    env: { DATABASE_PATH: 'test-results/e2e.db', PORT: '4173' }
   }
 });

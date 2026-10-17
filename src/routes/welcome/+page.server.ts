@@ -6,7 +6,7 @@ import type { Actions } from './$types';
 
 // First run: create the one account (D-85, D-88) and sign in.
 export const actions: Actions = {
-  default: async ({ request, cookies, url }) => {
+  default: async ({ request, cookies }) => {
     const form = await request.formData();
     const name = String(form.get('name') ?? '');
     const password = String(form.get('password') ?? '');
@@ -21,7 +21,7 @@ export const actions: Actions = {
         { name, password, timeZone: String(form.get('timeZone') ?? 'UTC') },
         now
       );
-      cookies.set(SESSION_COOKIE, createSession(db, userId, now), sessionCookieOptions(url));
+      cookies.set(SESSION_COOKIE, createSession(db, userId, now), sessionCookieOptions(request));
     } catch (error) {
       if (error instanceof AccountError) return fail(400, { name, error: error.message });
       throw error;

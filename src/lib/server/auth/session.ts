@@ -4,6 +4,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { and, eq, gt } from 'drizzle-orm';
 import type { Db } from '../db/client';
 import { session, user } from '../db/schema';
+import { isHttps } from './csrf';
 
 export const SESSION_COOKIE = 'session';
 export const SESSION_LIFETIME = 365 * 86_400_000;
@@ -68,12 +69,12 @@ export function signOutEverywhere(db: Db, userId: string): void {
 }
 
 /** Cookie settings: not readable by scripts, sent on normal navigation, secure when served over https. */
-export function sessionCookieOptions(url: URL) {
+export function sessionCookieOptions(request: Request) {
   return {
     path: '/',
     httpOnly: true,
     sameSite: 'lax' as const,
-    secure: url.protocol === 'https:',
+    secure: isHttps(request),
     maxAge: SESSION_LIFETIME / 1000
   };
 }
