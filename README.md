@@ -8,7 +8,34 @@
 - Installable as an app on your phone or tablet (PWA); opens offline, and shots saved offline are sent when you're back online.
 - Built for coffee nerds: recipe matching across your whole history, σ and distributions in Insights, any machine described by hand.
 
-> **Status:** foundation in place (milestone M0), features next. Not ready for use yet. Private for now; it will become open source once it is mature.
+> **Status:** the shot form works (milestone M3); Journal, Library, Home and Insights come next. Not ready for daily use yet. Private for now; it will become open source once it is mature.
+
+## Try the latest build on your server (Dockge)
+
+Every merge to `main` is published as the image `ghcr.io/albertflindt/coffee-nerd:main`. For trying it out, not yet for daily use: the full install guide comes with milestone M11.
+
+1. **Once: let the server pull the private image.** On GitHub, create a personal access token (classic) with only the `read:packages` scope. On the server run `docker login ghcr.io -u AlbertFlindt` and paste the token as the password. Dockge uses the server's Docker, so this is enough.
+2. **Create the stack.** In Dockge choose **+ Compose**, name it `coffee-nerd`, paste this and press **Deploy**:
+
+   ```yaml
+   services:
+     coffee-nerd:
+       image: ghcr.io/albertflindt/coffee-nerd:main
+       ports:
+         - '3000:3000'
+       volumes:
+         - data:/data
+       restart: unless-stopped
+
+   volumes:
+     data:
+   ```
+
+3. **Fill it with the reference setup before signing in.** Gear and My setup cannot be added in the app until milestone M6, so start from the seed (Lelit Bianca, Timemore 064S, VST 18 g, Daily routine, one bean). In Dockge open the stack's terminal (`sh`) and run `node scripts/seed.mjs`. It only works while the app has no account yet.
+4. **Sign in** at `http://<server>:3000` as **Demo** with the password **coffee-nerd**. Then set your own password in the same terminal with `node scripts/reset-password.mjs`.
+5. **Update to the latest build:** press **Update** on the stack. Dockge pulls the new image and restarts it; your shots stay in the `data` volume, and database changes are applied when the app starts.
+
+To start over, stop the stack and delete its `data` volume (`docker volume rm coffee-nerd_data`), then deploy and seed again.
 
 ## Documentation
 
