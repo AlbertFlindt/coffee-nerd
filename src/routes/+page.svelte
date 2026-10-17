@@ -17,7 +17,7 @@
         <span>Shot saved. {data.flash.beanName} is finished: its bag is used up.</span>
         <form method="POST" action="?/undoFinish">
           <input type="hidden" name="beanId" value={data.flash.beanId} />
-          <button type="submit" class="undo">Undo</button>
+          <button type="submit" class="undo tap">Undo</button>
         </form>
       {:else}
         <span>{data.flash.beanName} is open again.</span>
@@ -27,7 +27,7 @@
   <img src={logo} width="64" height="64" alt="" />
   <h1 class="cn-type-display">Coffee Nerd</h1>
   <!-- Until the tab bar and its "+" exist (M8), a new shot starts here (D-31). -->
-  <a class="cn-btn-add" href={resolve('/shot/new')}>
+  <a class="cn-btn-add tap-strong" href={resolve('/shot/new')}>
     <svg
       width="18"
       height="18"
@@ -42,7 +42,7 @@
   </a>
   <!-- Until Settings exists (M11), signing out lives here; not designed (docs/open-items.md). -->
   <form method="POST" action="/logout">
-    <button class="cn-btn-secondary" type="submit">Sign out</button>
+    <button class="cn-btn-secondary tap" type="submit">Sign out</button>
   </form>
 </main>
 

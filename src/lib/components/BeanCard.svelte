@@ -183,4 +183,17 @@
     color: var(--amber);
     font-weight: 600;
   }
+
+  /* D-36: tighter on shorter screens, as the rest of the shot form. */
+  @media (max-height: 880px) {
+    .card,
+    .card.compact {
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+    }
+
+    .compact .bottom {
+      min-height: 0;
+    }
+  }
 </style>

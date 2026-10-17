@@ -98,6 +98,9 @@
     {/if}
     {#if value !== null}
       <div class="handle" style:left="{percent(value)}%"></div>
+    {:else}
+      <!-- D-106: nothing set yet; a hollow dashed handle in the middle shows where to tap or drag. -->
+      <div class="handle empty" style:left="50%"></div>
     {/if}
   </div>
   <div class="ends cn-label">
@@ -218,9 +221,28 @@
     border: 4px solid var(--behind);
   }
 
+  .handle.empty {
+    background: transparent;
+    border: 1.5px dashed var(--ink-muted);
+    width: 24px;
+    height: 24px;
+    margin-left: -12px;
+  }
+
   .ends {
     display: flex;
     justify-content: space-between;
     margin-top: -6px;
+  }
+
+  /* D-36: a shorter track on shorter screens; the handle keeps its 28 px. */
+  @media (max-height: 880px) {
+    .track {
+      height: 32px;
+    }
+
+    .ends {
+      margin-top: -4px;
+    }
   }
 </style>
