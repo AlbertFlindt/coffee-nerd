@@ -128,6 +128,16 @@ describe('loadShotForm', () => {
     expect(form.lastShot?.recipe.grind).toBe(1500);
   });
 
+  it('D-43: a Brew next mark on a bean that is no longer open is ignored', () => {
+    const marked = save({ grind: 1700 }, 1);
+    db.update(appState).set({ brewNextRecipeId: marked.recipeId }).run();
+    db.update(bean).set({ status: 'finished' }).where(eq(bean.id, ids.beanId)).run();
+    const kenya = addBean();
+    const form = ready(loadShotForm(db, ids.userId));
+    expect(form.prefill).toMatchObject({ source: 'my_setup', beanId: kenya });
+    expect(form.bean.id).toBe(kenya);
+  });
+
   it('D-94: choosing another open bean starts from that bean; Brew next of another bean waits', () => {
     const marked = save({}, 1);
     db.update(appState).set({ brewNextRecipeId: marked.recipeId }).run();

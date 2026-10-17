@@ -413,7 +413,7 @@
   }
 
   .choice {
-    height: 32px;
+    height: var(--touch-min);
     padding: 0 10px;
     border: none;
     border-radius: var(--radius-pill);

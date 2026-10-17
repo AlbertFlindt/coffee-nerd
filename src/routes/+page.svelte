@@ -86,7 +86,7 @@
     border: none;
     border-radius: var(--radius-pill);
     background: var(--control);
-    color: var(--amber);
+    color: var(--ink);
     font-size: 15px;
     font-weight: 700;
   }

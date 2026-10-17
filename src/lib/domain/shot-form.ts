@@ -93,8 +93,8 @@ export function setupChanges(now: RecipeIdentity, last: RecipeIdentity | null): 
   result.routine = now.routineId !== last.routineId || stepValues(now) !== stepValues(last);
 
   for (const [key, feature] of Object.entries(now.setup.features)) {
-    const before = last.setup.features[key];
-    if (!before) continue;
+    // A feature the machine did not have at the last shot counts as switched off then (D-78, D-90).
+    const before = last.setup.features[key] ?? { label: feature.label, on: false };
     const change = featureChange(feature, before);
     if (change) result.features[key] = change;
   }

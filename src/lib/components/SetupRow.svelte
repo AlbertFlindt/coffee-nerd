@@ -223,6 +223,14 @@
     color: var(--amber);
     font-size: 13px;
     font-weight: 600;
+    position: relative;
+  }
+
+  /* A 44 px touch target around the small value (CLAUDE.md). */
+  .pressure::after {
+    content: '';
+    position: absolute;
+    inset: -10px 0;
   }
 
   .pressure.changed {

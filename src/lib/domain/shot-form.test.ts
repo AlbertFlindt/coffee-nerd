@@ -164,6 +164,17 @@ describe('setupChanges', () => {
     expect(changes.features.low_bar_end?.switched).toBe('On');
   });
 
+  it('D-90, D-78: a feature added to the machine since the last shot and switched on shows "On"', () => {
+    const earlier = { ...base.setup.features };
+    delete earlier.low_bar_end;
+    const last = { ...base, setup: { ...base.setup, features: earlier } };
+    const now = withFeatures({
+      low_bar_end: { label: 'Low bar end', on: true, value: 3000, pressure: 2000 }
+    });
+    expect(setupChanges(now, last).features.low_bar_end?.switched).toBe('On');
+    expect(setupChanges(base, last).features.low_bar_end).toBeUndefined();
+  });
+
   it('D-90: a different basket or routine values count as changed', () => {
     const now: RecipeIdentity = {
       ...base,

@@ -153,9 +153,17 @@
     border: none;
     border-radius: var(--radius-pill);
     background: transparent;
-    color: var(--amber);
+    color: var(--ink-soft);
     font-size: 13px;
     font-weight: 600;
+    position: relative;
+  }
+
+  /* A 44 px touch target around the small text (CLAUDE.md). */
+  .clear::after {
+    content: '';
+    position: absolute;
+    inset: -11px -4px;
   }
 
   .hidden {

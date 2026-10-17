@@ -134,16 +134,21 @@ test('M3 acceptance, D-16: going back to the first grind says "Recipe reused"', 
   await card('Grind').getByRole('button', { name: 'Grind plus 0.1' }).click();
   await expect(recipeTag()).toHaveText('Recipe reused 2x');
   await expect(page.getByText('Last with this recipe: 8')).toBeVisible();
+  await typeValue('Time', '28');
+  await save();
 });
 
 test('Rated, D-15, D-96: changed results, a balance in words and a score', async () => {
+  await page.getByRole('link', { name: 'New shot' }).click();
+  await expect(recipeTag()).toHaveText('Recipe reused 3x');
   await typeValue('Yield', '38.5');
   await typeValue('Time', '25.5');
   await setSlider('Balance, sour to bitter', -3, -10, 10);
   await page.getByRole('radio', { name: '7' }).click();
 
   await expect(card('Yield').locator('.cn-delta')).toHaveText('+2.5');
-  await expect(card('Time').locator('.cn-delta')).toHaveText('−5.5');
+  await expect(card('Time').locator('.cn-delta')).toHaveText('−2.5');
+  await expect(card('Grind').locator('.cn-delta')).toHaveCount(0);
   await expect(page.getByText('Ratio 1 : 2.1')).toBeVisible();
   await expect(page.getByRole('slider', { name: 'Balance, sour to bitter' })).toHaveAttribute(
     'aria-valuetext',
@@ -170,9 +175,9 @@ test('MoreSetup, D-21, D-24, D-90: the Setup tab; a changed value turns sage', a
 
   await sheet.getByRole('button', { name: 'Temperature plus 1 °C' }).click();
   await expect(sheet.locator('.cn-delta', { hasText: '+1' })).toBeVisible();
-  await expect(recipeTag()).toHaveText('New recipe · grind and temperature changed');
+  await expect(recipeTag()).toHaveText('New recipe · temperature changed');
   await sheet.getByRole('button', { name: 'Temperature minus 1 °C' }).click();
-  await expect(recipeTag()).toHaveText('Recipe reused 2x');
+  await expect(recipeTag()).toHaveText('Recipe reused 3x');
 
   await sheet.getByRole('switch', { name: 'Low bar end' }).click();
   await expect(sheet.locator('.cn-delta', { hasText: 'On' })).toBeVisible();

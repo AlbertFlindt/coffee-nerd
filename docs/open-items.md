@@ -17,6 +17,7 @@ Last updated: 2026-10-17
 | Question | Needed by | Source |
 |---|---|---|
 | Setup tab: a changed phase pressure turns its amber "at 2.0 bar" sage, and a changed basket or puck prep shows its name in sage without a pill (no number to show). Built so; is that right? | M4 | M3, D-90 |
+| A Brew next recipe that has no shots (kept only by its mark): built to show "New recipe · …" named against the last shot, not "Recipe reused 0x". Keep? | M5 | M3, D-43, D-16 |
 | Started from Brew next, the deltas and ratio compare with the bean's last shot (D-81), so they show when the marked recipe differs from it; the BrewNext screen shows none. Keep? | M5 | M3, D-43, D-81 |
 
 ## 2. Screens and states not designed yet
@@ -32,6 +33,9 @@ Last updated: 2026-10-17
 | Home: replace the placeholder start page (logo, name, a temporary "New shot" link standing in for the tab bar's "+", and a temporary "Sign out" button) | M8 | M0, M2, M3 |
 | The "Shot saved" message, the automatic-finish message with Undo, and "… is open again" (built as a plain card on the start page) | M8 | D-95 |
 | Shot form when there is nothing to brew with (no My setup or no open bean): built as a plain "Nothing to brew with yet" message | M6 | D-88, M3 |
+| Shot form: the bean list behind the bean card (D-94), built as a plain "Open beans" list in a sheet | M5 | D-94, M3 |
+| Taste sliders: the "Clear" control (D-98), built as small text after the value words | M4 | D-98, M3 |
+| Shot form: the message when the server refuses a shot ("The shot could not be saved. Nothing was changed.", above Save) | M10 | M3 |
 | Shot form: the message when a switched-on feature has no value yet ("Set Low bar end first.", above Save) | M6 | D-78, M3 |
 | More › Setup: rows for custom features that are on/off or "Pick from a list" (built as a switch with "On"/"Off", and a value that cycles through the options on tap) | M6 | D-46, M3 |
 | More › Setup: the basket and puck prep pickers (built as a plain list inside the sheet) | M6, M7 | D-22, D-25, M3 |
@@ -67,6 +71,9 @@ Last updated: 2026-10-17
 | Install guide: behind a reverse proxy with https, forward `X-Forwarded-Proto` (and `X-Forwarded-Host` if the proxy changes the host), so the sign-in cookie is marked secure and forms are accepted | M11 | M2 |
 | The Brew next end-to-end test sets the mark directly in the test database, since nothing in the app can mark a recipe before the bean detail page; switch it to the button | M5 | M3 |
 | "Back" and "Save shot" always return to the start page; once the tab bar exists they return to where "+" was pressed (D-95) | M8 | M3 |
+| The basket and puck prep pickers offer no "None", so once set they cannot be removed for one shot | M6 | M3 |
+| Switching the bean (D-94) or "Use last shot recipe" (D-43) starts the form again and drops edits already made, without a warning; the local draft of D-61 may cover it | M10 | M3 |
+| Basket row on the Setup tab shows the basket's name ("VST 18 g"); the design shows brand · size ("VST · 18 g"), which needs separate fields on the basket | M6 | D-49, M3 |
 | Shot form: a puck prep step's value is taken from the routine (D-76) and cannot be changed for one shot; only the routine can be switched | M7 | D-51, M3 |
 | `npm audit`: 4 moderate advisories from an old esbuild inside drizzle-kit (development only, not in the Docker image). Recheck when drizzle-kit updates. | Each dependency update | PR #1 |
 | The push guard still blocks a command whose single-line commit text looks like a push to `main` (e.g. a literal `push\nto main`). Safe side; a fix needs a shell parser. | Only if it gets in the way | PR #2 |

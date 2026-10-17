@@ -8,6 +8,8 @@ import { and, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 
 // New shot (screens 1–5 and 11): "+" opens it prefilled (D-03, D-31); ?bean= picks another open bean (D-94).
+const NOT_SAVED = 'The shot could not be saved. Nothing was changed.';
+
 export const load: PageServerLoad = ({ locals, url }) => {
   if (!locals.user) error(401);
   return { form: loadShotForm(getDb(), locals.user.id, url.searchParams.get('bean') ?? undefined) };
@@ -21,10 +23,10 @@ export const actions: Actions = {
     try {
       json = JSON.parse(String(data.get('shot') ?? ''));
     } catch {
-      return fail(400, { problems: ['The shot could not be read.'] });
+      return fail(400, { problems: [NOT_SAVED] });
     }
     const parsed = shotRequestSchema.safeParse(json);
-    if (!parsed.success) return fail(400, { problems: ['The shot could not be read.'] });
+    if (!parsed.success) return fail(400, { problems: [NOT_SAVED] });
 
     const db = getDb();
     const now = Date.now();
@@ -44,7 +46,11 @@ export const actions: Actions = {
         });
       } else setFlash(cookies, request, { kind: 'saved' });
     } catch (e) {
-      if (e instanceof ShotRejected) return fail(400, { problems: e.problems });
+      if (e instanceof ShotRejected) {
+        // The details are for the server log; the form says it in plain words (D-20).
+        console.error('Shot rejected:', e.problems.join('; '));
+        return fail(400, { problems: [NOT_SAVED] });
+      }
       throw e;
     }
     // D-95: back to where "+" was pressed; until Home and the tab bar exist (M8), that is the start page.

@@ -81,8 +81,13 @@ export function loadShotForm(
   const brewNextRow = state?.brewNextRecipeId
     ? recipeRow(db, ownerId, state.brewNextRecipeId)
     : undefined;
+  // D-43, D-94: the mark applies to an open bean, unless you chose another bean on the form.
   const brewNext =
-    brewNextRow && (!chosen || chosen.id === brewNextRow.beanId) ? brewNextRow : undefined;
+    brewNextRow &&
+    openBeans.some((b) => b.id === brewNextRow.beanId) &&
+    (!chosen || chosen.id === brewNextRow.beanId)
+      ? brewNextRow
+      : undefined;
   const current =
     openBeans.find((b) => b.id === brewNext?.beanId) ??
     chosen ??
