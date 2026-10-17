@@ -17,6 +17,7 @@ Set up the empty app so every later milestone has checks to run.
 - `Dockerfile` (multi-stage, non-root user) and `compose.yaml` with one volume for `/data`; health route `/health`.
 - `npm run screenshot -- <route> [name]`: saves a 412 × 915 screenshot of a route to `screenshots/` (git-ignored) for comparing with `docs/screens/`.
 - GitHub Actions CI: install, `check`, `lint`, `test`, `build`, and the Docker build, on every pull request and on `main`.
+- Protect `main` on GitHub once CI exists: changes only through pull requests, CI checks required (D-62). If GitHub's plan does not allow it for a private repository, say so to the owner; the push-guard hook and the review step remain the safeguard until the repository is public.
 - Update the **Commands** section of `CLAUDE.md` to the real scripts.
 
 **Done when:** a fresh clone runs `npm ci && npm run check && npm run lint && npm test && npm run build` with no errors; `docker compose up` serves `/health`; CI is green on the first pull request; `npm run screenshot -- /` produces a PNG.

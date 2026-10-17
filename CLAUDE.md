@@ -25,7 +25,7 @@ Set up in milestone M0; update this section once the scripts exist.
 - `npm run test:e2e`: Playwright
 - `npm run screenshot -- <route> [name]`: 412 × 915 screenshot into `screenshots/`
 - `npm run db:generate` / `npm run db:migrate`: Drizzle migrations
-- `node design-system/build-tokens.mjs`: regenerate `tokens.css` after a design-system sync
+- `node design-system/build-tokens.mjs`: regenerate `tokens.css`. Only as part of a design-system sync the owner starts; `design-system/` is otherwise read-only (D-69).
 
 ## Architecture
 
@@ -41,7 +41,7 @@ Set up in milestone M0; update this section once the scripts exist.
 - A recipe is immutable. Saving a shot finds or creates its recipe by fingerprint on the server, in the same transaction (D-63).
 - The fingerprint ignores labels, units and names (D-65). Changing what goes into it changes recipe identity: that needs a decision.
 - Taste is never prefilled (D-11). Not rated is `null`, never `0`.
-- Every user-created row has `owner_id`; Library rows also `shared`. Rows that shots point to are archived (`archived_at`), never deleted.
+- Every user-created row has `owner_id`; Library rows also `shared`. Rows that shots point to are archived (`archived_at`), never deleted. Only exception: a recipe left with no shots is deleted unless it is marked Brew next (data-model §4.1).
 - A new insight is a definition in the registry, not ad-hoc SQL (D-64). σ is the sample standard deviation (n − 1).
 - UI copy: plain words, no abbreviations, sentence case; "Gear", never "Equipment" (D-20, D-39).
 - Screens fit the viewport; only lists scroll; no visible scrollbars (D-36). Touch targets ≥ 44 px.
@@ -50,13 +50,13 @@ Set up in milestone M0; update this section once the scripts exist.
 
 ## Workflow
 
-- Branch per task from `main` (`m3-shot-form`), pull request into `main`. Never push to `main` directly.
+- Branch per task from `main` (`m3-shot-form`), pull request into `main`. Pushing to `main` is blocked by a hook.
 - Use plan mode first for anything that touches more than two files or a decision.
 - Domain logic: write the failing test first. Test names cite the decision: `it('D-16: returning to an earlier grind reuses that recipe')`.
 - Screens: use the `/build-screen` skill. Not done until your screenshot matches the PNG in `docs/screens/`.
 - Before a pull request: `npm run check && npm run lint && npm test`, then have the `decision-reviewer` subagent review the diff and fix what it finds about correctness or decisions.
 - When reporting work as done, show evidence: the commands you ran and their results, screenshots for UI.
-- A new product decision agreed with the owner goes into the log with `/record-decision`.
+- When the owner settles a question, record it with the `record-decision` skill before building on it.
 - Pull requests use `.github/pull_request_template.md`: decisions touched, evidence, anything not designed yet.
 
 ## When compacting

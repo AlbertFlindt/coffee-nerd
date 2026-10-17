@@ -12,5 +12,5 @@ paths:
 - Every query is scoped by the signed-in user's `owner_id`. No endpoint returns another user's rows.
 - Saving a shot: validate, recompute the fingerprint on the server (never trust the client's), find-or-create the recipe, insert the shot, clear Brew next, all in one transaction (data-model §4.1).
 - Shots from the offline queue carry their own UUID v7; inserting the same ID twice must be a no-op (D-61).
-- Rows that shots reference are archived, not deleted. Hard deletes only for recipes left with no shots (data-model §4.1, step 6).
+- Rows that shots reference are archived, not deleted. Hard deletes only for recipes left with no shots, unless marked Brew next (data-model §4.1, step 6).
 - Integration tests use a fresh temporary SQLite file per test file, never `./data`.

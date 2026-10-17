@@ -12,6 +12,7 @@ paths:
 - One full-width primary action per task screen, at the bottom (D-14). Bottom sheets stop above Save (D-21).
 - Every −/+ shows its step with unit ("+ 0.1 g"); steps come from the gear, never hard-coded (D-07).
 - `cream` marks at most one element per screen. Accents keep their one job (D-19); color is never the only signal.
+- Figtree is self-hosted (the `woff2` files in `docs/screens/fonts/` or `@fontsource/figtree`). Never load Google Fonts, although the design-system README and screen HTML mention it: no external requests (D-69, privacy).
 - Numbers use tabular figures (already on `.cn-root`). Inputs are 16 px so phones do not zoom.
 - Accessible markup: real `<button>`, `<a href>`, `<label>` + `<input>`; `aria-label` on icon-only buttons; icons are inline stroke SVG (2 px, round caps), never emoji.
 - The tab bar (Home · Journal · + · Library · Insights) appears on tab screens, not on task screens (shot form, forms, sheets).

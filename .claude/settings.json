@@ -6,30 +6,43 @@
       "Bash(npm test *)",
       "Bash(npx vitest *)",
       "Bash(npx playwright test *)",
-      "Bash(node design-system/build-tokens.mjs)",
       "Bash(git status *)",
       "Bash(git diff *)",
       "Bash(git log *)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
       "Bash(git switch *)",
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(gh pr view *)",
       "Bash(gh pr checks *)",
+      "Bash(gh pr create *)",
       "Bash(gh run view *)"
     ],
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",
+      "Read(!.env.example)",
       "Read(./data/**)",
       "Edit(/design-system/**)",
       "Edit(/docs/screens/**)",
       "Bash(git push --force *)",
       "Bash(git push -f *)",
-      "Bash(git push origin main)",
-      "Bash(git push origin HEAD:main)"
+      "Bash(git push *main)"
     ]
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-push.mjs"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
