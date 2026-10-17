@@ -57,6 +57,16 @@ describe('seedReferenceSetup', () => {
     expect(routineStepsSchema.safeParse(db.select().from(routine).get()?.steps).success).toBe(true);
   });
 
+  it('D-89: dose, yield and time steps default to 0.1 g, 0.1 g and 1 s per user', () => {
+    const db = openDatabase(join(dir, 'steps.db'));
+    seedReferenceSetup(db, { now: T0, name: 'Demo', passwordHash: 'x' });
+    expect(db.select().from(userSettings).get()).toMatchObject({
+      doseStep: 100,
+      yieldStep: 100,
+      timeStep: 1000
+    });
+  });
+
   it('D-88: the seed refuses a database that already has an account', () => {
     const db = openDatabase(join(dir, 'twice.db'));
     seedReferenceSetup(db, { now: T0, name: 'Demo', passwordHash: 'x' });

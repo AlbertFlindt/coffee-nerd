@@ -75,6 +75,10 @@ export const userSettings = sqliteTable('user_settings', {
     .notNull()
     .default(sql`'{}'`),
   timeZone: text('time_zone').notNull(),
+  /** −/+ steps on the shot form and Edit My setup, per user (D-89): 0.1 g, 0.1 g and 1 s by default. */
+  doseStep: integer('dose_step').notNull().default(100),
+  yieldStep: integer('yield_step').notNull().default(100),
+  timeStep: integer('time_step').notNull().default(1000),
   ...timestamps
 });
 
@@ -197,8 +201,8 @@ export const shot = sqliteTable(
       .notNull()
       .references(() => recipe.id),
     brewedAt: integer('brewed_at').notNull(),
-    yield: integer('yield'), // empty until set (D-82); whether a shot may be saved without it: open item
-    time: integer('time'), // empty until set (D-72)
+    yield: integer('yield'), // empty = not set; a shot may be saved without it (D-82, D-91)
+    time: integer('time'), // empty = not set; a shot may be saved without it (D-72, D-91)
     score: integer('score'),
     balance: integer('balance'),
     body: integer('body'),

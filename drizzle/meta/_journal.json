@@ -15,6 +15,13 @@
       "when": 1792247811901,
       "tag": "0001_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792262839485,
+      "tag": "0002_user_steps",
+      "breakpoints": true
     }
   ]
 }
