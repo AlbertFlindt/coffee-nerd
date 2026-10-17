@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Check, lint, test, build
+    # Pinned with @playwright/test 1.56.1, whose --with-deps knows Ubuntu up to 24.04; upgrade both together.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --tag coffee-nerd:ci .
+      - name: Container serves /health
+        run: |
+          docker run --detach --name coffee-nerd --publish 3000:3000 coffee-nerd:ci
+          for i in $(seq 1 30); do
+            if curl --silent --fail http://localhost:3000/health; then exit 0; fi
+            sleep 1
+          done
+          docker logs coffee-nerd
+          exit 1

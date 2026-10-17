@@ -1,0 +1,15 @@
+.git
+.claude
+node_modules
+.svelte-kit
+build
+data
+screenshots
+test-results
+playwright-report
+coverage
+.env
+.env.*
+!.env.example
+*.db
+*.db-*

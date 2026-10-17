@@ -3,3 +3,10 @@ docs/
 design-system/
 CLAUDE.md
 drizzle/
+
+# Generated or static
+package-lock.json
+/static/
+
+# Prose is maintained by the owner
+*.md
