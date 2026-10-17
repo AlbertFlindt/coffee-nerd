@@ -7,6 +7,9 @@ const GRINDER = 'grinder-064s';
 const BASKET = 'basket-vst18';
 const ROUTINE = 'routine-daily';
 const BEAN = 'bean-current';
+const OTHER_MACHINE = 'machine-old';
+const OTHER_GRINDER = 'grinder-old';
+const OTHER_ROUTINE = 'routine-old';
 const EARLIER_BAG = 'bean-earlier';
 const OLDEST_BAG = 'bean-oldest';
 
@@ -55,6 +58,11 @@ const routineSnapshot = {
   steps: [{ stepId: '0199f3a2-0000-7000-8000-00000000e001', name: 'WDT', unit: 's', value: 20000 }]
 };
 
+const otherRoutine = {
+  name: 'Old routine',
+  steps: [{ stepId: '0199f3a2-0000-7000-8000-00000000e009', name: 'Shake', value: null }]
+};
+
 const recipe = (overrides: Partial<RecipeValues> = {}): RecipeValues => ({
   beanId: BEAN,
   machineId: BIANCA,
@@ -87,8 +95,7 @@ const mySetup: PrefillContext['mySetup'] = {
     flat_pressure: { label: 'Flat pressure', unit: 'bar', on: true, value: 9000 },
     preinfusion: { label: 'Preinfusion', on: true, value: 5000, pressure: 2500 },
     low_bar_start: { label: 'Low bar start', on: true, value: 6000, pressure: 2000 }
-  },
-  routine: routineSnapshot
+  }
 };
 
 const context = (overrides: Partial<PrefillContext> = {}): PrefillContext => ({
@@ -97,7 +104,9 @@ const context = (overrides: Partial<PrefillContext> = {}): PrefillContext => ({
   latestShotOfBean: null,
   rebuyChain: [],
   mySetup,
-  machines: { [BIANCA]: biancaSpec() },
+  machines: { [BIANCA]: biancaSpec(), [OTHER_MACHINE]: biancaSpec({ preinfusion: false }) },
+  routines: { [ROUTINE]: routineSnapshot, [OTHER_ROUTINE]: otherRoutine },
+  archivedIds: new Set(),
   ...overrides
 });
 
@@ -174,7 +183,8 @@ describe('prefill', () => {
         rebuyChain: [
           {
             beanId: EARLIER_BAG,
-            best: { recipe: earlierBest, latestShot: { yield: 37000, time: 29000 } }
+            best: { recipe: earlierBest, latestShot: { yield: 37000, time: 29000 } },
+            latest: null
           }
         ]
       })
@@ -193,10 +203,11 @@ describe('prefill', () => {
     const result = prefill(
       context({
         rebuyChain: [
-          { beanId: EARLIER_BAG, best: null },
+          { beanId: EARLIER_BAG, best: null, latest: null },
           {
             beanId: OLDEST_BAG,
-            best: { recipe: oldestBest, latestShot: { yield: 36500, time: 30000 } }
+            best: { recipe: oldestBest, latestShot: { yield: 36500, time: 30000 } },
+            latest: null
           }
         ]
       })
@@ -204,8 +215,37 @@ describe('prefill', () => {
     expect(result).toMatchObject({ source: 'rebuy', beanId: BEAN, grind: 1300, yield: 36500 });
   });
 
+  it('D-74: an earlier bag with shots but none rated gives its latest shot', () => {
+    const latest = recipe({ beanId: EARLIER_BAG, grind: 1450 });
+    const result = prefill(
+      context({
+        rebuyChain: [
+          {
+            beanId: EARLIER_BAG,
+            best: null,
+            latest: { recipe: latest, shot: { yield: 35000, time: 26000 } }
+          },
+          {
+            beanId: OLDEST_BAG,
+            best: { recipe: recipe({ beanId: OLDEST_BAG, grind: 1300 }), latestShot: null },
+            latest: null
+          }
+        ]
+      })
+    );
+    expect(result).toMatchObject({
+      source: 'rebuy',
+      beanId: BEAN,
+      grind: 1450,
+      yield: 35000,
+      time: 26000
+    });
+  });
+
   it('D-73: a re-buy whose earlier bags have no shots starts from My setup', () => {
-    const result = prefill(context({ rebuyChain: [{ beanId: EARLIER_BAG, best: null }] }));
+    const result = prefill(
+      context({ rebuyChain: [{ beanId: EARLIER_BAG, best: null, latest: null }] })
+    );
     expect(result.source).toBe('my_setup');
   });
 
@@ -216,7 +256,8 @@ describe('prefill', () => {
         rebuyChain: [
           {
             beanId: EARLIER_BAG,
-            best: { recipe: recipe({ beanId: EARLIER_BAG }), latestShot: null }
+            best: { recipe: recipe({ beanId: EARLIER_BAG }), latestShot: null },
+            latest: null
           }
         ]
       })
@@ -316,7 +357,121 @@ describe('prefill', () => {
     });
   });
 
+  it('D-75: an archived grinder or basket is swapped for My setup’s; the rest is copied', () => {
+    const result = prefill(
+      context({
+        latestShotOfBean: {
+          recipe: recipe({ grinderId: OTHER_GRINDER, basketId: 'basket-old', grind: 1700 }),
+          shot: { yield: 36000, time: 28000 }
+        },
+        archivedIds: new Set([OTHER_GRINDER, 'basket-old'])
+      })
+    );
+    expect(result).toMatchObject({ grinderId: GRINDER, basketId: BASKET, grind: 1700 });
+  });
+
+  it('D-75: an archived machine is swapped for My setup’s, with features fitted to that machine', () => {
+    const result = prefill(
+      context({
+        latestShotOfBean: {
+          recipe: recipe({ machineId: OTHER_MACHINE }),
+          shot: { yield: 36000, time: 28000 }
+        },
+        archivedIds: new Set([OTHER_MACHINE])
+      })
+    );
+    expect(result.machineId).toBe(BIANCA);
+    expect(result.setup.features.preinfusion).toEqual({
+      label: 'Preinfusion',
+      on: true,
+      value: 4000,
+      pressure: 2000
+    });
+  });
+
+  it('D-75: an archived routine is swapped for My setup’s routine as it is now', () => {
+    const result = prefill(
+      context({
+        latestShotOfBean: {
+          recipe: recipe({
+            routineId: OTHER_ROUTINE,
+            setup: { ...recipe().setup, routine: otherRoutine }
+          }),
+          shot: { yield: 36000, time: 28000 }
+        },
+        archivedIds: new Set([OTHER_ROUTINE])
+      })
+    );
+    expect(result.routineId).toBe(ROUTINE);
+    expect(result.setup.routine).toEqual(routineSnapshot);
+  });
+
+  it('D-76: a routine edited since starts as it is now, keeping copied values for steps still there', () => {
+    const WDT = '0199f3a2-0000-7000-8000-00000000e001';
+    const TAMP = '0199f3a2-0000-7000-8000-00000000e002';
+    const SCREEN = '0199f3a2-0000-7000-8000-00000000e003';
+    const copied = {
+      name: 'Daily routine',
+      steps: [
+        { stepId: WDT, name: 'WDT', unit: 's', value: 30000 },
+        { stepId: SCREEN, name: 'Puck screen', value: null }
+      ]
+    };
+    const now = {
+      name: 'Daily routine v2',
+      steps: [
+        { stepId: WDT, name: 'Needle stir', unit: 's', value: 20000 },
+        { stepId: TAMP, name: 'Tamp', unit: 'kg', value: 15000 }
+      ]
+    };
+    const result = prefill(
+      context({
+        latestShotOfBean: {
+          recipe: recipe({ setup: { ...recipe().setup, routine: copied } }),
+          shot: { yield: 36000, time: 28000 }
+        },
+        routines: { [ROUTINE]: now }
+      })
+    );
+    expect(result.setup.routine).toEqual({
+      name: 'Daily routine v2',
+      steps: [
+        { stepId: WDT, name: 'Needle stir', unit: 's', value: 30000 },
+        { stepId: TAMP, name: 'Tamp', unit: 'kg', value: 15000 }
+      ]
+    });
+  });
+
+  it('D-76: a step used twice keeps each copied value in order', () => {
+    const WDT = '0199f3a2-0000-7000-8000-00000000e001';
+    const twice = {
+      name: 'Double WDT',
+      steps: [
+        { stepId: WDT, name: 'WDT', unit: 's', value: 10000 },
+        { stepId: WDT, name: 'WDT', unit: 's', value: 10000 }
+      ]
+    };
+    const copied = {
+      ...twice,
+      steps: [
+        { ...twice.steps[0], value: 15000 },
+        { ...twice.steps[1], value: 25000 }
+      ]
+    };
+    const result = prefill(
+      context({
+        latestShotOfBean: {
+          recipe: recipe({ setup: { ...recipe().setup, routine: copied } }),
+          shot: { yield: 36000, time: 28000 }
+        },
+        routines: { [ROUTINE]: twice }
+      })
+    );
+    expect(result.setup.routine?.steps.map((step) => step.value)).toEqual([15000, 25000]);
+  });
+
   it('D-02: fails clearly when the machine is unknown', () => {
     expect(() => prefill(context({ machines: {} }))).toThrow(/machine/);
+    expect(() => prefill(context({ routines: {} }))).toThrow(/routine/);
   });
 });

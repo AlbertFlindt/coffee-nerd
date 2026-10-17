@@ -1,6 +1,6 @@
-// What a new shot starts from (data-model §4.2; D-03, D-11, D-38, D-41, D-43, D-72, D-73).
-// Pure: the caller loads the candidates (Brew next, the bean's latest shot, the re-buy chain with each
-// earlier bag's best recipe, My setup, the machines) and this function picks and reconciles them.
+// What a new shot starts from (data-model §4.2; D-03, D-11, D-38, D-41, D-43, D-72 to D-76, D-78).
+// Pure: the caller loads the candidates (Brew next, the bean's latest shot, the re-buy chain, My setup,
+// machines, routines, archived ids) and this function picks one and brings it up to date.
 import type { FeatureValue, MachineSpec, SetupSnapshot, Taste } from './schemas';
 import type { Thousandths } from './units';
 
@@ -17,6 +17,9 @@ export type RecipeValues = {
 
 export type ShotResult = { yield: Thousandths | null; time: Thousandths | null };
 
+/** A routine as it is now, in the shape of a setup snapshot: name, steps with names, units and values. */
+export type RoutineNow = NonNullable<SetupSnapshot['routine']>;
+
 export type PrefillContext = {
   /** The current bean (Home's bean scope). */
   beanId: string;
@@ -24,10 +27,14 @@ export type PrefillContext = {
   brewNext: { recipe: RecipeValues; latestShot: ShotResult | null } | null;
   /** The current bean's latest shot and its recipe. */
   latestShotOfBean: { recipe: RecipeValues; shot: ShotResult } | null;
-  /** Earlier bags of a re-buy, nearest first, each with its best recipe (D-66) or null without shots. */
+  /**
+   * Earlier bags of a re-buy, nearest first (D-73): each with its best recipe (D-66) if it has rated
+   * shots, and its latest shot (D-74); both null when the bag has no shots.
+   */
   rebuyChain: {
     beanId: string;
     best: { recipe: RecipeValues; latestShot: ShotResult | null } | null;
+    latest: { recipe: RecipeValues; shot: ShotResult } | null;
   }[];
   /** My setup defaults (D-38); `features` has the same shape as a recipe's feature values. */
   mySetup: {
@@ -39,10 +46,13 @@ export type PrefillContext = {
     dose: Thousandths;
     yield: Thousandths | null;
     features: Record<string, FeatureValue>;
-    routine: SetupSnapshot['routine'];
   };
-  /** Current machine specs by id, for reconciling features. */
+  /** Machine specs as they are now, by id, including any archived machine a candidate uses. */
   machines: Record<string, MachineSpec>;
+  /** Routines as they are now, by id (D-76). */
+  routines: Record<string, RoutineNow>;
+  /** Ids of archived gear and routines (D-75). */
+  archivedIds: ReadonlySet<string>;
 };
 
 export type PrefillSource = 'brew_next' | 'last_shot' | 'rebuy' | 'my_setup';
@@ -70,21 +80,16 @@ export function prefill(context: PrefillContext): Prefill {
   const { brewNext, latestShotOfBean, rebuyChain, mySetup, beanId } = context;
 
   if (brewNext) {
-    return fromRecipe(
-      context,
-      'brew_next',
-      brewNext.recipe,
-      brewNext.latestShot,
-      brewNext.recipe.beanId
-    );
+    const { recipe, latestShot } = brewNext;
+    return fromRecipe(context, 'brew_next', recipe, latestShot, recipe.beanId);
   }
   if (latestShotOfBean) {
     return fromRecipe(context, 'last_shot', latestShotOfBean.recipe, latestShotOfBean.shot, beanId);
   }
-  const nearest = rebuyChain.find((bag) => bag.best !== null)?.best;
-  if (nearest) {
-    // A new recipe for this bag; scores are not carried over (D-41, D-73).
-    return fromRecipe(context, 'rebuy', nearest.recipe, nearest.latestShot, beanId);
+  // A new recipe for this bag; scores are not carried over (D-41, D-73, D-74).
+  for (const bag of rebuyChain) {
+    if (bag.best) return fromRecipe(context, 'rebuy', bag.best.recipe, bag.best.latestShot, beanId);
+    if (bag.latest) return fromRecipe(context, 'rebuy', bag.latest.recipe, bag.latest.shot, beanId);
   }
   return {
     source: 'my_setup',
@@ -103,7 +108,7 @@ export function prefill(context: PrefillContext): Prefill {
         mySetup.features,
         mySetup.features
       ),
-      routine: structuredClone(mySetup.routine)
+      routine: mySetup.routineId === null ? null : routineNow(context, mySetup.routineId, null)
     },
     taste: emptyTaste()
   };
@@ -116,24 +121,35 @@ function fromRecipe(
   shot: ShotResult | null,
   beanId: string
 ): Prefill {
+  const { mySetup, archivedIds } = context;
+  // D-75: an archived item is swapped for My setup's; everything else is copied.
+  const current = <T extends string | null>(id: T, fallback: T): T =>
+    id !== null && archivedIds.has(id) ? fallback : id;
+  const machineId = current(recipe.machineId, mySetup.machineId);
+  const routineId = current(recipe.routineId, mySetup.routineId);
+  const routineSwapped = routineId !== recipe.routineId;
+
   return {
     source,
     beanId,
-    machineId: recipe.machineId,
-    grinderId: recipe.grinderId,
-    basketId: recipe.basketId,
-    routineId: recipe.routineId,
+    machineId,
+    grinderId: current(recipe.grinderId, mySetup.grinderId),
+    basketId: current(recipe.basketId, mySetup.basketId),
+    routineId,
     grind: recipe.grind,
     dose: recipe.dose,
     yield: shot?.yield ?? null,
     time: shot?.time ?? null,
     setup: {
       features: reconcileFeatures(
-        machineSpec(context, recipe.machineId),
+        machineSpec(context, machineId),
         recipe.setup.features,
-        context.mySetup.features
+        mySetup.features
       ),
-      routine: structuredClone(recipe.setup.routine)
+      routine:
+        routineId === null
+          ? null
+          : routineNow(context, routineId, routineSwapped ? null : recipe.setup.routine)
     },
     taste: emptyTaste()
   };
@@ -146,10 +162,35 @@ function machineSpec(context: PrefillContext, machineId: string): MachineSpec {
 }
 
 /**
+ * The routine as it is now (D-76): its current name and steps, with the copied value for each step that
+ * is still in it (matched by step id, in order, so a step used twice keeps both values) and the routine's
+ * own value for new steps.
+ */
+function routineNow(
+  context: PrefillContext,
+  routineId: string,
+  copied: SetupSnapshot['routine']
+): RoutineNow {
+  const routine = context.routines[routineId];
+  if (!routine) throw new Error(`Unknown routine ${routineId}`);
+  const copiedValues = new Map<string, RoutineNow['steps'][number]['value'][]>();
+  for (const step of copied?.steps ?? []) {
+    copiedValues.set(step.stepId, [...(copiedValues.get(step.stepId) ?? []), step.value]);
+  }
+  return {
+    name: routine.name,
+    steps: routine.steps.map((step) => {
+      const values = copiedValues.get(step.stepId);
+      return { ...step, value: values?.length ? values.shift()! : step.value };
+    })
+  };
+}
+
+/**
  * Fits copied feature values to the machine as it is now (data-model §4.2): features switched off on the
  * machine are left out; features switched on since start from My setup when it has a value, otherwise
- * switched off (or on and waiting for a value when they have no off switch). Values take the feature's
- * current label and unit, since the new recipe's snapshot records them as they are now (D-65).
+ * switched off, or on and waiting for a value when they have no off switch (D-78). Values take the
+ * feature's current label and unit, since the new recipe's snapshot records them as they are now (D-65).
  */
 function reconcileFeatures(
   machine: MachineSpec,
