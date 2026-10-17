@@ -1,5 +1,6 @@
 // The one account of an installation (D-60): created on first run with a name and a password (D-85),
 // with the built-in flavor tags and nothing else (D-88).
+import { randomBytes } from 'node:crypto';
 import { count } from 'drizzle-orm';
 import { insertBuiltInTags } from '../db/built-in-tags';
 import type { Db } from '../db/client';
@@ -7,6 +8,7 @@ import { newId } from '../db/ids';
 import { appState, user, userSettings } from '../db/schema';
 import { hashPassword, verifyPassword } from './password.js';
 import type { SignedInUser } from './session';
+import type { SignInThrottle } from './throttle';
 
 export const MIN_PASSWORD_LENGTH = 8;
 
@@ -53,14 +55,44 @@ export async function createAccount(
   });
 }
 
-/** The account for this name (ignoring case and surrounding spaces) and password, or null. */
+/** Checked against when no name matches, so a wrong name takes as long as a wrong password. */
+const unmatchedHash = hashPassword(randomBytes(16).toString('hex'));
+
+/**
+ * The account for this name (ignoring case and surrounding spaces) and password, or null. Always runs
+ * exactly one password check, so the answer time does not reveal whether the name exists.
+ */
 export async function signIn(db: Db, name: string, password: string): Promise<SignedInUser | null> {
   const wanted = name.trim().toLowerCase();
-  for (const row of db.select().from(user).all()) {
-    if (row.name.toLowerCase() === wanted && (await verifyPassword(password, row.passwordHash)))
-      return { id: row.id, name: row.name };
-  }
-  return null;
+  const row = db
+    .select()
+    .from(user)
+    .all()
+    .find((u) => u.name.toLowerCase() === wanted);
+  const matches = await verifyPassword(password, row?.passwordHash ?? (await unmatchedHash));
+  return row && matches ? { id: row.id, name: row.name } : null;
+}
+
+export type SignInAttempt =
+  { outcome: 'signed_in'; user: SignedInUser } | { outcome: 'wrong' } | { outcome: 'throttled' };
+
+/**
+ * One sign-in attempt through the throttle. The attempt counts as a failure before the password is
+ * checked, so many guesses sent at once are limited just like guesses sent one after another.
+ */
+export async function attemptSignIn(
+  db: Db,
+  throttle: SignInThrottle,
+  name: string,
+  password: string,
+  now: number
+): Promise<SignInAttempt> {
+  if (throttle.retryAfter(now) > 0) return { outcome: 'throttled' };
+  throttle.recordFailure(now);
+  const signedIn = await signIn(db, name, password);
+  if (!signedIn) return { outcome: 'wrong' };
+  throttle.reset();
+  return { outcome: 'signed_in', user: signedIn };
 }
 
 /** An IANA time zone the runtime knows, or UTC (data-model §1.8). */

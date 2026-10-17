@@ -2,7 +2,10 @@
 // scripts/reset-password.mjs can use it on the server without a build step (D-87).
 import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 
-const PARAMS = { N: 16384, r: 8, p: 1 };
+// OWASP's current scrypt guidance (N = 2^17). Stored hashes carry their parameters, so they can change.
+const PARAMS = { N: 131072, r: 8, p: 1 };
+/** scrypt needs 128·N·r bytes (about 134 MB here); Node's default limit is 32 MB. */
+const MAX_MEMORY = 256 * 1024 * 1024;
 const KEY_LENGTH = 64;
 
 /**
@@ -13,8 +16,12 @@ const KEY_LENGTH = 64;
  */
 function derive(password, salt, params) {
   return new Promise((resolve, reject) =>
-    scrypt(password.normalize('NFKC'), salt, KEY_LENGTH, params, (error, key) =>
-      error ? reject(error) : resolve(key)
+    scrypt(
+      password.normalize('NFKC'),
+      salt,
+      KEY_LENGTH,
+      { ...params, maxmem: MAX_MEMORY },
+      (error, key) => (error ? reject(error) : resolve(key))
     )
   );
 }

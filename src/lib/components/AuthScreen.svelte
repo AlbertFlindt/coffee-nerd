@@ -23,7 +23,7 @@
   <div class="fields">
     {@render children()}
     {#if error}
-      <p class="error" role="alert">{error}</p>
+      <p class="error cn-type-body" role="alert">{error}</p>
     {/if}
   </div>
 
@@ -62,6 +62,5 @@
 
   .error {
     color: var(--ink);
-    font-size: 14px;
   }
 </style>

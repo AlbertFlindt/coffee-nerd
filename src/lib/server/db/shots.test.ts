@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { openDatabase, type Db } from './client';
 import { newId } from './ids';
@@ -203,10 +203,34 @@ describe('saveShot', () => {
       rejects(input({ grinderId: ids.machineId }), /grinder/);
     });
 
+    it('D-65: a setup that is not a setup at all', () => {
+      rejects(input({ setup: null as never }), /setup/);
+      rejects(input({ setup: { features: {}, routine: { name: 'Broken' } } as never }), /setup/);
+    });
+
     it('D-63: a dose that is not a positive whole number of thousandths', () => {
       rejects(input({ dose: 0 }), /dose/);
       rejects(input({ grind: 1.5 }), /grind/);
     });
+  });
+
+  it('D-63: a failure part way through a save rolls everything back', () => {
+    db.run(
+      sql`CREATE TRIGGER fail_tags BEFORE INSERT ON shot_tag BEGIN SELECT RAISE(ABORT, 'boom'); END`
+    );
+    const [berry] = db.select().from(tag).limit(1).all();
+    expect(() => save(input({ tagIds: [berry.id] }))).toThrow(/boom/);
+    expect(db.select().from(shot).all()).toHaveLength(0);
+    expect(recipeCount()).toBe(0);
+  });
+
+  it('D-63, D-65: only the checked setup is stored in the recipe, never extra fields', () => {
+    const extra = input();
+    (extra.setup as Record<string, unknown>).injected = 'not part of a setup';
+    const { recipeId } = save(extra);
+    expect(db.select().from(recipe).where(eq(recipe.id, recipeId)).get()?.setup).not.toHaveProperty(
+      'injected'
+    );
   });
 
   it('D-60: another owner’s bean, gear or tags cannot be used, and their rows stay untouched', () => {
@@ -268,6 +292,63 @@ describe('editShot', () => {
         .all()
         .map((row) => row.tagId)
     ).toEqual([caramel.id]);
+  });
+
+  it('data-model §4.1: a recipe that still has other shots stays when one of them moves away', () => {
+    const first = save(input({ grind: 1600 }, 1));
+    const second = save(input({ grind: 1600 }, 2));
+    editShot(
+      db,
+      ids.userId,
+      second.shotId,
+      { ...input({ grind: 1500 }, 2), id: second.shotId },
+      T0
+    );
+    expect(db.select().from(recipe).where(eq(recipe.id, first.recipeId)).get()).toBeDefined();
+    expect(recipeCount()).toBe(2);
+  });
+
+  it('D-57: a rejected edit changes nothing', () => {
+    const [berry] = db.select().from(tag).limit(1).all();
+    const shotInput = input({ tagIds: [berry.id] }, 1);
+    const { recipeId } = save(shotInput);
+    const bad = {
+      ...shotInput,
+      grind: 1500,
+      taste: { ...shotInput.taste, score: 0 },
+      tagIds: []
+    };
+    expect(() => editShot(db, ids.userId, shotInput.id, bad, T0)).toThrow(ShotRejected);
+    expect(db.select().from(shot).get()).toMatchObject({ recipeId, score: null });
+    expect(db.select().from(shotTag).all()).toHaveLength(1);
+    expect(recipeCount()).toBe(1);
+  });
+
+  it('D-57, D-16: editing a shot onto another bean moves it to that bean’s recipe', () => {
+    const otherBeanId = newId(T0 + 5);
+    db.insert(bean)
+      .values({
+        id: otherBeanId,
+        ownerId: ids.userId,
+        name: 'Kiambu AA',
+        roastDate: '2026-10-13',
+        createdAt: T0,
+        updatedAt: T0
+      })
+      .run();
+    const { shotId, recipeId } = save(input({}, 1));
+    const edited = editShot(
+      db,
+      ids.userId,
+      shotId,
+      { ...input({ beanId: otherBeanId }, 1), id: shotId },
+      T0
+    );
+    expect(edited.recipeId).not.toBe(recipeId);
+    expect(db.select().from(recipe).where(eq(recipe.id, edited.recipeId)).get()?.beanId).toBe(
+      otherBeanId
+    );
+    expect(db.select().from(recipe).where(eq(recipe.id, recipeId)).get()).toBeUndefined();
   });
 
   it('D-60: a shot of another owner cannot be edited', () => {

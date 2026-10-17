@@ -6,7 +6,7 @@
 </script>
 
 <div class="field">
-  <label for={id}>{label}</label>
+  <label class="cn-caption" for={id}>{label}</label>
   <input {id} {...input} />
 </div>
 
@@ -20,11 +20,6 @@
     padding: 0 14px;
     border-radius: var(--radius-md);
     background: var(--surface);
-  }
-
-  label {
-    font-size: 12px;
-    color: var(--ink-muted);
   }
 
   input {

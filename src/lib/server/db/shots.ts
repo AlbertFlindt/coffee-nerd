@@ -42,7 +42,7 @@ export type SaveResult = {
   status: 'saved' | 'duplicate';
   shotId: string;
   recipeId: string;
-  /** Shots on the recipe after saving, for "Recipe reused Nx" (D-16). */
+  /** Shots on the recipe after saving, including this one (the form shows the count before saving, D-16). */
   recipeShotCount: number;
   newRecipe: boolean;
   /** The bean was finished automatically by this shot; the app offers an undo (D-40). */
@@ -60,6 +60,7 @@ export class ShotRejected extends Error {
 /** Saves a new shot. Saving the same id again changes nothing (D-61). */
 export function saveShot(db: Db, ownerId: string, input: ShotInput, now: number): SaveResult {
   return db.transaction((tx) => {
+    // Looked up by id alone on purpose: an id another account already uses must be refused, not reused.
     const existing = tx.select().from(shot).where(eq(shot.id, input.id)).get();
     if (existing) {
       if (existing.ownerId !== ownerId) throw new ShotRejected(['shot: this id is already in use']);
@@ -67,14 +68,14 @@ export function saveShot(db: Db, ownerId: string, input: ShotInput, now: number)
         status: 'duplicate',
         shotId: existing.id,
         recipeId: existing.recipeId,
-        recipeShotCount: recipeShotCount(tx, existing.recipeId),
+        recipeShotCount: recipeShotCount(tx, ownerId, existing.recipeId),
         newRecipe: false,
         autoFinished: false
       };
     }
 
-    validate(tx, ownerId, input);
-    const { recipeId, newRecipe } = findOrCreateRecipe(tx, ownerId, input, now);
+    const setup = validate(tx, ownerId, input);
+    const { recipeId, newRecipe } = findOrCreateRecipe(tx, ownerId, { ...input, setup }, now);
     tx.insert(shot)
       .values({
         id: input.id,
@@ -97,7 +98,7 @@ export function saveShot(db: Db, ownerId: string, input: ShotInput, now: number)
       status: 'saved',
       shotId: input.id,
       recipeId,
-      recipeShotCount: recipeShotCount(tx, recipeId),
+      recipeShotCount: recipeShotCount(tx, ownerId, recipeId),
       newRecipe,
       autoFinished
     };
@@ -124,29 +125,32 @@ export function editShot(
       .get();
     if (!existing) throw new ShotRejected(['shot: not found']);
 
-    validate(tx, ownerId, input);
-    const { recipeId, newRecipe } = findOrCreateRecipe(tx, ownerId, input, now);
+    const setup = validate(tx, ownerId, input);
+    const { recipeId, newRecipe } = findOrCreateRecipe(tx, ownerId, { ...input, setup }, now);
     tx.update(shot)
       .set({ recipeId, ...shotValues(input), updatedAt: now })
-      .where(eq(shot.id, shotId))
+      .where(and(eq(shot.id, shotId), eq(shot.ownerId, ownerId)))
       .run();
     tx.delete(shotTag).where(eq(shotTag.shotId, shotId)).run();
     writeTags(tx, shotId, input.tagIds);
 
-    if (existing.recipeId !== recipeId && recipeShotCount(tx, existing.recipeId) === 0) {
+    if (existing.recipeId !== recipeId && recipeShotCount(tx, ownerId, existing.recipeId) === 0) {
       const marked = tx
         .select({ id: appState.userId })
         .from(appState)
         .where(and(eq(appState.userId, ownerId), eq(appState.brewNextRecipeId, existing.recipeId)))
         .get();
-      if (!marked) tx.delete(recipe).where(eq(recipe.id, existing.recipeId)).run();
+      if (!marked)
+        tx.delete(recipe)
+          .where(and(eq(recipe.id, existing.recipeId), eq(recipe.ownerId, ownerId)))
+          .run();
     }
 
     return {
       status: 'saved',
       shotId,
       recipeId,
-      recipeShotCount: recipeShotCount(tx, recipeId),
+      recipeShotCount: recipeShotCount(tx, ownerId, recipeId),
       newRecipe,
       autoFinished: false
     };
@@ -168,8 +172,11 @@ function shotValues(input: ShotInput) {
   };
 }
 
-/** Checks everything the shot points to and every value it carries; throws ShotRejected. */
-function validate(tx: Queryable, ownerId: string, input: ShotInput): void {
+/**
+ * Checks everything the shot points to and every value it carries; throws ShotRejected. Returns the
+ * setup as checked, so only known fields reach the recipe snapshot (D-65).
+ */
+function validate(tx: Queryable, ownerId: string, input: ShotInput): SetupSnapshot {
   const problems: string[] = [];
   const wholeNumber = (value: unknown, min: number) =>
     Number.isSafeInteger(value) && (value as number) >= min;
@@ -185,7 +192,7 @@ function validate(tx: Queryable, ownerId: string, input: ShotInput): void {
   if (!taste.success)
     problems.push(`taste: ${taste.error.issues.map((i) => i.path.join('.')).join(', ')}`);
   const setup = setupSnapshotSchema.safeParse(input.setup);
-  if (!setup.success) problems.push('setup: not a valid setup');
+  if (!setup.success) throw new ShotRejected([...problems, 'setup: not a valid setup']);
 
   const owned = and(eq(bean.id, input.beanId), eq(bean.ownerId, ownerId));
   if (!tx.select({ id: bean.id }).from(bean).where(owned).get()) problems.push('bean: not found');
@@ -206,23 +213,24 @@ function validate(tx: Queryable, ownerId: string, input: ShotInput): void {
   ownGear(input.grinderId, 'grinder');
   if (input.basketId !== null) ownGear(input.basketId, 'basket');
 
-  if (machine && setup.success) {
+  if (machine) {
     const spec = machineSpecSchema.parse(machine.spec);
-    for (const p of validateSetupAgainstMachine(input.setup, spec))
+    for (const p of validateSetupAgainstMachine(setup.data, spec))
       problems.push(`setup: ${p.label} ${p.problem.replaceAll('_', ' ')}`);
   }
 
   // Puck prep: the routine and its snapshot go together (D-51); values fit their steps (D-52).
-  if ((input.routineId === null) !== (input.setup.routine === null)) {
+  const routineSnapshot = setup.data.routine;
+  if ((input.routineId === null) !== (routineSnapshot === null)) {
     problems.push('routine: puck prep does not match the routine');
-  } else if (input.routineId !== null && input.setup.routine) {
+  } else if (input.routineId !== null && routineSnapshot) {
     const owns = tx
       .select({ id: routine.id })
       .from(routine)
       .where(and(eq(routine.id, input.routineId), eq(routine.ownerId, ownerId)))
       .get();
     if (!owns) problems.push('routine: not found');
-    const stepIds = [...new Set(input.setup.routine.steps.map((s) => s.stepId))];
+    const stepIds = [...new Set(routineSnapshot.steps.map((s) => s.stepId))];
     const settings: Record<string, PrepStepSetting> = Object.fromEntries(
       stepIds.length === 0
         ? []
@@ -233,7 +241,7 @@ function validate(tx: Queryable, ownerId: string, input: ShotInput): void {
             .all()
             .map((row) => [row.id, row.setting])
     );
-    const steps = input.setup.routine.steps.map(({ stepId, value }) => ({ stepId, value }));
+    const steps = routineSnapshot.steps.map(({ stepId, value }) => ({ stepId, value }));
     for (const p of validateRoutineAgainstSteps(steps, settings))
       problems.push(`routine: step ${p.index + 1} ${p.problem.replaceAll('_', ' ')}`);
   }
@@ -249,6 +257,7 @@ function validate(tx: Queryable, ownerId: string, input: ShotInput): void {
   }
 
   if (problems.length > 0) throw new ShotRejected(problems);
+  return setup.data;
 }
 
 /** The recipe with this fingerprint for this bean and machine, or a new one (D-16, D-63). */
@@ -302,8 +311,14 @@ function writeTags(tx: Queryable, shotId: string, tagIds: string[]): void {
       .run();
 }
 
-function recipeShotCount(tx: Queryable, recipeId: string): number {
-  return tx.select({ n: count() }).from(shot).where(eq(shot.recipeId, recipeId)).get()?.n ?? 0;
+function recipeShotCount(tx: Queryable, ownerId: string, recipeId: string): number {
+  return (
+    tx
+      .select({ n: count() })
+      .from(shot)
+      .where(and(eq(shot.recipeId, recipeId), eq(shot.ownerId, ownerId)))
+      .get()?.n ?? 0
+  );
 }
 
 /** D-40: when this shot's dose uses up an open bean's bag, mark the bean finished automatically. */
@@ -324,14 +339,20 @@ function finishBeanIfUsedUp(
     .select({ dose: recipe.dose })
     .from(shot)
     .innerJoin(recipe, eq(shot.recipeId, recipe.id))
-    .where(and(eq(recipe.beanId, input.beanId), sql`${shot.id} <> ${input.id}`))
+    .where(
+      and(
+        eq(recipe.beanId, input.beanId),
+        eq(shot.ownerId, ownerId),
+        sql`${shot.id} <> ${input.id}`
+      )
+    )
     .all()
     .map((r) => r.dose);
   if (!shouldAutoFinish(row.bagWeight, earlier, input.dose)) return false;
 
   tx.update(bean)
     .set({ status: 'finished', finishedAt: now, finishedAutomatically: true, updatedAt: now })
-    .where(eq(bean.id, input.beanId))
+    .where(and(eq(bean.id, input.beanId), eq(bean.ownerId, ownerId)))
     .run();
   return true;
 }

@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { openDatabase, type Db } from '../db/client';
 import { appState, session, tag, user, userSettings } from '../db/schema';
-import { AccountError, createAccount, hasAccount, signIn } from './account';
+import { AccountError, attemptSignIn, createAccount, hasAccount, signIn } from './account';
 import { hashPassword, verifyPassword } from './password.js';
 import {
   createSession,
@@ -142,14 +142,14 @@ describe('sessions (D-86)', () => {
 });
 
 describe('SignInThrottle', () => {
-  it('D-60: after 5 wrong passwords in 15 minutes, sign-in waits a minute', () => {
+  it('D-85: after 5 wrong passwords in 15 minutes, sign-in waits a minute', () => {
     const throttle = new SignInThrottle();
     for (let i = 0; i < 5; i++) throttle.recordFailure(T0 + i * 1000);
     expect(throttle.retryAfter(T0 + 5000)).toBeGreaterThan(0);
     expect(throttle.retryAfter(T0 + 5000 + 61_000)).toBe(0);
   });
 
-  it('D-60: fewer failures, old failures or a success do not slow sign-in', () => {
+  it('D-85: fewer failures, old failures or a success do not slow sign-in', () => {
     const throttle = new SignInThrottle();
     for (let i = 0; i < 4; i++) throttle.recordFailure(T0);
     expect(throttle.retryAfter(T0)).toBe(0);
@@ -157,6 +157,29 @@ describe('SignInThrottle', () => {
     expect(throttle.retryAfter(T0)).toBe(0);
     throttle.recordFailure(T0);
     throttle.reset();
+    expect(throttle.retryAfter(T0)).toBe(0);
+  });
+});
+
+describe('attemptSignIn', () => {
+  it('D-85: guesses sent all at once are limited like guesses sent one by one', async () => {
+    await account();
+    const throttle = new SignInThrottle();
+    const results = await Promise.all(
+      Array.from({ length: 10 }, () => attemptSignIn(db, throttle, 'Albert', 'wrong-guess', T0))
+    );
+    expect(results.filter((r) => r.outcome === 'wrong')).toHaveLength(5);
+    expect(results.filter((r) => r.outcome === 'throttled')).toHaveLength(5);
+  });
+
+  it('D-85: the right password signs in and clears earlier failures', async () => {
+    const userId = await account();
+    const throttle = new SignInThrottle();
+    await attemptSignIn(db, throttle, 'Albert', 'wrong-guess', T0);
+    expect(await attemptSignIn(db, throttle, 'Albert', 'espresso-at-dawn', T0)).toEqual({
+      outcome: 'signed_in',
+      user: { id: userId, name: 'Albert' }
+    });
     expect(throttle.retryAfter(T0)).toBe(0);
   });
 });
