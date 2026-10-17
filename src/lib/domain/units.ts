@@ -73,9 +73,18 @@ export function formatDelta(change: Thousandths, decimals: number): string {
   return change > 0 && /[1-9]/.test(text) ? `+${text}` : text;
 }
 
-/** A ratio (yield per gram of dose, in thousandths) as "1 : 2.1" (D-03). */
-export function formatRatio(ratio: Thousandths): string {
-  return `1 : ${formatNumber(ratio, 1)}`;
+/**
+ * The ratio of yield to dose as "1 : 2.1" (D-03), rounded once to one decimal straight from the two
+ * quantities, so it never rounds twice. Null without a yield or a dose.
+ */
+export function formatRatio(
+  yieldAmount: Thousandths | null,
+  dose: Thousandths | null
+): string | null {
+  if (yieldAmount === null || dose === null || dose <= 0) return null;
+  // Tenths, rounded half up, in whole numbers: ⌊(20·yield + dose) / (2·dose)⌋.
+  const tenths = Math.floor((20 * yieldAmount + dose) / (2 * dose));
+  return `1 : ${formatNumber(tenths * 100, 1)}`;
 }
 
 /** The label on a −/+ button: "+ 0.1 g", "− 1 s", "+ 0.1" (D-07). */

@@ -56,13 +56,14 @@ export type Prefill = Omit<RecipeValues, 'setup'> &
     taste: Taste;
   };
 
-const EMPTY_TASTE: Taste = {
+/** A fresh object each time, so a form writing into one prefill never prefills the next (D-11). */
+const emptyTaste = (): Taste => ({
   score: null,
   balance: null,
   body: null,
   sweetness: null,
   aftertaste: null
-};
+});
 
 /** The new shot's starting values, in the order of data-model §4.2. */
 export function prefill(context: PrefillContext): Prefill {
@@ -102,9 +103,9 @@ export function prefill(context: PrefillContext): Prefill {
         mySetup.features,
         mySetup.features
       ),
-      routine: mySetup.routine
+      routine: structuredClone(mySetup.routine)
     },
-    taste: EMPTY_TASTE
+    taste: emptyTaste()
   };
 }
 
@@ -132,9 +133,9 @@ function fromRecipe(
         recipe.setup.features,
         context.mySetup.features
       ),
-      routine: recipe.setup.routine
+      routine: structuredClone(recipe.setup.routine)
     },
-    taste: EMPTY_TASTE
+    taste: emptyTaste()
   };
 }
 

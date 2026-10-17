@@ -15,7 +15,7 @@ describe('bestRecipe', () => {
     expect(bestRecipe(recipes)).toEqual({
       recipeId: 'steady',
       basis: 'average',
-      averageScore: 8,
+      score: 8,
       ratedShots: 4
     });
   });
@@ -36,7 +36,7 @@ describe('bestRecipe', () => {
     expect(bestRecipe(recipes)).toEqual({
       recipeId: 'b',
       basis: 'single',
-      averageScore: 8,
+      score: 8,
       ratedShots: 1
     });
   });

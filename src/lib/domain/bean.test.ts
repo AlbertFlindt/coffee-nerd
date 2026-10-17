@@ -50,13 +50,18 @@ describe('gramsLeft and shouldAutoFinish', () => {
     expect(gramsLeft(30000, [18000, 18000])).toBe(0);
   });
 
-  it('D-40: the bean finishes automatically when the doses reach the bag weight', () => {
-    expect(shouldAutoFinish(36000, [18000, 18000])).toBe(true);
-    expect(shouldAutoFinish(36000, [18000, 18500])).toBe(true);
-    expect(shouldAutoFinish(36000, [18000])).toBe(false);
+  it('D-40: the bean finishes automatically when a shot makes the doses reach the bag weight', () => {
+    expect(shouldAutoFinish(36000, [18000], 18000)).toBe(true);
+    expect(shouldAutoFinish(36000, [18000], 18500)).toBe(true);
+    expect(shouldAutoFinish(36000, [], 18000)).toBe(false);
   });
 
-  it('D-40: never automatically without a bag weight', () => {
-    expect(shouldAutoFinish(null, [18000, 18000])).toBe(false);
+  it('D-40: after an undo or reopening, the next shot does not finish the bean again', () => {
+    expect(shouldAutoFinish(36000, [18000, 18000], 18000)).toBe(false);
+  });
+
+  it('D-40: never automatically without a bag weight, or with a bag weight of 0', () => {
+    expect(shouldAutoFinish(null, [18000], 18000)).toBe(false);
+    expect(shouldAutoFinish(0, [], 18000)).toBe(false);
   });
 });

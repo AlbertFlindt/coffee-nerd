@@ -149,6 +149,30 @@ describe('recipeFingerprint', () => {
     expect(fingerprints.size).toBe(6);
   });
 
+  it('D-63: an empty field and a missing field give the same fingerprint', () => {
+    const explicit = withFeatures({
+      low_bar_start: { label: 'Low bar start', on: false, value: undefined, pressure: undefined }
+    });
+    expect(recipeFingerprint(explicit)).toBe(recipeFingerprint(base));
+    const toggle = { label: 'Bloom', on: true };
+    const key = 'custom-0199f3a2-7c1e-7d2a-9b4f-000000000002';
+    expect(recipeFingerprint(withFeatures({ [key]: toggle }))).toBe(
+      recipeFingerprint(withFeatures({ [key]: { ...toggle, value: undefined, choice: undefined } }))
+    );
+  });
+
+  it('D-63: a step value of 20000 and the text "20000" are different recipes', () => {
+    const steps = base.setup.routine!.steps;
+    const asText: RecipeIdentity = {
+      ...base,
+      setup: {
+        ...base.setup,
+        routine: { ...base.setup.routine!, steps: [{ ...steps[0], value: '20000' }, steps[1]] }
+      }
+    };
+    expect(recipeFingerprint(asText)).not.toBe(recipeFingerprint(base));
+  });
+
   it('D-16: the machine is the matching scope, not part of the fingerprint', () => {
     expect(recipeFingerprint({ ...base, machineId: '0199f3a2-0000-7000-8000-00000000d002' })).toBe(
       recipeFingerprint(base)

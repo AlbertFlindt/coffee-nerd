@@ -1,7 +1,7 @@
 // Values about a bean and its shots that are always calculated, never stored (data-model §3).
 import type { Thousandths } from './units';
 
-/** Yield per gram of dose, in thousandths (38.5 g from 18.0 g → 2139, shown "1 : 2.1"). */
+/** Yield per gram of dose, in thousandths (38.5 g from 18.0 g → 2139), for statistics and charts. Display uses `formatRatio`. */
 export function ratio(
   yieldAmount: Thousandths | null,
   dose: Thousandths | null
@@ -40,10 +40,17 @@ export function gramsLeft(
   return Math.max(0, bagWeight - doses.reduce((sum, d) => sum + d, 0));
 }
 
-/** True when the bean has a bag weight and its shots' doses have used it up (D-40). */
+/**
+ * True when this shot makes the doses reach the bag weight (D-40): the doses before it were below the bag
+ * weight and with it they are not. So after an undo or reopening, later shots do not finish the bean
+ * again. Never without a bag weight.
+ */
 export function shouldAutoFinish(
   bagWeight: Thousandths | null,
-  doses: readonly Thousandths[]
+  earlierDoses: readonly Thousandths[],
+  dose: Thousandths
 ): boolean {
-  return bagWeight !== null && doses.reduce((sum, d) => sum + d, 0) >= bagWeight;
+  if (bagWeight === null) return false;
+  const before = earlierDoses.reduce((sum, d) => sum + d, 0);
+  return before < bagWeight && before + dose >= bagWeight;
 }

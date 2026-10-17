@@ -134,6 +134,16 @@ describe('prefill', () => {
     }
   });
 
+  it('D-11: changing one prefill’s taste never leaks into the next prefill', () => {
+    const first = prefill(context());
+    first.taste.score = 9;
+    first.setup.routine!.steps[0].value = 99000;
+    const second = prefill(context());
+    expect(second.taste).toEqual(emptyTaste);
+    expect(second.setup.routine).toEqual(routineSnapshot);
+    expect(routineSnapshot.steps[0].value).toBe(20000);
+  });
+
   it('D-43: Brew next comes first: that recipe’s bean, values and setup; yield and time from its latest shot', () => {
     const chosen = recipe({ beanId: 'bean-other', grind: 1400, dose: 18500 });
     const result = prefill(

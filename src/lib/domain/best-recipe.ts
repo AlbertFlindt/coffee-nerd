@@ -10,7 +10,8 @@ export type BestRecipe = {
   recipeId: string;
   /** `average`: highest mean among recipes with at least 3 rated shots; `single`: highest single score. */
   basis: 'average' | 'single';
-  averageScore: number;
+  /** The average score (`average`) or the single highest score (`single`). */
+  score: number;
   ratedShots: number;
 };
 
@@ -44,7 +45,7 @@ export function bestRecipe(recipes: readonly RecipeShots[]): BestRecipe | null {
     return {
       recipeId: winner.recipeId,
       basis: 'average',
-      averageScore: winner.total / winner.rated,
+      score: winner.total / winner.rated,
       ratedShots: winner.rated
     };
   }
@@ -53,7 +54,7 @@ export function bestRecipe(recipes: readonly RecipeShots[]): BestRecipe | null {
   return {
     recipeId: winner.recipeId,
     basis: 'single',
-    averageScore: winner.best,
+    score: winner.best,
     ratedShots: winner.rated
   };
 }

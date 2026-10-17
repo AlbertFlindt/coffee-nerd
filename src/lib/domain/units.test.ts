@@ -121,10 +121,20 @@ describe('formatDelta', () => {
 });
 
 describe('formatRatio', () => {
-  it('D-03: the ratio reads "1 : 2.1" with one decimal', () => {
-    expect(formatRatio(2139)).toBe('1 : 2.1');
-    expect(formatRatio(2000)).toBe('1 : 2.0');
-    expect(formatRatio(2050)).toBe('1 : 2.1');
+  it('D-03: the ratio of yield to dose reads "1 : 2.1" with one decimal', () => {
+    expect(formatRatio(38500, 18000)).toBe('1 : 2.1');
+    expect(formatRatio(36000, 18000)).toBe('1 : 2.0');
+    expect(formatRatio(36900, 18000)).toBe('1 : 2.1'); // 2.05 rounds up
+  });
+
+  it('D-03: the ratio is rounded once, straight from yield and dose', () => {
+    // 2.0495 must show 2.0, not 2.05 → 2.1 by rounding twice
+    expect(formatRatio(20495, 10000)).toBe('1 : 2.0');
+  });
+
+  it('D-03: no ratio without a dose or a yield', () => {
+    expect(formatRatio(36000, 0)).toBeNull();
+    expect(formatRatio(null, 18000)).toBeNull();
   });
 });
 
