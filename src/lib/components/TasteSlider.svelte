@@ -73,7 +73,7 @@
       <span class="words" class:small={heading === 'h3'}>{words}</span>
     {/if}
     {#if value !== null}
-      <button type="button" class="clear" onclick={() => onchange(null)}>
+      <button type="button" class="clear tap" onclick={() => onchange(null)}>
         Clear<span class="hidden"> {title.toLowerCase()}</span>
       </button>
     {/if}
@@ -177,9 +177,10 @@
     clip-path: inset(50%);
   }
 
+  /* The track is the whole touch target, so it is never shorter than 44 px. */
   .track {
     position: relative;
-    height: 40px;
+    height: var(--touch-min);
     display: flex;
     align-items: center;
     touch-action: none;
@@ -232,17 +233,17 @@
   .ends {
     display: flex;
     justify-content: space-between;
-    margin-top: -6px;
+    margin-top: -8px;
   }
 
-  /* D-36: a shorter track on shorter screens; the handle keeps its 28 px. */
+  /* D-36: tighter around the track on shorter screens; the track keeps its 44 px. */
   @media (max-height: 880px) {
-    .track {
-      height: 32px;
+    .taste {
+      gap: 0;
     }
 
     .ends {
-      margin-top: -4px;
+      margin-top: -10px;
     }
   }
 </style>

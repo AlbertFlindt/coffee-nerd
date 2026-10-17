@@ -21,9 +21,12 @@ test.beforeAll(async ({ browser }) => {
 
 test.afterAll(() => page.close());
 
+/** Sheets slide in and out (D-108); measure once they are in place. */
+const settled = () =>
+  page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+
 async function expectNoPageScroll() {
-  // Sheets slide in (D-108); measure once they are in place.
-  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+  await settled();
   const overflow = await page.evaluate(() =>
     [document.documentElement, document.querySelector('.cn-root')!].map(
       (el) => el.scrollHeight - el.clientHeight
@@ -34,7 +37,7 @@ async function expectNoPageScroll() {
 
 async function screenshot(name: string) {
   await page.evaluate(() => document.fonts.ready);
-  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+  await settled();
   await page.screenshot({ path: `screenshots/${name}.png` });
 }
 
@@ -364,6 +367,7 @@ test('D-106, D-107, D-108: empty sliders show a handle, buttons flash when press
   await page.getByRole('button', { name: 'More' }).click();
   const sheet = page.getByRole('region', { name: 'More' });
   await expect(sheet).toBeVisible();
+  await settled();
   const grip = (await sheet.locator('.grip').boundingBox())!;
   const drag = async (distance: number) => {
     await page.mouse.move(grip.x + grip.width / 2, grip.y + 10);
@@ -373,6 +377,45 @@ test('D-106, D-107, D-108: empty sliders show a handle, buttons flash when press
   };
   await drag(30);
   await expect(sheet).toBeVisible();
+  await expect(sheet).toHaveCSS('transform', 'none');
   await drag(200);
   await expect(sheet).toBeHidden();
+
+  // D-107: an amber button presses in while held.
+  const save = page.getByRole('button', { name: 'Save shot' });
+  const saveBox = (await save.boundingBox())!;
+  await page.mouse.move(saveBox.x + saveBox.width / 2, saveBox.y + saveBox.height / 2);
+  await page.mouse.down();
+  await expect(save).not.toHaveCSS('transform', 'none');
+  await page.mouse.move(0, 0);
+  await page.mouse.up();
+});
+
+test('D-108: the sheet slides; with reduced motion it just appears; saving with it open leaves one page', async () => {
+  await page.goto('/shot/new');
+  await page.getByRole('button', { name: 'More' }).click();
+  expect(
+    await page.evaluate(() => document.querySelector('section.sheet')!.getAnimations().length)
+  ).toBeGreaterThan(0);
+  await expect(page.getByRole('region', { name: 'More' })).toBeVisible();
+
+  // D-21: Save works with the sheet open, and the form leaves at once (no sheet sliding out over Home).
+  await page.getByRole('button', { name: 'Save shot' }).click();
+  await expect(page.getByRole('status')).toContainText('Shot saved');
+  await expect(page.getByRole('heading', { name: 'New shot' })).toHaveCount(0);
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/shot/new');
+  await page.getByRole('button', { name: 'More' }).click();
+  await expect(page.getByRole('region', { name: 'More' })).toBeVisible();
+  const sheetMotion = () =>
+    page.evaluate(
+      () =>
+        [...document.querySelectorAll('.layer, .layer > *')].flatMap((el) => el.getAnimations())
+          .length
+    );
+  expect(await sheetMotion()).toBe(0);
+  await page.getByRole('button', { name: 'Close More' }).click({ position: { x: 200, y: 20 } });
+  await expect(page.getByRole('region', { name: 'More' })).toBeHidden();
+  await page.emulateMedia({ reducedMotion: null });
 });

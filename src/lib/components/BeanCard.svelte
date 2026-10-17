@@ -29,7 +29,7 @@
 {/snippet}
 
 <div class="card" class:compact={!!brewNext}>
-  <button type="button" class="main" aria-label="{title}, choose another bean" onclick={onopen}>
+  <button type="button" class="main tap" aria-label="{title}, choose another bean" onclick={onopen}>
     <span class="icon">
       <svg
         width="22"
@@ -112,6 +112,7 @@
     width: 100%;
     padding: 0;
     border: none;
+    border-radius: var(--radius-md);
     background: transparent;
     color: var(--ink);
     text-align: left;

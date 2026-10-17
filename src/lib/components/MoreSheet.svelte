@@ -319,7 +319,7 @@
               }}
             />
           {:else}
-            <button type="button" class="cn-chip cn-chip--add" onclick={() => (adding = true)}>
+            <button type="button" class="cn-chip cn-chip--add tap" onclick={() => (adding = true)}>
               <svg
                 width="14"
                 height="14"

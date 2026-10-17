@@ -49,7 +49,7 @@
     class="cn-scrim scrim"
     aria-label={closeLabel}
     onclick={onclose}
-    transition:fade|global={{ duration }}
+    transition:fade={{ duration }}
   ></button>
   <section
     bind:this={sheet}
@@ -57,7 +57,7 @@
     class:dragging={dragFrom !== null}
     aria-label={label}
     style:transform={dragged > 0 ? `translateY(${dragged}px)` : undefined}
-    transition:fly|global={{ y: sheet?.offsetHeight ?? 600, duration, easing: cubicOut }}
+    transition:fly={{ y: sheet?.offsetHeight ?? 600, duration, easing: cubicOut }}
   >
     <!-- D-108: the handle and the strip around it can be dragged down to close; Escape and tapping
          outside do the same for keyboards and screen readers. -->
@@ -106,18 +106,29 @@
     transition: none;
   }
 
-  /* A strip as tall as a touch target around the small handle, pulled up into the sheet's top padding. */
+  /*
+   * A 44 px strip around the small handle, pulled up into the sheet's top padding; it lies over the top
+   * of the content that follows, so all of it can be dragged.
+   */
   .grip {
+    position: relative;
+    z-index: 1;
     flex: none;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     height: var(--touch-min);
     padding-top: 10px;
-    /* The handle stays where the design has it; the strip reaches under the content that follows. */
-    margin: -10px -20px -29px;
+    /* The handle stays where the design has it (.cn-sheet: 10px top padding, 12px gap, 5px handle). */
+    margin: -10px calc(-1 * var(--space-5)) calc(15px - var(--touch-min));
     touch-action: none;
     cursor: grab;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sheet {
+      transition: none;
+    }
   }
 
   /* D-36: on a short screen the sheet starts higher, so its content keeps room. */

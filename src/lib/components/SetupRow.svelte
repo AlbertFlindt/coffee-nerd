@@ -117,7 +117,7 @@
       {:else}
         <button
           type="button"
-          class="pressure"
+          class="pressure tap"
           class:changed={pressureChanged}
           aria-label="{label} pressure, {pressure.value === undefined
             ? 'not set'

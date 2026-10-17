@@ -118,7 +118,7 @@
 <div class="page">
   <div class="above-save">
     <header>
-      <a class="back" href={resolve('/')} aria-label="Back without saving">
+      <a class="back tap" href={resolve('/')} aria-label="Back without saving">
         <svg
           width="22"
           height="22"
@@ -343,6 +343,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: var(--radius-sm);
     color: var(--ink);
   }
 
