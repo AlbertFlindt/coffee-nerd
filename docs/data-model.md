@@ -63,7 +63,10 @@ erDiagram
 Every table also has `created_at` and `updated_at`. Decimal quantities are in thousandths (principle 4).
 
 ### `user`
-`id`, `name`, `email`, `password_hash`.
+`id`, `name`, `email` (optional, unused for now, D-85), `password_hash`.
+
+### `session` (D-86)
+`id` (a hash of the token in the sign-in cookie; the token itself is never stored), `user_id`, `expires_at`. Renewed on each visit; deleted on sign-out and by the password reset (D-87).
 
 ### `user_settings` — My setup (D-38, D-45)
 | Column | Notes |

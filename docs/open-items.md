@@ -16,13 +16,16 @@ Last updated: 2026-10-17
 
 | Question | Needed by | Source |
 |---|---|---|
-| *(none open)* | | |
+| Can a shot be saved without a time or yield? Both can start empty (D-72, D-82); the database allows empty for now | M3 | M2 |
+| Where do the dose, yield and time steps live? D-07 gives 0.1 g, 0.1 g and 1 s, but no gear holds them (the grinder holds the grind step) | M3 | M2 |
+| Edit My setup shows yield steps of 0.5 g; D-07 and the shot form use 0.1 g. Which is right? | M6 | M2, `docs/screens/EditSetup.png` |
 
 ## 2. Screens and states not designed yet
 
 | What is missing | Needed by | Source |
 |---|---|---|
-| Login and first-run account creation screens | M2 (login), M3 (UI) | D-60; `docs/screens/README.md` |
+| Proper design for the sign-in and "Create your account" pages (built simple for now) | Before release (M11) | D-84 |
+| First-run guide: after creating the account, how you add your gear, puck prep and My setup | M6 | D-88 |
 | Setup sheet: how a changed setup value is highlighted | M3 | Open topic 11, D-22 |
 | Recipe detail (a recipe's shots), opened from the bean detail page | M5 | Open topic 9, D-42 |
 | Gear: the message on an item My setup uses, "Used in My setup · choose another default first" | M6 | D-83 |
