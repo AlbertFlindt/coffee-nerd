@@ -65,9 +65,13 @@ function withRepo(branch, fn) {
   try {
     execFileSync('git', ['init', '-q', '-b', branch], { cwd: dir });
     // rev-parse --abbrev-ref HEAD needs a commit
-    execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'x'], {
-      cwd: dir
-    });
+    execFileSync(
+      'git',
+      ['-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'x'],
+      {
+        cwd: dir
+      }
+    );
     fn(dir);
   } finally {
     rmSync(dir, { recursive: true, force: true });

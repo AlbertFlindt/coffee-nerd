@@ -21,7 +21,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - `npm run dev`: dev server on port 5173
 - `npm run check`: svelte-check + TypeScript
 - `npm run lint` (Prettier check + ESLint) / `npm run format`
-- `npm test`: Vitest unit and integration tests (`src/**/*.test.ts`). Single file: `npx vitest run <path>`
+- `npm test`: Vitest unit and integration tests (`src/**/*.test.ts`), then the hook tests (`.claude/hooks/*.test.mjs`). Single file: `npx vitest run <path>`
 - `npm run test:e2e`: Playwright (`tests/e2e/`), builds and serves the app at 412 × 915 with its own database in `test-results/`
 - `npm run build` / `npm start`: production build in `build/`, served on port 3000
 - `npm run screenshot -- <route> [name]`: 412 × 915 screenshot (2×) into `screenshots/`; needs `npm run dev` running (or `BASE_URL`)
