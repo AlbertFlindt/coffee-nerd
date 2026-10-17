@@ -107,11 +107,11 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 - **D-03 — Prefill from last shot.** *(Revised 2026-10-17: see D-72, D-75, D-76.)* A new shot starts as a copy of the last shot (bean and core values). Changed values are highlighted against the previous shot. Ratio is calculated automatically. When there is no last shot for this bean, the shot starts from **My setup** defaults (D-38). When a recipe is marked **"Brew next"** (D-43), the next shot starts from that recipe instead.
   - *Why:* the most valuable action is "brew again, change one thing."
-- **D-72 — A bean's first shot starts with an empty time.** *(Revised 2026-10-17: see D-80.)* When a shot starts from My setup (D-38), grind, dose and yield come from My setup; the time has no default and stays empty until it is set. Refines D-03.
+- **D-72 — A bean's first shot starts with an empty time.** *(Revised 2026-10-17: see D-80, D-91.)* When a shot starts from My setup (D-38), grind, dose and yield come from My setup; the time has no default and stays empty until it is set. Refines D-03.
   - *Why:* My setup holds what you choose before brewing; time is a result, so inventing one would be a guess (same reasoning as D-11).
 - **D-80 — Tapping an empty time starts at 0 s.** *(Revised 2026-10-17: see D-82.)* When the time card is empty (D-72), its −/+ buttons count from 0 s: the first + gives 1 s, and − stays at 0 s. Tap-to-type still works for entering the time directly. Refines D-72.
   - *Why:* the buttons keep doing exactly what their label says ("+ 1 s", D-07), without guessing a typical time.
-- **D-82 — An empty yield works like an empty time.** When there is no yield to copy (a Brew next recipe without shots, D-43), the yield card starts empty, and its −/+ count from 0 like the time card (D-80). Refines D-43.
+- **D-82 — An empty yield works like an empty time.** *(Revised 2026-10-17: see D-91.)* When there is no yield to copy (a Brew next recipe without shots, D-43), the yield card starts empty, and its −/+ count from 0 like the time card (D-80). Refines D-43.
   - *Why:* one rule for every empty value; nothing is guessed.
 - **D-74 — A re-buy from a bag without rated shots starts from its latest shot.** When the nearest earlier bag with shots (D-73) has no rated shot, and so no best recipe (D-66), the new bag starts from that bag's latest shot: its recipe, yield and time. Refines D-73.
   - *Why:* keeps "the nearest bag with shots" true even when nothing was scored.
@@ -127,10 +127,12 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the "+" is pressed during or just after a shot — setup is already decided by then. Still stored on every shot for later insights.
 - **D-06 — Time is logged after the shot.** Entered from the scale or machine display. Prefilled from last shot, ±1 s steppers, tap to type, tenths allowed. **No in-app shot timer.**
   - *Why:* precision. Starting a phone timer while pulling a shot introduces seconds of error — not acceptable for data-driven users.
-- **D-07 — Controls favor steppers/sliders over the keyboard**, with tap-to-type for exact values. Step sizes follow the gear (e.g. grind in 0.1 steps for a stepless grinder with a decimal dial).
+- **D-07 — Controls favor steppers/sliders over the keyboard** *(Revised 2026-10-17: see D-89.)*, with tap-to-type for exact values. Step sizes follow the gear (e.g. grind in 0.1 steps for a stepless grinder with a decimal dial).
   - Current steps (reference setup): grind 0.1, dose 0.1 g, **yield 0.1 g** (matches a 0.1 g scale), time 1 s, temperature 1 °C.
   - **Every −/+ button shows its step with unit** (e.g. "− 0.1 g", "+ 0.1 g", "− 1 s", "+ 0.1" for grind). Used on the shot form cards, Edit My setup and the grinder preview.
     - *Why:* you see exactly what one tap does, and it doubles as a quiet unit label on every card.
+- **D-89 — Dose, yield and time steps are your settings.** The −/+ steps for dose, yield and time are stored per user and default to 0.1 g, 0.1 g and 1 s (D-07); the shot form and Edit My setup both use them (Edit My setup's 0.5 g yield step in the design is replaced). They are changed in Settings once it exists (roadmap M11). The grind step stays on the grinder (D-48). Refines D-07.
+  - *Why:* scales and habits differ between home baristas; the defaults match a 0.1 g scale and the reference setup.
 - **D-14 — Shot form layout.** Full-screen page opened from "+". Top to bottom: bean card (bean, machine, grinder, standing-setup summary, recipe tag) → 2×2 grid of core values (grind, dose, yield, time), each a card with large value and −/+ steppers → calculated ratio → balance slider → score row → More → full-width Save.
   - *Why:* the grid keeps all four core values visible at once with large touch targets; one primary action at the bottom suits one-handed use. A row-based "instrument" layout was tried and felt cluttered.
 - **D-15 — Changes vs. last shot shown as a delta.** A changed value is colored (see D-19) with a small delta pill (e.g. "+2.5"). No "was X" text.
@@ -153,8 +155,10 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 - **D-21 — More opens as a bottom sheet with two tabs: Setup and Tasting.** The sheet covers the form but **stops above the Save button**, which stays visible and active. Tapping outside the sheet (the dimmed form) closes it.
   - *Why:* the user can save from anywhere without closing the sheet first; tap-outside-to-close is the expected sheet behavior on phones.
-- **D-22 — Setup tab (Dialer profile):** temperature, pressure profile (D-24), basket (brand/model and size, opens a picker), puck prep (D-25).
+- **D-22 — Setup tab (Dialer profile):** *(Revised 2026-10-17: see D-90.)* temperature, pressure profile (D-24), basket (brand/model and size, opens a picker), puck prep (D-25).
   - All setup fields are part of the **recipe** (D-13): changing one makes a new recipe and is highlighted like any other change.
+- **D-90 — A changed setup value looks like a changed core value.** On the Setup tab, a value that differs from the last shot turns sage with a small sage delta pill, as on the core value cards (D-15); a feature switched on or off since the last shot shows a sage "On" or "Off" pill. Refines D-22.
+  - *Why:* one way to show "changed since last shot" everywhere (D-19), so the sheet reads like the form.
 - **D-24 — Pressure profile = a base pressure plus phases you switch on or off.** The base is "Flat" (main extraction pressure, in bar). Phases offered by the machine (for the Lelit Bianca: preinfusion, low bar start, low bar end) each have an on/off switch and can be combined freely. A phase that is off collapses to one quiet line. A phase that is on shows its **duration in seconds as the main value** (with −/+) and its **pressure in bar as a small tappable value** underneath (e.g. "at 2.0 bar").
   - Which phases exist, and whether they have a pressure, comes from the machine's capability profile (D-02).
   - *Why:* matches how the Bianca is actually used (flat, plus any combination of preinfusion, low bar start and low bar end) and replaces a pick-one profile list. Seconds are what you set most; bar is still recorded without a second full control.
@@ -173,8 +177,10 @@ Users never pick a persona. Personas are used to check that each screen works fo
 - **D-09 — Score: 1–10, whole numbers only.**
   - *Why:* 1–5 is too coarse to show improvement; 0–100 is false precision at home. Hard to change once data exists.
 - **D-10 — Score control: tap or slide.** A row of numbers 1–10. Tap to choose; slide to refine (e.g. tap 7, then slide to 6 after tasting further). Sliding snaps to whole numbers. Consistent gesture feel with the balance slider.
-- **D-11 — No prefill for taste.** Balance, score and all full-tasting fields start empty. A shot without a score is saved as **"not rated"** — never with a guessed or copied value.
+- **D-11 — No prefill for taste.** *(Revised 2026-10-17: see D-91.)* Balance, score and all full-tasting fields start empty. A shot without a score is saved as **"not rated"** — never with a guessed or copied value.
   - *Why:* protects data quality; copied scores would pollute statistics.
+- **D-91 — A shot can be saved with an empty time or yield.** Like an unrated score (D-11), an empty time or yield is saved as not set and left out of Insights; nothing blocks saving at the machine. Refines D-72 and D-82.
+  - *Why:* a missing timer reading should never cost the rest of the shot's data.
 - **D-12 — Faint reference to the previous score.** The score from the last shot with the **same recipe** is shown as a faint marker. It sets nothing. For a new recipe there is no marker, only "No earlier score".
   - *Why:* reveals bean aging (same recipe, falling scores) and keeps the home barista consistent.
 
@@ -230,8 +236,10 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* going back to your best recipe after experimenting should be one tap, not re-entering values by hand.
 - **D-35 — Bag weight is optional.** A bean can have a bag weight, but it is never required. When it is set, the app subtracts each shot's dose and shows grams left (on Home and the bean overview); when it is not, grams are simply not shown.
   - *Why:* some baristas track stock, many don't; an optional field serves both without nagging.
-- **D-40 — Finishing a bean.** A bean moves from Open to Finished with **"Mark as finished"**, always available on the bean. When a bag weight is set (D-35) and grams left reach zero, the app **finishes the bean automatically** and says so, with an undo. A finished bean can always be reopened.
+- **D-40 — Finishing a bean.** *(Revised 2026-10-17: see D-92.)* A bean moves from Open to Finished with **"Mark as finished"**, always available on the bean. When a bag weight is set (D-35) and grams left reach zero, the app **finishes the bean automatically** and says so, with an undo. A finished bean can always be reopened.
   - *Why:* manual works for everyone; automatic saves a step for those who track weight, but weights drift (spills, sharing), so the manual option and undo must always be there.
+- **D-92 — Only a new shot finishes a bean automatically.** Editing a past shot (D-57) updates grams left but never finishes or reopens a bean; that stays a manual action. Refines D-40.
+  - *Why:* an edit corrects history; finishing or reopening a bean by surprise during a correction would be confusing.
 - **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-17: see D-78, D-83.)*
   - **My setup** (a light cream card so it stands out): default machine, grinder, basket and puck prep routine, plus **default values** (dose, yield, grind, temperature, pressure profile). One "Edit" button.
   - Defaults are the **starting point for a bean's first shot** (and when switching gear). After that, D-03 applies: new shots copy the last shot.
@@ -316,8 +324,10 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* adding ownership later means migrating every table and query; adding it now costs one column.
 - **D-84 — Simple sign-in screens until they are designed.** The sign-in page and the one-time "Create your account" page are built from design-system parts only (fields, one full-width primary button, the logo), and get a proper design later. Refines D-60.
   - *Why:* the login protects the instance from the first milestone on; a plain version is enough until it is designed.
-- **D-85 — Sign in with name and password.** The one account is created with a name and a password; no email, since a self-hosted app sends no mail. Refines D-60.
+- **D-85 — Sign in with name and password.** *(Revised 2026-10-17: see D-93.)* The one account is created with a name and a password; no email, since a self-hosted app sends no mail. Refines D-60.
   - *Why:* nothing would ever be sent to an email address, so asking for one adds a field without a purpose.
+- **D-93 — Sign-in rules.** A password has at least 8 characters. The name is matched ignoring upper and lower case and surrounding spaces. After 5 wrong passwords within 15 minutes, sign-in waits a minute ("Too many tries. Wait a minute and try again."). Refines D-85.
+  - *Why:* a common minimum that still allows a memorable phrase; the wait slows down guessing without locking you out.
 - **D-86 — Stay signed in until you sign out.** Each visit renews the session; it ends only after a year without use, or when you sign out. Refines D-60.
   - *Why:* the app lives on a phone at the brew station; signing in again with wet hands is friction with no benefit on a private server.
 - **D-87 — A lost password is reset on the server.** A command run on the server sets a new password and signs out every device. There is no reset by email or from the sign-in page.
