@@ -22,7 +22,7 @@ Set up the empty app so every later milestone has checks to run.
 
 **Done when:** a fresh clone runs `npm ci && npm run check && npm run lint && npm test && npm run build` with no errors; `docker compose up` serves `/health`; CI is green on the first pull request; `npm run screenshot -- /` produces a PNG.
 
-## M1 — Domain core (no UI) ☐
+## M1 — Domain core (no UI) ☑
 Pure TypeScript in `src/lib/domain/`, fully unit-tested, used later by both browser and server. See `docs/data-model.md` §1, §4, §5.
 - `units`: thousandths in, display strings out; conversions only here.
 - Zod schemas: gear specs per kind, feature and value definitions, step settings, recipe setup snapshot (D-64, D-65, D-68).

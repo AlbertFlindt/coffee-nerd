@@ -16,7 +16,7 @@ describe('ratio', () => {
 describe('localDate and roastAgeDays', () => {
   const copenhagen = 'Europe/Copenhagen';
 
-  it('data-model §1.8: the calendar day depends on the user’s time zone', () => {
+  it('D-54: the calendar day depends on the user’s time zone', () => {
     const lateEvening = Date.UTC(2026, 9, 16, 22, 30); // 00:30 on 17 Oct in Copenhagen
     expect(localDate(lateEvening, copenhagen)).toBe('2026-10-17');
     expect(localDate(lateEvening, 'UTC')).toBe('2026-10-16');

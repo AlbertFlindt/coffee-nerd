@@ -243,7 +243,7 @@ describe('prefill', () => {
     });
   });
 
-  it('data-model §4.2: a feature switched on since the copied shot starts from My setup', () => {
+  it('D-03, D-38: a feature switched on since the copied shot starts from My setup', () => {
     const result = prefill(
       context({
         latestShotOfBean: { recipe: recipe(), shot: { yield: 36000, time: 28000 } },
@@ -258,7 +258,7 @@ describe('prefill', () => {
     });
   });
 
-  it('data-model §4.2: a feature switched on since, without a My setup value, starts switched off', () => {
+  it('D-03, D-38: a feature switched on since, without a My setup value, starts switched off', () => {
     const result = prefill(
       context({
         latestShotOfBean: { recipe: recipe(), shot: { yield: 36000, time: 28000 } },
@@ -268,7 +268,7 @@ describe('prefill', () => {
     expect(result.setup.features.low_bar_end).toEqual({ label: 'Low bar end', on: false });
   });
 
-  it('data-model §4.2: a feature since switched off on the machine is left out', () => {
+  it('D-02, D-44: a feature since switched off on the machine is left out', () => {
     const result = prefill(
       context({
         latestShotOfBean: { recipe: recipe(), shot: { yield: 36000, time: 28000 } },
@@ -306,7 +306,7 @@ describe('prefill', () => {
     });
   });
 
-  it('fails clearly when the machine is unknown', () => {
+  it('D-02: fails clearly when the machine is unknown', () => {
     expect(() => prefill(context({ machines: {} }))).toThrow(/machine/);
   });
 });
