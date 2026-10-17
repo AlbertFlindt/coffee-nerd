@@ -159,7 +159,7 @@
           {#each choices as item (item.id)}
             <button
               type="button"
-              class="pick"
+              class="pick tap"
               aria-pressed={item.chosen}
               onclick={() => {
                 item.pick();
@@ -222,13 +222,13 @@
             {/each}
           </div>
         {/if}
-        <button type="button" class="link-row" onclick={() => (picking = 'basket')}>
+        <button type="button" class="link-row tap" onclick={() => (picking = 'basket')}>
           <span class="strong">Basket</span>
           <span class="end" class:changed={changes.basket}
             >{shot.basketId ? (gearNames[shot.basketId] ?? '') : 'None'}{@render chevron()}</span
           >
         </button>
-        <button type="button" class="link-row prep" onclick={() => (picking = 'routine')}>
+        <button type="button" class="link-row prep tap" onclick={() => (picking = 'routine')}>
           <span class="prep-text">
             <span class="strong">Puck prep <span class="soft">· {routineName}</span></span>
             <span class="flow" class:changed={changes.routine}>
@@ -319,7 +319,7 @@
               }}
             />
           {:else}
-            <button type="button" class="cn-chip cn-chip--add" onclick={() => (adding = true)}>
+            <button type="button" class="cn-chip cn-chip--add tap" onclick={() => (adding = true)}>
               <svg
                 width="14"
                 height="14"
@@ -507,6 +507,8 @@
 
   .tasting {
     gap: var(--space-4);
+    /* Last resort on very short screens: the tab scrolls inside the sheet (D-36). */
+    overflow-y: auto;
     --taste-rail: var(--bg);
     --taste-behind: var(--surface-sheet);
   }
@@ -535,7 +537,8 @@
     align-content: flex-start;
     gap: var(--space-2);
     overflow-y: auto;
-    min-height: 0;
+    /* At least one row of notes stays in view (D-97). */
+    min-height: 40px;
   }
 
   .add {
@@ -578,5 +581,17 @@
 
   textarea::placeholder {
     color: var(--ink-muted);
+  }
+
+  /* D-36: tighter on shorter screens. */
+  @media (max-height: 880px) {
+    .tasting,
+    .sliders {
+      gap: var(--space-2);
+    }
+
+    textarea {
+      height: 56px;
+    }
   }
 </style>

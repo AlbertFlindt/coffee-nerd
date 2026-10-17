@@ -29,7 +29,7 @@
 {/snippet}
 
 <div class="card" class:compact={!!brewNext}>
-  <button type="button" class="main" aria-label="{title}, choose another bean" onclick={onopen}>
+  <button type="button" class="main tap" aria-label="{title}, choose another bean" onclick={onopen}>
     <span class="icon">
       <svg
         width="22"
@@ -112,6 +112,7 @@
     width: 100%;
     padding: 0;
     border: none;
+    border-radius: var(--radius-md);
     background: transparent;
     color: var(--ink);
     text-align: left;
@@ -182,5 +183,18 @@
     gap: 6px;
     color: var(--amber);
     font-weight: 600;
+  }
+
+  /* D-36: tighter on shorter screens, as the rest of the shot form. */
+  @media (max-height: 880px) {
+    .card,
+    .card.compact {
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+    }
+
+    .compact .bottom {
+      min-height: 0;
+    }
   }
 </style>

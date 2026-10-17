@@ -118,7 +118,7 @@
 <div class="page">
   <div class="above-save">
     <header>
-      <a class="back" href={resolve('/')} aria-label="Back without saving">
+      <a class="back tap" href={resolve('/')} aria-label="Back without saving">
         <svg
           width="22"
           height="22"
@@ -223,7 +223,7 @@
 
       <button
         type="button"
-        class="more"
+        class="more tap"
         aria-expanded={sheet === 'more'}
         onclick={() => (sheet = 'more')}
       >
@@ -267,7 +267,7 @@
               type="submit"
               name="bean"
               value={b.id}
-              class="bean"
+              class="bean tap"
               aria-pressed={b.id === data.bean.id}
               onclick={() => (sheet = null)}
             >
@@ -296,14 +296,14 @@
       }}
     >
       <input type="hidden" name="shot" value={JSON.stringify(shot)} />
-      <button class="cn-btn-primary" type="submit" disabled={saving}>Save shot</button>
+      <button class="cn-btn-primary tap-strong" type="submit" disabled={saving}>Save shot</button>
     </form>
   </footer>
 </div>
 
 {#snippet useLastShot()}
   <form method="POST" action="?/useLastShot">
-    <button type="submit" class="use-last">Use last shot recipe</button>
+    <button type="submit" class="use-last tap">Use last shot recipe</button>
   </form>
 {/snippet}
 
@@ -343,6 +343,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: var(--radius-sm);
     color: var(--ink);
   }
 
@@ -353,6 +354,8 @@
     flex-direction: column;
     gap: var(--space-4);
     padding: 4px var(--space-5) var(--space-4);
+    /* Last resort on very short screens: the form scrolls inside its area, never over Save (D-36). */
+    overflow-y: auto;
   }
 
   main.compact {
@@ -459,5 +462,57 @@
   .soft {
     font-weight: 400;
     color: var(--ink-muted);
+  }
+
+  /*
+   * D-36: screens adapt to the device. The reference is 412 × 915; a phone browser with its address bar
+   * leaves less (a Pixel 8a in Chrome: about 412 × 780), so spacing tightens in two steps.
+   */
+  @media (max-height: 880px) {
+    main,
+    main.compact {
+      gap: var(--space-2);
+      padding-bottom: var(--space-2);
+    }
+
+    .page :global(.cn-score button) {
+      height: var(--touch-min);
+    }
+
+    .page :global(.cn-value-card) {
+      padding: var(--space-3);
+      gap: var(--space-1);
+    }
+
+    .page :global(.cn-steppers) {
+      margin-top: 0;
+    }
+
+    .taste {
+      gap: var(--space-2);
+    }
+
+    .more {
+      min-height: var(--touch-min);
+    }
+
+    footer {
+      padding-bottom: var(--space-4);
+    }
+  }
+
+  @media (max-height: 760px) {
+    header {
+      height: 48px;
+    }
+
+    .page :global(.cn-value-card) {
+      padding: var(--space-2) var(--space-3);
+    }
+
+    footer {
+      padding-top: var(--space-1);
+      padding-bottom: var(--space-3);
+    }
   }
 </style>

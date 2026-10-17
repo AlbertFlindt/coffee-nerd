@@ -137,7 +137,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
     - *Why:* you see exactly what one tap does, and it doubles as a quiet unit label on every card.
 - **D-89 — Dose, yield and time steps are your settings.** The −/+ steps for dose, yield and time are stored per user and default to 0.1 g, 0.1 g and 1 s (D-07); the shot form and Edit My setup both use them (Edit My setup's 0.5 g yield step in the design is replaced). They are changed in Settings once it exists (roadmap M11). The grind step stays on the grinder (D-48). Refines D-07.
   - *Why:* scales and habits differ between home baristas; the defaults match a 0.1 g scale and the reference setup.
-- **D-14 — Shot form layout.** *(Revised 2026-10-17: see D-94, D-95.)* Full-screen page opened from "+". Top to bottom: bean card (bean, machine, grinder, standing-setup summary, recipe tag) → 2×2 grid of core values (grind, dose, yield, time), each a card with large value and −/+ steppers → calculated ratio → balance slider → score row → More → full-width Save.
+- **D-14 — Shot form layout.** *(Revised 2026-10-17: see D-94, D-95, D-107.)* Full-screen page opened from "+". Top to bottom: bean card (bean, machine, grinder, standing-setup summary, recipe tag) → 2×2 grid of core values (grind, dose, yield, time), each a card with large value and −/+ steppers → calculated ratio → balance slider → score row → More → full-width Save.
   - *Why:* the grid keeps all four core values visible at once with large touch targets; one primary action at the bottom suits one-handed use. A row-based "instrument" layout was tried and felt cluttered.
 - **D-15 — Changes vs. last shot shown as a delta.** A changed value is colored (see D-19) with a small delta pill (e.g. "+2.5"). No "was X" text.
   - *Why:* the delta is the information the barista acts on; extra text added clutter.
@@ -155,6 +155,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
 - **D-20 — Plain words, no abbreviations.** UI text spells things out (e.g. "Preinfusion 4 s", not "PI 4 s"); units are written in full or as standard symbols (°C, g, s, bar).
   - *Why:* abbreviations that feel obvious to the designer were unclear in review.
 
+- **D-107 — Buttons show that they were pressed.** Every −/+ and every plain button flashes amber while pressed and fades back quickly; the amber Save and Add buttons get lighter and press in slightly. Choices that change state (score, chips, tabs, switches) already show the new state and need no flash. Refines D-14 and D-19 (amber is your input and actions).
+  - *Why:* at the brew station you look at the scale, not the phone; a short flash confirms a tap was taken without reading the value.
 - **D-94 — The bean card switches the bean.** Tapping the bean card on the shot form opens a list of open beans. Picking one starts the form again from that bean's starting values (D-03, D-43, D-73, D-38). Choosing another machine or grinder on the shot form waits for the Gear pages (roadmap M6). Refines D-14.
   - *Why:* switching between open beans is the change you make at the brew station; gear changes are rare and belong with the Gear pages.
 - **D-95 — After saving, the app goes back with a message.** "Save shot" returns to the page where "+" was pressed, with a short "Shot saved" message. When the shot used up the bag and the bean was finished automatically (D-40), the message says so, with an Undo that reopens the bean. Refines D-14 and D-40.
@@ -162,8 +164,10 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 ### More (bottom sheet)
 
-- **D-21 — More opens as a bottom sheet with two tabs: Setup and Tasting.** The sheet covers the form but **stops above the Save button**, which stays visible and active. Tapping outside the sheet (the dimmed form) closes it.
+- **D-21 — More opens as a bottom sheet with two tabs: Setup and Tasting.** *(Revised 2026-10-17: see D-108.)* The sheet covers the form but **stops above the Save button**, which stays visible and active. Tapping outside the sheet (the dimmed form) closes it.
   - *Why:* the user can save from anywhere without closing the sheet first; tap-outside-to-close is the expected sheet behavior on phones.
+- **D-108 — Sheets slide, and can be dragged down to close.** A bottom sheet slides up when it opens and down when it closes, and the dimmed screen behind it fades. Dragging the handle (or the top of the sheet) down closes it; a short drag springs back. Tapping outside still closes it (D-21). Without motion when the phone asks for reduced motion. Refines D-21.
+  - *Why:* the handle invites a drag on every phone; a sheet that ignores it feels stuck.
 - **D-22 — Setup tab (Dialer profile):** *(Revised 2026-10-17: see D-90.)* temperature, pressure profile (D-24), basket (brand/model and size, opens a picker), puck prep (D-25).
   - All setup fields are part of the **recipe** (D-13): changing one makes a new recipe and is highlighted like any other change.
 - **D-90 — A changed setup value looks like a changed core value.** *(Revised 2026-10-17: see D-102.)* On the Setup tab, a value that differs from the last shot turns sage with a small sage delta pill, as on the core value cards (D-15); a feature switched on or off since the last shot shows a sage "On" or "Off" pill. Refines D-22.
@@ -175,7 +179,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* matches how the Bianca is actually used (flat, plus any combination of preinfusion, low bar start and low bar end) and replaces a pick-one profile list. Seconds are what you set most; bar is still recorded without a second full control.
 - **D-25 — Puck prep points to a saved routine.** The Setup tab shows the chosen routine's name and its steps in order (e.g. "Daily routine: WDT → Distributor → Tamp → Puck screen"); tapping opens a picker of routines. Routines are built in Library (D-26).
   - *Why:* puck prep varies a lot between baristas; referencing a routine keeps the shot form short while still recording exactly what was done.
-- **D-23 — Tasting tab:** *(Revised 2026-10-17: see D-96, D-97, D-101.)* body (light ↔ heavy), sweetness (low ↔ high), aftertaste (short ↔ long) as sliders with the same gesture as balance; flavor notes as chips from a short coffee flavor list plus "Add your own" (custom notes become chips); free-text notes.
+- **D-23 — Tasting tab:** *(Revised 2026-10-17: see D-96, D-97, D-101, D-106.)* body (light ↔ heavy), sweetness (low ↔ high), aftertaste (short ↔ long) as sliders with the same gesture as balance; flavor notes as chips from a short coffee flavor list plus "Add your own" (custom notes become chips); free-text notes.
   - Tasting follows D-11: everything starts empty, never copied from the last shot.
   - *Why:* sliders match the balance control; chips give structured data that Insights can use later.
 - **D-27 — Free-text notes are labelled as personal.** The notes field carries the hint "Just for you · not used in Insights".
@@ -200,6 +204,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* reveals bean aging (same recipe, falling scores) and keeps the home barista consistent.
 - **D-96 — Taste values are shown as words.** A set taste slider shows a word next to its title, in five bands. Balance: Very sour (−10 to −7), Sour (−6 to −4), Slightly sour (−3 to −1), Balanced (0), Slightly bitter (1 to 3), Bitter (4 to 6), Very bitter (7 to 10). Body, sweetness and aftertaste (0 to 10): 0–2, 3–4, 5, 6–7, 8–10 read as Light, Medium-light, Medium, Medium-heavy, Heavy; Low, Medium-low, Medium, Medium-high, High; Short, Medium-short, Medium, Medium-long, Long. An empty slider says "Not set". Refines D-08, D-23 and D-67.
   - *Why:* a word is how you describe a taste; the stored whole numbers (D-67) stay exact for Insights.
+- **D-106 — An empty slider shows where to tap.** A taste slider that is not set yet shows a hollow handle with a dashed outline in the middle of its track, so it reads as something to tap or drag; once set, the handle is the solid amber one. Refines D-08, D-23 and D-67. *(The dashed outline is borrowed from the design system's "add something new" chip; the design system should define this state, see open items.)*
+  - *Why:* a bare track gave no hint that it can be used; a dashed outline says "nothing set yet" without suggesting a value.
 - **D-98 — A score or taste value can be cleared.** Tapping the selected score again clears it, so the shot stays "not rated" (D-11). A taste slider that is set shows "Clear" next to its value. Refines D-10 and D-11.
   - *Why:* a mistaken tap must not force a score onto the shot; clearing keeps the data honest.
 

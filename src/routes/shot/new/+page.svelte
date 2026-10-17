@@ -17,7 +17,7 @@
   <!-- Not designed yet (docs/open-items.md): nothing to brew with before My setup and a bean exist (D-88). -->
   <div class="empty">
     <header>
-      <a class="back" href={resolve('/')} aria-label="Back">
+      <a class="back tap" href={resolve('/')} aria-label="Back">
         <svg
           width="22"
           height="22"

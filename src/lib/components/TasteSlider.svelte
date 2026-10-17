@@ -73,7 +73,7 @@
       <span class="words" class:small={heading === 'h3'}>{words}</span>
     {/if}
     {#if value !== null}
-      <button type="button" class="clear" onclick={() => onchange(null)}>
+      <button type="button" class="clear tap" onclick={() => onchange(null)}>
         Clear<span class="hidden"> {title.toLowerCase()}</span>
       </button>
     {/if}
@@ -98,6 +98,9 @@
     {/if}
     {#if value !== null}
       <div class="handle" style:left="{percent(value)}%"></div>
+    {:else}
+      <!-- D-106: nothing set yet; a hollow dashed handle in the middle shows where to tap or drag. -->
+      <div class="handle empty" style:left="50%"></div>
     {/if}
   </div>
   <div class="ends cn-label">
@@ -174,9 +177,10 @@
     clip-path: inset(50%);
   }
 
+  /* The track is the whole touch target, so it is never shorter than 44 px. */
   .track {
     position: relative;
-    height: 40px;
+    height: var(--touch-min);
     display: flex;
     align-items: center;
     touch-action: none;
@@ -218,9 +222,28 @@
     border: 4px solid var(--behind);
   }
 
+  .handle.empty {
+    background: transparent;
+    border: 1.5px dashed var(--ink-muted);
+    width: 24px;
+    height: 24px;
+    margin-left: -12px;
+  }
+
   .ends {
     display: flex;
     justify-content: space-between;
-    margin-top: -6px;
+    margin-top: -8px;
+  }
+
+  /* D-36: tighter around the track on shorter screens; the track keeps its 44 px. */
+  @media (max-height: 880px) {
+    .taste {
+      gap: 0;
+    }
+
+    .ends {
+      margin-top: -10px;
+    }
   }
 </style>
