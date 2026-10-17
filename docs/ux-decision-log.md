@@ -107,8 +107,10 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 - **D-03 — Prefill from last shot.** *(Revised 2026-10-17: see D-72, D-75, D-76.)* A new shot starts as a copy of the last shot (bean and core values). Changed values are highlighted against the previous shot. Ratio is calculated automatically. When there is no last shot for this bean, the shot starts from **My setup** defaults (D-38). When a recipe is marked **"Brew next"** (D-43), the next shot starts from that recipe instead.
   - *Why:* the most valuable action is "brew again, change one thing."
-- **D-72 — A bean's first shot starts with an empty time.** When a shot starts from My setup (D-38), grind, dose and yield come from My setup; the time has no default and stays empty until it is set. Refines D-03.
+- **D-72 — A bean's first shot starts with an empty time.** *(Revised 2026-10-17: see D-80.)* When a shot starts from My setup (D-38), grind, dose and yield come from My setup; the time has no default and stays empty until it is set. Refines D-03.
   - *Why:* My setup holds what you choose before brewing; time is a result, so inventing one would be a guess (same reasoning as D-11).
+- **D-80 — Tapping an empty time starts at 0 s.** When the time card is empty (D-72), its −/+ buttons count from 0 s: the first + gives 1 s, and − stays at 0 s. Tap-to-type still works for entering the time directly.
+  - *Why:* the buttons keep doing exactly what their label says ("+ 1 s", D-07), without guessing a typical time.
 - **D-74 — A re-buy from a bag without rated shots starts from its latest shot.** When the nearest earlier bag with shots (D-73) has no rated shot, and so no best recipe (D-66), the new bag starts from that bag's latest shot: its recipe, yield and time. Refines D-73.
   - *Why:* keeps "the nearest bag with shots" true even when nothing was scored.
 - **D-75 — Archived gear or routines are swapped for My setup's.** When the shot a new shot starts from used a machine, grinder, basket or puck prep routine that has since been archived, only that item is replaced by My setup's default (D-38); everything else is copied as usual, and the recipe tag names what changed. Refines D-03.

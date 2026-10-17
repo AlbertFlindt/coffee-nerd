@@ -94,17 +94,18 @@ export function stepLabel(direction: '+' | '-', step: Thousandths, unit?: string
 }
 
 /**
- * One tap on −/+: moves by exactly one step and stays inside the range (D-07). An empty value has no
- * starting point here; the caller decides what a tap on it does.
+ * One tap on −/+: moves by exactly one step and stays inside the range (D-07). An empty value counts
+ * from 0 (D-80): the first + gives one step.
  */
 export function applyStep(
-  value: Thousandths,
+  value: Thousandths | null,
   step: Thousandths,
   direction: '+' | '-',
   range: { min?: Thousandths; max?: Thousandths } = {}
 ): Thousandths {
   const { min, max } = range;
-  const next = direction === '+' ? value + step : value - step;
+  const from = value ?? 0;
+  const next = direction === '+' ? from + step : from - step;
   if (min !== undefined && next < min) return min;
   if (max !== undefined && next > max) return max;
   return next;
