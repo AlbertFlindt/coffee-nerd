@@ -107,20 +107,17 @@
   }
 
   /*
-   * A 44 px strip around the small handle, pulled up into the sheet's top padding; it lies over the top
-   * of the content that follows, so all of it can be dragged.
+   * A 44 px strip at the top of the sheet with the handle in its middle, so the handle has room above
+   * and below it (owner feedback) and the whole strip can be dragged (D-108).
    */
   .grip {
-    position: relative;
-    z-index: 1;
     flex: none;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     height: var(--touch-min);
-    padding-top: 10px;
-    /* The handle stays where the design has it (.cn-sheet: 10px top padding, 12px gap, 5px handle). */
-    margin: -10px calc(-1 * var(--space-5)) calc(15px - var(--touch-min));
+    /* From the sheet's top edge (its 10px top padding) to the content, which follows after the gap. */
+    margin: -10px calc(-1 * var(--space-5)) calc(-1 * var(--space-3));
     touch-action: none;
     cursor: grab;
   }
