@@ -105,8 +105,10 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 ## 7. Shot form (espresso)
 
-- **D-03 — Prefill from last shot.** A new shot starts as a copy of the last shot (bean and core values). Changed values are highlighted against the previous shot. Ratio is calculated automatically. When there is no last shot for this bean, the shot starts from **My setup** defaults (D-38). When a recipe is marked **"Brew next"** (D-43), the next shot starts from that recipe instead.
+- **D-03 — Prefill from last shot.** *(Revised 2026-10-17: see D-72.)* A new shot starts as a copy of the last shot (bean and core values). Changed values are highlighted against the previous shot. Ratio is calculated automatically. When there is no last shot for this bean, the shot starts from **My setup** defaults (D-38). When a recipe is marked **"Brew next"** (D-43), the next shot starts from that recipe instead.
   - *Why:* the most valuable action is "brew again, change one thing."
+- **D-72 — A bean's first shot starts with an empty time.** When a shot starts from My setup (D-38), grind, dose and yield come from My setup; the time has no default and stays empty until it is set. Refines D-03.
+  - *Why:* My setup holds what you choose before brewing; time is a result, so inventing one would be a guess (same reasoning as D-11).
 - **D-04 — Core fields: grind, dose, yield, time.** Bean is prefilled. Everything else lives behind a **More** button.
   - *Why:* these four are what a home barista adjusts shot to shot.
 - **D-05 — Standing setup vs. shot variables.** Temperature, basket, pressure profile, puck prep etc. are *standing setup*: set on the machine before brewing, carried over automatically, shown as a compact summary line, editable under More. Changes are highlighted like any other.
@@ -121,9 +123,11 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the grid keeps all four core values visible at once with large touch targets; one primary action at the bottom suits one-handed use. A row-based "instrument" layout was tried and felt cluttered.
 - **D-15 — Changes vs. last shot shown as a delta.** A changed value is colored (see D-19) with a small delta pill (e.g. "+2.5"). No "was X" text.
   - *Why:* the delta is the information the barista acts on; extra text added clutter.
-- **D-16 — Recipe tag on the bean card.** Shows **"Recipe reused Nx"** when this exact recipe has been brewed before, or **"New recipe · <what> changed"** (e.g. "grind changed") when it has not. Replaces an "attempt N" counter.
+- **D-16 — Recipe tag on the bean card.** *(Revised 2026-10-17: see D-71.)* Shows **"Recipe reused Nx"** when this exact recipe has been brewed before, or **"New recipe · <what> changed"** (e.g. "grind changed") when it has not. Replaces an "attempt N" counter.
   - Matching is against **all past shots for the same bean and machine**, not only the previous shot. Returning to an earlier setting is recognized as that recipe, with its count and its last score (D-12).
   - *Why:* dialing in often goes back and forth; matching all history keeps the counter, score reference and bean-aging signal reliable. Naming the cause makes the tag understandable — a bare "New recipe" left users unsure why it appeared.
+- **D-71 — Recipe tag names up to two changes.** When a new recipe differs from the last shot's recipe in more than one thing, the tag names the first two and counts the rest: "New recipe · grind changed", "New recipe · grind and dose changed", "New recipe · grind, dose and 1 more changed". Refines D-16.
+  - *Why:* says exactly what changed in the common one- or two-change case, and still fits on the bean card when more changed.
 - **D-17 — Bean age lives on the bean overview and Home, not the shot form.**
   - *Why:* bean age matters when choosing a bean; on the shot form it is clutter, since the bean is usually unchanged from the last shot.
 - **D-20 — Plain words, no abbreviations.** UI text spells things out (e.g. "Preinfusion 4 s", not "PI 4 s"); units are written in full or as standard symbols (°C, g, s, bar).
@@ -181,7 +185,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - **Finished** beans collapse into compact rows below (name, roaster · origin · process, best score, recipes · shots); this list is the part that scrolls (D-36).
   - "Add bean" sits in the header.
   - *Why:* open beans are what you choose between, so they get the space and the freshness signal; finished beans are history you look up now and then.
-- **D-41 — Add bean form.** Full-screen form opened from "Add bean"; fits the screen without scrolling (D-36). Top to bottom:
+- **D-41 — Add bean form.** *(Revised 2026-10-17: see D-73.)* Full-screen form opened from "Add bean"; fits the screen without scrolling (D-36). Top to bottom:
   - **"Same as before"** shortcut: pick a past bean to re-buy it. Everything is copied except roast date and bag weight. The new bag is linked to the earlier one, so its history and best recipe carry over (as a starting point, not merged scores).
   - **Name** (required).
   - **Roaster** (full width).
@@ -193,6 +197,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - Full-width **"Add bean"** button at the bottom.
   - Only the two required fields are marked ("Required"); everything else is optional without saying so, which keeps the form quiet.
   - *Why:* roast date powers freshness and bean-aging data, so it is worth requiring; the rest is nice-to-have. Re-buying the same bean is common, and the shortcut turns a 10-field form into one tap plus a date. Country is a picker, not free text, so Insights can reliably compare origins (free text would split "Ethiopia", "ethiopia" and "Ethiopa"); region stays free text because region names are too varied for a fixed list.
+- **D-73 — A re-buy starts from the nearest earlier bag with shots.** The first shot of a bag added with "Same as before" follows the chain of earlier bags back to the nearest one that has shots, and starts from that bag's best recipe (D-66), with yield and time from that recipe's latest shot, as a new recipe for this bag. If no earlier bag has shots, it starts from My setup (D-38). Refines D-41.
+  - *Why:* a bag that was re-bought but never brewed should not hide the dial-in work of the bags before it.
 - **D-42 — Bean detail page.** Opens by tapping a bean on the Beans overview (open or finished). It is everything about one bag; nothing on it is needed while brewing. Top to bottom:
   - Header: back to Beans, bean name, **Edit** (opens the Add bean form, filled in).
   - **About card:** roast age block (cream, as on the overview), roaster, country · region · process, variety · altitude · roast level, roast date and status (Open/Finished).

@@ -208,7 +208,7 @@ These are real tables rather than JSON on purpose: usage counts are one query, a
 1. While you edit the shot form, a shared function `recipeFingerprint(form)` runs in the browser.
 2. It looks the fingerprint up among this bean's recipes on this machine (cached on the phone, so it also works offline).
 3. **Found** → "Recipe reused N×" (N = the recipe's shot count). The faint previous-score marker (D-12) is the score of that recipe's latest rated shot.
-4. **Not found** → "New recipe · grind changed": the form is compared field by field with the **last shot's recipe** to name what changed (grind, dose, basket, routine, or a feature by its label).
+4. **Not found** → "New recipe · grind changed": the form is compared field by field with the **last shot's recipe** to name what changed (grind, dose, basket, routine, or a feature by its label); with several changes, the first two are named and the rest counted (D-71).
 5. **On save** the server recomputes the fingerprint itself (it never trusts the browser's), then finds or creates the recipe and saves the shot, in one transaction.
 6. **Editing a shot** (D-57) runs step 5 again. The shot may move to another recipe. A recipe left with no shots is removed, unless it is marked Brew next.
 
@@ -216,8 +216,8 @@ These are real tables rather than JSON on purpose: usage counts are one query, a
 In this order:
 1. **Brew next is set** → that recipe's bean, values and setup; yield and time from its latest shot. The form shows "Recipe chosen from Library".
 2. **Otherwise, the current bean has shots** → the latest shot's recipe, yield and time.
-3. **Otherwise, the bean is a re-buy** ("Same as before", D-41) → the earlier bag's best recipe, as a new recipe for this bag. Its scores are not carried over.
-4. **Otherwise** → My setup defaults, with the current bean.
+3. **Otherwise, the bean is a re-buy** ("Same as before", D-41, D-73) → follow the chain of earlier bags back to the nearest one with shots; its best recipe, with yield and time from that recipe's latest shot, as a new recipe for this bag. Its scores are not carried over.
+4. **Otherwise** → My setup defaults, with the current bean. Time starts empty (D-72).
 
 Taste always starts empty (D-11). Features switched on since the copied shot start from My setup if it has a value, otherwise switched off. Features since switched off on the machine are left out.
 
