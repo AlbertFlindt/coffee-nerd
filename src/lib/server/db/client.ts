@@ -3,11 +3,15 @@ import { dirname } from 'node:path';
 import Database from 'better-sqlite3';
 import { sql } from 'drizzle-orm';
 import { drizzle, type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
+import type { RunResult } from 'better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { MIGRATIONS_FOLDER } from './paths';
 import * as schema from './schema';
 
 export type Db = BetterSQLite3Database<typeof schema> & { $client: Database.Database };
+/** The database or a transaction on it: what repository functions take, so they compose in one transaction. */
+export type Queryable = BaseSQLiteDatabase<'sync', RunResult, typeof schema>;
 
 /** Opens (creating if needed) the SQLite file at `path` and applies all migrations. */
 export function openDatabase(path: string, migrationsFolder = MIGRATIONS_FOLDER): Db {
