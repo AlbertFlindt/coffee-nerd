@@ -177,6 +177,10 @@ test('MoreSetup, D-21, D-24, D-90: the Setup tab; a changed value turns sage', a
   // D-21: Save stays visible and usable under the sheet.
   await expect(page.getByRole('button', { name: 'Save shot' })).toBeVisible();
   await expectNoPageScroll();
+  // At the reference size the whole Setup tab fits inside the sheet, down to puck prep.
+  const prep = (await sheet.getByRole('button', { name: /Puck prep/ }).boundingBox())!;
+  const sheetBox = (await sheet.boundingBox())!;
+  expect(prep.y + prep.height).toBeLessThanOrEqual(sheetBox.y + sheetBox.height);
   await screenshot('MoreSetup');
 
   await sheet.getByRole('button', { name: 'Temperature plus 1 °C' }).click();
@@ -369,6 +373,14 @@ test('D-106, D-107, D-108: empty sliders show a handle, buttons flash when press
   await expect(sheet).toBeVisible();
   await settled();
   const grip = (await sheet.locator('.grip').boundingBox())!;
+  // The whole 44 px strip from the sheet's top edge can be dragged; the handle sits in its middle.
+  const sheetBox = (await sheet.boundingBox())!;
+  const handle = (await sheet.locator('.cn-sheet__handle').boundingBox())!;
+  expect(grip.height).toBeGreaterThanOrEqual(44);
+  expect(Math.abs(grip.y - sheetBox.y)).toBeLessThanOrEqual(1);
+  expect(Math.abs(handle.y + handle.height / 2 - (grip.y + grip.height / 2))).toBeLessThanOrEqual(
+    1
+  );
   const drag = async (distance: number) => {
     await page.mouse.move(grip.x + grip.width / 2, grip.y + 10);
     await page.mouse.down();
