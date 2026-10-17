@@ -16,15 +16,17 @@ If they disagree: decision log for behavior, design system for visuals. If somet
 
 ## Commands
 
-Set up in milestone M0; update this section once the scripts exist.
+Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are declared in `src/env.ts` and read from `$app/env/private`; import from `src/lib` as `#lib/<path>.ts`.
 
-- `npm run dev`: dev server
+- `npm run dev`: dev server on port 5173
 - `npm run check`: svelte-check + TypeScript
-- `npm run lint` / `npm run format`
-- `npm test`: Vitest unit and integration tests. Single file: `npx vitest run <path>`
-- `npm run test:e2e`: Playwright
-- `npm run screenshot -- <route> [name]`: 412 × 915 screenshot into `screenshots/`
-- `npm run db:generate` / `npm run db:migrate`: Drizzle migrations
+- `npm run lint` (Prettier check + ESLint) / `npm run format`
+- `npm test`: Vitest unit and integration tests (`src/**/*.test.ts`). Single file: `npx vitest run <path>`
+- `npm run test:e2e`: Playwright (`tests/e2e/`), builds and serves the app at 412 × 915 with its own database in `test-results/`
+- `npm run build` / `npm start`: production build in `build/`, served on port 3000
+- `npm run screenshot -- <route> [name]`: 412 × 915 screenshot (2×) into `screenshots/`; needs `npm run dev` running (or `BASE_URL`)
+- `npm run db:generate`: new migration in `drizzle/` from `src/lib/server/db/schema.ts`. Migrations are applied when the server starts; the database is `DATABASE_PATH` (default `./data/coffee-nerd.db`)
+- `docker compose up --build`: the production image on port 3000, data in the `/data` volume
 - `node design-system/build-tokens.mjs`: regenerate `tokens.css`. Only as part of a design-system sync the owner starts; `design-system/` is otherwise read-only (D-69).
 
 ## Architecture

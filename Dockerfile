@@ -1,0 +1,32 @@
+# Coffee Nerd: one image, one data volume (D-59).
+
+# --- build: install everything, compile the app ---
+FROM node:22-bookworm-slim AS build
+WORKDIR /app
+COPY package.json package-lock.json .npmrc ./
+# better-sqlite3 ships prebuilt binaries, so no install scripts (and no compiler) are needed.
+RUN npm ci --ignore-scripts
+COPY . .
+RUN npm run build
+
+# --- deps: production dependencies only ---
+FROM build AS deps
+RUN npm ci --omit=dev --ignore-scripts
+
+# --- runtime: non-root, only what the server needs ---
+FROM node:22-bookworm-slim AS runtime
+WORKDIR /app
+ENV NODE_ENV=production \
+    PORT=3000 \
+    DATABASE_PATH=/data/coffee-nerd.db
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=build /app/build ./build
+COPY --from=build /app/drizzle ./drizzle
+COPY package.json ./
+RUN mkdir -p /data && chown node:node /data
+USER node
+VOLUME /data
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD ["node", "-e", "fetch('http://127.0.0.1:' + process.env.PORT + '/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+CMD ["node", "build"]

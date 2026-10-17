@@ -8,7 +8,7 @@
 - Installable as an app on your phone or tablet (PWA); opens offline, and shots saved offline are sent when you're back online.
 - Built for coffee nerds: recipe matching across your whole history, σ and distributions in Insights, any machine described by hand.
 
-> **Status:** design done, build starting (milestone M0). Not ready for use yet. Private for now; it will become open source once it is mature.
+> **Status:** foundation in place (milestone M0), features next. Not ready for use yet. Private for now; it will become open source once it is mature.
 
 ## Documentation
 

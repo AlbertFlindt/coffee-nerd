@@ -8,7 +8,7 @@ Status: ☐ not started · ◐ in progress · ☑ done
 
 ---
 
-## M0 — Foundation ☐
+## M0 — Foundation ◐
 Set up the empty app so every later milestone has checks to run.
 - SvelteKit (Svelte 5, TypeScript `strict`), Node 22 LTS, npm.
 - ESLint + Prettier + `svelte-check`; Vitest for unit tests; Playwright for end-to-end tests.

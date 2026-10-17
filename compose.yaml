@@ -1,0 +1,12 @@
+services:
+  coffee-nerd:
+    build: .
+    image: coffee-nerd
+    ports:
+      - '3000:3000'
+    volumes:
+      - coffee-nerd-data:/data
+    restart: unless-stopped
+
+volumes:
+  coffee-nerd-data:
