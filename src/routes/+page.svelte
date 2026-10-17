@@ -40,6 +40,8 @@
     >
     New shot
   </a>
+  <!-- Until the tab bar exists, the Journal opens from here (docs/open-items.md). -->
+  <a class="cn-btn-secondary tap journal" href={resolve('/journal')}>Journal</a>
   <!-- Until Settings exists (M11), signing out lives here; not designed (docs/open-items.md). -->
   <form method="POST" action="/logout">
     <button class="cn-btn-secondary tap" type="submit">Sign out</button>
@@ -89,6 +91,14 @@
     color: var(--ink);
     font-size: 15px;
     font-weight: 700;
+  }
+
+  .journal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   main > form {

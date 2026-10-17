@@ -21,7 +21,7 @@ export default defineConfig({
     },
     {
       name: 'seeded',
-      testMatch: 'shot-form.test.ts',
+      testMatch: ['shot-form.test.ts', 'shot-journal.test.ts'],
       // The reference PNGs in docs/screens/ are 2× pixel density; the tests save comparable screenshots.
       use: { baseURL: 'http://localhost:4174', deviceScaleFactor: 2 }
     }
