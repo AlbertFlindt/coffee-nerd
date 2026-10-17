@@ -11,6 +11,7 @@ Read the relevant one before changing behavior or visuals. Do not import them he
 - `design-system/`: tokens, `components.css` (`cn-` classes), `components.md`. Synced copy, read-only.
 - `docs/screens/`: every designed screen as PNG + static HTML at 412 × 915. Match them.
 - `docs/roadmap.md`: milestones with acceptance criteria. Work on one milestone at a time.
+- `docs/open-items.md`: unanswered questions, screens not designed yet, deferred code and tooling, each with the milestone that needs it.
 
 If they disagree: decision log for behavior, design system for visuals. If something is not covered, or a decision seems wrong, stop and ask the owner. Never invent product behavior or change a decision silently.
 
@@ -59,6 +60,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - Before a pull request: `npm run check && npm run lint && npm test`, then have the `decision-reviewer` subagent review the diff and fix what it finds about correctness or decisions.
 - When reporting work as done, show evidence: the commands you ran and their results, screenshots for UI.
 - When the owner settles a question, record it with the `record-decision` skill before building on it.
+- Keep `docs/open-items.md` current in every pull request: add any question you could not answer, any state without a design, any shortcut or limitation you leave; delete items you settle. Nothing open lives only in a chat or a pull request description.
 - Pull requests use `.github/pull_request_template.md`: decisions touched, evidence, anything not designed yet.
 
 ## When compacting

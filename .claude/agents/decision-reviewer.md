@@ -20,5 +20,6 @@ Report only findings that matter:
 2. **Correctness**: bugs, unhandled edge cases from data-model §4, floating-point quantities, missing `owner_id` scoping, non-atomic shot saves, prefilled taste.
 3. **Missing proof**: acceptance items or edge cases without a test; tests that do not cite their D-number.
 4. **Design drift**: hard-coded colors or sizes, accents used outside their job, page scrolling, wrong UI wording.
+5. **Untracked open items**: a question, undesigned state, placeholder, shortcut or limitation in the diff or the pull request text that is not in `docs/open-items.md`, or an item the diff settles that is still listed.
 
 For each finding give the file and line, the D-number or rule, what is wrong, and a concrete fix. Do not report style preferences or speculative refactors, and do not pad the list: if the change is sound, say so in one line. You do not edit files.
