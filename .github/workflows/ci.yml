@@ -64,3 +64,34 @@ jobs:
           printf 'new-password\nnew-password\n' | docker exec -i coffee-nerd node scripts/reset-password.mjs
           test "$(post /login 'name=Albert&password=new-password')" = 303
           test "$(post /login 'name=Albert&password=old-password')" = 400
+      - name: The reference seed fills a fresh container, and its account signs in
+        run: |
+          docker run --rm --volume seeded:/data coffee-nerd:ci node scripts/seed.mjs
+          docker run --detach --name seeded --publish 3001:3000 --volume seeded:/data coffee-nerd:ci
+          for i in $(seq 1 30); do
+            if curl --silent --fail http://localhost:3001/health; then break; fi
+            sleep 1
+          done
+          code=$(curl --silent --output /dev/null --write-out '%{http_code}' -X POST \
+            -H 'Origin: http://localhost:3001' -H 'Accept: text/html' \
+            --data 'name=Demo&password=coffee-nerd' http://localhost:3001/login)
+          test "$code" = 303
+
+  publish:
+    name: Publish image
+    # Every merge to main becomes ghcr.io/<owner>/coffee-nerd:main, for trying the latest build on a server.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [checks, docker]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io --username "${{ github.actor }}" --password-stdin
+      - name: Build and push
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          docker build --tag "$image:main" --tag "$image:sha-${GITHUB_SHA::7}" .
+          docker push --all-tags "$image"

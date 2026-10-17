@@ -65,6 +65,7 @@ Last updated: 2026-10-17
 |---|---|---|
 | `main` is not protected: GitHub does not enforce the "Require pull request" ruleset on a private repository without a Team plan. The push-guard hook and the review step are the safeguard. | When the repository goes public | Roadmap M0, D-62 |
 | Playwright is pinned to 1.56.1 and CI to `ubuntu-24.04`, to match the browser in the development environment. Upgrade both together. | Any time | PR #1 |
+| The image is published to GitHub Packages as a private package (`ghcr.io/albertflindt/coffee-nerd:main`, Linux x86-64 only), with a short "Try the latest build" guide in the README that seeds the reference setup (D-105). At M11: remove `scripts/seed.mjs` from the runtime image, replace the guide with the real install guide, and publish a public image. Until then the guide warns that the app can be claimed, or opened with the Demo password, until it is seeded and the password reset | M11 | D-105 |
 | Install guide: create the account right after starting the server, before others can reach it; until then anyone who can open the app can claim it (D-88) | M11 | M2 |
 | Install guide: behind a reverse proxy with https, forward `X-Forwarded-Proto` (and `X-Forwarded-Host` if the proxy changes the host), so the sign-in cookie is marked secure and forms are accepted | M11 | M2 |
 | The Brew next end-to-end test sets the mark directly in the test database, since nothing in the app can mark a recipe before the bean detail page; switch it to the button | M5 | M3 |

@@ -8,6 +8,9 @@ COPY package.json package-lock.json .npmrc ./
 RUN npm ci --ignore-scripts
 COPY . .
 RUN npm run build
+# The reference seed as one file, for trying the app on a server until M11 (D-105; only on an empty database).
+RUN npx esbuild scripts/seed.ts --bundle --platform=node --format=esm --packages=external \
+      --tsconfig-raw='{}' --outfile=build-scripts/seed.mjs
 
 # --- deps: production dependencies only ---
 FROM build AS deps
@@ -25,6 +28,8 @@ COPY --from=build /app/drizzle ./drizzle
 # Password reset on the server (D-87): docker compose exec coffee-nerd node scripts/reset-password.mjs
 COPY --from=build /app/scripts/reset-password.mjs ./scripts/reset-password.mjs
 COPY --from=build /app/src/lib/server/auth/password.js ./src/lib/server/auth/password.js
+# Reference setup for trying it out, until M11 (D-105): docker compose exec coffee-nerd node scripts/seed.mjs
+COPY --from=build /app/build-scripts/seed.mjs ./scripts/seed.mjs
 COPY package.json ./
 RUN mkdir -p /data && chown node:node /data
 USER node
