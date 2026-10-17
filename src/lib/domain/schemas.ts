@@ -6,6 +6,8 @@ const thousandths = z.number().int();
 const step = z.number().int().positive();
 const name = z.string().trim().min(1);
 const id = z.uuid();
+/** A size in millimetres, in thousandths so 58.5 mm fits (D-79). */
+const millimetres = thousandths.positive().optional();
 
 type Range = { min?: number; max?: number };
 const rangeIsOrdered = ({ min, max }: Range) =>
@@ -100,7 +102,7 @@ export type FeatureDefinition = z.infer<typeof featureDefinitionSchema>;
 
 export const machineSpecSchema = z.object({
   type: z.enum(['automatic', 'semi_auto', 'lever', 'manual']),
-  groupSizeMm: z.number().int().positive().optional(),
+  groupSizeMm: millimetres,
   features: z
     .array(featureDefinitionSchema)
     .refine((features) => new Set(features.map((f) => f.key)).size === features.length, {
@@ -112,7 +114,7 @@ export type MachineSpec = z.infer<typeof machineSpecSchema>;
 export const grinderSpecSchema = z.object({
   type: z.enum(['electric', 'hand']),
   burrs: z.enum(['flat', 'conical']),
-  burrSizeMm: z.number().int().positive().optional(),
+  burrSizeMm: millimetres,
   /** How the dial works; drives the grind control (D-48). */
   dial: z
     .object({
@@ -130,7 +132,7 @@ export type GrinderSpec = z.infer<typeof grinderSpecSchema>;
 export const basketSpecSchema = z.object({
   type: z.enum(['precision', 'standard', 'pressurized']),
   shotSize: z.enum(['single', 'double', 'triple']),
-  diameterMm: z.number().int().positive().optional(),
+  diameterMm: millimetres,
   doseRange: z
     .object({ from: thousandths.nonnegative(), to: thousandths.nonnegative() })
     .refine((range) => range.from <= range.to, RANGE_MESSAGE)

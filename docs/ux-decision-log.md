@@ -244,6 +244,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the dial is the one grinder detail that changes how you log every shot; burr info is nerd context for Insights (e.g. comparing grinders) at no cost on the shot form.
 - **D-49 — Gear detail (basket).** Same pattern as machine and grinder. Name; **type** (Precision, Standard, Pressurized); **shot size** (Single, Double, Triple); **diameter** (mm) with a fit check against your machines ("Fits Lelit Bianca"); optional **dose range** (from–to, e.g. 17.0–19.0 g). When a dose on the shot form falls outside the range, the form shows a gentle hint — never a block.
   - *Why:* basket choice changes extraction and is part of the recipe (D-13); the dose range turns the basket's spec into a useful nudge without extra input per shot.
+- **D-79 — Gear sizes can have decimals.** Group size, burr size and basket diameter accept decimals (e.g. 58.5 mm), stored like every other decimal number.
+  - *Why:* real gear comes in sizes such as 58.5 mm and 63.5 mm; rounding them would make the fit check and grinder comparisons wrong.
 - **D-46 — "Add your own feature".** From the machine detail page (D-44), a bottom sheet lets the user define any capability of that machine the app doesn't know (e.g. a bloom pause, a paddle position). Fields:
   - **Name.**
   - **Kind of value:** Number with unit, Seconds, On / off, Pick from a list. The fields below adapt (unit for numbers, options for lists).

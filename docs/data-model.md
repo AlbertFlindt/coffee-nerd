@@ -113,7 +113,7 @@ One table for all Gear, because Gear is one concept (D-39, D-68). A future kind 
 | `name` | |
 | `spec` | JSON; its shape depends on `kind` (below) |
 
-**Spec shapes:**
+**Spec shapes** (sizes in millimetres are decimals, stored in thousandths like every decimal, D-79):
 
 - **Machine:** `type` (`automatic` · `semi_auto` · `lever` · `manual`), `groupSizeMm`, `features` (a list of feature definitions).
 - **Grinder:** `type` (`electric` · `hand`), `burrs` (`flat` · `conical`), `burrSizeMm`, `dial` (`mode`: `stepped` or `stepless`, `step`, `finest`, `coarsest`).
