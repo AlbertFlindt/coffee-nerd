@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   applyStep,
+  decimalsFor,
   decimalsForStep,
   formatDelta,
   formatNumber,
@@ -12,42 +13,46 @@ import {
 } from './units';
 
 describe('toThousandths', () => {
-  it('data-model §1.4: decimal quantities become whole thousandths (18.0 g → 18000)', () => {
+  it('D-63: decimal quantities become whole thousandths, so equal recipes match exactly (18.0 g → 18000)', () => {
     expect(toThousandths(18)).toBe(18000);
     expect(toThousandths(1.6)).toBe(1600);
     expect(toThousandths('38.5')).toBe(38500);
     expect(toThousandths('0.125')).toBe(125);
   });
 
-  it('data-model §1.4: floating-point drift never reaches a stored value', () => {
+  it('D-63: floating-point drift never reaches a stored value', () => {
     expect(toThousandths(0.1 + 0.2)).toBe(300);
     expect(toThousandths(1.1 * 3)).toBe(3300);
   });
 
-  it('data-model §1.4: typed text with a comma or spaces is read as a decimal', () => {
+  it('D-07: typed text with a comma or spaces is read as a decimal', () => {
     expect(toThousandths('18,5')).toBe(18500);
     expect(toThousandths(' 93 ')).toBe(93000);
     expect(toThousandths('-2.5')).toBe(-2500);
     expect(toThousandths('−2.5')).toBe(-2500);
   });
 
-  it('data-model §1.4: more than three decimals round once, half away from zero', () => {
+  it('D-63: more than three decimals round once, half away from zero', () => {
     expect(toThousandths('1.0005')).toBe(1001);
     expect(toThousandths('-1.0005')).toBe(-1001);
     expect(toThousandths(2.0004)).toBe(2000);
   });
 
-  it('rejects text that is not a number', () => {
+  it('D-07: rejects typed text that is not a number', () => {
     for (const bad of ['', 'abc', '1.2.3', '1e3', 'NaN']) {
       expect(() => toThousandths(bad), bad).toThrow();
     }
     expect(() => toThousandths(Number.NaN)).toThrow();
     expect(() => toThousandths(Number.POSITIVE_INFINITY)).toThrow();
   });
+
+  it('D-63: rejects numbers too large to store exactly', () => {
+    expect(() => toThousandths('99999999999999.9')).toThrow();
+  });
 });
 
 describe('fromThousandths', () => {
-  it('data-model §1.4: converts back for display and charts', () => {
+  it('D-56: converts back for display and charts', () => {
     expect(fromThousandths(18000)).toBe(18);
     expect(fromThousandths(1600)).toBe(1.6);
   });
@@ -64,7 +69,22 @@ describe('decimalsForStep', () => {
   });
 });
 
+describe('decimalsFor', () => {
+  it('D-07, D-16: a value typed off the step grid shows its own decimals, so different recipes never look alike', () => {
+    expect(decimalsFor(93500, 1000)).toBe(1); // 93.5 °C with a 1 °C step
+    expect(decimalsFor(93000, 1000)).toBe(0);
+    expect(decimalsFor(1650, 100)).toBe(2);
+    expect(decimalsFor(1600, 100)).toBe(1);
+  });
+});
+
 describe('formatNumber and formatQuantity', () => {
+  it('D-07: decimals must be a whole number from 0 to 3', () => {
+    expect(() => formatNumber(1000, 4)).toThrow(RangeError);
+    expect(() => formatNumber(1000, -1)).toThrow(RangeError);
+    expect(() => formatNumber(1000, 1.5)).toThrow(RangeError);
+  });
+
   it('D-07: values show the same decimals as their step, with the unit after a space', () => {
     expect(formatQuantity(18000, { decimals: 1, unit: 'g' })).toBe('18.0 g');
     expect(formatQuantity(93000, { decimals: 0, unit: '°C' })).toBe('93 °C');
@@ -73,7 +93,7 @@ describe('formatNumber and formatQuantity', () => {
     expect(formatQuantity(1600, { decimals: 1 })).toBe('1.6');
   });
 
-  it('rounds half away from zero when showing fewer decimals', () => {
+  it('D-07: rounds half away from zero when showing fewer decimals', () => {
     expect(formatNumber(25550, 1)).toBe('25.6');
     expect(formatNumber(25549, 1)).toBe('25.5');
     expect(formatNumber(-25550, 1)).toBe('−25.6');
@@ -128,10 +148,5 @@ describe('applyStep', () => {
     expect(applyStep(0, 100, '-', { min: 0, max: 16000 })).toBe(0);
     expect(applyStep(16000, 100, '+', { min: 0, max: 16000 })).toBe(16000);
     expect(applyStep(15950, 100, '+', { max: 16000 })).toBe(16000);
-  });
-
-  it('D-07: an empty value starts at the range minimum, or zero', () => {
-    expect(applyStep(null, 1000, '+', { min: 20000 })).toBe(20000);
-    expect(applyStep(null, 1000, '+')).toBe(0);
   });
 });

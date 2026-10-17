@@ -9,10 +9,12 @@ import {
   routineStepsSchema,
   setupSnapshotSchema,
   tasteSchema,
+  validateRoutineAgainstSteps,
   validateSetupAgainstMachine,
   valueDefinitionSchema,
   type FeatureDefinition,
   type MachineSpec,
+  type PrepStepSetting,
   type SetupSnapshot
 } from './schemas';
 
@@ -154,6 +156,28 @@ describe('feature definitions', () => {
     );
   });
 
+  it('D-24, D-44: built-in features keep their kind; temperature and flat pressure have no off switch', () => {
+    expect(featureDefinitionSchema.safeParse({ ...temperature, switchable: true }).success).toBe(
+      false
+    );
+    expect(
+      featureDefinitionSchema.safeParse({ ...flatPressure, value: preinfusion.value }).success
+    ).toBe(false);
+    expect(
+      featureDefinitionSchema.safeParse({ ...preinfusion, value: { kind: 'toggle' } }).success
+    ).toBe(false);
+    expect(featureDefinitionSchema.safeParse({ ...preinfusion, switchable: false }).success).toBe(
+      false
+    );
+  });
+
+  it('D-46: custom features always have an off switch and are never phases (built-in only for now)', () => {
+    expect(featureDefinitionSchema.safeParse({ ...paddle, switchable: false }).success).toBe(false);
+    expect(featureDefinitionSchema.safeParse({ ...paddle, value: preinfusion.value }).success).toBe(
+      false
+    );
+  });
+
   it('D-46: a feature needs a name', () => {
     expect(featureDefinitionSchema.safeParse({ ...paddle, label: ' ' }).success).toBe(false);
   });
@@ -252,6 +276,60 @@ describe('puck prep', () => {
   });
 });
 
+describe('validateRoutineAgainstSteps', () => {
+  const WDT = '0199f3a2-0000-7000-8000-000000000001';
+  const DISTRIBUTOR = '0199f3a2-0000-7000-8000-000000000002';
+  const RDT = '0199f3a2-0000-7000-8000-000000000003';
+  const settings: Record<string, PrepStepSetting> = {
+    [WDT]: { kind: 'seconds', step: 1000, min: 0, max: 60000, startsAt: 20000 },
+    [DISTRIBUTOR]: { kind: 'none' },
+    [RDT]: {
+      kind: 'choice',
+      options: [
+        { id: 'one', label: 'One spray' },
+        { id: 'two', label: 'Two sprays' }
+      ],
+      startsAt: 'one'
+    }
+  };
+
+  it('D-51, D-52: step values that fit their settings are valid', () => {
+    expect(
+      validateRoutineAgainstSteps(
+        [
+          { stepId: WDT, value: 20000 },
+          { stepId: DISTRIBUTOR, value: null },
+          { stepId: RDT, value: 'two' }
+        ],
+        settings
+      )
+    ).toEqual([]);
+  });
+
+  it('D-52: each value must match its step’s setting', () => {
+    expect(
+      validateRoutineAgainstSteps(
+        [
+          { stepId: WDT, value: 'two' },
+          { stepId: WDT, value: 90000 },
+          { stepId: WDT, value: null },
+          { stepId: DISTRIBUTOR, value: 5000 },
+          { stepId: RDT, value: 'three' },
+          { stepId: '0199f3a2-0000-7000-8000-000000000009', value: null }
+        ],
+        settings
+      )
+    ).toEqual([
+      { index: 0, stepId: WDT, problem: 'wrong_kind', value: 'two' },
+      { index: 1, stepId: WDT, problem: 'out_of_range', value: 90000, min: 0, max: 60000 },
+      { index: 2, stepId: WDT, problem: 'value_missing' },
+      { index: 3, stepId: DISTRIBUTOR, problem: 'unexpected_value', value: 5000 },
+      { index: 4, stepId: RDT, problem: 'not_an_option', value: 'three' },
+      { index: 5, stepId: '0199f3a2-0000-7000-8000-000000000009', problem: 'unknown_step' }
+    ]);
+  });
+});
+
 describe('setup snapshot', () => {
   it('D-65: a recipe keeps values together with the labels and units of the time', () => {
     expect(setupSnapshotSchema.safeParse(setup).success).toBe(true);
@@ -261,7 +339,7 @@ describe('setup snapshot', () => {
     expect(setupSnapshotSchema.safeParse({ ...setup, routine: null }).success).toBe(true);
   });
 
-  it('data-model §1.4: values are whole thousandths, never fractions', () => {
+  it('D-63: values are whole thousandths, never fractions', () => {
     expect(
       setupSnapshotSchema.safeParse({
         ...setup,
@@ -281,14 +359,14 @@ describe('validateSetupAgainstMachine', () => {
       Object.entries(setup.features).filter(([key]) => key !== 'temperature')
     );
     expect(validateSetupAgainstMachine({ ...setup, features: rest }, bianca)).toEqual([
-      'Temperature: missing'
+      { key: 'temperature', label: 'Temperature', problem: 'missing' }
     ]);
   });
 
   it('D-44: a feature that is switched off on the machine must not be in the setup', () => {
     const features = { ...setup.features, low_bar_end: { label: 'Low bar end', on: false } };
     expect(validateSetupAgainstMachine({ ...setup, features }, bianca)).toEqual([
-      'low_bar_end: not a feature of this machine'
+      { key: 'low_bar_end', label: 'Low bar end', problem: 'not_on_machine' }
     ]);
   });
 
@@ -298,7 +376,7 @@ describe('validateSetupAgainstMachine', () => {
       temperature: { label: 'Temperature', on: false }
     };
     expect(validateSetupAgainstMachine({ ...setup, features }, bianca)).toEqual([
-      'Temperature: cannot be switched off'
+      { key: 'temperature', label: 'Temperature', problem: 'cannot_switch_off' }
     ]);
   });
 
@@ -310,9 +388,23 @@ describe('validateSetupAgainstMachine', () => {
       [CUSTOM_KEY]: { label: 'Paddle position', on: true, choice: 'high' }
     };
     expect(validateSetupAgainstMachine({ ...setup, features }, bianca)).toEqual([
-      'Temperature: 120000 is outside 80000–100000',
-      'Preinfusion: pressure 10000 is outside 0–9000',
-      'Paddle position: "high" is not an option'
+      {
+        key: 'temperature',
+        label: 'Temperature',
+        problem: 'out_of_range',
+        value: 120000,
+        min: 80000,
+        max: 100000
+      },
+      {
+        key: 'preinfusion',
+        label: 'Preinfusion',
+        problem: 'pressure_out_of_range',
+        value: 10000,
+        min: 0,
+        max: 9000
+      },
+      { key: CUSTOM_KEY, label: 'Paddle position', problem: 'not_an_option', value: 'high' }
     ]);
   });
 
@@ -322,7 +414,7 @@ describe('validateSetupAgainstMachine', () => {
       preinfusion: { label: 'Preinfusion', on: true }
     };
     expect(validateSetupAgainstMachine({ ...setup, features }, bianca)).toEqual([
-      'Preinfusion: value missing'
+      { key: 'preinfusion', label: 'Preinfusion', problem: 'value_missing' }
     ]);
   });
 

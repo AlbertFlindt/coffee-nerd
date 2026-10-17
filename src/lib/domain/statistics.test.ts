@@ -43,6 +43,11 @@ describe('standardDeviation', () => {
   it('D-56: identical values have σ 0', () => {
     expect(standardDeviation([8, 8, 8])).toBe(0);
   });
+
+  it('D-56: identical decimal values have σ exactly 0, despite floating-point error', () => {
+    expect(standardDeviation(Array(7).fill(1.6))).toBe(0);
+    expect(standardDeviation([28.2, 28.2, 28.2])).toBe(0);
+  });
 });
 
 describe('quantile, median and quartiles (linear interpolation, R-7)', () => {
@@ -64,13 +69,13 @@ describe('quantile, median and quartiles (linear interpolation, R-7)', () => {
     expect(median([])).toBeNull();
   });
 
-  it('does not reorder the caller’s values', () => {
+  it('D-56: does not reorder the caller’s values', () => {
     const values = [3, 1, 2];
     median(values);
     expect(values).toEqual([3, 1, 2]);
   });
 
-  it('rejects a probability outside 0–1', () => {
+  it('D-56: rejects a probability outside 0–1', () => {
     expect(() => quantile([1, 2], 1.5)).toThrow();
   });
 });
@@ -110,6 +115,19 @@ describe('histogram', () => {
     expect(histogram([28, 28, 28])).toEqual([{ from: 28, to: 29, count: 3 }]);
     expect(histogram([])).toEqual([]);
   });
+
+  it('D-56: one far-off value does not explode the default histogram into hundreds of bins', () => {
+    const bins = histogram([27, 27.5, 28, 28, 28.5, 29, 120]);
+    expect(bins.length).toBeLessThanOrEqual(20);
+    expect(bins.reduce((sum, bin) => sum + bin.count, 0)).toBe(7);
+  });
+
+  it('D-56: when the middle half has no spread, the range is split by Sturges’ rule', () => {
+    // n = 8 → ⌈log2 8⌉ + 1 = 4 bins over 20–36, width 4
+    const bins = histogram([20, 28, 28, 28, 28, 28, 28, 36]);
+    expect(bins.map((b) => b.from)).toEqual([20, 24, 28, 32, 36]);
+    expect(bins.reduce((sum, bin) => sum + bin.count, 0)).toBe(8);
+  });
 });
 
 describe('normalCurve', () => {
@@ -142,6 +160,7 @@ describe('sigmaDistance', () => {
   it('D-57: no comparison with fewer than two earlier values or no spread', () => {
     expect(sigmaDistance(25.5, [28])).toBeNull();
     expect(sigmaDistance(25.5, [28, 28, 28])).toBeNull();
+    expect(sigmaDistance(27.9, Array(7).fill(28.2))).toBeNull();
   });
 });
 
@@ -156,5 +175,6 @@ describe('pooledStandardDeviation', () => {
     expect(pooledStandardDeviation([[7, 9], [5]])).toBeCloseTo(standardDeviation([7, 9])!, 12);
     expect(pooledStandardDeviation([[7], [5]])).toBeNull();
     expect(pooledStandardDeviation([])).toBeNull();
+    expect(pooledStandardDeviation([[0.1, 0.1, 0.1]])).toBe(0);
   });
 });

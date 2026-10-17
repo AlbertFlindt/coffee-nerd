@@ -23,6 +23,8 @@ export function standardDeviation(values: readonly number[]): number | null {
 
 function sampleVariance(values: readonly number[]): number | null {
   if (values.length < 2) return null;
+  // Identical values have no spread; floating-point averaging of decimals (28.2) would leave ~1e-16.
+  if (values.every((v) => v === values[0])) return 0;
   const m = mean(values)!;
   return values.reduce((sum, v) => sum + (v - m) ** 2, 0) / (values.length - 1);
 }
@@ -63,7 +65,8 @@ export type Bin = { from: number; to: number; count: number };
 /**
  * Counts values into equal-width bins, aligned to multiples of the width. A value on an edge goes to the
  * higher bin. Without a width, the Freedman–Diaconis rule (2·IQR / ∛n) picks one; when the IQR is 0 the
- * values' range is split by Sturges' rule; identical values get one bin of width 1.
+ * values' range is split by Sturges' rule; identical values get one bin of width 1. Default widths never
+ * make more than about 20 bins.
  */
 export function histogram(values: readonly number[], options: { binWidth?: number } = {}): Bin[] {
   const extent = range(values);
@@ -90,9 +93,16 @@ function binIndex(value: number, width: number): number {
 function defaultBinWidth(values: readonly number[], { min, max }: { min: number; max: number }) {
   if (min === max) return 1;
   const iqr = quantile(values, 0.75)! - quantile(values, 0.25)!;
-  if (iqr > 0) return (2 * iqr) / Math.cbrt(values.length);
-  return (max - min) / (Math.ceil(Math.log2(values.length)) + 1);
+  const width =
+    iqr > 0
+      ? (2 * iqr) / Math.cbrt(values.length)
+      : (max - min) / (Math.ceil(Math.log2(values.length)) + 1);
+  // One far-off value (a choked shot) must not make hundreds of bins that cannot be drawn.
+  // Aligning bins to multiples of the width can add one at each end, hence − 2.
+  return Math.max(width, (max - min) / (MAX_DEFAULT_BINS - 2));
 }
+
+const MAX_DEFAULT_BINS = 20;
 
 /**
  * Points of the normal curve with this mean and σ, evenly spaced from `from` to `to`. `scale` multiplies

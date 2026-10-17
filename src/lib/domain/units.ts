@@ -22,6 +22,7 @@ export function toThousandths(value: number | string): Thousandths {
   const digits = fraction.padEnd(4, '0');
   let result = Number(whole || '0') * 1000 + Number(digits.slice(0, 3));
   if (Number(digits[3]) >= 5) result += 1;
+  if (!Number.isSafeInteger(result)) throw new RangeError(`Too large to store exactly: "${value}"`);
   return sign === '' || sign === '+' || result === 0 ? result : -result;
 }
 
@@ -38,8 +39,18 @@ export function decimalsForStep(step: Thousandths): number {
   return 3;
 }
 
+/**
+ * Decimals to show a value with: as many as its step, or more when the value was typed off the step grid
+ * (93.5 °C with a 1 °C step), so two different recipes never look the same (D-07, D-16).
+ */
+export function decimalsFor(value: Thousandths, step: Thousandths): number {
+  return Math.max(decimalsForStep(step), decimalsForStep(value));
+}
+
 /** Thousandths as text with a fixed number of decimals (0–3) and a real minus sign. */
 export function formatNumber(value: Thousandths, decimals: number): string {
+  if (!Number.isInteger(decimals) || decimals < 0 || decimals > 3)
+    throw new RangeError(`Decimals must be 0–3: ${decimals}`);
   const unit = 10 ** (3 - decimals);
   const magnitude = Math.floor((Math.abs(value) + unit / 2) / unit); // half away from zero
   const text = String(magnitude).padStart(decimals + 1, '0');
@@ -73,15 +84,17 @@ export function stepLabel(direction: '+' | '-', step: Thousandths, unit?: string
   return `${sign} ${formatQuantity(step, { decimals: decimalsForStep(step), unit })}`;
 }
 
-/** One tap on −/+: moves by exactly one step and stays inside the range (D-07). */
+/**
+ * One tap on −/+: moves by exactly one step and stays inside the range (D-07). An empty value has no
+ * starting point here; the caller decides what a tap on it does.
+ */
 export function applyStep(
-  value: Thousandths | null,
+  value: Thousandths,
   step: Thousandths,
   direction: '+' | '-',
   range: { min?: Thousandths; max?: Thousandths } = {}
 ): Thousandths {
   const { min, max } = range;
-  if (value === null) return min ?? 0;
   const next = direction === '+' ? value + step : value - step;
   if (min !== undefined && next < min) return min;
   if (max !== undefined && next > max) return max;

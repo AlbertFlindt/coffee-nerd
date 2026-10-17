@@ -60,6 +60,15 @@ export const BUILT_IN_FEATURE_KEYS = [
   'low_bar_end'
 ] as const;
 const builtInKeys: ReadonlySet<string> = new Set(BUILT_IN_FEATURE_KEYS);
+/** Built-in features have a fixed kind and off switch; custom ones always switch and are never phases (§3). */
+const BUILT_IN_RULES: Record<string, { switchable: boolean; kinds: readonly string[] }> = {
+  temperature: { switchable: false, kinds: ['number'] },
+  flat_pressure: { switchable: false, kinds: ['number'] },
+  preinfusion: { switchable: true, kinds: ['phase'] },
+  low_bar_start: { switchable: true, kinds: ['phase'] },
+  low_bar_end: { switchable: true, kinds: ['phase'] }
+};
+const CUSTOM_RULE = { switchable: true, kinds: ['number', 'seconds', 'toggle', 'choice'] };
 const CUSTOM_KEY = /^custom-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 export const featureDefinitionSchema = z
@@ -77,7 +86,14 @@ export const featureDefinitionSchema = z
   .refine((f) => f.builtIn === builtInKeys.has(f.key), {
     message: 'Only the five known features are built in',
     path: ['builtIn']
-  });
+  })
+  .refine(
+    (f) => {
+      const rule = BUILT_IN_RULES[f.key] ?? CUSTOM_RULE;
+      return f.switchable === rule.switchable && rule.kinds.includes(f.value.kind);
+    },
+    { message: 'This feature has a fixed kind of value and off switch (data-model §3)' }
+  );
 export type FeatureDefinition = z.infer<typeof featureDefinitionSchema>;
 
 // --- gear specs: one per kind (D-68) ---
@@ -181,24 +197,45 @@ export const setupSnapshotSchema = z.object({
 });
 export type SetupSnapshot = z.infer<typeof setupSnapshotSchema>;
 
+/** A problem with a setup or routine, as data; the screens decide the wording (values in thousandths). */
+export type SetupProblem = {
+  key: string;
+  label: string;
+  problem:
+    | 'missing'
+    | 'not_on_machine'
+    | 'cannot_switch_off'
+    | 'value_missing'
+    | 'pressure_missing'
+    | 'out_of_range'
+    | 'pressure_out_of_range'
+    | 'not_an_option';
+  value?: number | string;
+  min?: number;
+  max?: number;
+};
+
 /**
  * Checks a setup against the machine it is brewed on: every enabled feature is present, nothing else is,
  * non-switchable features are on, and switched-on values fit their definition. Values typed off the step
- * grid are allowed (D-07). Returns readable problems; an empty list means valid.
+ * grid are allowed (D-07). An empty list means valid.
  */
-export function validateSetupAgainstMachine(setup: SetupSnapshot, machine: MachineSpec): string[] {
-  const problems: string[] = [];
+export function validateSetupAgainstMachine(
+  setup: SetupSnapshot,
+  machine: MachineSpec
+): SetupProblem[] {
+  const problems: SetupProblem[] = [];
   const enabled = machine.features.filter((f) => f.enabled);
 
   for (const feature of enabled) {
     const entry = setup.features[feature.key];
-    const label = feature.label;
+    const at = { key: feature.key, label: feature.label };
     if (!entry) {
-      problems.push(`${label}: missing`);
+      problems.push({ ...at, problem: 'missing' });
       continue;
     }
     if (!entry.on) {
-      if (!feature.switchable) problems.push(`${label}: cannot be switched off`);
+      if (!feature.switchable) problems.push({ ...at, problem: 'cannot_switch_off' });
       continue;
     }
     const definition = feature.value;
@@ -206,38 +243,97 @@ export function validateSetupAgainstMachine(setup: SetupSnapshot, machine: Machi
       case 'toggle':
         break;
       case 'choice':
-        if (entry.choice === undefined) problems.push(`${label}: value missing`);
+        if (entry.choice === undefined) problems.push({ ...at, problem: 'value_missing' });
         else if (!definition.options.some((o) => o.id === entry.choice))
-          problems.push(`${label}: "${entry.choice}" is not an option`);
+          problems.push({ ...at, problem: 'not_an_option', value: entry.choice });
         break;
       case 'number':
       case 'seconds':
       case 'phase':
         if (entry.value === undefined) {
-          problems.push(`${label}: value missing`);
+          problems.push({ ...at, problem: 'value_missing' });
           break;
         }
         if (definition.kind !== 'phase' && !inRange(entry.value, definition))
-          problems.push(`${label}: ${entry.value} is outside ${rangeText(definition)}`);
+          problems.push({
+            ...at,
+            problem: 'out_of_range',
+            value: entry.value,
+            ...range(definition)
+          });
         if (definition.kind === 'phase' && definition.pressure) {
-          if (entry.pressure === undefined) problems.push(`${label}: pressure missing`);
+          if (entry.pressure === undefined) problems.push({ ...at, problem: 'pressure_missing' });
           else if (!inRange(entry.pressure, definition.pressure))
-            problems.push(
-              `${label}: pressure ${entry.pressure} is outside ${rangeText(definition.pressure)}`
-            );
+            problems.push({
+              ...at,
+              problem: 'pressure_out_of_range',
+              value: entry.pressure,
+              ...range(definition.pressure)
+            });
         }
         break;
     }
   }
 
   const enabledKeys = new Set(enabled.map((f) => f.key));
-  for (const key of Object.keys(setup.features)) {
-    if (!enabledKeys.has(key)) problems.push(`${key}: not a feature of this machine`);
+  for (const [key, entry] of Object.entries(setup.features)) {
+    if (!enabledKeys.has(key))
+      problems.push({ key, label: entry.label, problem: 'not_on_machine' });
   }
   return problems;
 }
 
-const rangeText = ({ min, max }: Range) => `${min ?? '…'}–${max ?? '…'}`;
+/** Only the bounds that are set, so problems compare cleanly. */
+const range = ({ min, max }: Range): Range => ({
+  ...(min !== undefined && { min }),
+  ...(max !== undefined && { max })
+});
+
+export type RoutineProblem = {
+  index: number;
+  stepId: string;
+  problem:
+    | 'unknown_step'
+    | 'value_missing'
+    | 'unexpected_value'
+    | 'wrong_kind'
+    | 'out_of_range'
+    | 'not_an_option';
+  value?: number | string;
+  min?: number;
+  max?: number;
+};
+
+/**
+ * Checks a routine's step values against each step's setting (D-51, D-52): no value for "No setting",
+ * whole thousandths inside the range for numbers and seconds, one of the options for lists.
+ */
+export function validateRoutineAgainstSteps(
+  steps: RoutineSteps,
+  settings: Readonly<Record<string, PrepStepSetting>>
+): RoutineProblem[] {
+  const problems: RoutineProblem[] = [];
+  steps.forEach(({ stepId, value }, index) => {
+    const at = { index, stepId };
+    const setting = settings[stepId];
+    if (!setting) return problems.push({ ...at, problem: 'unknown_step' });
+    if (setting.kind === 'none') {
+      if (value !== null) problems.push({ ...at, problem: 'unexpected_value', value });
+      return;
+    }
+    if (value === null) return problems.push({ ...at, problem: 'value_missing' });
+    if (setting.kind === 'choice') {
+      if (typeof value !== 'string') problems.push({ ...at, problem: 'wrong_kind', value });
+      else if (!setting.options.some((o) => o.id === value))
+        problems.push({ ...at, problem: 'not_an_option', value });
+      return;
+    }
+    if (typeof value !== 'number') problems.push({ ...at, problem: 'wrong_kind', value });
+    else if (!inRange(value, setting))
+      problems.push({ ...at, problem: 'out_of_range', value, ...range(setting) });
+  });
+  return problems;
+}
 
 // --- a shot's taste (D-09, D-11, D-23, D-67): null means not rated / not set, never 0 ---
 
