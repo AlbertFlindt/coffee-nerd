@@ -16,7 +16,12 @@ Last updated: 2026-10-17
 
 | Question | Needed by | Source |
 |---|---|---|
-| *(none open)* | | |
+| **"Compared with this recipe" (D-57): which shots is this shot compared with?** (a) The recipe's *other* shots, not this one; at least 2 with a value, otherwise the line says "Not enough shots yet" — *recommended*, since an outlier should not pull the average towards itself. (b) All the recipe's shots, this one included, from 2 shots on. (c) As (a), but only from 3 other shots on. The "3 shots" in the header would count all the recipe's shots either way. | M4 | D-57, data-model §5 |
+| **"Compared with this recipe": when is a shot "within normal range"?** (a) Within 1σ of the average; outside it says "1.7σ faster/slower than usual" for time and "1.2σ higher/lower than usual" for score — *recommended*, matches the screen (1.7σ is not normal). (b) Within 2σ (only clear outliers are named). (c) Show the σ number always, without "within normal range". Values compared: time and score, as designed; yield too? | M4 | D-57 |
+| **The Journal's "Rate" block (D-54): what does tapping it do?** (a) Opens a small sheet with the score row; tapping a score saves it and closes the sheet — *recommended*, the "one-tap job" of D-54. (b) Opens the shot form in edit mode (all of taste, but more taps). (c) Nothing of its own: it opens the shot like the rest of the row (built this way for now). | M4 | D-54 |
+| **The Journal's "Any recipe" filter (D-54): how are recipes listed?** (a) Only once a bean is chosen; that bean's recipes by their values ("1.6 · 18.0 g · Daily routine · 3 shots"), most recently brewed first — *recommended*. (b) Every recipe, grouped by bean. (c) Leave the chip out until the recipe detail page (M5) gives recipes a home. Not built yet. | M4 | D-54 |
+| **Editing a shot (D-57): what does the form compare with?** (a) With the shot as it was before this edit: sage marks what you changed now, the tag says "Recipe reused" or "New recipe · grind changed"; the bean and the brewing time stay fixed; "Save changes" returns to the shot detail without a message — *recommended*. (b) With the bean's shot before this one, as when the shot was brewed. Not built yet. | M4 | D-57, D-14, D-15, D-16 |
+| **The tab bar (D-30) before Library and Insights exist**: the Journal and shot detail screens show it. (a) Build it now on the tab screens; Library and Insights are shown dimmed and do nothing until their milestones — *recommended*. (b) Library and Insights open a plain "Coming later" page. (c) Wait for M8; until then the start page links to the Journal (built this way for now, with the phone's back gesture to return). | M4 | D-30, D-31 |
 
 ## 2. Screens and states not designed yet
 
@@ -33,6 +38,11 @@ Last updated: 2026-10-17
 | Shot form when there is nothing to brew with (no My setup or no open bean): built as a plain "Nothing to brew with yet" message | M6 | D-88, M3 |
 | Shot form: the bean list behind the bean card (D-94), built as a plain "Open beans" list in a sheet | M5 | D-94, M3 |
 | Taste sliders: the "Clear" control (D-98), built as small text after the value words | M4 | D-98, M3 |
+| Journal: the empty list ("No shots yet.", "No unrated shots."), and the bean filter's list (built as a plain list of the beans that have shots, in a sheet; the chosen bean's name replaces "All beans" on the chip, in amber) | M4 | D-54 |
+| Journal row: a shot without a yield or time leaves it out of the values ("1.6 · 18.0 g · 25.5 s"); the taste line shows the balance in words, "Not rated" for an unrated shot without one, and nothing for a rated shot without one; a date in another year names the year ("Tue 30 Dec 2025") | M4 | D-54, D-72, D-82 |
+| Journal header: "N shots this week" counts every shot, whatever the filter; "Unrated · N" counts within the bean filter | M4 | D-54 |
+| Shot detail: an unrated shot ("Not rated" in the score block), a taste scale that is not set ("Not set", no handle), an empty yield or time tile ("Not set"); the notes card and the flavor notes are left out when empty; aftertaste is not shown (D-57 names balance, body and sweetness) | M4 | D-57, D-11 |
+| Shot detail: "Back" always returns to the Journal without its filters | M4 | D-57 |
 | Shot form: the message when the server refuses a shot ("The shot could not be saved. Nothing was changed.", above Save) | M10 | M3 |
 | Shot form: the message when a switched-on feature has no value yet ("Set Low bar end first.", above Save) | M6 | D-78, M3 |
 | More › Setup: rows for custom features that are on/off or "Pick from a list" (built as a switch with "On"/"Off", and a value that cycles through the options on tap) | M6 | D-46, M3 |
@@ -77,4 +87,6 @@ Last updated: 2026-10-17
 | Basket row on the Setup tab shows the basket's name ("VST 18 g"); the design shows brand · size ("VST · 18 g"), which needs separate fields on the basket | M6 | D-49, M3 |
 | Shot form: a puck prep step's value is taken from the routine (D-76) and cannot be changed for one shot; only the routine can be switched | M7 | D-51, M3 |
 | `npm audit`: 4 moderate advisories from an old esbuild inside drizzle-kit (development only, not in the Docker image). Recheck when drizzle-kit updates. | Each dependency update | PR #1 |
+| End-to-end: the sheet handle test (D-108, `shot-form.test.ts`) failed in 2 of 6 local runs (handle position off by 2.9 px once, drag strip 43.99999 px once), measured while the sheet may still move; it touches nothing this pull request changed and passed in the other runs. Watch it; make the measurement wait for the sheet to stop if it fails again | If it fails again | M4 |
+| End-to-end: the Journal test expects the shots under Today, Yesterday and one earlier date; a run that crosses midnight in Copenhagen (the seed's time zone) would see one more day | Only if it gets in the way | M4 |
 | The push guard still blocks a command whose single-line commit text looks like a push to `main` (e.g. a literal `push\nto main`). Safe side; a fix needs a shell parser. | Only if it gets in the way | PR #2 |
