@@ -1,0 +1,67 @@
+/* Coffee Nerd components — plain CSS on top of tokens.css. Class prefix: cn- */
+.cn-root{background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+.cn-root *{box-sizing:border-box}
+.cn-root button{font-family:inherit;cursor:pointer}
+.cn-card{background:var(--surface);border-radius:var(--radius-lg);padding:var(--space-4)}
+.cn-card--cream{background:var(--cream);color:var(--on-cream)}
+.cn-label{font-size:13px;line-height:18px;font-weight:500;color:var(--ink-muted)}
+.cn-caption{font-size:12px;line-height:16px;color:var(--ink-muted)}
+/* value card: core values with −/+ that show their step */
+.cn-value-card{display:flex;flex-direction:column;gap:6px;background:var(--surface);border-radius:var(--radius-lg);padding:14px}
+.cn-value-card__value{font-size:32px;line-height:37px;font-weight:600}
+.cn-value-card__unit{font-size:16px;font-weight:500;color:var(--ink-muted)}
+.cn-value-card--changed .cn-value-card__value{color:var(--sage)}
+.cn-steppers{display:flex;gap:var(--space-2);margin-top:4px}
+.cn-step{flex:1;height:var(--touch-min);border-radius:var(--radius-sm);border:none;background:var(--control);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:4px}
+.cn-step__sym{font-size:20px;line-height:1}
+.cn-step__amt{font-size:13px;font-weight:600;color:var(--ink-soft)}
+/* row stepper: setup rows */
+.cn-row{display:flex;align-items:center;gap:8px;min-height:64px;padding:0 10px 0 14px;border-radius:var(--radius-md);background:var(--surface-sheet-field)}
+.cn-row__label{flex:1;font-size:15px;font-weight:600}
+.cn-row__btn{width:var(--touch-min);height:var(--touch-min);border-radius:var(--radius-sm);border:none;background:var(--control-strong);color:var(--ink);font-size:20px}
+.cn-row__value{width:72px;text-align:center;font-size:20px;font-weight:600}
+.cn-row__sub{display:block;font-size:13px;font-weight:600;color:var(--amber)}
+/* primary button */
+.cn-btn-primary{width:100%;height:var(--button-primary-h);border-radius:var(--radius-lg);border:none;background:var(--amber);color:var(--on-amber);font-size:17px;font-weight:700}
+.cn-btn-secondary{width:100%;height:52px;border-radius:var(--radius-md);border:none;background:var(--surface);color:var(--ink);font-size:15px;font-weight:600}
+.cn-btn-add{display:inline-flex;align-items:center;gap:6px;height:var(--touch-min);padding:0 16px;border-radius:var(--radius-pill);border:none;background:var(--amber);color:var(--on-amber);font-size:15px;font-weight:700}
+/* chips */
+.cn-chip{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:var(--radius-pill);border:none;background:var(--surface);color:var(--ink);font-size:14px;font-weight:600}
+.cn-chip[aria-pressed="true"],.cn-chip.is-on{background:var(--amber);color:var(--on-amber);font-weight:700}
+.cn-chip--add{background:transparent;border:1.5px dashed var(--line);color:var(--ink-muted);font-weight:500}
+.cn-chip__count{font-weight:500;color:var(--ink-muted)}
+/* segmented */
+.cn-seg{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:var(--space-1);padding:4px;border-radius:var(--radius-md);background:var(--surface)}
+.cn-seg button{height:40px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--ink);font-size:14px;font-weight:500}
+.cn-seg button[aria-checked="true"]{background:var(--amber);color:var(--on-amber);font-weight:700}
+.cn-tabs button[aria-selected="true"]{background:var(--cream);color:var(--on-cream);font-weight:700}
+/* switch */
+.cn-switch{position:relative;width:44px;height:26px;border-radius:13px;border:none;padding:0;background:var(--control-strong)}
+.cn-switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:10px;background:var(--ink-muted)}
+.cn-switch[aria-checked="true"]{background:var(--amber)}
+.cn-switch[aria-checked="true"]::after{left:21px;background:var(--on-amber)}
+/* recipe tag + delta pill */
+.cn-tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--cherry)}
+.cn-tag::before{content:"";width:8px;height:8px;border-radius:4px;background:var(--cherry)}
+.cn-tag--new::before{background:transparent;border:1.5px solid var(--cherry)}
+.cn-delta{display:inline-block;font-size:12px;font-weight:700;color:var(--on-sage);background:var(--sage);padding:2px 8px;border-radius:var(--radius-pill)}
+/* score row */
+.cn-score{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.cn-score button{height:48px;border-radius:var(--radius-sm);border:none;background:var(--surface);color:var(--ink);font-size:15px;font-weight:600}
+.cn-score button[aria-checked="true"]{background:var(--amber);color:var(--on-amber);font-weight:700}
+.cn-score button.is-previous{border:1.5px dashed var(--cherry)}
+/* sheet */
+.cn-sheet{background:var(--surface-sheet);border-radius:var(--radius-sheet) var(--radius-sheet) 0 0;padding:10px 20px 20px;display:flex;flex-direction:column;gap:12px}
+.cn-sheet__handle{align-self:center;width:40px;height:5px;border-radius:3px;background:var(--line)}
+.cn-scrim{background:var(--scrim)}
+/* preview frame */
+.cn-preview{padding:10px;border-radius:var(--radius-xl);border:1.5px dashed var(--line)}
+/* tab bar */
+.cn-tabbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;height:var(--tabbar-h);padding:0 8px 16px;background:var(--nav)}
+.cn-tabbar a{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink-muted);text-decoration:none;font-size:12px;font-weight:500}
+.cn-tabbar a[aria-current="page"]{color:var(--ink);font-weight:600}
+.cn-tabbar .cn-plus{justify-self:center;width:var(--plus-button);height:var(--plus-button);border-radius:var(--radius-pill);background:var(--amber);color:var(--on-amber);justify-content:center}
+/* insight card */
+.cn-insight{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:var(--radius-xl);background:var(--surface)}
+.cn-insight h3{margin:0;font-size:17px;line-height:22px;font-weight:700}
+.cn-insight p{margin:0;font-size:14px;line-height:1.4;color:var(--ink-soft)}

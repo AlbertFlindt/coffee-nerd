@@ -1,0 +1,58 @@
+/* GENERATED from tokens.json by build-tokens.mjs. Do not edit. */
+:root{
+  color-scheme: dark;
+  --bg: #2E2522;
+  --surface: #3E322D;
+  --surface-sheet: #362B27;
+  --surface-sheet-field: #43372F;
+  --control: #4D3F38;
+  --control-strong: #54453D;
+  --nav: #261F1C;
+  --scrim: rgba(18, 12, 10, 0.62);
+  --ink: #F5EDE3;
+  --ink-soft: #D9CBBE;
+  --ink-muted: #BFAE9F;
+  --line: #6A5850;
+  --cream: #F1E6D6;
+  --on-cream: #2E2522;
+  --on-cream-muted: #6B4A3A;
+  --amber: #E7A955;
+  --on-amber: #2A1A08;
+  --sage: #9DCB98;
+  --on-sage: #22301F;
+  --cherry: #E9837A;
+  --bean: #A86B45;
+  --bean-crease: #5A3624;
+  --chart-grid: var(--control);
+  --chart-secondary: var(--line);
+  --font-sans: "Figtree", system-ui, sans-serif;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 28px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 18px;
+  --radius-sheet: 24px;
+  --radius-pill: 999px;
+  --touch-min: 44px;
+  --button-primary-h: 56px;
+  --field-h: 56px;
+  --tabbar-h: 84px;
+  --plus-button: 56px;
+  --viewport-ref-w: 412px;
+  --viewport-ref-h: 915px;
+}
+.cn-type-display{font-size:26px;line-height:32px;font-weight:700;letter-spacing:-0.01em}
+.cn-type-value-xl{font-size:32px;line-height:37px;font-weight:600}
+.cn-type-value-l{font-size:24px;line-height:28px;font-weight:600}
+.cn-type-title{font-size:20px;line-height:26px;font-weight:600}
+.cn-type-heading{font-size:17px;line-height:22px;font-weight:700}
+.cn-type-section{font-size:15px;line-height:20px;font-weight:600}
+.cn-type-body{font-size:15px;line-height:22px;font-weight:400}
+.cn-type-label{font-size:13px;line-height:18px;font-weight:500}
+.cn-type-caption{font-size:12px;line-height:16px;font-weight:400}
+.cn-type-button{font-size:17px;line-height:20px;font-weight:700}

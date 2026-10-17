@@ -1,0 +1,132 @@
+[
+  {
+    "file": "Main.html",
+    "png": "Main.png",
+    "title": "1 \u00b7 New shot \u2014 prefilled"
+  },
+  {
+    "file": "Rated.html",
+    "png": "Rated.png",
+    "title": "2 \u00b7 Results changed + rated"
+  },
+  {
+    "file": "RecipeChanged.html",
+    "png": "RecipeChanged.png",
+    "title": "3 \u00b7 Recipe changed \u2014 new experiment"
+  },
+  {
+    "file": "MoreSetup.html",
+    "png": "MoreSetup.png",
+    "title": "4 \u00b7 More \u2014 Setup"
+  },
+  {
+    "file": "MoreTasting.html",
+    "png": "MoreTasting.png",
+    "title": "5 \u00b7 More \u2014 Tasting"
+  },
+  {
+    "file": "Home.html",
+    "png": "Home.png",
+    "title": "6 \u00b7 Home"
+  },
+  {
+    "file": "Beans.html",
+    "png": "Beans.png",
+    "title": "7 \u00b7 Library \u2014 Beans"
+  },
+  {
+    "file": "Equipment.html",
+    "png": "Equipment.png",
+    "title": "8 \u00b7 Library \u2014 Gear"
+  },
+  {
+    "file": "AddBean.html",
+    "png": "AddBean.png",
+    "title": "9 \u00b7 Library \u2014 Add bean"
+  },
+  {
+    "file": "BeanDetail.html",
+    "png": "BeanDetail.png",
+    "title": "10 \u00b7 Library \u2014 Bean detail"
+  },
+  {
+    "file": "BrewNext.html",
+    "png": "BrewNext.png",
+    "title": "11 \u00b7 New shot \u2014 started from Brew next"
+  },
+  {
+    "file": "GearDetail.html",
+    "png": "GearDetail.png",
+    "title": "12 \u00b7 Gear \u2014 Machine detail"
+  },
+  {
+    "file": "EditSetup.html",
+    "png": "EditSetup.png",
+    "title": "13 \u00b7 Gear \u2014 Edit My setup"
+  },
+  {
+    "file": "CustomFeature.html",
+    "png": "CustomFeature.png",
+    "title": "14 \u00b7 Gear \u2014 Add your own feature"
+  },
+  {
+    "file": "GrinderDetail.html",
+    "png": "GrinderDetail.png",
+    "title": "15 \u00b7 Gear \u2014 Grinder detail"
+  },
+  {
+    "file": "BasketDetail.html",
+    "png": "BasketDetail.png",
+    "title": "16 \u00b7 Gear \u2014 Basket detail"
+  },
+  {
+    "file": "Library.html",
+    "png": "Library.png",
+    "title": "17 \u00b7 Library \u2014 Landing"
+  },
+  {
+    "file": "PuckPrep.html",
+    "png": "PuckPrep.png",
+    "title": "18 \u00b7 Puck prep \u2014 Overview"
+  },
+  {
+    "file": "RoutineBuilder.html",
+    "png": "RoutineBuilder.png",
+    "title": "19 \u00b7 Puck prep \u2014 Routine builder"
+  },
+  {
+    "file": "NewStep.html",
+    "png": "NewStep.png",
+    "title": "20 \u00b7 Puck prep \u2014 New step"
+  },
+  {
+    "file": "Tags.html",
+    "png": "Tags.png",
+    "title": "21 \u00b7 Library \u2014 Tags"
+  },
+  {
+    "file": "Journal.html",
+    "png": "Journal.png",
+    "title": "22 \u00b7 Journal"
+  },
+  {
+    "file": "Insights.html",
+    "png": "Insights.png",
+    "title": "23 \u00b7 Insights \u2014 What I like"
+  },
+  {
+    "file": "InsightsProgress.html",
+    "png": "InsightsProgress.png",
+    "title": "24 \u00b7 Insights \u2014 Progress"
+  },
+  {
+    "file": "InsightsCompare.html",
+    "png": "InsightsCompare.png",
+    "title": "25 \u00b7 Insights \u2014 Comparisons"
+  },
+  {
+    "file": "ShotDetail.html",
+    "png": "ShotDetail.png",
+    "title": "26 \u00b7 Journal \u2014 Shot detail"
+  }
+]

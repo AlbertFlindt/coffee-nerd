@@ -1,0 +1,5 @@
+# Owner-maintained or synced files keep their own formatting
+docs/
+design-system/
+CLAUDE.md
+drizzle/

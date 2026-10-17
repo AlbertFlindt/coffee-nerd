@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" role="img" aria-label="Coffee Nerd logo: a coffee bean wearing glasses">
+  <ellipse cx="20" cy="21" rx="13" ry="16" transform="rotate(-18 20 21)" fill="#A86B45"></ellipse>
+  <path d="M24 7 C18 14, 23 25, 15 35" fill="none" stroke="#5A3624" stroke-width="2.4" stroke-linecap="round"></path>
+  <circle cx="13.5" cy="17" r="5" fill="#2E2522" fill-opacity="0.35" stroke="#F1E6D6" stroke-width="2"></circle>
+  <circle cx="26.5" cy="17" r="5" fill="#2E2522" fill-opacity="0.35" stroke="#F1E6D6" stroke-width="2"></circle>
+  <path d="M18.5 16.5 Q20 15 21.5 16.5" fill="none" stroke="#F1E6D6" stroke-width="2" stroke-linecap="round"></path>
+  <circle cx="14.5" cy="17.5" r="1.6" fill="#F5EDE3"></circle>
+  <circle cx="27.5" cy="17.5" r="1.6" fill="#F5EDE3"></circle>
+  <path d="M16 27 Q20 30 24 27" fill="none" stroke="#2A1A08" stroke-width="1.8" stroke-linecap="round"></path>
+</svg>
