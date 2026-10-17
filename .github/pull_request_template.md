@@ -12,9 +12,10 @@
 
 ## Not designed yet / questions for the owner
 
-<!-- States or behavior that had no design or decision, and what was done instead. "None" if none. -->
+<!-- States or behavior that had no design or decision, and what was done instead. "None" if none. Every item here is also in docs/open-items.md. -->
 
 ## Review
 
 - [ ] `decision-reviewer` subagent run on the full diff; findings fixed or listed above
 - [ ] `docs/roadmap.md` status updated
+- [ ] `docs/open-items.md` updated: new open items added, settled ones removed
