@@ -2,6 +2,7 @@
 // fingerprint on the server, find or create the recipe, write the shot, clear Brew next, finish the bean
 // when the bag runs out. Every query is scoped by the owner (D-60).
 import { and, count, eq, inArray, sql } from 'drizzle-orm';
+import { z } from 'zod';
 import { shouldAutoFinish } from '../../domain/bean';
 import { recipeFingerprint } from '../../domain/fingerprint';
 import {
@@ -39,6 +40,31 @@ export type ShotInput = {
   notes: string | null;
   brewedAt: number;
 };
+
+const wholeNumber = z.number().int();
+
+/**
+ * The shape of a shot sent by the shot form; the values themselves are checked again by `saveShot`.
+ * `brewedAt` is set by the server.
+ */
+export const shotRequestSchema = z.object({
+  id: z.uuid(),
+  beanId: z.string(),
+  machineId: z.string(),
+  grinderId: z.string(),
+  basketId: z.string().nullable(),
+  routineId: z.string().nullable(),
+  grind: wholeNumber,
+  dose: wholeNumber,
+  setup: setupSnapshotSchema,
+  yield: wholeNumber.nullable(),
+  time: wholeNumber.nullable(),
+  taste: tasteSchema,
+  tagIds: z.array(z.string()).max(100),
+  newTagNames: z.array(z.string()).max(20),
+  notes: z.string().max(5000).nullable()
+});
+export type ShotRequest = z.infer<typeof shotRequestSchema>;
 
 export type SaveResult = {
   status: 'saved' | 'duplicate';

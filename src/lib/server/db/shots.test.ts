@@ -196,7 +196,13 @@ describe('saveShot', () => {
   it('D-53, D-101: an added note that already exists (ignoring case) is reused, not duplicated', () => {
     const berry = db.select().from(tag).where(eq(tag.name, 'Berry')).get()!;
     const { shotId } = save(input({ tagIds: [berry.id], newTagNames: ['berry', 'BERRY'] }, 1));
-    expect(db.select().from(tag).where(sql`lower(${tag.name}) = 'berry'`).all()).toHaveLength(1);
+    expect(
+      db
+        .select()
+        .from(tag)
+        .where(sql`lower(${tag.name}) = 'berry'`)
+        .all()
+    ).toHaveLength(1);
     expect(db.select().from(shotTag).where(eq(shotTag.shotId, shotId)).all()).toEqual([
       { shotId, tagId: berry.id }
     ]);
@@ -219,7 +225,10 @@ describe('saveShot', () => {
   });
 
   it('D-95, D-40: Undo does not reopen a bean that was finished by hand, or another owner’s', () => {
-    db.update(bean).set({ status: 'finished', finishedAt: T0 }).where(eq(bean.id, ids.beanId)).run();
+    db.update(bean)
+      .set({ status: 'finished', finishedAt: T0 })
+      .where(eq(bean.id, ids.beanId))
+      .run();
     expect(reopenAutoFinishedBean(db, ids.userId, ids.beanId, T0)).toBe(false);
     const other = seedOtherAccount();
     expect(reopenAutoFinishedBean(db, other.userId, ids.beanId, T0)).toBe(false);
