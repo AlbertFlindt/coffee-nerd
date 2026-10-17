@@ -1,5 +1,5 @@
 import { defineEnvVars } from '@sveltejs/kit/env';
-import { DEFAULT_DATABASE_PATH } from './lib/server/db/client';
+import { DEFAULT_DATABASE_PATH } from './lib/server/db/paths';
 
 export const variables = defineEnvVars({
   DATABASE_PATH: {

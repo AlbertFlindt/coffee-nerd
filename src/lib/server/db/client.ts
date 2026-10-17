@@ -4,10 +4,8 @@ import Database from 'better-sqlite3';
 import { sql } from 'drizzle-orm';
 import { drizzle, type BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
+import { MIGRATIONS_FOLDER } from './paths';
 import * as schema from './schema';
-
-export const DEFAULT_DATABASE_PATH = './data/coffee-nerd.db';
-export const MIGRATIONS_FOLDER = './drizzle';
 
 export type Db = BetterSQLite3Database<typeof schema> & { $client: Database.Database };
 

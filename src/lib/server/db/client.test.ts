@@ -35,11 +35,11 @@ describe('openDatabase', () => {
 });
 
 describe('isDatabaseReachable', () => {
-  it('is true for an open database', () => {
+  it('D-59: is true for an open database', () => {
     expect(isDatabaseReachable(openDatabase(join(dir, 'health.db')))).toBe(true);
   });
 
-  it('is false once the connection is closed', () => {
+  it('D-59: is false once the connection is closed', () => {
     const db = openDatabase(join(dir, 'closed.db'));
     db.$client.close();
 

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('/health reports the app and its database as ok', async ({ request }) => {
+test('D-59: /health reports the app and its database as ok', async ({ request }) => {
   const response = await request.get('/health');
 
   expect(response.status()).toBe(200);
@@ -11,14 +11,16 @@ test('D-36: the start page fits the viewport without page scrolling', async ({ p
   await page.goto('/');
 
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
-  const { scrollHeight, clientHeight } = await page.evaluate(() => ({
-    scrollHeight: document.documentElement.scrollHeight,
-    clientHeight: document.documentElement.clientHeight
-  }));
-  expect(scrollHeight).toBeLessThanOrEqual(clientHeight);
+  // The app shell clips overflow, so check both the document and the shell itself.
+  const overflow = await page.evaluate(() =>
+    [document.documentElement, document.querySelector('.cn-root')!].map(
+      (el) => el.scrollHeight - el.clientHeight
+    )
+  );
+  expect(overflow).toEqual([0, 0]);
 });
 
-test('the app uses the design system and self-hosted Figtree, with no external requests', async ({
+test('D-18, D-69: the app uses the design system and self-hosted Figtree, with no external requests', async ({
   page
 }) => {
   const external: string[] = [];

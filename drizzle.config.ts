@@ -1,5 +1,5 @@
 import { defineConfig } from 'drizzle-kit';
-import { DEFAULT_DATABASE_PATH } from './src/lib/server/db/client';
+import { DEFAULT_DATABASE_PATH } from './src/lib/server/db/paths';
 
 export default defineConfig({
   schema: './src/lib/server/db/schema.ts',

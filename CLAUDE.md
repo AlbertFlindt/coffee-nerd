@@ -25,7 +25,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - `npm run test:e2e`: Playwright (`tests/e2e/`), builds and serves the app at 412 × 915 with its own database in `test-results/`
 - `npm run build` / `npm start`: production build in `build/`, served on port 3000
 - `npm run screenshot -- <route> [name]`: 412 × 915 screenshot (2×) into `screenshots/`; needs `npm run dev` running (or `BASE_URL`)
-- `npm run db:generate`: new migration in `drizzle/` from `src/lib/server/db/schema.ts`. Migrations are applied when the server starts; the database is `DATABASE_PATH` (default `./data/coffee-nerd.db`)
+- `npm run db:generate`: new migration in `drizzle/` from `src/lib/server/db/schema.ts`. Migrations are applied when the server starts (`npm run db:migrate` applies them without starting it); the database is `DATABASE_PATH` (default `./data/coffee-nerd.db`)
 - `docker compose up --build`: the production image on port 3000, data in the `/data` volume
 - `node design-system/build-tokens.mjs`: regenerate `tokens.css`. Only as part of a design-system sync the owner starts; `design-system/` is otherwise read-only (D-69).
 
