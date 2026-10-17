@@ -160,6 +160,11 @@ describe('applyStep', () => {
     expect(applyStep(null, 1000, '+', { min: 0, max: 60000 })).toBe(1000);
   });
 
+  it('D-82: an empty yield counts from 0 like time: the first + gives 0.1 g', () => {
+    expect(applyStep(null, 100, '+')).toBe(100);
+    expect(applyStep(null, 100, '-')).toBe(0);
+  });
+
   it('D-07: a value stays inside its range', () => {
     expect(applyStep(0, 100, '-', { min: 0, max: 16000 })).toBe(0);
     expect(applyStep(16000, 100, '+', { min: 0, max: 16000 })).toBe(16000);

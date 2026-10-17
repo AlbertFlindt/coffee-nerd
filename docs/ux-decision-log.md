@@ -109,8 +109,10 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the most valuable action is "brew again, change one thing."
 - **D-72 — A bean's first shot starts with an empty time.** *(Revised 2026-10-17: see D-80.)* When a shot starts from My setup (D-38), grind, dose and yield come from My setup; the time has no default and stays empty until it is set. Refines D-03.
   - *Why:* My setup holds what you choose before brewing; time is a result, so inventing one would be a guess (same reasoning as D-11).
-- **D-80 — Tapping an empty time starts at 0 s.** When the time card is empty (D-72), its −/+ buttons count from 0 s: the first + gives 1 s, and − stays at 0 s. Tap-to-type still works for entering the time directly. Refines D-72.
+- **D-80 — Tapping an empty time starts at 0 s.** *(Revised 2026-10-17: see D-82.)* When the time card is empty (D-72), its −/+ buttons count from 0 s: the first + gives 1 s, and − stays at 0 s. Tap-to-type still works for entering the time directly. Refines D-72.
   - *Why:* the buttons keep doing exactly what their label says ("+ 1 s", D-07), without guessing a typical time.
+- **D-82 — An empty yield works like an empty time.** When there is no yield to copy (a Brew next recipe without shots, D-43), the yield card starts empty, and its −/+ count from 0 like the time card (D-80). Refines D-43.
+  - *Why:* one rule for every empty value; nothing is guessed.
 - **D-74 — A re-buy from a bag without rated shots starts from its latest shot.** When the nearest earlier bag with shots (D-73) has no rated shot, and so no best recipe (D-66), the new bag starts from that bag's latest shot: its recipe, yield and time. Refines D-73.
   - *Why:* keeps "the nearest bag with shots" true even when nothing was scored.
 - **D-75 — Archived gear or routines are swapped for My setup's.** When the shot a new shot starts from used a machine, grinder, basket or puck prep routine that has since been archived, only that item is replaced by My setup's default (D-38); everything else is copied as usual, and the recipe tag names what changed. Refines D-03.
@@ -133,13 +135,15 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the grid keeps all four core values visible at once with large touch targets; one primary action at the bottom suits one-handed use. A row-based "instrument" layout was tried and felt cluttered.
 - **D-15 — Changes vs. last shot shown as a delta.** A changed value is colored (see D-19) with a small delta pill (e.g. "+2.5"). No "was X" text.
   - *Why:* the delta is the information the barista acts on; extra text added clutter.
-- **D-16 — Recipe tag on the bean card.** *(Revised 2026-10-17: see D-71, D-77.)* Shows **"Recipe reused Nx"** when this exact recipe has been brewed before, or **"New recipe · <what> changed"** (e.g. "grind changed") when it has not. Replaces an "attempt N" counter.
+- **D-16 — Recipe tag on the bean card.** *(Revised 2026-10-17: see D-71, D-77, D-81.)* Shows **"Recipe reused Nx"** when this exact recipe has been brewed before, or **"New recipe · <what> changed"** (e.g. "grind changed") when it has not. Replaces an "attempt N" counter.
   - Matching is against **all past shots for the same bean and machine**, not only the previous shot. Returning to an earlier setting is recognized as that recipe, with its count and its last score (D-12).
   - *Why:* dialing in often goes back and forth; matching all history keeps the counter, score reference and bean-aging signal reliable. Naming the cause makes the tag understandable — a bare "New recipe" left users unsure why it appeared.
 - **D-71 — Recipe tag names up to two changes.** *(Revised 2026-10-17: see D-77.)* When a new recipe differs from the last shot's recipe in more than one thing, the tag names the first two and counts the rest: "New recipe · grind changed", "New recipe · grind and dose changed", "New recipe · grind, dose and 1 more changed". Refines D-16.
   - *Why:* says exactly what changed in the common one- or two-change case, and still fits on the bean card when more changed.
-- **D-77 — Order of changes in the recipe tag, and a plain "New recipe".** Changes are named in this order: grind, dose, machine, grinder, basket, routine, then machine features, so D-71's first two follow it (e.g. "grind and grinder changed"). When nothing can be named — a bean's first shot, or the last shot was another bean with the same setup — the tag says just "New recipe". Refines D-16 and D-71.
+- **D-77 — Order of changes in the recipe tag, and a plain "New recipe".** *(Revised 2026-10-17: see D-81.)* Changes are named in this order: grind, dose, machine, grinder, basket, routine, then machine features, so D-71's first two follow it (e.g. "grind and grinder changed"). When nothing can be named (a bean's first shot), the tag says just "New recipe". Refines D-16 and D-71.
   - *Why:* the values you change most come first; a bare "New recipe" is honest when there is nothing earlier to compare with.
+- **D-81 — The recipe tag compares with this bean's last shot.** What changed is named against the last shot of the same bean: the shot the form copies from (D-03) and the deltas compare with (D-15). A bean's first shot has nothing to compare with, so its tag says just "New recipe" (D-77). Refines D-16.
+  - *Why:* the tag, the deltas and the prefill all talk about the same shot, so they never disagree.
 - **D-17 — Bean age lives on the bean overview and Home, not the shot form.**
   - *Why:* bean age matters when choosing a bean; on the shot form it is clutter, since the bean is usually unchanged from the last shot.
 - **D-20 — Plain words, no abbreviations.** UI text spells things out (e.g. "Preinfusion 4 s", not "PI 4 s"); units are written in full or as standard symbols (°C, g, s, bar).
@@ -219,7 +223,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - Each recipe has a round **"Brew next"** button (cup icon) on the right (D-43).
   - **"Mark as finished"** at the bottom as a quiet secondary button (becomes "Reopen" on a finished bean, D-40).
   - *Why:* answers "what have I learned about this bag?" — the recipe list is the bean's dial-in history in one view. Graphs stay on Home and in Insights to keep this page calm.
-- **D-43 — "Brew next": start the next shot from a chosen recipe.** On the bean detail page, tapping a recipe's "Brew next" button marks it (amber button, amber outline on the row, "Next shot starts here"). The next "+" then opens the shot form prefilled with that recipe (its recipe values and setup; yield and time from its last shot), and the recipe tag shows its reuse count as usual. Only one recipe can be marked at a time; tapping again clears it. After that shot is saved the mark clears and D-03 (copy last shot) applies again.
+- **D-43 — "Brew next": start the next shot from a chosen recipe.** *(Revised 2026-10-17: see D-82.)* On the bean detail page, tapping a recipe's "Brew next" button marks it (amber button, amber outline on the row, "Next shot starts here"). The next "+" then opens the shot form prefilled with that recipe (its recipe values and setup; yield and time from its last shot), and the recipe tag shows its reuse count as usual. Only one recipe can be marked at a time; tapping again clears it. After that shot is saved the mark clears and D-03 (copy last shot) applies again.
   - "+" stays the only way to add a shot (D-31); "Brew next" only decides what it starts from.
   - The shot form says so: the bean card's bottom row shows **"Recipe chosen from Library"** (amber, cup icon) under the recipe tag, with a **"Use last shot recipe"** button that switches back to D-03 and clears the mark.
     - *Why:* a mark set yesterday and forgotten would otherwise make "+" start from an unexpected recipe.
@@ -228,7 +232,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* some baristas track stock, many don't; an optional field serves both without nagging.
 - **D-40 — Finishing a bean.** A bean moves from Open to Finished with **"Mark as finished"**, always available on the bean. When a bag weight is set (D-35) and grams left reach zero, the app **finishes the bean automatically** and says so, with an undo. A finished bean can always be reopened.
   - *Why:* manual works for everyone; automatic saves a step for those who track weight, but weights drift (spills, sharing), so the manual option and undo must always be there.
-- **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-17: see D-78.)*
+- **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-17: see D-78, D-83.)*
   - **My setup** (a light cream card so it stands out): default machine, grinder, basket and puck prep routine, plus **default values** (dose, yield, grind, temperature, pressure profile). One "Edit" button.
   - Defaults are the **starting point for a bean's first shot** (and when switching gear). After that, D-03 applies: new shots copy the last shot.
   - **Gear list** grouped by type (Machines, Grinders, Baskets, later Other). Each row shows a short capability summary (e.g. "Semi-auto · Preinfusion, low bar start, low bar end"; "Stepless · steps of 0.1"); the default item carries a "Default" chip. Tapping a row opens the item, where its capability profile (D-02) and step sizes (D-07) are set.
@@ -248,6 +252,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* basket choice changes extraction and is part of the recipe (D-13); the dose range turns the basket's spec into a useful nudge without extra input per shot.
 - **D-79 — Gear sizes can have decimals.** Group size, burr size and basket diameter accept decimals (e.g. 58.5 mm), stored like every other decimal number. Refines D-44, D-48 and D-49.
   - *Why:* real gear comes in sizes such as 58.5 mm and 63.5 mm; rounding them would make the fit check and grinder comparisons wrong.
+- **D-83 — Gear and routines that My setup uses cannot be archived.** Archiving is not offered for the default machine, grinder, basket or puck prep routine; the item says "Used in My setup · choose another default first". Refines D-38.
+  - *Why:* a new shot can always fall back to My setup (D-75), so My setup must only point to items you can pick.
 - **D-46 — "Add your own feature".** From the machine detail page (D-44), a bottom sheet lets the user define any capability of that machine the app doesn't know (e.g. a bloom pause, a paddle position). Fields:
   - **Name.**
   - **Kind of value:** Number with unit, Seconds, On / off, Pick from a list. The fields below adapt (unit for numbers, options for lists).
