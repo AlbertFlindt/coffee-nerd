@@ -110,7 +110,7 @@
         ]
   );
 
-  const routineName = $derived(shot.setup.routine?.name ?? 'None');
+  const routineName = $derived(shot.setup.routine?.name ?? 'No puck prep');
 
   function toggleTag(id: string) {
     shot.tagIds = shot.tagIds.includes(id)
@@ -249,7 +249,9 @@
         <button type="button" class="link-row cn-tap" onclick={() => (picking = 'basket')}>
           <span class="strong">Basket</span>
           <span class="end" class:changed={changes.basket}
-            >{shot.basketId ? (gearNames[shot.basketId] ?? '') : 'None'}{@render chevron()}</span
+            >{shot.basketId
+              ? (gearNames[shot.basketId] ?? '')
+              : 'No basket'}{@render chevron()}</span
           >
         </button>
         <button type="button" class="link-row prep cn-tap" onclick={() => (picking = 'routine')}>

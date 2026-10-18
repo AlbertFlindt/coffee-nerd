@@ -58,7 +58,8 @@
       <span class="name" aria-hidden="true">{title}</span>
       <button
         type="button"
-        class="line gear"
+        class="line gear cn-tap"
+        class:with-summary={!!summary}
         aria-label="{gear}, choose another machine or grinder"
         onclick={ongear}>{gear}</button
       >
@@ -159,15 +160,22 @@
     pointer-events: auto;
   }
 
-  /* A larger tap area around the one-line gear text that stops short of the bean name's middle. */
+  /*
+   * A 44 px tap area that stops short of the bean name: with a summary line it reaches down over it (the
+   * summary is the gear's setup), otherwise it grows evenly.
+   */
+  .gear {
+    border-radius: var(--radius-sm);
+  }
+
   .gear::before {
     content: '';
     position: absolute;
-    inset: -9px -8px;
+    inset: -13px -8px;
   }
 
-  .gear:active {
-    color: var(--amber);
+  .gear.with-summary::before {
+    inset: -6px -8px -21px;
   }
 
   .icon {

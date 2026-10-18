@@ -96,7 +96,11 @@ export const featureDefinitionSchema = z
       return f.switchable === rule.switchable && rule.kinds.includes(f.value.kind);
     },
     { message: 'This feature has a fixed kind of value and off switch (data-model §3)' }
-  );
+  )
+  .refine((f) => f.value.kind !== 'choice' || f.value.options.length >= 2, {
+    message: 'A list needs at least two options (D-152)',
+    path: ['value', 'options']
+  });
 export type FeatureDefinition = z.infer<typeof featureDefinitionSchema>;
 
 // --- gear specs: one per kind (D-68) ---

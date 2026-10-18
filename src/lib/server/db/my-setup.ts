@@ -185,6 +185,19 @@ export function saveMySetup(db: Db, ownerId: string, input: unknown, now: number
     });
     if (problems.length > 0) throw new MySetupRejected(problems);
 
+    // Defaults for features this machine does not have switched on stay, for when a shot switches to another
+    // machine (D-153); the chosen machine's own features are as checked above.
+    const stored = tx
+      .select({ features: userSettings.defaultFeatures })
+      .from(userSettings)
+      .where(eq(userSettings.userId, ownerId))
+      .get();
+    const others = Object.fromEntries(
+      Object.entries(stored?.features ?? {}).filter(
+        ([key]) => !spec.features.some((f) => f.key === key && f.enabled)
+      )
+    );
+
     const values = {
       defaultMachineId: v.machineId,
       defaultGrinderId: v.grinderId,
@@ -193,15 +206,10 @@ export function saveMySetup(db: Db, ownerId: string, input: unknown, now: number
       defaultGrind: v.grind,
       defaultDose: v.dose,
       defaultYield: v.yield,
-      defaultFeatures: features,
+      defaultFeatures: { ...others, ...features },
       updatedAt: now
     };
-    const exists = tx
-      .select({ userId: userSettings.userId })
-      .from(userSettings)
-      .where(eq(userSettings.userId, ownerId))
-      .get();
-    if (exists) tx.update(userSettings).set(values).where(eq(userSettings.userId, ownerId)).run();
+    if (stored) tx.update(userSettings).set(values).where(eq(userSettings.userId, ownerId)).run();
     else
       tx.insert(userSettings)
         .values({ userId: ownerId, timeZone: 'UTC', createdAt: now, ...values })

@@ -69,6 +69,31 @@ test('D-153: the gear line switches the grinder for this shot; the grind control
   await expect(page.locator('.cn-tag')).toContainText('New recipe');
 });
 
+test('D-153: switching the machine brings its own features; values both have stay', async () => {
+  await page.goto('/library/gear');
+  await page.getByRole('button', { name: 'Add gear' }).click();
+  await page.getByRole('button', { name: 'Machine' }).click();
+  // D-158: a new machine has temperature and flat pressure, no phases.
+  await page.getByLabel('Name').fill('Gaggia Classic');
+  await page.getByRole('button', { name: 'Add machine' }).click();
+  await expect(page.getByRole('link', { name: /^Gaggia Classic/ })).toBeVisible();
+
+  await page.goto('/shot/new');
+  await expect(page.locator('.card')).toContainText('Preinfusion 4 s');
+  await page.getByRole('button', { name: /choose another machine or grinder$/ }).click();
+  await page
+    .getByRole('region', { name: 'Choose machine and grinder' })
+    .getByRole('button', { name: 'Gaggia Classic' })
+    .click();
+  await expect(page.locator('.card')).toContainText('Gaggia Classic · Timemore 064S');
+  await expect(page.locator('.card')).not.toContainText('Preinfusion');
+  await expect(page.locator('.card')).toContainText('93 °C');
+  await page.getByRole('button', { name: 'More', exact: true }).click();
+  const more = page.getByRole('region', { name: 'More', exact: true });
+  await expect(more.getByRole('switch', { name: 'Preinfusion' })).toHaveCount(0);
+  await expect(more.getByText('Flat')).toBeVisible();
+});
+
 test('D-154: a dose outside the basket’s range shows a gentle hint, never a block', async () => {
   await page.goto('/shot/new');
   await expect(page.getByText(/holds 17\.0–19\.0 g/)).toHaveCount(0);
@@ -88,7 +113,7 @@ test('D-155: the basket and puck prep pickers start with leaving them out', asyn
   await sheet.getByRole('button', { name: /^Basket/ }).click();
   await expect(sheet.locator('.pick').first()).toHaveText('No basket');
   await sheet.getByRole('button', { name: 'No basket' }).click();
-  await expect(sheet.getByRole('button', { name: /^Basket/ })).toContainText('None');
+  await expect(sheet.getByRole('button', { name: /^Basket/ })).toContainText('No basket');
   await expect(page.locator('.cn-tag')).toContainText('New recipe');
 
   await sheet.getByRole('button', { name: /Puck prep/ }).click();
@@ -100,10 +125,19 @@ test('D-155: the basket and puck prep pickers start with leaving them out', asyn
   ).toBeVisible();
   await screenshot('ShotNoPuckPrep');
   await sheet.getByRole('button', { name: 'No puck prep' }).click();
-  await expect(sheet.getByRole('button', { name: /Puck prep/ })).toContainText('None');
+  await expect(sheet.getByRole('button', { name: /Puck prep/ })).toContainText('No puck prep');
 });
 
-test('the grinder added for this file is archived again', async () => {
+test('the machine and grinder added for this file are archived again', async () => {
+  await page.goto('/library/gear');
+  await page.getByRole('link', { name: /^Gaggia Classic/ }).click();
+  await page.getByRole('button', { name: 'Archive' }).click();
+  await page
+    .getByRole('region', { name: 'Archive this machine' })
+    .getByRole('button', { name: 'Archive' })
+    .click();
+  await expect(page.getByRole('link', { name: /^Gaggia Classic/ })).toHaveCount(0);
+
   await page.goto('/library/gear');
   await page.getByRole('link', { name: /^Comandante C40/ }).click();
   await page.getByRole('button', { name: 'Archive' }).click();

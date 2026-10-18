@@ -157,6 +157,12 @@
       .map(
         (p) => `Set ${p.problem === 'pressure_missing' ? 'the pressure for ' : ''}${p.label} first.`
       );
+    // D-153: after switching the grinder, the grind may be outside its range (as Edit My setup says).
+    if (
+      shot.grind < Math.min(dial.finest, dial.coarsest) ||
+      shot.grind > Math.max(dial.finest, dial.coarsest)
+    )
+      localProblems.push('Grind must be within the grinder’s range');
     return localProblems.length === 0;
   }
 </script>

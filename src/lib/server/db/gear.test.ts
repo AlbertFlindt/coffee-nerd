@@ -290,6 +290,79 @@ describe('custom features (D-46, D-151)', () => {
     expect(spec.features.at(-1)).toMatchObject({ label: 'Bloom', enabled: false });
   });
 
+  it('D-151: a used feature keeps its kind of value and its options', () => {
+    const water: FeatureDefinition = {
+      ...bloom,
+      label: 'Water',
+      value: {
+        kind: 'choice',
+        options: [
+          { id: 'soft', label: 'Soft' },
+          { id: 'hard', label: 'Hard' }
+        ]
+      }
+    };
+    saveGear(
+      db,
+      ids.userId,
+      ids.machineId,
+      machine([...REFERENCE.machine.spec.features, water]),
+      T0
+    );
+    useIt();
+    const changed = (value: FeatureDefinition['value']) =>
+      machine([...REFERENCE.machine.spec.features, { ...water, value }]);
+    expect(() =>
+      saveGear(db, ids.userId, ids.machineId, changed({ kind: 'seconds', step: 1000 }), T0)
+    ).toThrow(new GearRejected(['spec.features: used']));
+    expect(() =>
+      saveGear(
+        db,
+        ids.userId,
+        ids.machineId,
+        changed({
+          kind: 'choice',
+          options: [
+            { id: 'soft', label: 'Soft' },
+            { id: 'filtered', label: 'Filtered' }
+          ]
+        }),
+        T0
+      )
+    ).toThrow(new GearRejected(['spec.features: used']));
+    // A new option and a renamed one are fine.
+    saveGear(
+      db,
+      ids.userId,
+      ids.machineId,
+      changed({
+        kind: 'choice',
+        options: [
+          { id: 'soft', label: 'Very soft' },
+          { id: 'hard', label: 'Hard' },
+          { id: 'filtered', label: 'Filtered' }
+        ]
+      }),
+      T0
+    );
+  });
+
+  it('D-152: a list of your own needs at least two options', () => {
+    const one: FeatureDefinition = {
+      ...bloom,
+      value: { kind: 'choice', options: [{ id: 'only', label: 'Only' }] }
+    };
+    expect(() =>
+      saveGear(
+        db,
+        ids.userId,
+        ids.machineId,
+        machine([...REFERENCE.machine.spec.features, one]),
+        T0
+      )
+    ).toThrow(GearRejected);
+  });
+
   it('D-151, D-60: usedFeatureKeys lists the keys of your recipes only', () => {
     expect(usedFeatureKeys(db, ids.userId)).toEqual([]);
     useIt();

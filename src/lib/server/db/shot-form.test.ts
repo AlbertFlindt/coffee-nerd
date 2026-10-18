@@ -286,6 +286,14 @@ const noTaste = { score: null, balance: null, body: null, sweetness: null, after
 describe('loadEditShotForm', () => {
   const rated = { score: 7, balance: -2, body: 6, sweetness: null, aftertaste: null };
 
+  it('D-113, D-153: a shot keeps its own grinder in the list, even when archived since', () => {
+    const { shotId } = save({}, 1);
+    db.update(gear).set({ archivedAt: T0 }).where(eq(gear.id, ids.grinderId)).run();
+    const form = loadEditShotForm(db, ids.userId, shotId)!;
+    expect(form.grinders.map((g) => g.id)).toEqual([ids.grinderId]);
+    expect(form.machines.map((m) => m.id)).toEqual([ids.machineId]);
+  });
+
   it('D-57: starts from the shot itself: its values, taste, flavor notes and notes', () => {
     const berry = db.select().from(tag).where(eq(tag.name, 'Berry')).get()!;
     const { shotId } = save(

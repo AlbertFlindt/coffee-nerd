@@ -199,7 +199,7 @@ describe('saveMySetup', () => {
     expect(page.mySetup?.machine).toBe('Second');
   });
 
-  it('D-45: features that the chosen machine does not have are left out', () => {
+  it('D-45, D-153: features the chosen machine does not have keep their defaults for other machines', () => {
     const plain = addGear(
       db,
       ids.userId,
@@ -219,8 +219,18 @@ describe('saveMySetup', () => {
       },
       T0
     );
-    const features = loadMySetupForm(db, ids.userId).current.features;
-    expect(Object.keys(features)).toEqual(['flat_pressure']);
+    const stored = db
+      .select({ features: userSettings.defaultFeatures })
+      .from(userSettings)
+      .where(eq(userSettings.userId, ids.userId))
+      .get()!.features;
+    expect(stored.flat_pressure).toMatchObject({ value: 8500 });
+    // The Bianca's preinfusion keeps its default, for when the shot form switches back to it.
+    expect(stored.preinfusion).toMatchObject({ on: true, value: 4000 });
+    // A new bean on the plain machine starts with its own feature only.
+    const form = loadShotForm(db, ids.userId);
+    if (form.state !== 'ready') throw new Error('Expected a ready form');
+    expect(Object.keys(form.prefill.setup.features)).toEqual(['flat_pressure']);
   });
 
   it('D-155: no basket and no puck prep', () => {

@@ -215,17 +215,25 @@ export function usedFeatureKeys(db: Queryable, ownerId: string): string[] {
   return [...keys];
 }
 
-/** D-151: a custom feature can be deleted only while no shot has used it. */
+/**
+ * D-151: a custom feature a shot used stays, with its kind of value and its list options, so the values
+ * recipes hold keep their meaning. It can still be renamed, switched off and given new options.
+ */
 function assertUsedFeaturesKept(db: Queryable, ownerId: string, id: string, spec: MachineSpec) {
   const existing = loadGear(db, ownerId, id);
   if (existing?.kind !== 'machine') return;
-  const kept = new Set(spec.features.map((f) => f.key));
-  const dropped = (existing.spec as MachineSpec).features
-    .filter((f) => !f.builtIn && !kept.has(f.key))
-    .map((f) => f.key);
-  if (dropped.length === 0) return;
+  const now = new Map(spec.features.map((f) => [f.key, f.value]));
+  const changed = (existing.spec as MachineSpec).features.filter((f) => {
+    if (f.builtIn) return false;
+    const next = now.get(f.key);
+    if (!next || next.kind !== f.value.kind) return true;
+    if (f.value.kind !== 'choice' || next.kind !== 'choice') return false;
+    const ids = new Set(next.options.map((o) => o.id));
+    return f.value.options.some((o) => !ids.has(o.id));
+  });
+  if (changed.length === 0) return;
   const used = new Set(usedFeatureKeys(db, ownerId));
-  if (dropped.some((key) => used.has(key))) throw new GearRejected(['spec.features: used']);
+  if (changed.some((f) => used.has(f.key))) throw new GearRejected(['spec.features: used']);
 }
 
 /** Saves a gear page (D-44, D-48, D-49). The kind never changes; archived gear is not saved (D-148). */
