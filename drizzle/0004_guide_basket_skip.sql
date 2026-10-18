@@ -1,0 +1,1 @@
+ALTER TABLE `app_state` ADD `basket_step_skipped` integer DEFAULT false NOT NULL;

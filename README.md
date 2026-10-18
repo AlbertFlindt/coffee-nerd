@@ -8,7 +8,7 @@
 - Installable as an app on your phone or tablet (PWA); opens offline, and shots saved offline are sent when you're back online.
 - Built for coffee nerds: recipe matching across your whole history, σ and distributions in Insights, any machine described by hand.
 
-> **Status:** the shot form, the Journal, the shot detail and the Library's Beans pages work (milestones M3 to M5); Gear and My setup are being built (M6), then Puck prep, Home and Insights. Not ready for daily use yet. Private for now; it will become open source once it is mature.
+> **Status:** the shot form, the Journal, the shot detail, the Library's Beans and Gear pages and My setup work, with a step-by-step start after creating the account (milestones M3 to M6); Puck prep, Home and Insights come next. Not ready for daily use yet. Private for now; it will become open source once it is mature.
 
 ## Try the latest build on your server (Dockge)
 
@@ -33,7 +33,7 @@ Every merge to `main` is published as the image `ghcr.io/albertflindt/coffee-ner
 
    Do steps 3 and 4 right away: until the seed has run, anyone who can reach the server can claim the app, and until you set your own password the published Demo password works.
 
-3. **Fill it with the reference setup before signing in.** Gear and My setup cannot be added in the app until milestone M6, so start from the seed (Lelit Bianca, Timemore 064S, VST 18 g, Daily routine, one bean). In Dockge open the stack's terminal (`sh`) and run `node scripts/seed.mjs`. It only works while the app has no account yet.
+3. **Fill it with the reference setup before signing in.** The seed gives you a ready setup to try (Lelit Bianca, Timemore 064S, VST 18 g, Daily routine, one bean). In Dockge open the stack's terminal (`sh`) and run `node scripts/seed.mjs`. It only works while the app has no account yet. To use your own gear instead, skip steps 3 and 4: create your account at `http://<server>:3000` and the app walks you through your machine, grinder, basket, My setup and first bean.
 4. **Sign in** at `http://<server>:3000` as **Demo** with the password **coffee-nerd**. Then set your own password in the same terminal with `node scripts/reset-password.mjs`.
 5. **Update to the latest build:** press **Update** on the stack. Dockge pulls the new image and restarts it; your shots stay in the `data` volume, and database changes are applied when the app starts.
 

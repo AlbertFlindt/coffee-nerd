@@ -10,6 +10,7 @@
   import { PROCESS_LABEL, roastDateText, type Process } from '#lib/domain/bean.ts';
   import type { BeanFormText } from '#lib/domain/bean-form.ts';
   import { countryName, searchCountries } from '#lib/domain/countries.ts';
+  import type { Guide } from '#lib/domain/guide.ts';
 
   let {
     mode,
@@ -19,6 +20,7 @@
     today,
     rebuy = null,
     choices = [],
+    guide = null,
     problems = []
   }: {
     mode: 'add' | 'edit';
@@ -33,6 +35,8 @@
     rebuy?: { name: string } | null;
     /** "Same as before" choices (D-126); picking one opens the form filled from it (?rebuy=). */
     choices?: { id: string; name: string; origin: string }[];
+    /** The last step of the step-by-step start (D-157): "Step 5 of 5" and "Next". */
+    guide?: Guide | null;
     problems?: string[];
   } = $props();
 
@@ -55,8 +59,12 @@
 <header>
   <a
     class="icon cn-tap"
-    href={beanId ? resolve('/library/beans/[id]', { id: beanId }) : resolve('/library/beans')}
-    aria-label="Close without saving"
+    href={guide
+      ? resolve('/')
+      : beanId
+        ? resolve('/library/beans/[id]', { id: beanId })
+        : resolve('/library/beans')}
+    aria-label={guide ? 'Leave for now' : 'Close without saving'}
   >
     <svg
       width="22"
@@ -69,11 +77,20 @@
       aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg
     >
   </a>
-  <h1>{mode === 'add' ? 'Add bean' : 'Edit bean'}</h1>
+  <div class="title">
+    <h1>{mode === 'add' ? 'Add bean' : 'Edit bean'}</h1>
+    {#if guide}<span class="step">Step {guide.step} of {guide.of}</span>{/if}
+  </div>
   <span></span>
 </header>
 
-<form id="bean-form" class="fields" method="POST" action="?/save" use:enhance>
+<form
+  id="bean-form"
+  class="fields"
+  method="POST"
+  action={guide ? '?guide=1&/save' : '?/save'}
+  use:enhance
+>
   {#if mode === 'add'}
     <div class="rebuy">
       <button type="button" class="rebuy-open cn-tap" onclick={() => (sheet = 'rebuy')}>
@@ -276,7 +293,7 @@
     <p class="problem" role="alert">{problem}</p>
   {/each}
   <button class="cn-btn-primary cn-tap-strong" form="bean-form">
-    {mode === 'add' ? 'Add bean' : 'Save changes'}
+    {guide ? 'Next' : mode === 'add' ? 'Add bean' : 'Save changes'}
   </button>
   {#if mode === 'edit' && deletable}
     <!-- D-145: only a bean without shots can be deleted; a confirmation asks first. -->
@@ -296,6 +313,7 @@
       action={resolve('/library/beans/new')}
       data-sveltekit-replacestate
     >
+      {#if guide}<input type="hidden" name="guide" value="1" />{/if}
       {#each choices as choice (choice.id)}
         <button type="submit" name="rebuy" value={choice.id} class="row cn-tap">
           <span class="row-name">{choice.name}</span>
@@ -372,6 +390,17 @@
     text-align: center;
     font-size: 20px;
     font-weight: 600;
+  }
+
+  .title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .step {
+    font-size: 13px;
+    color: var(--ink-muted);
   }
 
   .icon {

@@ -16,6 +16,7 @@
     today={data.today}
     rebuy={data.rebuyName ? { name: data.rebuyName } : null}
     choices={data.choices}
+    guide={data.guide}
     problems={form?.problems}
   />
 {/key}

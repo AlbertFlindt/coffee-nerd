@@ -2,6 +2,7 @@
   // The machine page (screen 12): edit a machine (D-44) or add one (D-147, D-158). Switched-on features
   // are exactly what the shot form shows (D-02). Group size takes decimals (D-79).
   import { untrack } from 'svelte';
+  import type { Guide } from '#lib/domain/guide.ts';
   import CustomFeature from '#lib/components/CustomFeature.svelte';
   import GearFormShell from '#lib/components/GearFormShell.svelte';
   import TextField from '#lib/components/TextField.svelte';
@@ -14,6 +15,7 @@
     spec: initialSpec,
     isDefault = false,
     usedFeatures = [],
+    guide = null,
     problems = []
   }: {
     name?: string;
@@ -22,6 +24,8 @@
     isDefault?: boolean;
     /** Keys of features some shot used: those cannot be deleted (D-151). */
     usedFeatures?: string[];
+    /** A step of the step-by-step start (D-157). */
+    guide?: Guide | null;
     problems?: string[];
   } = $props();
 
@@ -85,6 +89,7 @@
   kind="machine"
   {adding}
   {isDefault}
+  {guide}
   {problems}
   payload={JSON.stringify({ kind: 'machine', name, spec })}
 >

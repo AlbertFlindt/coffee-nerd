@@ -2,6 +2,7 @@
   // The grinder page (screen 15, D-48, D-79, D-147, D-158, D-159): name, type, burrs, burr size, and how the dial
   // works, with a preview of the shot form's Grind card so you see what the settings do.
   import { untrack } from 'svelte';
+  import type { Guide } from '#lib/domain/guide.ts';
   import GearFormShell from '#lib/components/GearFormShell.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import { NEW_GEAR, trimmed } from '#lib/domain/gear.ts';
@@ -19,11 +20,14 @@
     name = '',
     spec,
     isDefault = false,
+    guide = null,
     problems = []
   }: {
     name?: string;
     spec?: GrinderSpec;
     isDefault?: boolean;
+    /** A step of the step-by-step start (D-157). */
+    guide?: Guide | null;
     problems?: string[];
   } = $props();
 
@@ -109,7 +113,7 @@
   const payload = $derived(JSON.stringify({ kind: 'grinder', name: nameValue, spec: value }));
 </script>
 
-<GearFormShell kind="grinder" {adding} {isDefault} {payload} {problems}>
+<GearFormShell kind="grinder" {adding} {isDefault} {payload} {guide} {problems}>
   <TextField label="Name" id="grinder-name" autocomplete="off" bind:value={nameValue} />
 
   <div class="pair">

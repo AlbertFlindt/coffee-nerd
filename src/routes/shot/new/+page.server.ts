@@ -1,6 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getDb } from '#lib/server/db/connection.ts';
 import { loadShotForm } from '#lib/server/db/shot-form.ts';
+import { guideNext } from '#lib/server/first-run.ts';
 import { clearBrewNext, saveShot, shotRequestSchema, ShotRejected } from '#lib/server/db/shots.ts';
 import { setFlash } from '#lib/server/flash.ts';
 import { bean } from '#lib/server/db/schema.ts';
@@ -8,11 +9,15 @@ import { and, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 
 // New shot (screens 1–5 and 11): "+" opens it prefilled (D-03, D-31); ?bean= picks another open bean (D-94).
+// With nothing to brew with yet, "+" resumes the step-by-step start at the first missing step (D-157).
 const NOT_SAVED = 'The shot could not be saved. Nothing was changed.';
 
 export const load: PageServerLoad = ({ locals, url }) => {
   if (!locals.user) error(401);
-  return { form: loadShotForm(getDb(), locals.user.id, url.searchParams.get('bean') ?? undefined) };
+  const db = getDb();
+  const form = loadShotForm(db, locals.user.id, url.searchParams.get('bean') ?? undefined);
+  if (form.state === 'empty') redirect(303, guideNext(db, locals.user.id));
+  return { form };
 };
 
 export const actions: Actions = {

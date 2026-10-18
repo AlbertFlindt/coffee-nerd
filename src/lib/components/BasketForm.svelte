@@ -2,6 +2,7 @@
   // The basket page (screen 16, D-49, D-150, D-79, D-147, D-158): brand and size (the name is built from
   // them by the server), type, shot size, diameter with the machines it fits, and the optional dose range.
   import { untrack } from 'svelte';
+  import type { Guide } from '#lib/domain/guide.ts';
   import GearFormShell from '#lib/components/GearFormShell.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import { fitsMachines, NEW_GEAR, trimmed } from '#lib/domain/gear.ts';
@@ -12,11 +13,14 @@
     spec,
     isDefault = false,
     machines,
+    guide = null,
     problems = []
   }: {
     spec?: BasketSpec;
     isDefault?: boolean;
     machines: { name: string; groupSizeMm?: number }[];
+    /** A step of the step-by-step start (D-157). */
+    guide?: Guide | null;
     problems?: string[];
   } = $props();
 
@@ -109,7 +113,7 @@
   const payload = $derived(JSON.stringify({ kind: 'basket', spec: value }));
 </script>
 
-<GearFormShell kind="basket" {adding} {isDefault} {payload} {problems}>
+<GearFormShell kind="basket" {adding} {isDefault} {payload} {guide} {problems}>
   <div class="pair">
     <TextField
       label="Brand"

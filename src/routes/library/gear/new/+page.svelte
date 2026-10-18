@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Add gear (D-147): the kind's page, empty.
+  // Add gear (D-147): the kind's page, empty; a step of the step-by-step start with a guide (D-157).
   import BasketForm from '#lib/components/BasketForm.svelte';
   import GrinderForm from '#lib/components/GrinderForm.svelte';
   import MachineForm from '#lib/components/MachineForm.svelte';
@@ -11,9 +11,9 @@
 <svelte:head><title>Add {data.kind} · Coffee Nerd</title></svelte:head>
 
 {#if data.kind === 'machine'}
-  <MachineForm problems={form?.problems} />
+  <MachineForm guide={data.guide} problems={form?.problems} />
 {:else if data.kind === 'grinder'}
-  <GrinderForm problems={form?.problems} />
+  <GrinderForm guide={data.guide} problems={form?.problems} />
 {:else}
-  <BasketForm machines={data.machines} problems={form?.problems} />
+  <BasketForm guide={data.guide} machines={data.machines} problems={form?.problems} />
 {/if}

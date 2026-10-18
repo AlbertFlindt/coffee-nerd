@@ -8,4 +8,4 @@
 
 <svelte:head><title>My setup · Coffee Nerd</title></svelte:head>
 
-<MySetupForm setup={data.setup} problems={form?.problems} />
+<MySetupForm setup={data.setup} guide={data.guide} problems={form?.problems} />
