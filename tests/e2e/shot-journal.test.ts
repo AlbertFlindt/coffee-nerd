@@ -252,7 +252,9 @@ test('D-113: editing, another bean keeps the values entered', async () => {
   await page.getByRole('link', { name: 'Edit' }).click();
   await page.getByRole('button', { name: 'Time plus 1 second' }).click();
   const time = await page.getByRole('button', { name: /^Time, .*tap to type$/ }).textContent();
-  await page.getByRole('button', { name: /choose another bean/ }).click();
+  await page
+    .getByRole('button', { name: /choose another bean/ })
+    .click({ position: { x: 22, y: 10 } });
   await page
     .getByRole('region', { name: 'Choose a bean' })
     .getByRole('button', { name: 'Kiambu AA' })

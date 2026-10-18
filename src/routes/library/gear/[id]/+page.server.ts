@@ -1,5 +1,11 @@
 import { error, fail, redirect } from '@sveltejs/kit';
-import { archiveGear, loadGear, loadMachineSizes, saveGear } from '#lib/server/db/gear.ts';
+import {
+  archiveGear,
+  loadGear,
+  loadMachineSizes,
+  saveGear,
+  usedFeatureKeys
+} from '#lib/server/db/gear.ts';
 import { getDb } from '#lib/server/db/connection.ts';
 import { saveGearForm } from '#lib/server/gear-form.ts';
 import type { Actions, PageServerLoad } from './$types';
@@ -10,7 +16,12 @@ export const load: PageServerLoad = ({ locals, params }) => {
   const db = getDb();
   const item = loadGear(db, locals.user.id, params.id);
   if (!item || item.archived) error(404);
-  return { item, machines: loadMachineSizes(db, locals.user.id) };
+  return {
+    item,
+    machines: loadMachineSizes(db, locals.user.id),
+    // D-151: a custom feature can be deleted only while no shot has used it.
+    usedFeatures: item.kind === 'machine' ? usedFeatureKeys(db, locals.user.id) : []
+  };
 };
 
 export const actions: Actions = {

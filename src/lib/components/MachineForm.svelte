@@ -2,6 +2,7 @@
   // The machine page (screen 12): edit a machine (D-44) or add one (D-147, D-158). Switched-on features
   // are exactly what the shot form shows (D-02). Group size takes decimals (D-79).
   import { untrack } from 'svelte';
+  import CustomFeature from '#lib/components/CustomFeature.svelte';
   import GearFormShell from '#lib/components/GearFormShell.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import { NEW_GEAR, trimmed } from '#lib/domain/gear.ts';
@@ -12,12 +13,15 @@
     name: initialName = '',
     spec: initialSpec,
     isDefault = false,
+    usedFeatures = [],
     problems = []
   }: {
     name?: string;
     /** Without a spec the page adds a machine (D-147). */
     spec?: MachineSpec;
     isDefault?: boolean;
+    /** Keys of features some shot used: those cannot be deleted (D-151). */
+    usedFeatures?: string[];
     problems?: string[];
   } = $props();
 
@@ -31,6 +35,22 @@
     ['lever', 'Lever'],
     ['manual', 'Manual']
   ] as const;
+
+  // The sheet for your own feature (D-46): null closed, 'new' to add, or the key being edited.
+  let sheet: 'new' | string | null = $state(null);
+  const editing = $derived(spec.features.find((f) => f.key === sheet));
+
+  function saveFeature(feature: FeatureDefinition) {
+    const at = spec.features.findIndex((f) => f.key === feature.key);
+    if (at === -1) spec.features.push(feature);
+    else spec.features[at] = feature;
+    sheet = null;
+  }
+
+  function deleteFeature(key: string) {
+    spec.features = spec.features.filter((f) => f.key !== key);
+    sheet = null;
+  }
 
   const GROUP_STEP = 500; // D-79: 0.5 mm
 
@@ -92,10 +112,23 @@
   <div class="features">
     {#each spec.features as feature (feature.key)}
       <div class="feature">
-        <div class="text">
-          <span class="name">{feature.label}</span>
-          <span class="detail">{detail(feature)}</span>
-        </div>
+        {#if feature.builtIn}
+          <div class="text">
+            <span class="name">{feature.label}</span>
+            <span class="detail">{detail(feature)}</span>
+          </div>
+        {:else}
+          <!-- Your own feature: tap to rename, change or delete it (D-151). -->
+          <button
+            type="button"
+            class="text edit cn-tap"
+            aria-label="Edit {feature.label}"
+            onclick={() => (sheet = feature.key)}
+          >
+            <span class="name">{feature.label}</span>
+            <span class="detail">{detail(feature)}</span>
+          </button>
+        {/if}
         <button
           type="button"
           class="cn-switch"
@@ -106,8 +139,7 @@
         ></button>
       </div>
     {/each}
-    <!-- Not built yet: a later pull request adds the sheet for your own feature (D-46). -->
-    <button type="button" class="add" aria-disabled="true" aria-describedby="add-feature-later">
+    <button type="button" class="add" onclick={() => (sheet = 'new')}>
       <svg
         width="18"
         height="18"
@@ -118,7 +150,6 @@
         stroke-linecap="round"
         aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg
       >Add your own feature
-      <span id="add-feature-later" class="sr">Not available yet</span>
     </button>
   </div>
 
@@ -143,6 +174,24 @@
     >
   </div>
 </GearFormShell>
+
+{#if sheet === 'new'}
+  <CustomFeature
+    onsave={saveFeature}
+    ondelete={() => (sheet = null)}
+    onclose={() => (sheet = null)}
+  />
+{:else if editing}
+  {#key editing.key}
+    <CustomFeature
+      feature={editing}
+      used={usedFeatures.includes(editing.key)}
+      onsave={saveFeature}
+      ondelete={() => deleteFeature(editing.key)}
+      onclose={() => (sheet = null)}
+    />
+  {/key}
+{/if}
 
 <style>
   fieldset {
@@ -201,6 +250,19 @@
     gap: 2px;
   }
 
+  .edit {
+    align-self: stretch;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    align-items: flex-start;
+    min-width: 0;
+  }
+
   .name {
     font-size: 15px;
     font-weight: 600;
@@ -235,8 +297,6 @@
     font-size: 14px;
     font-weight: 500;
     text-align: left;
-    opacity: 0.6;
-    cursor: default;
   }
 
   .group {
@@ -277,14 +337,6 @@
     font-size: 14px;
     font-weight: 500;
     color: var(--ink-muted);
-  }
-
-  .sr {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
   }
 
   .unit {

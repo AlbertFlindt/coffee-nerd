@@ -17,9 +17,10 @@
   import ValueCard from './ValueCard.svelte';
   import type { ShotState } from './shot-state';
   import { recipeTagText, type RecipeIdentity } from '../domain/fingerprint';
+  import { reconcileFeatures } from '../domain/prefill';
   import { validateSetupAgainstMachine } from '../domain/schemas';
   import { coreChanges, matchRecipe, setupChanges, setupSummary } from '../domain/shot-form';
-  import { decimalsFor, formatRatio } from '../domain/units';
+  import { decimalsFor, formatNumber, formatRatio } from '../domain/units';
   import type { ShotFormData } from '../server/db/shot-form';
 
   let { data, problems = [] }: { data: ShotFormData; problems?: string[] } = $props();
@@ -70,7 +71,7 @@
       reset: false
     });
   }
-  let sheet: 'more' | 'bean' | 'delete' | null = $state(null);
+  let sheet: 'more' | 'bean' | 'gear' | 'delete' | null = $state(null);
   let tab: 'setup' | 'tasting' = $state('setup');
   let saving = $state(false);
   let deleting = $state(false);
@@ -100,7 +101,32 @@
   const setup = $derived(setupChanges(identity, last?.recipe ?? null));
   const ratio = $derived(formatRatio(shot.yield, shot.dose));
   const lastRatio = $derived(last ? formatRatio(last.yield, last.recipe.dose) : null);
-  const dial = $derived(data.grinder.dial);
+  // D-153: the machine and grinder can be switched for this shot; features and grind control follow.
+  const machine = $derived(data.machines.find((m) => m.id === shot.machineId) ?? data.machines[0]);
+  const grinder = $derived(data.grinders.find((g) => g.id === shot.grinderId) ?? data.grinders[0]);
+  const dial = $derived(grinder.dial);
+
+  function chooseMachine(id: string) {
+    sheet = null;
+    if (id === shot.machineId) return;
+    const next = data.machines.find((m) => m.id === id)!;
+    shot.machineId = id;
+    // Values both machines share stay; new features start from My setup (data-model §4.2).
+    shot.setup.features = reconcileFeatures(next, shot.setup.features, data.defaultFeatures);
+  }
+
+  function chooseGrinder(id: string) {
+    sheet = null;
+    shot.grinderId = id;
+  }
+
+  // D-154: a gentle hint while the dose is outside the basket's dose range; it never blocks saving.
+  const basket = $derived(data.baskets.find((b) => b.id === shot.basketId));
+  const doseHint = $derived.by(() => {
+    const range = basket?.doseRange;
+    if (!basket || !range || (shot.dose >= range.from && shot.dose <= range.to)) return null;
+    return `${basket.name} holds ${formatNumber(range.from, 1)}–${formatNumber(range.to, 1)} g`;
+  });
   const shown = (value: number | null, step: number, at_least = 0) =>
     Math.max(at_least, value === null ? 0 : decimalsFor(value, step));
 
@@ -125,12 +151,18 @@
 
   function check(): boolean {
     // A switched-on feature needs its value (D-78); everything else may stay empty (D-11, D-91).
-    const machine = { type: 'semi_auto' as const, features: data.machine.features };
-    localProblems = validateSetupAgainstMachine(shot.setup, machine)
+    const spec = { type: 'semi_auto' as const, features: machine.features };
+    localProblems = validateSetupAgainstMachine(shot.setup, spec)
       .filter((p) => p.problem === 'value_missing' || p.problem === 'pressure_missing')
       .map(
         (p) => `Set ${p.problem === 'pressure_missing' ? 'the pressure for ' : ''}${p.label} first.`
       );
+    // D-153: after switching the grinder, the grind may be outside its range (as Edit My setup says).
+    if (
+      shot.grind < Math.min(dial.finest, dial.coarsest) ||
+      shot.grind > Math.max(dial.finest, dial.coarsest)
+    )
+      localProblems.push('Grind must be within the grinder’s range');
     return localProblems.length === 0;
   }
 </script>
@@ -160,8 +192,8 @@
         title={data.bean.process
           ? `${data.bean.name} · ${PROCESS_LABEL[data.bean.process]}`
           : data.bean.name}
-        gear="{data.machine.name} · {data.grinder.name}"
-        summary={setupSummary(shot.setup, data.machine.features)}
+        gear="{machine.name} · {grinder.name}"
+        summary={setupSummary(shot.setup, machine.features)}
         tag={{
           reused: match.kind === 'reused',
           text: tagMain,
@@ -169,6 +201,7 @@
         }}
         brewNext={data.prefill.source === 'brew_next' ? useLastShot : undefined}
         onopen={() => (sheet = 'bean')}
+        ongear={() => (sheet = 'gear')}
       />
 
       <section class="core" aria-label="Core values">
@@ -222,6 +255,7 @@
           >{ratio ?? '—'}</span
         >
       </div>
+      {#if doseHint}<p class="dose-hint">{doseHint}</p>{/if}
 
       <section class="taste" aria-label="Taste">
         <TasteSlider
@@ -265,7 +299,7 @@
       <MoreSheet
         bind:shot
         bind:tab
-        features={data.machine.features}
+        features={machine.features}
         baskets={data.baskets}
         routines={data.routines}
         gearNames={data.gearNames}
@@ -311,6 +345,36 @@
             {/each}
           </form>
         {/if}
+      </BottomSheet>
+    {:else if sheet === 'gear'}
+      <!-- D-153: another machine or grinder for this shot. The sheet is not designed yet (open items). -->
+      <BottomSheet
+        label="Choose machine and grinder"
+        closeLabel="Close gear list"
+        onclose={() => (sheet = null)}
+      >
+        <h2 class="cn-type-heading sheet-title">Machine</h2>
+        <div class="beans">
+          {#each data.machines as m (m.id)}
+            <button
+              type="button"
+              class="bean cn-tap"
+              aria-pressed={m.id === shot.machineId}
+              onclick={() => chooseMachine(m.id)}>{m.name}</button
+            >
+          {/each}
+        </div>
+        <h2 class="cn-type-heading sheet-title">Grinder</h2>
+        <div class="beans">
+          {#each data.grinders as g (g.id)}
+            <button
+              type="button"
+              class="bean cn-tap"
+              aria-pressed={g.id === shot.grinderId}
+              onclick={() => chooseGrinder(g.id)}>{g.name}</button
+            >
+          {/each}
+        </div>
       </BottomSheet>
     {:else if sheet === 'delete'}
       <!-- D-116: deleting asks first. The confirmation is not designed yet (docs/open-items.md). -->
@@ -469,6 +533,13 @@
 
   .ratio-value.changed {
     color: var(--sage);
+  }
+
+  .dose-hint {
+    margin: -12px 0 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-muted);
   }
 
   .taste {

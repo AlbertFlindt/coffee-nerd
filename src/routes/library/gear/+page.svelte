@@ -1,7 +1,8 @@
 <script lang="ts">
   // Gear (screen 8, D-38): the cream My setup card, then the gear grouped by kind, each with a short
   // summary and the Default chip for what My setup uses (D-149). "Add gear" asks for the kind first (D-147).
-  // Only the list scrolls (D-36). Editing My setup comes with the next pull request, so its button waits.
+  // Only the list scrolls (D-36). "Edit" opens Edit My setup (screen 13, D-45), the only place the default
+  // is chosen (D-149).
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
@@ -82,7 +83,7 @@
         <h2 class="setup-name">My setup</h2>
         <span class="muted">Starting point for new beans</span>
       </div>
-      <span class="edit later">Edit<span class="sr">, not available yet</span></span>
+      <a class="edit cn-tap" href={resolve('/library/gear/setup')}>Edit</a>
     </div>
     {#if page.mySetup}
       <div class="grid">
@@ -213,18 +214,7 @@
     color: var(--ink);
     font-size: 14px;
     font-weight: 600;
-  }
-
-  .sr {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
-  .later {
-    opacity: 0.4;
+    text-decoration: none;
   }
 
   .grid {

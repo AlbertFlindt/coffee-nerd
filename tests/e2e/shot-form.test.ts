@@ -165,8 +165,8 @@ test('Rated, D-15, D-96: changed results, a balance in words and a score', async
 });
 
 test('MoreSetup, D-21, D-24, D-90: the Setup tab; a changed value turns sage', async () => {
-  await page.getByRole('button', { name: 'More' }).click();
-  const sheet = page.getByRole('region', { name: 'More' });
+  await page.getByRole('button', { name: 'More', exact: true }).click();
+  const sheet = page.getByRole('region', { name: 'More', exact: true });
   await expect(sheet.getByRole('tab', { name: 'Setup' })).toHaveAttribute('aria-selected', 'true');
   await expect(sheet.getByText('Pressure profile')).toBeVisible();
   await expect(sheet.getByRole('switch', { name: 'Low bar end' })).toHaveAttribute(
@@ -195,7 +195,7 @@ test('MoreSetup, D-21, D-24, D-90: the Setup tab; a changed value turns sage', a
 });
 
 test('MoreTasting, D-23, D-96, D-97, D-101: the Tasting tab', async () => {
-  const sheet = page.getByRole('region', { name: 'More' });
+  const sheet = page.getByRole('region', { name: 'More', exact: true });
   await sheet.getByRole('tab', { name: 'Tasting' }).click();
   await expect(sheet.getByRole('slider', { name: 'Aftertaste, short to long' })).toHaveAttribute(
     'aria-valuetext',
@@ -279,7 +279,9 @@ test('BrewNext, D-43: a recipe marked Brew next is where "+" starts, until clear
 });
 
 test('D-94: the bean card lists the open beans', async () => {
-  await page.getByRole('button', { name: /choose another bean/ }).click();
+  await page
+    .getByRole('button', { name: /choose another bean/ })
+    .click({ position: { x: 22, y: 10 } });
   const sheet = page.getByRole('region', { name: 'Choose a bean' });
   await expect(sheet.getByRole('button', { name: /Guji Hambela/ })).toHaveAttribute(
     'aria-pressed',
@@ -336,8 +338,8 @@ test.describe('a shorter screen', () => {
       // At 780 the whole form fits; on a smaller screen it may scroll inside its own area instead.
       if (height >= 780) expect(formBottom).toBe(true);
 
-      await page.getByRole('button', { name: 'More' }).click();
-      const sheet = page.getByRole('region', { name: 'More' });
+      await page.getByRole('button', { name: 'More', exact: true }).click();
+      const sheet = page.getByRole('region', { name: 'More', exact: true });
       await sheet.getByRole('tab', { name: 'Tasting' }).click();
       // D-97: at least a row of flavor chips stays in view.
       await expect(sheet.getByRole('button', { name: 'Berry' })).toBeInViewport();
@@ -369,8 +371,8 @@ test('D-106, D-107, D-108: empty sliders show a handle, buttons flash when press
   await expect(plus).not.toHaveCSS('background-color', 'rgb(231, 169, 85)');
 
   // D-108: a short drag on the handle springs back; a longer one closes the sheet.
-  await page.getByRole('button', { name: 'More' }).click();
-  const sheet = page.getByRole('region', { name: 'More' });
+  await page.getByRole('button', { name: 'More', exact: true }).click();
+  const sheet = page.getByRole('region', { name: 'More', exact: true });
   await expect(sheet).toBeVisible();
   await settled();
   // Measure once the sheet has stopped moving: its top is the same in two frames in a row.
@@ -416,11 +418,11 @@ test('D-106, D-107, D-108: empty sliders show a handle, buttons flash when press
 
 test('D-108: the sheet slides; with reduced motion it just appears; saving with it open leaves one page', async () => {
   await page.goto('/shot/new');
-  await page.getByRole('button', { name: 'More' }).click();
+  await page.getByRole('button', { name: 'More', exact: true }).click();
   expect(
     await page.evaluate(() => document.querySelector('section.sheet')!.getAnimations().length)
   ).toBeGreaterThan(0);
-  await expect(page.getByRole('region', { name: 'More' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'More', exact: true })).toBeVisible();
 
   // D-21: Save works with the sheet open, and the form leaves at once (no sheet sliding out over Home).
   await page.getByRole('button', { name: 'Save shot' }).click();
@@ -429,8 +431,8 @@ test('D-108: the sheet slides; with reduced motion it just appears; saving with 
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/shot/new');
-  await page.getByRole('button', { name: 'More' }).click();
-  await expect(page.getByRole('region', { name: 'More' })).toBeVisible();
+  await page.getByRole('button', { name: 'More', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'More', exact: true })).toBeVisible();
   const sheetMotion = () =>
     page.evaluate(
       () =>
@@ -439,6 +441,6 @@ test('D-108: the sheet slides; with reduced motion it just appears; saving with 
     );
   expect(await sheetMotion()).toBe(0);
   await page.getByRole('button', { name: 'Close More' }).click({ position: { x: 200, y: 20 } });
-  await expect(page.getByRole('region', { name: 'More' })).toBeHidden();
+  await expect(page.getByRole('region', { name: 'More', exact: true })).toBeHidden();
   await page.emulateMedia({ reducedMotion: null });
 });

@@ -21,7 +21,8 @@ export default defineConfig({
     },
     {
       name: 'seeded',
-      testMatch: ['shot-form.test.ts', 'shot-journal.test.ts', 'tab-library.test.ts'],
+      // Files run in name order and build on each other's data: shot-*, then tab-*.
+      testMatch: ['shot-*.test.ts', 'tab-*.test.ts'],
       // The reference PNGs in docs/screens/ are 2× pixel density; the tests save comparable screenshots.
       use: { baseURL: 'http://localhost:4174', deviceScaleFactor: 2 }
     }

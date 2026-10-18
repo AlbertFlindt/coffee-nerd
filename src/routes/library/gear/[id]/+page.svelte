@@ -18,6 +18,7 @@
       name={item.name}
       spec={item.spec as MachineSpec}
       isDefault={item.isDefault}
+      usedFeatures={data.usedFeatures}
       problems={form?.problems}
     />
   {:else if item.kind === 'grinder'}

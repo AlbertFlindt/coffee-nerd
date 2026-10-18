@@ -163,7 +163,9 @@ test('D-73, D-140: the re-buy is added, and its first shot starts from the earli
   expect(time).not.toBeNull(); // From My setup the time would be empty (D-72), so this tells them apart.
 
   await page.getByRole('link', { name: 'New shot' }).click();
-  await page.getByRole('button', { name: /choose another bean/ }).click();
+  await page
+    .getByRole('button', { name: /choose another bean/ })
+    .click({ position: { x: 22, y: 10 } });
   // The newest bean comes first (D-137): the re-buy.
   await page.locator('.bean', { hasText: 'Guji Hambela' }).first().click();
   await expect(
@@ -396,4 +398,61 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
     .click();
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
   await expect(page.getByRole('link', { name: /^IMS/ })).toHaveCount(0);
+});
+
+test('D-46, D-02: your own feature appears on More › Setup', async () => {
+  await page.goto('/library/gear');
+  await page.getByRole('link', { name: /^Lelit Bianca/ }).click();
+  await page.getByRole('button', { name: 'Add your own feature' }).click();
+  const sheet = page.getByRole('region', { name: 'Add your own feature' });
+  await sheet.getByLabel('Name').fill('Bloom pause');
+  await sheet.getByRole('radio', { name: 'Seconds' }).click();
+  await sheet.getByRole('button', { name: 'Add feature' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
+
+  await page.goto('/shot/new');
+  await page.getByRole('button', { name: 'More', exact: true }).click();
+  const more = page.getByRole('region', { name: 'More', exact: true });
+  await expect(more.getByRole('switch', { name: 'Bloom pause' })).toBeVisible();
+
+  // No shot used it, so it can be deleted again (D-151), leaving the reference setup as it was.
+  await page.goto('/library/gear');
+  await page.getByRole('link', { name: /^Lelit Bianca/ }).click();
+  await page.getByRole('button', { name: 'Edit Bloom pause' }).click();
+  await page.getByRole('button', { name: 'Delete feature' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('link', { name: /^Lelit Bianca/ })).not.toContainText('Bloom');
+});
+
+test('D-45, D-38: a new bean’s first shot starts from the edited My setup', async () => {
+  await page.goto('/library/gear/setup');
+  await page.getByRole('button', { name: 'Dose minus 0.1 gram' }).click();
+  await page.getByRole('button', { name: 'Save setup' }).click();
+  await expect(page.getByRole('region', { name: 'My setup' })).toContainText('Dose 17.9 g');
+
+  await page.goto('/library/beans/new');
+  await page.getByLabel('Name').fill('Kenya Kiambu');
+  const today = await page.evaluate(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  });
+  await page.locator('input[name=roastDate]').fill(today);
+  await page.getByRole('button', { name: 'Add bean' }).click();
+  await expect(page.getByRole('heading', { name: 'Kenya Kiambu', level: 1 })).toBeVisible();
+
+  await page.goto('/shot/new');
+  await page
+    .getByRole('button', { name: /choose another bean/ })
+    .click({ position: { x: 22, y: 10 } });
+  await page.locator('.bean', { hasText: 'Kenya Kiambu' }).click();
+  await expect(
+    page.getByRole('button', { name: /^Kenya Kiambu, choose another bean$/ })
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Dose, 17\.9 g,/ })).toBeVisible();
+
+  await page.goto('/library/gear/setup');
+  await page.getByRole('button', { name: 'Dose plus 0.1 gram' }).click();
+  await page.getByRole('button', { name: 'Save setup' }).click();
+  await expect(page.getByRole('region', { name: 'My setup' })).toContainText('Dose 18.0 g');
 });

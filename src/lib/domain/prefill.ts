@@ -191,9 +191,10 @@ function routineNow(
  * machine are left out; features switched on since start from My setup when it has a value, otherwise
  * switched off, or on and waiting for a value when they have no off switch (D-78). Values take the
  * feature's current label and unit, since the new recipe's snapshot records them as they are now (D-65).
+ * Also used when the machine is switched on the shot form (D-153) or in Edit My setup (D-45).
  */
-function reconcileFeatures(
-  machine: MachineSpec,
+export function reconcileFeatures(
+  machine: Pick<MachineSpec, 'features'>,
   copied: Record<string, FeatureValue>,
   defaults: Record<string, FeatureValue>
 ): Record<string, FeatureValue> {

@@ -11,6 +11,10 @@ const PROBLEM: [RegExp, string][] = [
   [/^spec\.dial\.step/, 'The step interval must be more than 0'],
   [/^spec\.dial/, 'Finest and coarsest must differ'],
   [/^spec\.doseRange/, 'The dose range must run from low to high'],
+  [
+    /^spec\.features: used/,
+    'A feature that shots have used cannot be deleted, change its kind or lose an option'
+  ],
   [/^spec\.features/, 'Each feature needs a name, and names must differ'],
   [/^gear: not found/, 'This gear could not be found']
 ];
