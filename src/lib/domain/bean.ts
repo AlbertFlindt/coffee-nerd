@@ -96,3 +96,39 @@ export function originLine(bean: {
     .filter((part) => part)
     .join(' · ');
 }
+
+/**
+ * Altitude as typed on the Add bean form (D-41): "1,900–2,100 m", "1900-2100" or one height, which fills
+ * both. Null when empty; "invalid" when it is not one or two whole metres from low to high.
+ */
+export function parseAltitude(text: string): { min: number; max: number } | null | 'invalid' {
+  const cleaned = text.replace(/[,\s]|m$/gi, '');
+  if (cleaned === '') return null;
+  const match = /^(\d{1,5})(?:[-–](\d{1,5}))?$/.exec(cleaned);
+  if (!match) return 'invalid';
+  const min = Number(match[1]);
+  const max = match[2] === undefined ? min : Number(match[2]);
+  return min <= max ? { min, max } : 'invalid';
+}
+
+/** "1,900–2,100 m", or "1,850 m" when both ends are the same; null when not set (D-41). */
+export function altitudeText(min: number | null, max: number | null): string | null {
+  if (min === null && max === null) return null;
+  const metres = (n: number) => n.toLocaleString('en-US');
+  const low = min ?? max!;
+  const high = max ?? min!;
+  return low === high ? `${metres(low)} m` : `${metres(low)}–${metres(high)} m`;
+}
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** The roast date as shown on the form (D-138): "14 Oct" and "2 days ago"; another year names the year. */
+export function roastDateText(roastDate: string, today: string): { date: string; ago: string } {
+  const [year, month, day] = roastDate.split('-').map(Number);
+  const sameYear = today.slice(0, 4) === roastDate.slice(0, 4);
+  const days = dayNumber(today) - dayNumber(roastDate);
+  return {
+    date: `${day} ${MONTHS[month - 1]}${sameYear ? '' : ` ${year}`}`,
+    ago: days === 0 ? 'Today' : days === 1 ? 'Yesterday' : `${days} days ago`
+  };
+}

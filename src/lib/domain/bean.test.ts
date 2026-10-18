@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  altitudeText,
   bestScoreText,
   gramsLeft,
   gramsLeftText,
   localDate,
   originLine,
+  parseAltitude,
   ratio,
+  roastDateText,
   roastAgeDays,
   shouldAutoFinish
 } from './bean';
@@ -110,5 +113,45 @@ describe('originLine', () => {
     );
     expect(originLine({ roaster: null, countryCode: null, process: 'washed' })).toBe('Washed');
     expect(originLine({ roaster: null, countryCode: null, process: null })).toBe('');
+  });
+});
+
+describe('parseAltitude', () => {
+  it('D-41: a range in metres, with or without thousands separators and unit', () => {
+    expect(parseAltitude('1,900–2,100 m')).toEqual({ min: 1900, max: 2100 });
+    expect(parseAltitude('1900-2100')).toEqual({ min: 1900, max: 2100 });
+  });
+
+  it('D-41: one value fills both', () => {
+    expect(parseAltitude('1850 m')).toEqual({ min: 1850, max: 1850 });
+  });
+
+  it('D-41: empty is not set; anything else is a problem', () => {
+    expect(parseAltitude('  ')).toBeNull();
+    expect(parseAltitude('high')).toBe('invalid');
+    expect(parseAltitude('2100–1900')).toBe('invalid');
+  });
+});
+
+describe('altitudeText', () => {
+  it('D-41: a range or a single height, with thousands separators', () => {
+    expect(altitudeText(1900, 2100)).toBe('1,900–2,100 m');
+    expect(altitudeText(1850, 1850)).toBe('1,850 m');
+    expect(altitudeText(null, null)).toBeNull();
+  });
+});
+
+describe('roastDateText', () => {
+  it('D-138: the date and how long ago it was', () => {
+    expect(roastDateText('2026-10-14', '2026-10-16')).toEqual({
+      date: '14 Oct',
+      ago: '2 days ago'
+    });
+    expect(roastDateText('2026-10-15', '2026-10-16')).toEqual({ date: '15 Oct', ago: 'Yesterday' });
+    expect(roastDateText('2026-10-16', '2026-10-16')).toEqual({ date: '16 Oct', ago: 'Today' });
+  });
+
+  it('D-138: a date in another year names the year', () => {
+    expect(roastDateText('2025-12-30', '2026-01-02').date).toBe('30 Dec 2025');
   });
 });
