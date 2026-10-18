@@ -53,9 +53,10 @@ test('Beans, D-124: the Library tab opens the Beans overview', async () => {
   await expect(card).toContainText('days');
   await expect(card).toContainText('since roast');
   await expect(card).toContainText('Nordlys Roasters · Ethiopia · Natural');
-  await expect(card.locator('.numbers')).toContainText('Best');
-  await expect(card.locator('.numbers')).toContainText(/Recipes \d+/);
-  await expect(card.locator('.numbers')).toContainText(/Shots \d+/);
+  // D-132, D-135: dots between the numbers, then grams left (shot-form.test.ts gives the bean a bag weight).
+  await expect(card.locator('.numbers')).toHaveText(
+    /^(Best \d+(\.\d)?|Not rated yet)\s*·\s*Recipes \d+\s*·\s*Shots \d+(\s*·\s*\d+ g left)?\s*$/
+  );
   await expect(page.getByRole('heading', { name: /Finished/ })).toHaveCount(0);
   await expectNoPageScroll();
   await screenshot('Beans');

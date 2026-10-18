@@ -14,7 +14,7 @@
 
 <header>
   <h1>Beans</h1>
-  <a class="add later" aria-disabled="true">
+  <a class="cn-btn-add add later" aria-disabled="true">
     <svg
       width="16"
       height="16"
@@ -35,7 +35,7 @@
   {#if open.length > 0}
     <h2>Open · {open.length}</h2>
     {#each open as bean (bean.id)}
-      <div class="card">
+      <div class="cn-card card">
         <div class="age">
           <span class="age-days">{bean.roastAgeDays}</span>
           <span class="age-unit">{bean.roastAgeDays === 1 ? 'day' : 'days'}</span>
@@ -106,16 +106,6 @@
   }
 
   .add {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: var(--touch-min);
-    padding: 0 var(--space-4);
-    border-radius: var(--radius-pill);
-    background: var(--amber);
-    color: var(--on-amber);
-    font-size: 15px;
-    font-weight: 700;
     text-decoration: none;
   }
 
@@ -154,9 +144,6 @@
     display: flex;
     flex: none;
     gap: 14px;
-    padding: var(--space-4);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
   }
 
   .age {
