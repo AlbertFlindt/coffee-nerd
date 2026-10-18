@@ -1,5 +1,7 @@
 // The bean detail page's recipe rows (D-42, D-128, D-143). Pure, like the rest of the domain.
 import { decimalsFor, formatQuantity, type Thousandths } from './units';
+import { altitudeText, PROCESS_LABEL, roastDateText, type Process } from './bean';
+import { countryName } from './countries';
 
 type Steps = { grind: Thousandths; dose: Thousandths; yield: Thousandths };
 
@@ -37,4 +39,45 @@ export function recipeHistory(shotCount: number): { text: string; reused: boolea
   if (shotCount === 0) return { text: 'New recipe', reused: false };
   if (shotCount === 1) return { text: 'Tried once', reused: false };
   return { text: `Reused ${shotCount - 1}x`, reused: true };
+}
+
+const ROAST_LEVEL = { light: 'Light', medium_light: 'Med-light', medium: 'Medium', dark: 'Dark' };
+
+/**
+ * The about card's lines (D-42): roaster; country · region · process; variety · altitude · roast level;
+ * "Roasted 4 Oct · Open". What is not set is left out, and so is a line left empty.
+ */
+export function aboutLines(
+  bean: {
+    roaster: string | null;
+    countryCode: string | null;
+    region: string | null;
+    process: Process | null;
+    variety: string | null;
+    altitudeMinM: number | null;
+    altitudeMaxM: number | null;
+    roastLevel: keyof typeof ROAST_LEVEL | null;
+    roastDate: string;
+    status: 'open' | 'finished';
+  },
+  today: string
+): string[] {
+  const line = (...parts: (string | null)[]) => parts.filter((p) => p).join(' · ');
+  return [
+    line(bean.roaster),
+    line(
+      bean.countryCode ? countryName(bean.countryCode) : null,
+      bean.region,
+      bean.process ? PROCESS_LABEL[bean.process] : null
+    ),
+    line(
+      bean.variety,
+      altitudeText(bean.altitudeMinM, bean.altitudeMaxM),
+      bean.roastLevel ? ROAST_LEVEL[bean.roastLevel] : null
+    ),
+    line(
+      `Roasted ${roastDateText(bean.roastDate, today).date}`,
+      bean.status === 'open' ? 'Open' : 'Finished'
+    )
+  ].filter((l) => l !== '');
 }

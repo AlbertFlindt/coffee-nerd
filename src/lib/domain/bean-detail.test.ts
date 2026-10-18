@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { recipeHistory, recipeRowDetail, recipeTitle } from './bean-detail';
+import { aboutLines, recipeHistory, recipeRowDetail, recipeTitle } from './bean-detail';
 
 describe('recipeTitle', () => {
   it('D-42, D-143: grind, dose, and the latest shot’s yield', () => {
@@ -40,5 +40,47 @@ describe('recipeHistory', () => {
 
   it('D-128: a recipe kept only by its Brew next mark is new', () => {
     expect(recipeHistory(0)).toEqual({ text: 'New recipe', reused: false });
+  });
+});
+
+describe('aboutLines', () => {
+  const guji = {
+    roaster: 'Nordlys Roasters',
+    countryCode: 'ET',
+    region: 'Guji',
+    process: 'natural' as const,
+    variety: 'Heirloom',
+    altitudeMinM: 1900,
+    altitudeMaxM: 2100,
+    roastLevel: 'light' as const,
+    roastDate: '2026-10-04',
+    status: 'open' as const
+  };
+
+  it('D-42: roaster; country · region · process; variety · altitude · roast level; roast date · status', () => {
+    expect(aboutLines(guji, '2026-10-16')).toEqual([
+      'Nordlys Roasters',
+      'Ethiopia · Guji · Natural',
+      'Heirloom · 1,900–2,100 m · Light',
+      'Roasted 4 Oct · Open'
+    ]);
+  });
+
+  it('D-42: what is not set is left out, and an empty line too', () => {
+    expect(
+      aboutLines(
+        {
+          ...guji,
+          roaster: null,
+          region: null,
+          variety: null,
+          altitudeMinM: null,
+          altitudeMaxM: null,
+          roastLevel: null,
+          status: 'finished'
+        },
+        '2026-10-16'
+      )
+    ).toEqual(['Ethiopia · Natural', 'Roasted 4 Oct · Finished']);
   });
 });
