@@ -10,6 +10,7 @@ import {
   roastAgeDays
 } from '../../domain/bean';
 import { bestRecipe } from '../../domain/best-recipe';
+import type { BeanFormValues as BeanForm } from '../../domain/bean-form';
 import type { BeanInput } from '../../domain/schemas';
 import type { Db, Queryable } from './client';
 import { newId } from './ids';
@@ -99,8 +100,7 @@ export function loadBeans(db: Queryable, ownerId: string, now: number): Beans {
   };
 }
 
-/** The Add bean form's fields; a new form or a re-buy has no roast date yet (D-138). */
-export type BeanForm = Omit<BeanInput, 'roastDate'> & { roastDate: string | null };
+export type { BeanFormValues as BeanForm } from '../../domain/bean-form';
 
 export class BeanRejected extends Error {
   constructor(readonly problems: string[]) {
