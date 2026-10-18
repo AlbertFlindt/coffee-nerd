@@ -132,6 +132,10 @@
       onchange={readSize}
     />
   </div>
+  <!-- Size only names the basket (D-150); the dose range below is what the shot form uses (D-154). -->
+  <p class="cn-caption note size-note">
+    Size is the grams the basket is made for. It names the basket, like VST · 18 g.
+  </p>
 
   <fieldset>
     <legend>Type</legend>
@@ -288,5 +292,9 @@
   .note {
     margin: 0 2px;
     line-height: 1.4;
+  }
+
+  .size-note {
+    margin-top: -6px;
   }
 </style>
