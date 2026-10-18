@@ -66,3 +66,31 @@ function pick(candidates: Candidate[], compare: (a: Candidate, b: Candidate) => 
     return order > 0 ? c : best;
   });
 }
+
+/**
+ * A bean's recipes "best first" (D-135), as D-66 ranks them: recipes with at least 3 rated shots by
+ * average, then the other rated ones by their highest score, ties by more rated shots, then the latest
+ * shot; recipes without a rated shot last, most recent first. The first is the best recipe.
+ */
+export function rankRecipes(recipes: readonly RecipeShots[]): string[] {
+  const candidates = recipes.map(({ recipeId, shots }) => {
+    const scores = shots.flatMap((s) => (s.score === null ? [] : [s.score]));
+    return {
+      recipeId,
+      total: scores.reduce((sum, s) => sum + s, 0),
+      rated: scores.length,
+      best: Math.max(...scores),
+      latest: Math.max(...shots.map((s) => s.brewedAt))
+    };
+  });
+  const tier = (c: Candidate) => (c.rated >= MIN_RATED_SHOTS ? 0 : c.rated > 0 ? 1 : 2);
+  return candidates
+    .sort((a, b) => {
+      if (tier(a) !== tier(b)) return tier(a) - tier(b);
+      // Averages compared exactly with whole numbers, as in bestRecipe.
+      const score =
+        tier(a) === 0 ? b.total * a.rated - a.total * b.rated : tier(a) === 1 ? b.best - a.best : 0;
+      return score || b.rated - a.rated || b.latest - a.latest;
+    })
+    .map((c) => c.recipeId);
+}

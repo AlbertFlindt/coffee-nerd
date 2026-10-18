@@ -13,6 +13,7 @@
 
   let {
     mode,
+    beanId,
     text,
     today,
     rebuy = null,
@@ -20,6 +21,8 @@
     problems = []
   }: {
     mode: 'add' | 'edit';
+    /** The bean being edited: closing goes back to its page (D-130). */
+    beanId?: string;
     text: BeanFormText;
     /** Today in your time zone, "YYYY-MM-DD": no roast date after it (D-138). */
     today: string;
@@ -46,7 +49,11 @@
 </script>
 
 <header>
-  <a class="icon tap" href={resolve('/library/beans')} aria-label="Close without saving">
+  <a
+    class="icon tap"
+    href={beanId ? resolve('/library/beans/[id]', { id: beanId }) : resolve('/library/beans')}
+    aria-label="Close without saving"
+  >
     <svg
       width="22"
       height="22"

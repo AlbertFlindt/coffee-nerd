@@ -6,6 +6,10 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   addBean as addBeanFromForm,
   BeanRejected,
+  finishBean,
+  loadBeanDetail,
+  reopenBean,
+  toggleBrewNext,
   loadBeanForm,
   rebuyChoices,
   rebuyFields,
@@ -15,9 +19,9 @@ import { loadBeans } from './beans';
 import { openDatabase, type Db } from './client';
 import { newId } from './ids';
 import type { BeanInput } from '../../domain/schemas';
-import { appState, bean } from './schema';
+import { appState, bean, recipe } from './schema';
 import { REFERENCE, seedReferenceSetup, type SeededIds } from './seed';
-import { saveShot, type ShotInput } from './shots';
+import { clearBrewNext, deleteShot, saveShot, type ShotInput } from './shots';
 
 const dir = mkdtempSync(join(tmpdir(), 'coffee-nerd-beans-'));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -33,8 +37,8 @@ beforeEach(() => {
   ids = seedReferenceSetup(db, { now: T0 - 30 * DAY, name: 'Demo', passwordHash: 'x' });
 });
 
-function shot(brewedAt: number, overrides: Partial<ShotInput> = {}): void {
-  saveShot(
+function shot(brewedAt: number, overrides: Partial<ShotInput> = {}) {
+  return saveShot(
     db,
     ids.userId,
     {
@@ -259,5 +263,141 @@ describe('editing a bean', () => {
   it('D-60: another user’s bean is not found', () => {
     expect(loadBeanForm(db, 'someone-else', ids.beanId)).toBeNull();
     expect(() => updateBean(db, 'someone-else', ids.beanId, input(), T0)).toThrow(BeanRejected);
+  });
+});
+
+const brewNext = () => db.select().from(appState).get()?.brewNextRecipeId ?? null;
+const statusOf = (id: string) => db.select().from(bean).where(eq(bean.id, id)).get()!;
+
+describe('loadBeanDetail', () => {
+  it('D-42: about lines, numbers, and recipes best first with their rows (D-128, D-135, D-143)', () => {
+    shot(T0 - 5 * DAY, { taste: taste(7), yield: 38000, time: 26000 });
+    shot(T0 - 4 * DAY, { taste: taste(9), yield: 36000, time: 30000 });
+    shot(T0 - 3 * DAY, { taste: taste(null), grind: 1500, yield: null, time: null });
+    const detail = loadBeanDetail(db, ids.userId, ids.beanId, T0)!;
+    expect(detail).toMatchObject({
+      name: 'Guji Hambela',
+      status: 'open',
+      roastAgeDays: 42,
+      about: [
+        'Nordlys Roasters',
+        'Ethiopia · Guji · Natural',
+        'Heirloom · 1,900–2,100 m · Light',
+        'Roasted 5 Sep · Open'
+      ],
+      best: '9',
+      recipeCount: 2,
+      shotCount: 3
+    });
+    expect(detail.recipes).toMatchObject([
+      {
+        title: 'Grind 1.6 · 18.0 g → 36.0 g',
+        detail: 'Preinfusion 4 s · Low bar start 5 s · 93 °C · avg 28.0 s',
+        history: { text: 'Reused 1x', reused: true },
+        best: 9,
+        marked: false
+      },
+      {
+        title: 'Grind 1.5 · 18.0 g',
+        history: { text: 'Tried once', reused: false },
+        best: null,
+        marked: false
+      }
+    ]);
+  });
+
+  it('D-60: another user’s bean is not found', () => {
+    expect(loadBeanDetail(db, 'someone-else', ids.beanId, T0)).toBeNull();
+  });
+});
+
+describe('toggleBrewNext', () => {
+  it('D-43: marks one recipe; marking another moves the mark; tapping again clears it', () => {
+    const a = shot(T0 - 2 * DAY).recipeId;
+    const b = shot(T0 - DAY, { grind: 1500 }).recipeId;
+    expect(toggleBrewNext(db, ids.userId, ids.beanId, a, T0)).toBe('marked');
+    expect(brewNext()).toBe(a);
+    expect(
+      loadBeanDetail(db, ids.userId, ids.beanId, T0)!.recipes.find((r) => r.id === a)?.marked
+    ).toBe(true);
+    toggleBrewNext(db, ids.userId, ids.beanId, b, T0);
+    expect(brewNext()).toBe(b);
+    expect(toggleBrewNext(db, ids.userId, ids.beanId, b, T0)).toBe('cleared');
+    expect(brewNext()).toBeNull();
+  });
+
+  it('D-129: on a finished bean, marking reopens the bean', () => {
+    const a = shot(T0 - DAY).recipeId;
+    finishBean(db, ids.userId, ids.beanId, T0);
+    expect(toggleBrewNext(db, ids.userId, ids.beanId, a, T0)).toBe('reopened');
+    expect(statusOf(ids.beanId)).toMatchObject({ status: 'open', finishedAt: null });
+    expect(brewNext()).toBe(a);
+  });
+
+  it('D-128, data-model §4.1: a recipe kept only by its mark goes when the mark does', () => {
+    const saved = shot(T0 - DAY);
+    toggleBrewNext(db, ids.userId, ids.beanId, saved.recipeId, T0);
+    deleteShot(db, ids.userId, saved.shotId);
+    const kept = loadBeanDetail(db, ids.userId, ids.beanId, T0)!;
+    expect(kept.recipes).toMatchObject([{ history: { text: 'New recipe' }, marked: true }]);
+    toggleBrewNext(db, ids.userId, ids.beanId, saved.recipeId, T0);
+    expect(db.select().from(recipe).where(eq(recipe.id, saved.recipeId)).get()).toBeUndefined();
+  });
+
+  it('D-43, data-model §4.1: "Use last shot recipe" also removes a recipe kept only by its mark', () => {
+    const saved = shot(T0 - DAY);
+    toggleBrewNext(db, ids.userId, ids.beanId, saved.recipeId, T0);
+    deleteShot(db, ids.userId, saved.shotId);
+    clearBrewNext(db, ids.userId, T0);
+    expect(db.select().from(recipe).where(eq(recipe.id, saved.recipeId)).get()).toBeUndefined();
+  });
+
+  it('D-43, data-model §4.1: a shot on another recipe removes the recipe only the mark kept', () => {
+    const saved = shot(T0 - 2 * DAY);
+    toggleBrewNext(db, ids.userId, ids.beanId, saved.recipeId, T0);
+    deleteShot(db, ids.userId, saved.shotId);
+    shot(T0 - DAY, { grind: 1500 });
+    expect(brewNext()).toBeNull();
+    expect(db.select().from(recipe).where(eq(recipe.id, saved.recipeId)).get()).toBeUndefined();
+  });
+
+  it('D-43, data-model §4.1: moving the mark removes a recipe only the old mark kept', () => {
+    const a = shot(T0 - 2 * DAY);
+    const b = shot(T0 - DAY, { grind: 1500 }).recipeId;
+    toggleBrewNext(db, ids.userId, ids.beanId, a.recipeId, T0);
+    deleteShot(db, ids.userId, a.shotId);
+    toggleBrewNext(db, ids.userId, ids.beanId, b, T0);
+    expect(brewNext()).toBe(b);
+    expect(db.select().from(recipe).where(eq(recipe.id, a.recipeId)).get()).toBeUndefined();
+  });
+
+  it('D-129: only a recipe of the bean on the page can be marked from it', () => {
+    const a = shot(T0 - DAY).recipeId;
+    expect(toggleBrewNext(db, ids.userId, newId(T0), a, T0)).toBeNull();
+    expect(brewNext()).toBeNull();
+  });
+
+  it('D-60: another user’s recipe cannot be marked', () => {
+    const a = shot(T0 - DAY).recipeId;
+    expect(toggleBrewNext(db, 'someone-else', ids.beanId, a, T0)).toBeNull();
+    expect(brewNext()).toBeNull();
+  });
+});
+
+describe('finishing a bean', () => {
+  it('D-40, D-127: finished by hand, then reopened (the undo)', () => {
+    expect(finishBean(db, ids.userId, ids.beanId, T0)).toBe(true);
+    expect(statusOf(ids.beanId)).toMatchObject({
+      status: 'finished',
+      finishedAt: T0,
+      finishedAutomatically: false
+    });
+    expect(reopenBean(db, ids.userId, ids.beanId, T0)).toBe(true);
+    expect(statusOf(ids.beanId)).toMatchObject({ status: 'open', finishedAt: null });
+  });
+
+  it('D-60: not another user’s bean', () => {
+    expect(finishBean(db, 'someone-else', ids.beanId, T0)).toBe(false);
+    expect(statusOf(ids.beanId).status).toBe('open');
   });
 });

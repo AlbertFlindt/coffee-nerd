@@ -229,7 +229,7 @@ Taste always starts empty (D-11). Features switched on since the copied shot sta
 Among a bean's recipes, the highest average score among those with at least 3 rated shots. If none has 3 yet, the highest single score. Ties: more rated shots, then most recent. Calculated, never stored.
 
 ### 4.4 Brew next (D-43)
-`app_state.brew_next_recipe_id`. Saving a shot clears it in the same transaction, and makes the shot's bean `current_bean_id` (D-32). Tapping the button again or "Use last shot recipe" also clears it.
+`app_state.brew_next_recipe_id`. Saving a shot clears it in the same transaction, and makes the shot's bean `current_bean_id` (D-32). Tapping the button again or "Use last shot recipe" also clears it. Whenever the mark is cleared or moves, a recipe that only the mark kept (no shots) is removed (§4.1, step 6). On a finished bean, marking a recipe reopens the bean (D-129).
 
 ### 4.5 Custom features and step settings (D-46, D-51, D-52)
 Definitions live on the gear (`spec.features`) and on the step (`setting`); values live in the recipe's setup snapshot under the feature `key` or the `stepId`. One set of schemas checks all of them, in the browser and on the server.

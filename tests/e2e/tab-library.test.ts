@@ -127,7 +127,11 @@ test('AddBean, D-126, D-139: "Same as before" fills the form from an earlier bea
 
 test('D-73, D-140: the re-buy is added, and its first shot starts from the earlier bag’s best recipe', async () => {
   await page.getByRole('button', { name: 'Add bean' }).click();
-  await expect(page.getByRole('heading', { name: 'Beans', level: 1 })).toBeVisible();
+  // D-140: the new bean's page opens; it has no shots yet (D-131).
+  await expect(page.getByRole('heading', { name: 'Guji Hambela', level: 1 })).toBeVisible();
+  await expect(page.getByText('No shots yet')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Numbers' })).toContainText('Not rated yet');
+  await page.getByRole('link', { name: 'Back to Beans' }).click();
   await expect(page.getByRole('main').locator('.card', { hasText: 'Guji Hambela' })).toHaveCount(2);
 
   // The earlier bag's best recipe (D-66), worked out from the test database.
@@ -185,7 +189,74 @@ test('D-130: Edit bean is the form filled in, without "Same as before"', async (
   await expect(page.getByText('2 days ago')).toBeVisible();
   await page.getByLabel('Bag weight').fill('1,000');
   await page.getByRole('button', { name: 'Save changes' }).click();
-  await expect(page.getByRole('heading', { name: 'Beans', level: 1 })).toBeVisible();
+  // D-130: back to the bean's page.
+  await expect(page.getByRole('heading', { name: 'Guji Hambela', level: 1 })).toBeVisible();
+  await page.getByRole('link', { name: 'Back to Beans' }).click();
   // D-142: "1,000" is a thousand grams (shown without a separator, like other quantities).
   await expect(page.getByRole('main').locator('.card', { hasText: '1000 g left' })).toHaveCount(1);
+});
+
+const earliestGuji = () => page.locator('.card', { hasText: 'Guji Hambela' }).last();
+
+test('BeanDetail, D-42: about, numbers and recipes best first', async () => {
+  await earliestGuji().click();
+  await expect(page.getByRole('heading', { name: 'Guji Hambela', level: 1 })).toBeVisible();
+  const about = page.getByRole('region', { name: 'About this bean' });
+  await expect(about).toContainText('since roast');
+  await expect(about).toContainText('Nordlys Roasters');
+  await expect(about).toContainText('Ethiopia · Guji · Natural');
+  await expect(about).toContainText(/Roasted \d+ \w+ · Open/);
+  await expect(page.getByText('Best first')).toBeVisible();
+  const recipes = page.locator('.recipe');
+  expect(await recipes.count()).toBeGreaterThan(1);
+  await expect(recipes.first().locator('.title')).toHaveText(/^Grind \S+ · /);
+  await expect(page.getByRole('button', { name: 'Mark as finished' })).toBeVisible();
+  await expectNoPageScroll();
+});
+
+test('D-43: Brew next marks one recipe; tapping again clears it', async () => {
+  const first = page.locator('.recipe').first();
+  await first.getByRole('button', { name: 'Brew this recipe next' }).click();
+  await expect(first).toContainText('Next shot starts here');
+  await expectNoPageScroll();
+  await screenshot('BeanDetail');
+  await first.getByRole('button', { name: 'Brewing next. Tap to undo' }).click();
+  await expect(first).not.toContainText('Next shot starts here');
+});
+
+test('D-125: a recipe opens the Journal filtered to it', async () => {
+  const title = (await page.locator('.recipe .title').first().innerText()).trim();
+  await page.locator('.recipe-open').first().click();
+  await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
+  expect(page.url()).toMatch(/bean=.+&recipe=.+/);
+  const grind = title.match(/^Grind (\S+)/)![1];
+  for (const row of await page.getByRole('main').getByRole('link').all())
+    await expect(row).toContainText(grind);
+  await page.goBack();
+});
+
+test('D-40, D-127: finish by hand, Undo, finish again and Reopen', async () => {
+  await page.getByRole('button', { name: 'Mark as finished' }).click();
+  await expect(page.getByRole('status')).toContainText('Guji Hambela is finished');
+  await expect(page.getByRole('region', { name: 'About this bean' })).toContainText('Finished');
+  await page.getByRole('status').getByRole('button', { name: 'Undo' }).click();
+  await expect(page.getByRole('button', { name: 'Mark as finished' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'About this bean' })).toContainText('Open');
+
+  await page.getByRole('button', { name: 'Mark as finished' }).click();
+  await expect(page.getByRole('button', { name: 'Reopen' })).toBeVisible();
+  await page.getByRole('button', { name: 'Reopen' }).click();
+  await expect(page.getByRole('button', { name: 'Mark as finished' })).toBeVisible();
+});
+
+test('D-129: Brew next on a finished bean reopens it', async () => {
+  await page.getByRole('button', { name: 'Mark as finished' }).click();
+  await expect(page.getByRole('button', { name: 'Reopen' })).toBeVisible();
+  const first = page.locator('.recipe').first();
+  await first.getByRole('button', { name: 'Brew this recipe next' }).click();
+  await expect(page.getByRole('status')).toContainText('Guji Hambela is open again');
+  await expect(page.getByRole('button', { name: 'Mark as finished' })).toBeVisible();
+  await expect(first).toContainText('Next shot starts here');
+  // Leave no mark behind.
+  await first.getByRole('button', { name: 'Brewing next. Tap to undo' }).click();
 });

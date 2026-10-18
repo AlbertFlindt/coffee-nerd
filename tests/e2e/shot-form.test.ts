@@ -258,12 +258,13 @@ test('MoreTasting, D-23, D-96, D-97, D-101: the Tasting tab', async () => {
 });
 
 test('BrewNext, D-43: a recipe marked Brew next is where "+" starts, until cleared', async () => {
-  // The bean detail page that marks a recipe comes in M5; until then the test sets the mark directly.
-  const db = new Database(DATABASE);
-  db.prepare(
-    `update app_state set brew_next_recipe_id = (select id from recipe where grind = 1500)`
-  ).run();
-  db.close();
+  // The mark is set with the recipe's button on the bean detail page (D-42).
+  await page.goto('/library/beans');
+  await page.locator('.card', { hasText: 'Guji Hambela' }).click();
+  const row = page.locator('.recipe', { hasText: 'Grind 1.5' });
+  await row.getByRole('button', { name: 'Brew this recipe next' }).click();
+  await expect(row.getByRole('button', { name: 'Brewing next. Tap to undo' })).toBeVisible();
+  await expect(row).toContainText('Next shot starts here');
 
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(page.getByText('Recipe chosen from Library')).toBeVisible();

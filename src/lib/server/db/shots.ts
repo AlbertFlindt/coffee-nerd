@@ -117,10 +117,12 @@ export function saveShot(db: Db, ownerId: string, input: ShotInput, now: number)
       .run();
     writeTags(tx, input.id, tagIds);
     // D-43: the mark is used up by the shot it started. D-32: Home follows the bean you last brewed.
+    const marked = markedRecipe(tx, ownerId);
     tx.update(appState)
       .set({ brewNextRecipeId: null, currentBeanId: input.beanId, updatedAt: now })
       .where(eq(appState.userId, ownerId))
       .run();
+    if (marked) removeIfUnused(tx, ownerId, marked);
     const autoFinished = finishBeanIfUsedUp(tx, ownerId, input, now);
 
     return {
@@ -476,10 +478,31 @@ export function rateShot(
 
 /** "Use last shot recipe" (D-43): the next shot starts from the last shot again. */
 export function clearBrewNext(db: Db, ownerId: string, now: number): void {
-  db.update(appState)
+  db.transaction((tx) => clearMark(tx, ownerId, now));
+}
+
+/** The recipe marked Brew next (D-43), if any. */
+export function markedRecipe(tx: Queryable, ownerId: string): string | null {
+  return (
+    tx
+      .select({ id: appState.brewNextRecipeId })
+      .from(appState)
+      .where(eq(appState.userId, ownerId))
+      .get()?.id ?? null
+  );
+}
+
+/**
+ * Clears Brew next (D-43). A recipe that only the mark kept (no shots) goes with it (data-model §4.1,
+ * step 6).
+ */
+export function clearMark(tx: Queryable, ownerId: string, now: number): void {
+  const marked = markedRecipe(tx, ownerId);
+  tx.update(appState)
     .set({ brewNextRecipeId: null, updatedAt: now })
     .where(eq(appState.userId, ownerId))
     .run();
+  if (marked) removeIfUnused(tx, ownerId, marked);
 }
 
 /**

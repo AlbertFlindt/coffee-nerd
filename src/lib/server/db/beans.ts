@@ -9,12 +9,16 @@ import {
   originLine,
   roastAgeDays
 } from '../../domain/bean';
-import { bestRecipe } from '../../domain/best-recipe';
+import { aboutLines, recipeHistory, recipeRowDetail, recipeTitle } from '../../domain/bean-detail';
+import { bestRecipe, rankRecipes } from '../../domain/best-recipe';
+import type { GrinderSpec, MachineSpec } from '../../domain/schemas';
+import { setupSummary } from '../../domain/shot-form';
 import type { BeanFormValues as BeanForm } from '../../domain/bean-form';
 import type { BeanInput } from '../../domain/schemas';
 import type { Db, Queryable } from './client';
 import { newId } from './ids';
-import { bean, recipe, shot, userSettings } from './schema';
+import { appState, bean, gear, recipe, shot, userSettings } from './schema';
+import { clearMark, markedRecipe } from './shots';
 
 export type BeanSummary = {
   id: string;
@@ -243,4 +247,170 @@ export function rebuyChoices(
 export function rebuyFields(db: Queryable, ownerId: string, id: string): BeanForm | null {
   const row = ownBean(db, ownerId, id);
   return row ? { ...formOf(row), roastDate: null, bagWeight: null, rebuyOfId: row.id } : null;
+}
+
+export type BeanDetail = {
+  id: string;
+  name: string;
+  status: 'open' | 'finished';
+  roastAgeDays: number;
+  /** The about card's lines (D-42); the first is the roaster when `roaster` is set. */
+  about: string[];
+  roaster: boolean;
+  /** The best score as shown (D-135); null when no shot is rated. */
+  best: string | null;
+  recipeCount: number;
+  shotCount: number;
+  /** Best first (D-135). */
+  recipes: {
+    id: string;
+    /** "Grind 1.6 · 18.0 g → 36.0 g" (D-143). */
+    title: string;
+    /** "Preinfusion 4 s · 93 °C · avg 28.0 s" (D-128). */
+    detail: string;
+    history: { text: string; reused: boolean };
+    /** The recipe's highest single score, "8 best" (D-135); null when none is rated. */
+    best: number | null;
+    /** Marked Brew next (D-43). */
+    marked: boolean;
+  }[];
+};
+
+/** The bean detail page (D-42); null when the bean is not yours. */
+export function loadBeanDetail(
+  db: Queryable,
+  ownerId: string,
+  beanId: string,
+  now: number
+): BeanDetail | null {
+  const b = ownBean(db, ownerId, beanId);
+  if (!b) return null;
+  const settings = db.select().from(userSettings).where(eq(userSettings.userId, ownerId)).get()!;
+  const recipes = db
+    .select()
+    .from(recipe)
+    .where(and(eq(recipe.beanId, beanId), eq(recipe.ownerId, ownerId)))
+    .all();
+  const shots = db
+    .select({
+      recipeId: shot.recipeId,
+      score: shot.score,
+      yield: shot.yield,
+      time: shot.time,
+      brewedAt: shot.brewedAt
+    })
+    .from(shot)
+    .innerJoin(recipe, eq(recipe.id, shot.recipeId))
+    .where(and(eq(shot.ownerId, ownerId), eq(recipe.beanId, beanId)))
+    .orderBy(desc(shot.brewedAt), desc(shot.id))
+    .all();
+  const gearOf = new Map(
+    db
+      .select()
+      .from(gear)
+      .where(eq(gear.ownerId, ownerId))
+      .all()
+      .map((g) => [g.id, g])
+  );
+  const marked = markedRecipe(db, ownerId);
+  const ofRecipe = (id: string) => shots.filter((s) => s.recipeId === id);
+  const byRecipe = recipes.map((r) => ({ recipeId: r.id, shots: ofRecipe(r.id) }));
+  const order = rankRecipes(byRecipe);
+  const today = localDate(now, settings.timeZone);
+
+  return {
+    id: b.id,
+    name: b.name,
+    status: b.status,
+    roastAgeDays: roastAgeDays(b.roastDate, now, settings.timeZone),
+    about: aboutLines(b, today),
+    roaster: b.roaster !== null,
+    best: bestScoreText(bestRecipe(byRecipe)),
+    recipeCount: recipes.length,
+    shotCount: shots.length,
+    recipes: order.map((id) => {
+      const r = recipes.find((x) => x.id === id)!;
+      const its = ofRecipe(id);
+      const scores = its.flatMap((s) => (s.score === null ? [] : [s.score]));
+      const machine = gearOf.get(r.machineId)?.spec as MachineSpec | undefined;
+      const grinder = gearOf.get(r.grinderId)?.spec as GrinderSpec | undefined;
+      return {
+        id,
+        title: recipeTitle(
+          { grind: r.grind, dose: r.dose, yield: its[0]?.yield ?? null },
+          {
+            grind: grinder?.dial.step ?? 100,
+            dose: settings.doseStep,
+            yield: settings.yieldStep
+          }
+        ),
+        detail: recipeRowDetail(
+          setupSummary(r.setup, machine?.features ?? []),
+          its.map((s) => s.time),
+          settings.timeStep
+        ),
+        history: recipeHistory(its.length),
+        best: scores.length > 0 ? Math.max(...scores) : null,
+        marked: marked === id
+      };
+    })
+  };
+}
+
+/**
+ * The Brew next button (D-43): marks this recipe, moving the mark from another; tapping the marked one
+ * clears it. On a finished bean, marking reopens the bean (D-129). Null when the recipe is not one of
+ * yours on this bean.
+ */
+export function toggleBrewNext(
+  db: Db,
+  ownerId: string,
+  beanId: string,
+  recipeId: string,
+  now: number
+): 'marked' | 'cleared' | 'reopened' | null {
+  return db.transaction((tx) => {
+    // Only a recipe of the bean whose page this is (D-42).
+    const r = tx
+      .select({ id: recipe.id, beanId: recipe.beanId })
+      .from(recipe)
+      .where(and(eq(recipe.id, recipeId), eq(recipe.ownerId, ownerId), eq(recipe.beanId, beanId)))
+      .get();
+    if (!r) return null;
+    if (markedRecipe(tx, ownerId) === recipeId) {
+      clearMark(tx, ownerId, now);
+      return 'cleared';
+    }
+    // A recipe that only the old mark kept goes with it (data-model §4.1).
+    clearMark(tx, ownerId, now);
+    tx.update(appState)
+      .set({ brewNextRecipeId: recipeId, updatedAt: now })
+      .where(eq(appState.userId, ownerId))
+      .run();
+    return reopen(tx, ownerId, r.beanId, now) ? 'reopened' : 'marked';
+  });
+}
+
+function reopen(tx: Queryable, ownerId: string, beanId: string, now: number): boolean {
+  const result = tx
+    .update(bean)
+    .set({ status: 'open', finishedAt: null, finishedAutomatically: false, updatedAt: now })
+    .where(and(eq(bean.id, beanId), eq(bean.ownerId, ownerId), eq(bean.status, 'finished')))
+    .run();
+  return result.changes > 0;
+}
+
+/** "Mark as finished" (D-40, D-127). True when an open bean of yours was finished. */
+export function finishBean(db: Db, ownerId: string, beanId: string, now: number): boolean {
+  const result = db
+    .update(bean)
+    .set({ status: 'finished', finishedAt: now, finishedAutomatically: false, updatedAt: now })
+    .where(and(eq(bean.id, beanId), eq(bean.ownerId, ownerId), eq(bean.status, 'open')))
+    .run();
+  return result.changes > 0;
+}
+
+/** "Reopen", and the Undo after finishing by hand (D-40, D-127). True when a bean was reopened. */
+export function reopenBean(db: Db, ownerId: string, beanId: string, now: number): boolean {
+  return reopen(db, ownerId, beanId, now);
 }
