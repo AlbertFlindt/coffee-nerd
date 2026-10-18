@@ -24,14 +24,12 @@ Last updated: 2026-10-18
 |---|---|---|
 | Proper design for the sign-in and "Create your account" pages (built simple for now) | Before release (M11) | D-84 |
 | First-run guide: after creating the account, how you add your gear, puck prep and My setup | M6 | D-88 |
-| Recipe detail (a recipe's shots), opened from the bean detail page | M5 | Open topic 9, D-42 |
 | Gear: the message on an item My setup uses, "Used in My setup · choose another default first" | M6 | D-83 |
 | Tag sheet: rename, merge, remove | M7 | Open topic 14, D-29, D-53 |
 | Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency) | M8 | Open topic 15, D-32 |
 | Home: replace the placeholder start page (logo, name and a temporary "Sign out" button above the tab bar) | M8 | M0, M2, M3 |
 | The "Shot saved" message, the automatic-finish message with Undo, and "… is open again" (built as a plain card on the start page) | M8 | D-95 |
 | Shot form when there is nothing to brew with (no My setup or no open bean): built as a plain "Nothing to brew with yet" message | M6 | D-88, M3 |
-| Shot form: the bean list behind the bean card (D-94), built as a plain "Open beans" list in a sheet | M5 | D-94, M3 |
 | The Rate sheet when the score cannot be saved: it stays open with "The score could not be saved. Nothing was changed." under the score row | M10 | D-111 |
 | Tab bar: the screens (Journal.png, ShotDetail.png) draw it about 100 px tall, the design system's `--tabbar-h` is 84 px; built at 84 px, so icons sit about 8 px lower than in the PNGs. Settle in the design-system sync | M5 (D-119) | D-30, D-114 |
 | "Compared with this recipe": the distance is compared as shown, to one decimal, so 1.04σ reads "Within normal range" (never "1.0σ faster than usual"); a reading of D-110 to confirm | M9 (Insights uses the same σ) | D-110 |
