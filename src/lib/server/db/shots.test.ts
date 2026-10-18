@@ -10,6 +10,7 @@ import { appState, bean, gear, recipe, shot, shotTag, tag, user } from './schema
 import { REFERENCE, seedReferenceSetup, type SeededIds } from './seed';
 import {
   clearBrewNext,
+  deleteShot,
   editShot,
   rateShot,
   reopenAutoFinishedBean,
@@ -513,5 +514,36 @@ describe('rateShot', () => {
     expect(rateShot(db, 'someone-else', shotId, 7, T0)).toBe(false);
     expect(rateShot(db, ids.userId, 'nope', 7, T0)).toBe(false);
     expect(db.select().from(shot).where(eq(shot.id, shotId)).get()!.score).toBeNull();
+  });
+});
+
+describe('deleteShot', () => {
+  it('D-116: removes the shot and its flavor notes; a recipe left without shots goes too', () => {
+    const berry = db.select().from(tag).where(eq(tag.name, 'Berry')).get()!;
+    const kept = save(input({}, 1));
+    const { shotId, recipeId } = save(input({ grind: 1500, tagIds: [berry.id] }, 2));
+    expect(deleteShot(db, ids.userId, shotId)).toBe(true);
+    expect(db.select().from(shot).where(eq(shot.id, shotId)).get()).toBeUndefined();
+    expect(db.select().from(shotTag).where(eq(shotTag.shotId, shotId)).all()).toEqual([]);
+    expect(db.select().from(recipe).where(eq(recipe.id, recipeId)).get()).toBeUndefined();
+    expect(db.select().from(recipe).where(eq(recipe.id, kept.recipeId)).get()).toBeDefined();
+  });
+
+  it('D-116, D-43: a recipe that still has shots, or is marked Brew next, stays', () => {
+    const first = save(input({}, 1));
+    const second = save(input({}, 2));
+    deleteShot(db, ids.userId, second.shotId);
+    expect(db.select().from(recipe).where(eq(recipe.id, first.recipeId)).get()).toBeDefined();
+    const lone = save(input({ grind: 1500 }, 3));
+    db.update(appState).set({ brewNextRecipeId: lone.recipeId }).run();
+    deleteShot(db, ids.userId, lone.shotId);
+    expect(db.select().from(recipe).where(eq(recipe.id, lone.recipeId)).get()).toBeDefined();
+  });
+
+  it('D-60: another user’s shot, or an unknown one, is left alone', () => {
+    const { shotId } = save(input({}, 1));
+    expect(deleteShot(db, 'someone-else', shotId)).toBe(false);
+    expect(deleteShot(db, ids.userId, 'nope')).toBe(false);
+    expect(db.select().from(shot).where(eq(shot.id, shotId)).get()).toBeDefined();
   });
 });

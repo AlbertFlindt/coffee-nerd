@@ -372,11 +372,21 @@ test('D-106, D-107, D-108: empty sliders show a handle, buttons flash when press
   const sheet = page.getByRole('region', { name: 'More' });
   await expect(sheet).toBeVisible();
   await settled();
+  // Measure once the sheet has stopped moving: its top is the same in two frames in a row.
+  await expect
+    .poll(async () => {
+      const before = (await sheet.boundingBox())!.y;
+      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => r(null))));
+      return (await sheet.boundingBox())!.y === before;
+    })
+    .toBe(true);
   const grip = (await sheet.locator('.grip').boundingBox())!;
   // The whole 44 px strip from the sheet's top edge can be dragged; the handle sits in its middle.
   const sheetBox = (await sheet.boundingBox())!;
   const handle = (await sheet.locator('.cn-sheet__handle').boundingBox())!;
-  expect(grip.height).toBeGreaterThanOrEqual(44);
+  // Chromium lays out in 1/64 px; a fractional position can read 44 px as 43.99999.
+  const layoutPx = (n: number) => Math.round(n * 64) / 64;
+  expect(layoutPx(grip.height)).toBeGreaterThanOrEqual(44);
   expect(Math.abs(grip.y - sheetBox.y)).toBeLessThanOrEqual(1);
   expect(Math.abs(handle.y + handle.height / 2 - (grip.y + grip.height / 2))).toBeLessThanOrEqual(
     1

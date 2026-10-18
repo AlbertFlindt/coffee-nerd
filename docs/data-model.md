@@ -214,7 +214,7 @@ These are real tables rather than JSON on purpose: usage counts are one query, a
 3. **Found** → "Recipe reused N×" (N = the recipe's shot count). The faint previous-score marker (D-12) is the score of that recipe's latest rated shot.
 4. **Not found** → "New recipe · grind changed": the form is compared field by field with the recipe of **this bean's last shot** (D-81) to name what changed (grind, dose, machine, grinder, basket, routine, or a feature by its label); with several changes, the first two are named and the rest counted (D-71), in the order grind, dose, machine, grinder, basket, routine, features; with nothing to name, just "New recipe" (D-77).
 5. **On save** the server recomputes the fingerprint itself (it never trusts the browser's), then finds or creates the recipe and saves the shot, in one transaction. Flavor notes added on the Tasting tab are created in that transaction too, in the family Other, or matched to an existing note ignoring case (D-101).
-6. **Editing a shot** (D-57) runs step 5 again. The shot may move to another recipe. A recipe left with no shots is removed, unless it is marked Brew next.
+6. **Editing a shot** (D-57) runs step 5 again. The shot may move to another recipe. A recipe left with no shots is removed, unless it is marked Brew next. **Deleting a shot** (D-116) does the same for its recipe, in the same transaction.
 
 ### 4.2 Prefill (D-03, D-38, D-43) — one pure, tested function
 In this order:

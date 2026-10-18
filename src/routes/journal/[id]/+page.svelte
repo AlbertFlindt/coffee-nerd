@@ -66,18 +66,28 @@
     }
   ]);
 
-  // D-57: balance, body and sweetness as small scales; the handle sits where the value is.
-  const scales: { scale: TasteScale; label: string }[] = [
+  // D-57: balance, body and sweetness as small scales, and aftertaste when it is set (D-115); the
+  // handle sits where the value is.
+  const scales: { scale: TasteScale; label: string }[] = $derived([
     { scale: 'balance', label: 'Balance' },
     { scale: 'body', label: 'Body' },
-    { scale: 'sweetness', label: 'Sweetness' }
-  ];
+    { scale: 'sweetness', label: 'Sweetness' },
+    ...(shot.taste.aftertaste === null
+      ? []
+      : [{ scale: 'aftertaste' as const, label: 'Aftertaste' }])
+  ]);
+  // D-118: "New recipe" in cherry, what changed after it in muted ink, as on the shot form.
+  const [tagMain, ...tagRest] = $derived(recipeTagText(shot.recipeTag).split(' · '));
   const position = (scale: TasteScale, value: number) =>
     scale === 'balance' ? ((value + 10) / 20) * 100 : value * 10;
 </script>
 
 <header>
-  <a class="back tap" href={resolve('/journal')} aria-label="Back to Journal">
+  <a
+    class="back tap"
+    href={data.filters ? resolve(`/journal?${data.filters}`) : resolve('/journal')}
+    aria-label="Back to Journal"
+  >
     <svg
       width="22"
       height="22"
@@ -107,7 +117,8 @@
     <span class="soft">{shot.gear}</span>
     {#if shot.setup}<span class="soft">{shot.setup}</span>{/if}
     <span class="cn-tag" class:cn-tag--new={shot.recipeTag.kind === 'new'}
-      >{recipeTagText(shot.recipeTag)}</span
+      >{tagMain}{#if tagRest.length}<span class="tag-detail">{` · ${tagRest.join(' · ')}`}</span
+        >{/if}</span
     >
   </section>
 
@@ -411,6 +422,11 @@
     background: var(--bg);
     font-size: 13px;
     font-weight: 600;
+  }
+
+  .tag-detail {
+    color: var(--ink-muted);
+    font-weight: 500;
   }
 
   .compared {

@@ -1,7 +1,8 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getDb } from '#lib/server/db/connection.ts';
 import { loadEditShotForm } from '#lib/server/db/shot-form.ts';
-import { editShot, shotRequestSchema, ShotRejected } from '#lib/server/db/shots.ts';
+import { deleteShot, editShot, shotRequestSchema, ShotRejected } from '#lib/server/db/shots.ts';
+import { journalWithFilters } from '#lib/server/journal-filters.ts';
 import { shot } from '#lib/server/db/schema.ts';
 import { and, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
@@ -59,5 +60,13 @@ export const actions: Actions = {
     }
     // D-113: "Save changes" returns to the shot.
     redirect(303, `/journal/${params.id}`);
+  },
+
+  // D-116: delete after the confirmation; back to the Journal as you left it (D-117).
+  delete: ({ locals, params, cookies }) => {
+    if (!locals.user) error(401);
+    // A second tap finds the shot already gone: the Journal is still the right place to land.
+    deleteShot(getDb(), locals.user.id, params.id);
+    redirect(303, journalWithFilters(cookies));
   }
 };

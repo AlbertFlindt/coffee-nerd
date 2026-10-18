@@ -178,17 +178,7 @@ export function editShot(
     tx.delete(shotTag).where(eq(shotTag.shotId, shotId)).run();
     writeTags(tx, shotId, tagIds);
 
-    if (existing.recipeId !== recipeId && recipeShotCount(tx, ownerId, existing.recipeId) === 0) {
-      const marked = tx
-        .select({ id: appState.userId })
-        .from(appState)
-        .where(and(eq(appState.userId, ownerId), eq(appState.brewNextRecipeId, existing.recipeId)))
-        .get();
-      if (!marked)
-        tx.delete(recipe)
-          .where(and(eq(recipe.id, existing.recipeId), eq(recipe.ownerId, ownerId)))
-          .run();
-    }
+    if (existing.recipeId !== recipeId) removeIfUnused(tx, ownerId, existing.recipeId);
 
     return {
       status: 'saved',
@@ -198,6 +188,41 @@ export function editShot(
       newRecipe,
       autoFinished: false
     };
+  });
+}
+
+/** A recipe left with no shots is removed, unless it is marked Brew next (data-model §4.1, step 6). */
+function removeIfUnused(tx: Queryable, ownerId: string, recipeId: string): void {
+  if (recipeShotCount(tx, ownerId, recipeId) > 0) return;
+  const marked = tx
+    .select({ id: appState.userId })
+    .from(appState)
+    .where(and(eq(appState.userId, ownerId), eq(appState.brewNextRecipeId, recipeId)))
+    .get();
+  if (!marked)
+    tx.delete(recipe)
+      .where(and(eq(recipe.id, recipeId), eq(recipe.ownerId, ownerId)))
+      .run();
+}
+
+/**
+ * Deletes a shot and its flavor notes (D-116); its recipe goes too when no shot is left on it, as when
+ * editing. True when the shot was found.
+ */
+export function deleteShot(db: Db, ownerId: string, shotId: string): boolean {
+  return db.transaction((tx) => {
+    const existing = tx
+      .select({ recipeId: shot.recipeId })
+      .from(shot)
+      .where(and(eq(shot.id, shotId), eq(shot.ownerId, ownerId)))
+      .get();
+    if (!existing) return false;
+    tx.delete(shotTag).where(eq(shotTag.shotId, shotId)).run();
+    tx.delete(shot)
+      .where(and(eq(shot.id, shotId), eq(shot.ownerId, ownerId)))
+      .run();
+    removeIfUnused(tx, ownerId, existing.recipeId);
+    return true;
   });
 }
 
