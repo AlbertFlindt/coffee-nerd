@@ -3,10 +3,19 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import {
+  addBean as addBeanFromForm,
+  BeanRejected,
+  loadBeanForm,
+  rebuyChoices,
+  rebuyFields,
+  updateBean
+} from './beans';
 import { loadBeans } from './beans';
 import { openDatabase, type Db } from './client';
 import { newId } from './ids';
-import { bean } from './schema';
+import type { BeanInput } from '../../domain/schemas';
+import { appState, bean } from './schema';
 import { REFERENCE, seedReferenceSetup, type SeededIds } from './seed';
 import { saveShot, type ShotInput } from './shots';
 
@@ -122,5 +131,128 @@ describe('loadBeans', () => {
 
   it('D-60: another user’s beans are not listed', () => {
     expect(loadBeans(db, 'someone-else', T0)).toEqual({ open: [], finished: [] });
+  });
+});
+
+const input = (overrides: Partial<BeanInput> = {}): BeanInput => ({
+  name: 'Kiambu AA',
+  roaster: 'Havnens Rösteri',
+  countryCode: 'KE',
+  region: 'Kiambu',
+  variety: 'SL28',
+  process: 'washed',
+  altitudeMinM: 1700,
+  altitudeMaxM: 1800,
+  roastLevel: 'medium_light',
+  roastDate: '2026-10-13',
+  bagWeight: 250000,
+  rebuyOfId: null,
+  ...overrides
+});
+
+describe('addBean', () => {
+  it('D-41: saves an open bean with what was entered', () => {
+    const id = addBeanFromForm(db, ids.userId, input(), T0);
+    expect(db.select().from(bean).where(eq(bean.id, id)).get()).toMatchObject({
+      ownerId: ids.userId,
+      name: 'Kiambu AA',
+      countryCode: 'KE',
+      roastDate: '2026-10-13',
+      bagWeight: 250000,
+      status: 'open',
+      rebuyOfId: null
+    });
+  });
+
+  it('D-138: a roast date after today is refused', () => {
+    // T0 is 17 Oct 2026, 06:00 UTC.
+    expect(() => addBeanFromForm(db, ids.userId, input({ roastDate: '2026-10-18' }), T0)).toThrow(
+      BeanRejected
+    );
+    expect(() =>
+      addBeanFromForm(db, ids.userId, input({ roastDate: '2026-10-17' }), T0)
+    ).not.toThrow();
+  });
+
+  it('D-41, D-60: a re-buy links to an earlier bag of yours only', () => {
+    const id = addBeanFromForm(db, ids.userId, input({ rebuyOfId: ids.beanId }), T0);
+    expect(db.select().from(bean).where(eq(bean.id, id)).get()?.rebuyOfId).toBe(ids.beanId);
+    const other = seedReferenceSetup(openDatabase(join(dir, `other-${counter++}.db`)), {
+      now: T0,
+      name: 'Other',
+      passwordHash: 'x'
+    });
+    expect(() => addBeanFromForm(db, ids.userId, input({ rebuyOfId: other.beanId }), T0)).toThrow(
+      BeanRejected
+    );
+  });
+
+  it('D-140: adding a bean does not change the current bean', () => {
+    const before = db.select().from(appState).get()?.currentBeanId;
+    addBeanFromForm(db, ids.userId, input(), T0);
+    expect(db.select().from(appState).get()?.currentBeanId).toBe(before);
+  });
+});
+
+describe('rebuyChoices', () => {
+  it('D-126: every earlier bean once, as its latest bag, newest first', () => {
+    const older = addBean({
+      name: 'Kiambu AA',
+      roaster: 'Havnens Rösteri',
+      createdAt: T0 - 9 * DAY
+    });
+    const latest = addBean({
+      name: 'Kiambu AA',
+      roaster: 'Havnens Rösteri',
+      status: 'finished',
+      createdAt: T0 - 2 * DAY
+    });
+    const choices = rebuyChoices(db, ids.userId);
+    expect(choices.map((c) => c.id)).toEqual([latest, ids.beanId]);
+    expect(choices.map((c) => c.id)).not.toContain(older);
+    expect(choices[0]).toMatchObject({ name: 'Kiambu AA', origin: 'Havnens Rösteri' });
+  });
+
+  it('D-60: only your own beans', () => {
+    expect(rebuyChoices(db, 'someone-else')).toEqual([]);
+  });
+});
+
+describe('rebuyFields', () => {
+  it('D-41, D-139: everything but roast date and bag weight, linked to that bag', () => {
+    db.update(bean).set({ bagWeight: 250000 }).where(eq(bean.id, ids.beanId)).run();
+    const fields = rebuyFields(db, ids.userId, ids.beanId)!;
+    expect(fields).toMatchObject({
+      name: 'Guji Hambela',
+      roaster: 'Nordlys Roasters',
+      countryCode: 'ET',
+      region: 'Guji',
+      process: 'natural',
+      altitudeMinM: 1900,
+      altitudeMaxM: 2100,
+      roastLevel: 'light',
+      roastDate: null,
+      bagWeight: null,
+      rebuyOfId: ids.beanId
+    });
+    expect(rebuyFields(db, 'someone-else', ids.beanId)).toBeNull();
+  });
+});
+
+describe('editing a bean', () => {
+  it('D-130: the form starts from the bean, and saving changes it but keeps its re-buy link', () => {
+    const id = addBeanFromForm(db, ids.userId, input({ rebuyOfId: ids.beanId }), T0);
+    const form = loadBeanForm(db, ids.userId, id)!;
+    expect(form).toMatchObject({ name: 'Kiambu AA', roastDate: '2026-10-13', bagWeight: 250000 });
+    updateBean(db, ids.userId, id, input({ name: 'Kiambu AA Peaberry', rebuyOfId: null }), T0);
+    expect(db.select().from(bean).where(eq(bean.id, id)).get()).toMatchObject({
+      name: 'Kiambu AA Peaberry',
+      rebuyOfId: ids.beanId
+    });
+  });
+
+  it('D-60: another user’s bean is not found', () => {
+    expect(loadBeanForm(db, 'someone-else', ids.beanId)).toBeNull();
+    expect(() => updateBean(db, 'someone-else', ids.beanId, input(), T0)).toThrow(BeanRejected);
   });
 });
