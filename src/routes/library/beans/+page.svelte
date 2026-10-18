@@ -1,6 +1,6 @@
 <script lang="ts">
   // Beans overview (screen 7, D-37): open beans as cards with their roast age, finished beans as rows below;
-  // only the finished list scrolls (D-36). The Library tab opens it directly, so there is no back arrow
+  // below the header everything scrolls as one list (D-36, D-136). The Library tab opens it directly, so there is no back arrow
   // until the Library page exists (D-124). Add bean and the bean pages come later in M5, so the button
   // is dimmed and the beans are not links yet.
   import TabBar from '#lib/components/TabBar.svelte';
@@ -129,8 +129,9 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
-    padding: var(--space-1) var(--space-5) 0;
-    overflow: hidden;
+    padding: var(--space-1) var(--space-5) var(--space-4);
+    /* D-36, D-136: open cards and finished rows scroll together as one list. */
+    overflow-y: auto;
   }
 
   h2 {
@@ -228,15 +229,13 @@
     font-weight: 700;
   }
 
-  /* D-36, D-37: the finished beans are the list that scrolls. */
   .finished {
-    flex: 1;
-    min-height: 0;
+    flex: none;
     display: flex;
     flex-direction: column;
     gap: 2px;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    overflow-y: auto;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
   }
 
   .row {

@@ -66,6 +66,7 @@ Last updated: 2026-10-18
 
 | Item | When | Source |
 |---|---|---|
+| Beans overview: "Add bean" is dimmed and the beans are not links until the Add bean form and the bean detail page are built | M5 (next two pull requests) | D-37, D-41, D-42 |
 | Recipe filter labels (D-121) add the differing gear and machine features, not the routine's step values: two recipes with the same routine whose steps differ (e.g. WDT 20 s vs 30 s) still read the same | M7 (Puck prep, when step values become editable there) | D-121, D-51 |
 | `main` is not protected: GitHub does not enforce the "Require pull request" ruleset on a private repository without a Team plan. The push-guard hook and the review step are the safeguard. | When the repository goes public | Roadmap M0, D-62 |
 | Playwright is pinned to 1.56.1 and CI to `ubuntu-24.04`, to match the browser in the development environment. Upgrade both together. | Any time | PR #1 |
