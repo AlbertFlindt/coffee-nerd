@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { sql } from 'drizzle-orm';
@@ -44,5 +44,40 @@ describe('isDatabaseReachable', () => {
     db.$client.close();
 
     expect(isDatabaseReachable(db)).toBe(false);
+  });
+});
+
+describe('migration 0003_basket_brand_size', () => {
+  it('D-150: an existing basket is split once into brand and size', () => {
+    const db = openDatabase(join(dir, 'baskets.db'));
+    const raw = db.$client;
+    const owner = raw.prepare(
+      "insert into user (id, name, password_hash, created_at, updated_at) values ('u', 'U', 'x', 0, 0)"
+    );
+    owner.run();
+    const add = raw.prepare(
+      'insert into gear (id, owner_id, kind, name, spec, created_at, updated_at) values (?, \'u\', \'basket\', ?, \'{"type":"precision","shotSize":"double"}\', 0, 0)'
+    );
+    add.run('a', 'VST 18 g');
+    add.run('b', 'Stock double');
+    const migration = readFileSync(
+      join(process.cwd(), 'drizzle/0003_basket_brand_size.sql'),
+      'utf8'
+    );
+    for (const statement of migration.split('--> statement-breakpoint')) raw.exec(statement);
+    const rows = raw.prepare('select id, name, spec from gear order by id').all() as {
+      id: string;
+      name: string;
+      spec: string;
+    }[];
+    expect(rows.map((r) => [r.name, JSON.parse(r.spec)])).toEqual([
+      ['VST · 18 g', { type: 'precision', shotSize: 'double', brand: 'VST', sizeG: 18000 }],
+      ['Stock double', { type: 'precision', shotSize: 'double', brand: 'Stock double' }]
+    ]);
+    // Running it again changes nothing.
+    for (const statement of migration.split('--> statement-breakpoint')) raw.exec(statement);
+    expect(raw.prepare("select name from gear where id = 'a'").get()).toEqual({
+      name: 'VST · 18 g'
+    });
   });
 });

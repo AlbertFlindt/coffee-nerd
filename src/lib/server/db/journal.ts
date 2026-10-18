@@ -171,7 +171,7 @@ export type ShotDetail = {
   brewedAt: number;
   beanName: string;
   roastDate: string;
-  /** "Lelit Bianca · Timemore 064S · VST 18 g · Daily routine" (D-57). */
+  /** "Lelit Bianca · Timemore 064S · VST · 18 g · Daily routine" (D-57). */
   gear: string;
   /** The pressure profile and other features (D-57). */
   setup: string;

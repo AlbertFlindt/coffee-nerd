@@ -76,8 +76,14 @@ export const REFERENCE = {
     } satisfies GrinderSpec
   },
   basket: {
-    name: 'VST 18 g',
-    spec: { type: 'precision', shotSize: 'double', diameterMm: 58000 } satisfies BasketSpec
+    name: 'VST · 18 g',
+    spec: {
+      brand: 'VST',
+      sizeG: 18000,
+      type: 'precision',
+      shotSize: 'double',
+      diameterMm: 58000
+    } satisfies BasketSpec
   },
   steps: [
     { name: 'WDT', setting: { kind: 'seconds', step: 1000, startsAt: 20000 } },

@@ -22,7 +22,7 @@ describe('seedReferenceSetup', () => {
         .from(gear)
         .all()
         .map((g) => g.name)
-    ).toEqual(['Lelit Bianca', 'Timemore 064S', 'VST 18 g']);
+    ).toEqual(['Lelit Bianca', 'Timemore 064S', 'VST · 18 g']);
     expect(
       db
         .select()

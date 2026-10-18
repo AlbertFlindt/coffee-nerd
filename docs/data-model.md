@@ -121,7 +121,7 @@ One table for all Gear, because Gear is one concept (D-39, D-68). A future kind 
 
 - **Machine:** `type` (`automatic` · `semi_auto` · `lever` · `manual`), `groupSizeMm`, `features` (a list of feature definitions).
 - **Grinder:** `type` (`electric` · `hand`), `burrs` (`flat` · `conical`), `burrSizeMm`, `dial` (`mode`: `stepped` or `stepless`, `step`, `finest`, `coarsest`).
-- **Basket:** `type` (`precision` · `standard` · `pressurized`), `shotSize` (`single` · `double` · `triple`), `diameterMm`, optional `doseRange` (`from`, `to`).
+- **Basket:** `brand`, optional `sizeG` (D-150; the row's `name` is kept as "VST · 18 g" for lists and old shots), `type` (`precision` · `standard` · `pressurized`), `shotSize` (`single` · `double` · `triple`), `diameterMm`, optional `doseRange` (`from`, `to`).
 
 **Feature definition** (built-in and custom, D-44, D-46):
 

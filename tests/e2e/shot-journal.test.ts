@@ -190,7 +190,7 @@ test('ShotDetail, D-57: tapping a shot opens it', async () => {
   const card = page.getByRole('region', { name: 'Bean and setup' });
   await expect(card).toContainText('Guji Hambela');
   await expect(card).toContainText(/\d+ days? since roast/);
-  await expect(card).toContainText('Lelit Bianca · Timemore 064S · VST 18 g · Daily routine');
+  await expect(card).toContainText('Lelit Bianca · Timemore 064S · VST · 18 g · Daily routine');
   await expect(card).toContainText('93 °C · Flat 9.0 bar');
   const values = page.getByRole('region', { name: 'Core values' });
   for (const label of ['Grind', 'Dose', 'Yield', 'Time']) await expect(values).toContainText(label);

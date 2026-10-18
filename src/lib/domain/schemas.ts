@@ -131,6 +131,9 @@ export const grinderSpecSchema = z.object({
 export type GrinderSpec = z.infer<typeof grinderSpecSchema>;
 
 export const basketSpecSchema = z.object({
+  /** The basket is named by brand and size: "VST · 18 g" (D-150). */
+  brand: name,
+  sizeG: thousandths.positive().optional(),
   type: z.enum(['precision', 'standard', 'pressurized']),
   shotSize: z.enum(['single', 'double', 'triple']),
   diameterMm: millimetres,
