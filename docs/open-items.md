@@ -22,12 +22,12 @@ Last updated: 2026-10-18
 
 | What is missing | Needed by | Source |
 |---|---|---|
+| Gear pages built without a design: the "Add gear" sheet (Machine, Grinder, Basket as rows), the archive confirmation ("Archive this basket?", "It leaves the Gear page and the pickers. Past shots keep its name."), "Fits none of your machines" when no machine has the basket's diameter, "Not set up yet" on the My setup card before My setup exists, "No basket" and "No puck prep" on that card when none is set, "Not set" for a group, burr or basket size that was never entered (the first tap on − or + sets 58 mm), the basket's Size field ("e.g. 18", a typed "g" is ignored), the grinder's three typed fields Step interval, Finest and Coarsest with the line "Step interval is how much − or + moves the grind." (D-159), the grinder preview's example value (1.6, or the finest when 1.6 is outside the range), the problem lines above the button ("Name is required", "Brand is required", "Size must be more than 0", "The step interval must be more than 0", "Finest and coarsest must differ", "The dose range must run from low to high", "Each feature needs a name, and names must differ", "This gear could not be found", otherwise "Something on this page is not right"), and "Not available yet" read out for the dimmed Library rows and Edit | When the canvas designs them | D-147, D-148, D-49, D-150, D-48, D-159, D-156 |
 | Delete bean (D-145): the confirmation sheet's line "It has no shots yet. This cannot be undone." and the problem line "A bean with shots cannot be deleted" (shown only if a shot is saved while the sheet is open) are wording no decision fixes | When the canvas designs them | D-145, D-116 |
 | Bean detail: the "Guji Hambela is finished" message with Undo and "… is open again" reuse Home's message card above the button (D-127, D-129); a recipe kept only by its Brew next mark shows "New recipe" in muted text without a dot (D-128); a long name in the header is cut with "…"; "Not rated yet" sits in the Best score tile (D-131). Accepted as built (D-119, D-146) until the canvas designs them | When the canvas designs them | D-127, D-128, D-129, D-131 |
 | Add bean: built without a design, from the form's own parts: the "Same as before" sheet (name and roaster · country · process per row, "No beans yet"), the country sheet (search field, then countries as rows), the picked re-buy card with its × (D-139), the problem lines above the button, and Edit bean (D-130). Accepted as built (D-119, D-146) until the canvas designs them | When the canvas designs them | D-126, D-130, D-133, D-138, D-139 |
 | Proper design for the sign-in and "Create your account" pages (built simple for now) | Before release (M11) | D-84 |
 | First-run guide: after creating the account, how you add your gear, puck prep and My setup | M6 | D-88 |
-| Gear: the message on an item My setup uses, "Used in My setup · choose another default first" | M6 | D-83 |
 | Tag sheet: rename, merge, remove | M7 | Open topic 14, D-29, D-53 |
 | Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency) | M8 | Open topic 15, D-32 |
 | Home: replace the placeholder start page (logo, name and a temporary "Sign out" button above the tab bar) | M8 | M0, M2, M3 |
@@ -66,6 +66,7 @@ Last updated: 2026-10-18
 
 | Item | When | Source |
 |---|---|---|
+| Gear: "Edit" on the My setup card and "Add your own feature" on the machine page are dimmed until the next pull request builds Edit My setup and the feature sheet | M6 (next pull request) | D-45, D-46 |
 | Recipe filter labels (D-121) add the differing gear and machine features, not the routine's step values: two recipes with the same routine whose steps differ (e.g. WDT 20 s vs 30 s) still read the same | M7 (Puck prep, when step values become editable there) | D-121, D-51 |
 | `main` is not protected: GitHub does not enforce the "Require pull request" ruleset on a private repository without a Team plan. The push-guard hook and the review step are the safeguard. | When the repository goes public | Roadmap M0, D-62 |
 | Playwright is pinned to 1.56.1 and CI to `ubuntu-24.04`, to match the browser in the development environment. Upgrade both together. | Any time | PR #1 |
@@ -75,7 +76,6 @@ Last updated: 2026-10-18
 | "Back" and "Save shot" always return to the start page, also when "+" was pressed on the Journal; D-95 wants them to return to where "+" was pressed, with the "Shot saved" message there (the message lives only on the start page for now) | M8 | M3, D-114 |
 | The basket and puck prep pickers offer no "None", so once set they cannot be removed for one shot | M6 | M3 |
 | Switching the bean (D-94) or "Use last shot recipe" (D-43) starts the form again and drops edits already made, without a warning; the local draft of D-61 may cover it | M10 | M3 |
-| Basket row on the Setup tab shows the basket's name ("VST 18 g"); the design shows brand · size ("VST · 18 g"), which needs separate fields on the basket | M6 | D-49, M3 |
 | Shot form: a puck prep step's value is taken from the routine (D-76) and cannot be changed for one shot; only the routine can be switched | M7 | D-51, M3 |
 | `npm audit`: 4 moderate advisories from an old esbuild inside drizzle-kit (development only, not in the Docker image). Recheck when drizzle-kit updates. | Each dependency update | PR #1 |
 | End-to-end: the Journal test expects the shots under Today, Yesterday and one earlier date; a run that crosses midnight in Copenhagen (the seed's time zone) would see one more day | Only if it gets in the way | M4 |

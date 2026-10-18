@@ -56,8 +56,12 @@ Built in three pull requests: the overview (D-124, D-132, D-134, D-135), then Ad
 
 **Done when:** screenshots match `Beans`, `AddBean` and `BeanDetail`; end-to-end tests: add a bean, re-buy it with "Same as before" and its first shot starts from the earlier bag's best recipe (D-73); mark a recipe Brew next with its button and "+" starts from it; finish a bean, undo, reopen.
 
-## M6 — Gear and My setup ☐  (screens 8, 12–16)
+## M6 — Gear and My setup ◐  (screens 8, 12–17)
 Gear list, machine/grinder/basket detail, Add your own feature, Edit My setup. Library landing (screen 17).
+
+Built in three pull requests: the Library and gear pages (D-147 to D-150, D-156, D-158), then Add your own feature, Edit My setup and the shot form's gear pieces (D-151 to D-155), then the step-by-step start (D-157).
+
+**Done when:** screenshots match `Library`, `Equipment`, `GearDetail`, `GrinderDetail`, `BasketDetail`, `CustomFeature` and `EditSetup`; end-to-end tests: add and archive gear; add a custom feature and see it on More › Setup; edit My setup and a new bean's first shot starts from it; a new account is guided from sign-up to its first shot.
 
 ## M7 — Puck prep and Tags ☐  (screens 18–21)
 Routines overview, routine builder (drag, insert), New step, Tags page with families, merge and duplicate finder.

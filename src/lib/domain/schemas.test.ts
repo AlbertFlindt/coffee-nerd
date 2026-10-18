@@ -209,7 +209,13 @@ describe('gear specs (D-68: one table, a spec per kind)', () => {
   });
 
   it('D-49: a basket has an optional dose range from low to high', () => {
-    const vst = { type: 'precision', shotSize: 'double', diameterMm: 58000 };
+    const vst = {
+      brand: 'VST',
+      sizeG: 18000,
+      type: 'precision',
+      shotSize: 'double',
+      diameterMm: 58000
+    };
     expect(basketSpecSchema.safeParse(vst).success).toBe(true);
     expect(
       basketSpecSchema.safeParse({ ...vst, doseRange: { from: 17000, to: 19000 } }).success
@@ -222,8 +228,12 @@ describe('gear specs (D-68: one table, a spec per kind)', () => {
   it('D-79: gear sizes can have decimals, stored in thousandths (58.5 mm → 58500)', () => {
     expect(machineSpecSchema.safeParse({ ...bianca, groupSizeMm: 58500 }).success).toBe(true);
     expect(
-      basketSpecSchema.safeParse({ type: 'precision', shotSize: 'double', diameterMm: 58500 })
-        .success
+      basketSpecSchema.safeParse({
+        brand: 'VST',
+        type: 'precision',
+        shotSize: 'double',
+        diameterMm: 58500
+      }).success
     ).toBe(true);
     expect(machineSpecSchema.safeParse({ ...bianca, groupSizeMm: 58.5 }).success).toBe(false);
     expect(machineSpecSchema.safeParse({ ...bianca, groupSizeMm: 0 }).success).toBe(false);

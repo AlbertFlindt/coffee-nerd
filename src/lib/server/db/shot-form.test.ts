@@ -194,7 +194,7 @@ describe('loadShotForm', () => {
     db.update(gear).set({ archivedAt: T0 }).where(eq(gear.id, otherBasket)).run();
     const form = ready(loadShotForm(db, ids.userId));
     expect(form.prefill.basketId).toBe(ids.basketId);
-    expect(form.baskets.map((b) => b.name)).toEqual(['VST 18 g']);
+    expect(form.baskets.map((b) => b.name)).toEqual(['VST · 18 g']);
     expect(form.gearNames[otherBasket]).toBe('IMS 20 g');
   });
 
