@@ -132,7 +132,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the list is the same as the shot form's; finished beans stay out of the way.
 - **D-123 — The shot detail's details stay as built.** When the recipe's other shots do not vary, "Compared with this recipe" shows only the average. The notes card and the flavor notes are left out when empty, and a long note scrolls inside its card (D-36). The flavor notes get 12 px corners from a new design-system token (`radius-block`), added in the design-system sync (D-146). *(Corrected 2026-10-18: this entry first named the score block too, but ShotDetail.png draws it at 14 px, as built.)* Refines D-57 and D-109.
   - *Why:* without spread there is no normal range to compare with; empty cards add nothing; the screens draw 12 px corners.
-- **D-124 — The Library tab opens Beans until the Library page exists.** Until the Library landing page (D-50) is built, the Library tab opens the Beans overview, which then has no back arrow. Refines D-114.
+- **D-124 — The Library tab opens Beans until the Library page exists.** *(Revised 2026-10-18: see D-156.)* Until the Library landing page (D-50) is built, the Library tab opens the Beans overview, which then has no back arrow. Refines D-114.
   - *Why:* Beans is reachable the way it will be, without building the landing page early.
 
 ## 7. Shot form (espresso)
@@ -189,7 +189,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 - **D-107 — Buttons show that they were pressed.** Every −/+ and every plain button flashes amber while pressed and fades back quickly; the amber Save and Add buttons get lighter and press in slightly. Choices that change state (score, chips, tabs, switches) already show the new state and need no flash. Refines D-14 and D-19 (amber is your input and actions).
   - *Why:* at the brew station you look at the scale, not the phone; a short flash confirms a tap was taken without reading the value.
-- **D-94 — The bean card switches the bean.** *(Revised 2026-10-18: see D-113, D-134.)* Tapping the bean card on the shot form opens a list of open beans. Picking one starts the form again from that bean's starting values (D-03, D-43, D-73, D-38). Choosing another machine or grinder on the shot form waits for the Gear pages (roadmap M6). Refines D-14.
+- **D-94 — The bean card switches the bean.** *(Revised 2026-10-18: see D-113, D-134, D-153.)* Tapping the bean card on the shot form opens a list of open beans. Picking one starts the form again from that bean's starting values (D-03, D-43, D-73, D-38). Choosing another machine or grinder on the shot form waits for the Gear pages (roadmap M6). Refines D-14.
   - *Why:* switching between open beans is the change you make at the brew station; gear changes are rare and belong with the Gear pages.
 - **D-95 — After saving, the app goes back with a message.** "Save shot" returns to the page where "+" was pressed, with a short "Shot saved" message. When the shot used up the bag and the bean was finished automatically (D-40), the message says so, with an Undo that reopens the bean. Refines D-14 and D-40.
   - *Why:* you see that the shot is safe without an extra screen, and the automatic finish can be undone right where it is announced.
@@ -202,7 +202,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the user can save from anywhere without closing the sheet first; tap-outside-to-close is the expected sheet behavior on phones.
 - **D-108 — Sheets slide, and can be dragged down to close.** A bottom sheet slides up when it opens and down when it closes, and the dimmed screen behind it fades. Dragging the handle (or the top of the sheet) down closes it; a short drag springs back. Tapping outside still closes it (D-21). Without motion when the phone asks for reduced motion. Refines D-21.
   - *Why:* the handle invites a drag on every phone; a sheet that ignores it feels stuck.
-- **D-22 — Setup tab (Dialer profile):** *(Revised 2026-10-17: see D-90.)* temperature, pressure profile (D-24), basket (brand/model and size, opens a picker), puck prep (D-25).
+- **D-22 — Setup tab (Dialer profile):** *(Revised 2026-10-18: see D-90, D-155.)* temperature, pressure profile (D-24), basket (brand/model and size, opens a picker), puck prep (D-25).
   - All setup fields are part of the **recipe** (D-13): changing one makes a new recipe and is highlighted like any other change.
 - **D-90 — A changed setup value looks like a changed core value.** *(Revised 2026-10-17: see D-102.)* On the Setup tab, a value that differs from the last shot turns sage with a small sage delta pill, as on the core value cards (D-15); a feature switched on or off since the last shot shows a sage "On" or "Off" pill. Refines D-22.
   - *Why:* one way to show "changed since last shot" everywhere (D-19), so the sheet reads like the form.
@@ -211,7 +211,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 - **D-24 — Pressure profile = a base pressure plus phases you switch on or off.** The base is "Flat" (main extraction pressure, in bar). Phases offered by the machine (for the Lelit Bianca: preinfusion, low bar start, low bar end) each have an on/off switch and can be combined freely. A phase that is off collapses to one quiet line. A phase that is on shows its **duration in seconds as the main value** (with −/+) and its **pressure in bar as a small tappable value** underneath (e.g. "at 2.0 bar").
   - Which phases exist, and whether they have a pressure, comes from the machine's capability profile (D-02).
   - *Why:* matches how the Bianca is actually used (flat, plus any combination of preinfusion, low bar start and low bar end) and replaces a pick-one profile list. Seconds are what you set most; bar is still recorded without a second full control.
-- **D-25 — Puck prep points to a saved routine.** The Setup tab shows the chosen routine's name and its steps in order (e.g. "Daily routine: WDT → Distributor → Tamp → Puck screen"); tapping opens a picker of routines. Routines are built in Library (D-26).
+- **D-25 — Puck prep points to a saved routine.** *(Revised 2026-10-18: see D-155.)* The Setup tab shows the chosen routine's name and its steps in order (e.g. "Daily routine: WDT → Distributor → Tamp → Puck screen"); tapping opens a picker of routines. Routines are built in Library (D-26).
   - *Why:* puck prep varies a lot between baristas; referencing a routine keeps the shot form short while still recording exactly what was done.
 - **D-23 — Tasting tab:** *(Revised 2026-10-17: see D-96, D-97, D-101, D-106.)* body (light ↔ heavy), sweetness (low ↔ high), aftertaste (short ↔ long) as sliders with the same gesture as balance; flavor notes as chips from a short coffee flavor list plus "Add your own" (custom notes become chips); free-text notes.
   - Tasting follows D-11: everything starts empty, never copied from the last shot.
@@ -343,7 +343,29 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* rows stay short as drawn, and a recipe brewed at another temperature still says so.
 - **D-145 — A bean without shots can be deleted.** The Edit bean form ends with a quiet "Delete bean" below "Save changes", only while the bean has no shots (for a bag added by mistake); a sheet asks "Delete this bean?" with "Delete bean" / "Keep it", as for a shot (D-116). Deleting removes the bean and any recipe kept only by its Brew next mark, then opens the Beans overview. A bean with shots is finished, never deleted, so its history stays. Refines D-40 and D-130.
   - *Why:* a mistaken bag should not stay in the list, but shot history is never lost (D-60, data-model §1).
-- **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-17: see D-78, D-83.)*
+- **D-147 — Adding gear.** "Add gear" on the Gear page opens a small sheet: Machine, Grinder, Basket. Picking one opens that kind's detail page empty, titled "Add machine" (or grinder, basket), with "Add machine" as its button. Refines D-38.
+  - *Why:* one button in the header as drawn, and each kind keeps its own page.
+- **D-148 — Archiving gear.** A gear page ends with a quiet "Archive" button (D-145's pattern) and a confirmation. Archived gear leaves the Gear list and every picker; past shots keep showing its name. An item My setup uses offers no Archive and says "Used in My setup · choose another default first" (D-83). There is no list of archived gear yet. Refines D-38 and D-83.
+  - *Why:* gear that shots point to is archived, never deleted (data-model §1), and a quiet button keeps it out of the way.
+- **D-149 — The default is chosen in My setup only.** The "Default" chip shows what My setup uses; it is changed in Edit My setup's pickers, not on the gear pages. Refines D-38.
+  - *Why:* one place decides what new beans start from.
+- **D-150 — A basket has a brand and a size instead of a name.** The basket page has Brand (text, e.g. "VST") and Size (grams, e.g. 18) side by side where Name was drawn; everywhere a basket is shown as "VST · 18 g". Existing baskets are split once ("VST 18 g" becomes VST and 18). Revises D-49.
+  - *Why:* the design names baskets "VST · 18 g" on the My setup card; separate fields keep it consistent.
+- **D-151 — Custom features can be renamed, switched off, and deleted while unused.** A custom feature can always be renamed and switched off. It can be deleted only while no shot has used it. Refines D-46.
+  - *Why:* old shots keep their meaning; a feature added by mistake can go.
+- **D-152 — Options for "Pick from a list".** In Add your own feature, "Pick from a list" shows one text row per option where Step and Range sit for numbers, with "+ Add option" below and a × on each row; at least two options. Refines D-46.
+  - *Why:* each option gets a field, so commas in labels are no problem.
+- **D-153 — Switching machine or grinder for one shot.** Tapping the gear line on the shot form's bean card ("Lelit Bianca · Timemore 064S") opens a sheet with Machine and Grinder lists; picking one changes it for this shot, and the setup features and the grind control follow. Refines D-94.
+  - *Why:* the same pattern as switching the bean, where the gear is already named.
+- **D-154 — The dose hint.** When the dose is outside the basket's dose range, a muted line under the core values says so: "VST · 18 g holds 17.0–19.0 g". It is shown only while the dose is outside and never blocks saving. Refines D-49.
+  - *Why:* a gentle nudge, as D-49 asks, in plain words.
+- **D-155 — No basket, no puck prep.** The basket picker on More › Setup starts with "No basket". The puck prep picker starts with "No puck prep", with a note under it: "Shots are easier to repeat with a puck prep routine. Add one in Library › Puck prep." A shot without them is its own recipe. Refines D-22 and D-25.
+  - *Why:* a basket or routine can be left out for one shot; a routine is encouraged, not forced.
+- **D-156 — The Library landing page arrives with Gear.** The Library tab opens the Library page (D-50) again. The Beans and Gear rows work with live summaries; Puck prep and Tags show their summaries dimmed and do nothing until M7. Revises D-124.
+  - *Why:* with two sections working, the landing page is worth its tap.
+- **D-157 — A step-by-step start after sign-up.** After creating the account, the app walks through Machine → Grinder → Basket (can be skipped) → My setup → first bean, each on its normal page with "Step 2 of 5" under the title and "Next" as its button. Puck prep is left out until M7. Leaving halfway is fine: the next time "+" is tapped, it resumes at the first missing step. Refines D-88.
+  - *Why:* a new installation has nothing to brew with (D-88); the guide gets a new user to a first shot.
+- **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-18: see D-78, D-83, D-147, D-148, D-149.)*
   - **My setup** (a light cream card so it stands out): default machine, grinder, basket and puck prep routine, plus **default values** (dose, yield, grind, temperature, pressure profile). One "Edit" button.
   - Defaults are the **starting point for a bean's first shot** (and when switching gear). After that, D-03 applies: new shots copy the last shot.
   - **Gear list** grouped by type (Machines, Grinders, Baskets, later Other). Each row shows a short capability summary (e.g. "Semi-auto · Preinfusion, low bar start, low bar end"; "Stepless · steps of 0.1"); the default item carries a "Default" chip. Tapping a row opens the item, where its capability profile (D-02) and step sizes (D-07) are set.
@@ -359,13 +381,13 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - **Finest** and **Coarsest** dial values (0.0 and 16.0 for the 064S).
   - A **Preview** of the shot form's Grind card, framed like the custom-feature preview (D-46), with the step on its buttons ("− 0.1", "+ 0.1") and the range beside it.
   - *Why:* the dial is the one grinder detail that changes how you log every shot; burr info is nerd context for Insights (e.g. comparing grinders) at no cost on the shot form.
-- **D-49 — Gear detail (basket).** *(Revised 2026-10-17: see D-79.)* Same pattern as machine and grinder. Name; **type** (Precision, Standard, Pressurized); **shot size** (Single, Double, Triple); **diameter** (mm) with a fit check against your machines ("Fits Lelit Bianca"); optional **dose range** (from–to, e.g. 17.0–19.0 g). When a dose on the shot form falls outside the range, the form shows a gentle hint — never a block.
+- **D-49 — Gear detail (basket).** *(Revised 2026-10-18: see D-79, D-150, D-154.)* Same pattern as machine and grinder. Name; **type** (Precision, Standard, Pressurized); **shot size** (Single, Double, Triple); **diameter** (mm) with a fit check against your machines ("Fits Lelit Bianca"); optional **dose range** (from–to, e.g. 17.0–19.0 g). When a dose on the shot form falls outside the range, the form shows a gentle hint — never a block.
   - *Why:* basket choice changes extraction and is part of the recipe (D-13); the dose range turns the basket's spec into a useful nudge without extra input per shot.
 - **D-79 — Gear sizes can have decimals.** Group size, burr size and basket diameter accept decimals (e.g. 58.5 mm), stored like every other decimal number. Refines D-44, D-48 and D-49.
   - *Why:* real gear comes in sizes such as 58.5 mm and 63.5 mm; rounding them would make the fit check and grinder comparisons wrong.
-- **D-83 — Gear and routines that My setup uses cannot be archived.** Archiving is not offered for the default machine, grinder, basket or puck prep routine; the item says "Used in My setup · choose another default first". Refines D-38.
+- **D-83 — Gear and routines that My setup uses cannot be archived.** *(Revised 2026-10-18: see D-148.)* Archiving is not offered for the default machine, grinder, basket or puck prep routine; the item says "Used in My setup · choose another default first". Refines D-38.
   - *Why:* a new shot can always fall back to My setup (D-75), so My setup must only point to items you can pick.
-- **D-46 — "Add your own feature".** From the machine detail page (D-44), a bottom sheet lets the user define any capability of that machine the app doesn't know (e.g. a bloom pause, a paddle position). Fields:
+- **D-46 — "Add your own feature".** *(Revised 2026-10-18: see D-151, D-152.)* From the machine detail page (D-44), a bottom sheet lets the user define any capability of that machine the app doesn't know (e.g. a bloom pause, a paddle position). Fields:
   - **Name.**
   - **Kind of value:** Number with unit, Seconds, On / off, Pick from a list. The fields below adapt (unit for numbers, options for lists).
   - **Step** and optional **Range**.
@@ -435,7 +457,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the app lives on a phone at the brew station; signing in again with wet hands is friction with no benefit on a private server.
 - **D-87 — A lost password is reset on the server.** A command run on the server sets a new password and signs out every device. There is no reset by email or from the sign-in page.
   - *Why:* no mail is sent (D-85), and a server command leaves nothing to attack from outside.
-- **D-88 — A new installation starts with the built-in flavor tags only.** *(Revised 2026-10-17: see D-105.)* Creating the account adds the built-in tags; gear, puck prep, My setup and beans are added in Library. The reference setup (Lelit Bianca, Timemore 064S, VST 18 g, Daily routine) is a seed for development, tests and screenshots, not part of a real installation.
+- **D-88 — A new installation starts with the built-in flavor tags only.** *(Revised 2026-10-18: see D-105, D-157.)* Creating the account adds the built-in tags; gear, puck prep, My setup and beans are added in Library. The reference setup (Lelit Bianca, Timemore 064S, VST 18 g, Daily routine) is a seed for development, tests and screenshots, not part of a real installation.
   - *Why:* every home barista's gear is different; example gear would have to be removed before use.
 - **D-105 — Until M11 the published image can seed the reference setup.** The image published from `main` carries a command that fills an empty installation with the reference setup, so the app can be tried on a server before gear and My setup can be added in the app (roadmap M6). It only works before an account exists. It is removed from the image when the real install guide lands (roadmap M11). Refines D-88.
   - *Why:* trying the app at the brew station early is the point of building the core loop first (D-70); without gear a server install could not log a shot.
