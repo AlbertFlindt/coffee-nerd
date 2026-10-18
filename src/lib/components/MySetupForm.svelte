@@ -3,7 +3,8 @@
   // default values as −/+ cards (steps from your settings and the grinder, D-07, D-89), the ratio, and the
   // pressure profile as one row that opens the same phase rows as More › Setup (D-24). What shows follows
   // the chosen machine's switched-on features and the grinder's dial. One Save at the bottom; it fits the
-  // screen (D-36). Basket and puck prep may be none (D-155).
+  // screen (D-36). Basket and puck prep may be none (D-155). As step 4 of the step-by-step start (D-157) it
+  // says so under the title and its button is "Next".
   import { untrack } from 'svelte';
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
@@ -19,13 +20,16 @@
   } from '../domain/schemas';
   import { setupParts } from '../domain/shot-form';
   import { decimalsFor, formatRatio, type Thousandths } from '../domain/units';
+  import type { Guide } from '../domain/guide';
   import type { MySetupFormData } from '../server/db/my-setup';
 
   let {
     setup,
+    guide = null,
     problems = []
   }: {
     setup: MySetupFormData;
+    guide?: Guide | null;
     /** What the server refused, in plain words. */
     problems?: string[];
   } = $props();
@@ -38,11 +42,16 @@
 
   // The form keeps what you set; the page starts it again when it loads again.
   const start = untrack(() => {
-    const machine = setup.machines.find((m) => m.id === setup.current.machineId);
+    // Nothing chosen yet (a new account, D-157): your only machine, grinder or basket is the choice.
+    const only = <T extends { id: string }>(items: T[]) =>
+      items.length === 1 ? items[0].id : null;
+    const fresh = setup.current.machineId === null;
+    const machineId = setup.current.machineId ?? only(setup.machines);
+    const machine = setup.machines.find((m) => m.id === machineId);
     return {
-      machineId: setup.current.machineId,
-      grinderId: setup.current.grinderId,
-      basketId: setup.current.basketId,
+      machineId,
+      grinderId: setup.current.grinderId ?? only(setup.grinders),
+      basketId: fresh ? only(setup.baskets) : setup.current.basketId,
       routineId: setup.current.routineId,
       grind: setup.current.grind,
       dose: setup.current.dose,
@@ -253,7 +262,11 @@
 <div class="page">
   <div class="above-save">
     <header>
-      <a class="icon cn-tap" href={resolve('/library/gear')} aria-label="Close without saving">
+      <a
+        class="icon cn-tap"
+        href={guide ? resolve('/') : resolve('/library/gear')}
+        aria-label={guide ? 'Leave for now' : 'Close without saving'}
+      >
         <svg
           width="22"
           height="22"
@@ -267,7 +280,9 @@
       </a>
       <div class="title">
         <h1>My setup</h1>
-        <span class="cn-caption">Starting point for new beans</span>
+        <span class="cn-caption"
+          >{guide ? `Step ${guide.step} of ${guide.of} · ` : ''}Starting point for new beans</span
+        >
       </div>
       <span></span>
     </header>
@@ -410,13 +425,13 @@
     {/each}
     <form
       method="POST"
-      action="?/save"
+      action={guide ? '?guide=1&/save' : '?/save'}
       use:enhance={({ cancel }) => {
         if (!check()) cancel();
       }}
     >
       <input type="hidden" name="payload" value={payload} />
-      <button class="cn-btn-primary cn-tap-strong">Save setup</button>
+      <button class="cn-btn-primary cn-tap-strong">{guide ? 'Next' : 'Save setup'}</button>
     </form>
   </footer>
 </div>

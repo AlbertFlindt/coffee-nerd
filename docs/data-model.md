@@ -86,6 +86,7 @@ Every table also has `created_at` and `updated_at`. Decimal quantities are in th
 | `current_bean_id` | Home's bean scope (D-32) |
 | `brew_next_recipe_id` | D-43. One column, so there can only ever be one mark |
 | `home_graph` | last chosen graph on Home (D-32) |
+| `basket_step_skipped` | D-157. The step-by-step start's basket step was skipped, so it is not asked again |
 
 Kept apart from settings because it changes with almost every visit.
 

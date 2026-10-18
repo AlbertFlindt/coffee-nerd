@@ -2,17 +2,20 @@
   // The frame every gear page shares (screens 12, 15, 16; D-44, D-48, D-49): back to Gear, the kind as
   // title with the Default chip (D-38), the page's own fields, then Save. A quiet "Archive" with a
   // confirmation (D-148), or, for an item My setup uses, "Used in My setup · choose another default
-  // first" (D-83). Adding (D-147) titles the page "Add machine" and its button the same.
+  // first" (D-83). Adding (D-147) titles the page "Add machine" and its button the same. As a step of the
+  // step-by-step start (D-157) it shows "Step 1 of 5" under the title and "Next"; the basket can be skipped.
   import type { Snippet } from 'svelte';
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
+  import type { Guide } from '#lib/domain/guide.ts';
 
   let {
     kind,
     adding,
     isDefault = false,
     payload,
+    guide = null,
     problems = [],
     children
   }: {
@@ -21,17 +24,24 @@
     isDefault?: boolean;
     /** The page's fields as JSON, posted to `?/save` (a GearInput). */
     payload: string;
+    guide?: Guide | null;
     problems?: string[];
     children: Snippet;
   } = $props();
 
   const NOUN = { machine: 'Machine', grinder: 'Grinder', basket: 'Basket' };
   let confirm = $state(false);
+  // Adding keeps ?kind= (and the guide) in the URL, so the page can show what to fix (D-147).
+  const query = $derived(adding ? `?kind=${kind}${guide ? '&guide=1' : ''}&` : '?');
   let archiving = $state(false);
 </script>
 
 <header>
-  <a class="icon cn-tap" href={resolve('/library/gear')} aria-label="Back to Gear">
+  <a
+    class="icon cn-tap"
+    href={guide ? resolve('/') : resolve('/library/gear')}
+    aria-label={guide ? 'Leave for now' : 'Back to Gear'}
+  >
     <svg
       width="22"
       height="22"
@@ -44,7 +54,10 @@
       aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" /></svg
     >
   </a>
-  <h1>{adding ? `Add ${kind}` : NOUN[kind]}</h1>
+  <div class="title">
+    <h1>{adding ? `Add ${kind}` : NOUN[kind]}</h1>
+    {#if guide}<span class="cn-caption">Step {guide.step} of {guide.of}</span>{/if}
+  </div>
   {#if isDefault}<span class="chip">Default</span>{:else}<span></span>{/if}
 </header>
 
@@ -56,11 +69,18 @@
   {#each problems as problem (problem)}
     <p class="problem" role="alert">{problem}</p>
   {/each}
-  <!-- Adding keeps ?kind= in the URL, so the page can show what to fix (D-147). -->
-  <form method="POST" action={adding ? `?kind=${kind}&/save` : '?/save'} use:enhance>
+  <form method="POST" action="{query}/save" use:enhance>
     <input type="hidden" name="payload" value={payload} />
-    <button class="cn-btn-primary cn-tap-strong">{adding ? `Add ${kind}` : 'Save'}</button>
+    <button class="cn-btn-primary cn-tap-strong"
+      >{guide ? 'Next' : adding ? `Add ${kind}` : 'Save'}</button
+    >
   </form>
+  {#if guide && kind === 'basket'}
+    <!-- D-157: the basket step can be skipped. -->
+    <form method="POST" action="{query}/skip">
+      <button class="cn-btn-quiet cn-tap skip">Skip</button>
+    </form>
+  {/if}
   {#if !adding}
     {#if isDefault}
       <p class="in-use">Used in My setup · choose another default first</p>
@@ -108,6 +128,15 @@
     margin: 0;
     font-size: 20px;
     font-weight: 600;
+  }
+
+  .title {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .skip {
+    width: 100%;
   }
 
   .icon {

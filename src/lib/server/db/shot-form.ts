@@ -266,7 +266,10 @@ export function loadEditShotForm(
   };
 }
 
-function readMySetup(settings: typeof userSettings.$inferSelect): PrefillContext['mySetup'] | null {
+/** My setup as the prefill uses it, or null while it is not set up yet (D-38, D-157). */
+export function readMySetup(
+  settings: typeof userSettings.$inferSelect
+): PrefillContext['mySetup'] | null {
   const { defaultMachineId, defaultGrinderId, defaultGrind, defaultDose } = settings;
   if (!defaultMachineId || !defaultGrinderId || defaultGrind === null || defaultDose === null)
     return null;

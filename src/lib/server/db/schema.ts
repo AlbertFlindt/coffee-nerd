@@ -90,6 +90,8 @@ export const appState = sqliteTable('app_state', {
   currentBeanId: text('current_bean_id').references(() => bean.id),
   brewNextRecipeId: text('brew_next_recipe_id').references(() => recipe.id),
   homeGraph: text('home_graph'),
+  /** The step-by-step start's basket step was skipped (D-157), so it is not asked again. */
+  basketStepSkipped: integer('basket_step_skipped', { mode: 'boolean' }).notNull().default(false),
   ...timestamps
 });
 
