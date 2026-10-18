@@ -56,7 +56,7 @@
   </a>
   <div class="title">
     <h1>{adding ? `Add ${kind}` : NOUN[kind]}</h1>
-    {#if guide}<span class="step">Step {guide.step} of {guide.of}</span>{/if}
+    {#if guide}<span class="cn-caption">Step {guide.step} of {guide.of}</span>{/if}
   </div>
   {#if isDefault}<span class="chip">Default</span>{:else}<span></span>{/if}
 </header>
@@ -133,11 +133,6 @@
   .title {
     display: flex;
     flex-direction: column;
-  }
-
-  .step {
-    font-size: 13px;
-    color: var(--ink-muted);
   }
 
   .skip {

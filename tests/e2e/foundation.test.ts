@@ -88,6 +88,10 @@ test('D-157: step by step from the machine to a ready shot form; leaving halfway
   // "+" resumes at the first missing step.
   await page.goto('/shot/new');
   await expect(page.getByText('Step 1 of 5')).toBeVisible();
+  // A problem keeps you on the step.
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page.getByRole('alert')).toHaveText('Name is required');
+  await expect(page.getByText('Step 1 of 5')).toBeVisible();
   await page.getByLabel('Name').fill('Gaggia Classic');
   await page.getByRole('button', { name: 'Next' }).click();
 
@@ -108,7 +112,9 @@ test('D-157: step by step from the machine to a ready shot form; leaving halfway
 
   await expect(page.getByRole('heading', { name: 'My setup', level: 1 })).toBeVisible();
   await expect(page.getByText('Step 4 of 5 · Starting point for new beans')).toBeVisible();
+  // Nothing was chosen yet: your only machine and grinder are (D-157).
   await expect(page.getByRole('button', { name: 'Machine, Gaggia Classic' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Grinder, Comandante C40' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Basket, No basket' })).toBeVisible();
   for (const [label, value] of [
     ['Dose', '18'],
@@ -149,6 +155,12 @@ test('D-157: step by step from the machine to a ready shot form; leaving halfway
   ).toBeVisible();
   await expect(page.getByRole('button', { name: /^Dose, 18\.0 g,/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /^Grind, 2\.5,/ })).toBeVisible();
+
+  // The first shot saves, and "+" now opens the shot form.
+  await page.getByRole('button', { name: 'Save shot' }).click();
+  await expect(page.getByRole('status')).toContainText('Shot saved');
+  await page.goto('/shot/new');
+  await expect(page.getByRole('button', { name: 'Save shot' })).toBeVisible();
 });
 
 test('D-60: after first run, signed-out visits lead to sign-in, and /welcome is gone', async ({

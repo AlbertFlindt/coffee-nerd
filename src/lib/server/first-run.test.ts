@@ -1,6 +1,7 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { eq } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { NEW_GEAR } from '../domain/gear';
 import { createAccount } from './auth/account';
@@ -120,5 +121,22 @@ describe('the step-by-step start (D-157)', () => {
     machine();
     grinder();
     expect(firstStep(db, userId)).toBe('setup');
+  });
+
+  it('D-157, D-155: a complete My setup without a basket skips the basket step', () => {
+    const m = machine();
+    const g = grinder();
+    mySetup(m, g);
+    expect(firstStep(db, userId)).toBe('bean');
+  });
+
+  it('D-157: when every bean is finished, "+" goes to the bean step', () => {
+    const m = machine();
+    const g = grinder();
+    basket();
+    mySetup(m, g);
+    openBean();
+    db.update(bean).set({ status: 'finished' }).where(eq(bean.ownerId, userId)).run();
+    expect(firstStep(db, userId)).toBe('bean');
   });
 });

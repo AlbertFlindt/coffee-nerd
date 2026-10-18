@@ -5,6 +5,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { guideOf, GUIDE_STEPS, type GuideStep } from '../domain/guide';
 import type { Queryable } from './db/client';
 import { appState, bean, gear, userSettings } from './db/schema';
+import { readMySetup } from './db/shot-form';
 
 export { guideOf, GUIDE_STEPS };
 
@@ -30,17 +31,13 @@ export function firstStep(db: Queryable, ownerId: string): GuideStep | null {
   );
   if (!kinds.has('machine')) return 'machine';
   if (!kinds.has('grinder')) return 'grinder';
-  const state = db.select().from(appState).where(eq(appState.userId, ownerId)).get();
-  if (!kinds.has('basket') && !state?.basketStepSkipped) return 'basket';
+  // The same test the shot form uses, so "+" never sends you back to itself.
   const settings = db.select().from(userSettings).where(eq(userSettings.userId, ownerId)).get();
-  // The same test the shot form uses for "My setup exists" (shot-form.ts).
-  if (
-    !settings?.defaultMachineId ||
-    !settings.defaultGrinderId ||
-    settings.defaultGrind === null ||
-    settings.defaultDose === null
-  )
-    return 'setup';
+  const hasMySetup = !!settings && readMySetup(settings) !== null;
+  // A saved My setup may have no basket on purpose (D-155): the basket step only asks before it exists.
+  const state = db.select().from(appState).where(eq(appState.userId, ownerId)).get();
+  if (!hasMySetup && !kinds.has('basket') && !state?.basketStepSkipped) return 'basket';
+  if (!hasMySetup) return 'setup';
   const open = db
     .select({ id: bean.id })
     .from(bean)

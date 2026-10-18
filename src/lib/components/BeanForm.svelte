@@ -79,7 +79,7 @@
   </a>
   <div class="title">
     <h1>{mode === 'add' ? 'Add bean' : 'Edit bean'}</h1>
-    {#if guide}<span class="step">Step {guide.step} of {guide.of}</span>{/if}
+    {#if guide}<span class="cn-caption">Step {guide.step} of {guide.of}</span>{/if}
   </div>
   <span></span>
 </header>
@@ -396,11 +396,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-  }
-
-  .step {
-    font-size: 13px;
-    color: var(--ink-muted);
   }
 
   .icon {
