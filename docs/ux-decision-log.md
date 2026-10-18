@@ -112,7 +112,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* recipes have no names; within one bean their values tell them apart.
 - **D-113 — Editing a shot compares with the shot before it.** In edit mode, the changes (sage, D-15) and the recipe tag (D-16) compare with the same bean's shot brewed before this one, as when the shot was brewed. The bean card can switch the shot to another open bean, keeping the values entered; the comparison then uses that bean's shot before this one. The brewing time stays as it was. "Save changes" returns to the shot detail. Refines D-57 and D-94.
   - *Why:* the shot keeps telling the same story it told when it was logged.
-- **D-114 — The tab bar comes before all its pages.** The tab bar (D-30) is built now on the tab screens; Library and Insights are shown dimmed and do nothing until their milestones. Refines D-30.
+- **D-114 — The tab bar comes before all its pages.** *(Revised 2026-10-18: see D-124.)* The tab bar (D-30) is built now on the tab screens; Library and Insights are shown dimmed and do nothing until their milestones. Refines D-30.
   - *Why:* the Journal is reachable the way it will always be, without a stand-in link.
 - **D-115 — The shot detail shows aftertaste when it is set.** Below balance, body and sweetness, a fourth scale shows aftertaste, only for a shot that has one. Refines D-57.
   - *Why:* nothing you entered stays hidden.
@@ -132,6 +132,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the list is the same as the shot form's; finished beans stay out of the way.
 - **D-123 — The shot detail's details stay as built.** When the recipe's other shots do not vary, "Compared with this recipe" shows only the average. The notes card and the flavor notes are left out when empty, and a long note scrolls inside its card (D-36). The score block and the flavor notes get 12 px corners from a new design-system token, added in the design-system sync. Refines D-57 and D-109.
   - *Why:* without spread there is no normal range to compare with; empty cards add nothing; the screens draw 12 px corners.
+- **D-124 — The Library tab opens Beans until the Library page exists.** Until the Library landing page (D-50) is built, the Library tab opens the Beans overview, which then has no back arrow. Refines D-114.
+  - *Why:* Beans is reachable the way it will be, without building the landing page early.
 
 ## 7. Shot form (espresso)
 
@@ -187,10 +189,12 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 - **D-107 — Buttons show that they were pressed.** Every −/+ and every plain button flashes amber while pressed and fades back quickly; the amber Save and Add buttons get lighter and press in slightly. Choices that change state (score, chips, tabs, switches) already show the new state and need no flash. Refines D-14 and D-19 (amber is your input and actions).
   - *Why:* at the brew station you look at the scale, not the phone; a short flash confirms a tap was taken without reading the value.
-- **D-94 — The bean card switches the bean.** *(Revised 2026-10-18: see D-113.)* Tapping the bean card on the shot form opens a list of open beans. Picking one starts the form again from that bean's starting values (D-03, D-43, D-73, D-38). Choosing another machine or grinder on the shot form waits for the Gear pages (roadmap M6). Refines D-14.
+- **D-94 — The bean card switches the bean.** *(Revised 2026-10-18: see D-113, D-134.)* Tapping the bean card on the shot form opens a list of open beans. Picking one starts the form again from that bean's starting values (D-03, D-43, D-73, D-38). Choosing another machine or grinder on the shot form waits for the Gear pages (roadmap M6). Refines D-14.
   - *Why:* switching between open beans is the change you make at the brew station; gear changes are rare and belong with the Gear pages.
 - **D-95 — After saving, the app goes back with a message.** "Save shot" returns to the page where "+" was pressed, with a short "Shot saved" message. When the shot used up the bag and the bean was finished automatically (D-40), the message says so, with an Undo that reopens the bean. Refines D-14 and D-40.
   - *Why:* you see that the shot is safe without an extra screen, and the automatic finish can be undone right where it is announced.
+- **D-134 — The shot form's bean list shows roast age.** Each row in the bean list behind the bean card (D-94) shows the bean's name, process and roast age: "Guji Hambela · Natural · 12 days". The list stays a plain sheet. Refines D-94.
+  - *Why:* freshness helps choose between open beans; a plain list is enough for one tap.
 
 ### More (bottom sheet)
 
@@ -257,12 +261,12 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 - **D-50 — Library landing page.** What the Library tab opens to. Title "Library" with the subtitle "The nerdy basement", then **four full-width rows** — **Beans, Gear, Puck prep, Tags** — each with a cream icon tile on the left, its name and two short live summaries, and a chevron on the right (e.g. "2 open · 6 finished" / "Freshest: 4 days"; "4 items" / "Bianca · Timemore 064S"; "2 routines · 6 steps" / "In use: Daily routine"; "18 flavor notes" / "Most used: Berry"). No add buttons here; each section page has its own (D-33).
   - *Why:* four equal doors into the basement, each telling you something useful before you tap; the summaries make the landing page worth a glance rather than just a menu. Rows (instead of a 2×2 grid) give the summaries room to read in one line and match the list pattern used elsewhere in Library.
-- **D-37 — Bean overview: open beans as cards, finished beans as rows.**
+- **D-37 — Bean overview: open beans as cards, finished beans as rows.** *(Revised 2026-10-18: see D-131, D-132.)*
   - **Open** beans (several can be open at once) get a card with a large **roast age** block ("12 days since roast") on the left, then name, roaster · origin · process, and **best score · recipes · shots**. A bean with no rated shots says "Not rated yet".
   - **Finished** beans collapse into compact rows below (name, roaster · origin · process, best score, recipes · shots); this list is the part that scrolls (D-36).
   - "Add bean" sits in the header.
   - *Why:* open beans are what you choose between, so they get the space and the freshness signal; finished beans are history you look up now and then.
-- **D-41 — Add bean form.** *(Revised 2026-10-17: see D-73.)* Full-screen form opened from "Add bean"; fits the screen without scrolling (D-36). Top to bottom:
+- **D-41 — Add bean form.** *(Revised 2026-10-18: see D-73, D-126, D-133.)* Full-screen form opened from "Add bean"; fits the screen without scrolling (D-36). Top to bottom:
   - **"Same as before"** shortcut: pick a past bean to re-buy it. Everything is copied except roast date and bag weight. The new bag is linked to the earlier one, so its history and best recipe carry over (as a starting point, not merged scores).
   - **Name** (required).
   - **Roaster** (full width).
@@ -276,7 +280,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* roast date powers freshness and bean-aging data, so it is worth requiring; the rest is nice-to-have. Re-buying the same bean is common, and the shortcut turns a 10-field form into one tap plus a date. Country is a picker, not free text, so Insights can reliably compare origins (free text would split "Ethiopia", "ethiopia" and "Ethiopa"); region stays free text because region names are too varied for a fixed list.
 - **D-73 — A re-buy starts from the nearest earlier bag with shots.** *(Revised 2026-10-17: see D-74.)* The first shot of a bag added with "Same as before" follows the chain of earlier bags back to the nearest one that has shots, and starts from that bag's best recipe (D-66), with yield and time from that recipe's latest shot, as a new recipe for this bag. If no earlier bag has shots, it starts from My setup (D-38). Refines D-41.
   - *Why:* a bag that was re-bought but never brewed should not hide the dial-in work of the bags before it.
-- **D-42 — Bean detail page.** Opens by tapping a bean on the Beans overview (open or finished). It is everything about one bag; nothing on it is needed while brewing. Top to bottom:
+- **D-42 — Bean detail page.** *(Revised 2026-10-18: see D-125, D-128, D-130, D-131.)* Opens by tapping a bean on the Beans overview (open or finished). It is everything about one bag; nothing on it is needed while brewing. Top to bottom:
   - Header: back to Beans, bean name, **Edit** (opens the Add bean form, filled in).
   - **About card:** roast age block (cream, as on the overview), roaster, country · region · process, variety · altitude · roast level, roast date and status (Open/Finished).
   - **Numbers:** best score, recipes, shots.
@@ -284,7 +288,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - Each recipe has a round **"Brew next"** button (cup icon) on the right (D-43).
   - **"Mark as finished"** at the bottom as a quiet secondary button (becomes "Reopen" on a finished bean, D-40).
   - *Why:* answers "what have I learned about this bag?" — the recipe list is the bean's dial-in history in one view. Graphs stay on Home and in Insights to keep this page calm.
-- **D-43 — "Brew next": start the next shot from a chosen recipe.** *(Revised 2026-10-17: see D-82, D-103, D-104.)* On the bean detail page, tapping a recipe's "Brew next" button marks it (amber button, amber outline on the row, "Next shot starts here"). The next "+" then opens the shot form prefilled with that recipe (its recipe values and setup; yield and time from its last shot), and the recipe tag shows its reuse count as usual. Only one recipe can be marked at a time; tapping again clears it. After that shot is saved the mark clears and D-03 (copy last shot) applies again.
+- **D-43 — "Brew next": start the next shot from a chosen recipe.** *(Revised 2026-10-18: see D-82, D-103, D-104, D-129.)* On the bean detail page, tapping a recipe's "Brew next" button marks it (amber button, amber outline on the row, "Next shot starts here"). The next "+" then opens the shot form prefilled with that recipe (its recipe values and setup; yield and time from its last shot), and the recipe tag shows its reuse count as usual. Only one recipe can be marked at a time; tapping again clears it. After that shot is saved the mark clears and D-03 (copy last shot) applies again.
   - "+" stays the only way to add a shot (D-31); "Brew next" only decides what it starts from.
   - The shot form says so: the bean card's bottom row shows **"Recipe chosen from Library"** (amber, cup icon) under the recipe tag, with a **"Use last shot recipe"** button that switches back to D-03 and clears the mark.
     - *Why:* a mark set yesterday and forgotten would otherwise make "+" start from an unexpected recipe.
@@ -293,12 +297,30 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* one rule everywhere, and you see how far you are jumping back from what you brewed last.
 - **D-104 — A marked recipe without shots is a "New recipe".** When the recipe marked Brew next has no shots (it is kept only by its mark), the recipe tag says "New recipe" and names what changed against the last shot, never "Recipe reused 0x". Refines D-16 and D-43.
   - *Why:* it has never been brewed, so it is new to your history.
-- **D-35 — Bag weight is optional.** A bean can have a bag weight, but it is never required. When it is set, the app subtracts each shot's dose and shows grams left (on Home and the bean overview); when it is not, grams are simply not shown.
+- **D-35 — Bag weight is optional.** *(Revised 2026-10-18: see D-132.)* A bean can have a bag weight, but it is never required. When it is set, the app subtracts each shot's dose and shows grams left (on Home and the bean overview); when it is not, grams are simply not shown.
   - *Why:* some baristas track stock, many don't; an optional field serves both without nagging.
-- **D-40 — Finishing a bean.** *(Revised 2026-10-17: see D-92.)* A bean moves from Open to Finished with **"Mark as finished"**, always available on the bean. When a bag weight is set (D-35) and grams left reach zero, the app **finishes the bean automatically** and says so, with an undo. A finished bean can always be reopened.
+- **D-40 — Finishing a bean.** *(Revised 2026-10-18: see D-92, D-127.)* A bean moves from Open to Finished with **"Mark as finished"**, always available on the bean. When a bag weight is set (D-35) and grams left reach zero, the app **finishes the bean automatically** and says so, with an undo. A finished bean can always be reopened.
   - *Why:* manual works for everyone; automatic saves a step for those who track weight, but weights drift (spills, sharing), so the manual option and undo must always be there.
 - **D-92 — Only a new shot finishes a bean automatically.** Editing a past shot (D-57) updates grams left but never finishes or reopens a bean; that stays a manual action. Refines D-40.
   - *Why:* an edit corrects history; finishing or reopening a bean by surprise during a correction would be confusing.
+- **D-125 — A recipe on the bean page opens the Journal filtered to it.** Tapping a recipe on the bean detail page opens the Journal with that bean and recipe chosen in its filters (D-112). There is no separate recipe page. Refines D-42; settles open topic 9.
+  - *Why:* the Journal already lists a recipe's shots; no new screen is needed.
+- **D-126 — "Same as before" lists each bean once.** The "Same as before" sheet lists every earlier bean, open and finished, newest first. Several bags with the same name and roaster show as one row, the latest bag, which the new bag is linked to. Refines D-41.
+  - *Why:* you re-buy a coffee, not a particular bag; the latest bag leads back through the chain (D-73).
+- **D-127 — Finishing a bean by hand offers an undo.** "Mark as finished" keeps you on the bean page, turns the button into "Reopen" and shows a message, "Guji Hambela is finished", with Undo, as an automatic finish does. Refines D-40.
+  - *Why:* one way of finishing behaves like the other, and a mistaken tap is undone where it happened.
+- **D-128 — What a recipe row on the bean page shows.** The second line is the bean card's setup line (D-100: switched-on phases and custom features, then temperature) followed by the average time ("avg 28.0 s"). What is missing is left out: no score block for a recipe without a rated shot, and for a recipe kept only by its Brew next mark, "New recipe" in place of the reuse count and no average time. Refines D-42 and D-104.
+  - *Why:* the same setup line everywhere; no empty boxes for values that do not exist.
+- **D-129 — Brew next on a finished bean reopens it.** A finished bean's recipes keep their Brew next buttons; tapping one reopens the bean and marks the recipe. Refines D-43.
+  - *Why:* going back to a coffee's best recipe should be one tap, even after the bag was marked finished.
+- **D-130 — Editing a bean.** "Edit" on the bean page opens the Add bean form filled in, titled "Edit bean", without the "Same as before" row; the button reads "Save changes" and returns to the bean page. Refines D-42.
+  - *Why:* it works like editing a shot (D-57); the re-buy link is set once, when the bag is added.
+- **D-131 — Empty Beans pages say so in one line.** With no beans, the Beans overview shows "No beans yet" under the header, with "Add bean" in the header as usual. A bean with no shots shows "No shots yet" where its recipes go, and its numbers read "Not rated yet", 0 recipes and 0 shots. Refines D-37 and D-42.
+  - *Why:* a plain line is enough until there is something to show.
+- **D-132 — Grams left on the overview, and separated numbers.** An open bean's card on the Beans overview shows grams left at the end of its numbers line when it has a bag weight, and the numbers are separated by dots: "Best 8 · Recipes 5 · Shots 23 · 120 g left". Without a bag weight nothing is added. Refines D-35 and D-37.
+  - *Why:* D-35 promised grams left on the overview; the owner found the numbers hard to read with only spaces between them.
+- **D-133 — Choosing a country.** Tapping Country on the Add bean form opens a sheet with a search field on top and every country below, A to Z, in English. Refines D-41.
+  - *Why:* a fixed list keeps origins comparable (D-41); search makes the long list quick.
 - **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-17: see D-78, D-83.)*
   - **My setup** (a light cream card so it stands out): default machine, grinder, basket and puck prep routine, plus **default values** (dose, yield, grind, temperature, pressure profile). One "Edit" button.
   - Defaults are the **starting point for a bean's first shot** (and when switching gear). After that, D-03 applies: new shots copy the last shot.
@@ -431,7 +453,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 6. Prototype & test at a real brew station
 7. Success metrics (time to log, % rated, repeat rate)
 8. ~~Shot form: how a recipe change is shown~~ (D-16, D-12)
-9. ~~Bean overview, Add bean, bean detail~~ (D-37, D-35, D-40, D-41, D-42) — still to do: recipe detail (its shots)
+9. ~~Bean overview, Add bean, bean detail~~ (D-37, D-35, D-40, D-41, D-42; recipe detail: the filtered Journal, D-125)
 10. ~~Pressure profile options~~ (D-24)
 11. ~~Setup sheet: show how a changed setup value is highlighted~~ (D-90)
 12. ~~Puck prep routine builder and New step~~ (D-51, D-52)
