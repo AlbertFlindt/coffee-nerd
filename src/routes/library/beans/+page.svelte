@@ -1,7 +1,7 @@
 <script lang="ts">
   // Beans overview (screen 7, D-37): open beans as cards with their roast age, finished beans as rows below;
   // below the header everything scrolls as one list (D-36, D-136). The Library tab opens it directly, so there is no back arrow
-  // until the Library page exists (D-124). The bean pages come later in M5, so the beans are not links yet.
+  // until the Library page exists (D-124). A bean opens its page (D-42).
   import { resolve } from '$app/paths';
   import TabBar from '#lib/components/TabBar.svelte';
   import type { PageData } from './$types';
@@ -35,7 +35,7 @@
   {#if open.length > 0}
     <h2>Open · {open.length}</h2>
     {#each open as bean (bean.id)}
-      <div class="cn-card card">
+      <a class="cn-card card" href={resolve('/library/beans/[id]', { id: bean.id })}>
         <div class="age">
           <span class="age-days">{bean.roastAgeDays}</span>
           <span class="age-unit">{bean.roastAgeDays === 1 ? 'day' : 'days'}</span>
@@ -61,14 +61,14 @@
             {/if}
           </span>
         </div>
-      </div>
+      </a>
     {/each}
   {/if}
   {#if finished.length > 0}
     <h2 class="finished-title">Finished · {finished.length}</h2>
     <div class="finished">
       {#each finished as bean (bean.id)}
-        <div class="row">
+        <a class="row" href={resolve('/library/beans/[id]', { id: bean.id })}>
           <div class="about">
             <span class="row-name">{bean.name}</span>
             {#if bean.origin}<span class="origin">{bean.origin}</span>{/if}
@@ -82,7 +82,7 @@
               {bean.shots === 1 ? 'shot' : 'shots'}</span
             >
           </div>
-        </div>
+        </a>
       {/each}
     </div>
   {/if}
@@ -140,6 +140,8 @@
     display: flex;
     flex: none;
     gap: 14px;
+    color: var(--ink);
+    text-decoration: none;
   }
 
   .age {
@@ -229,6 +231,8 @@
     min-height: 64px;
     padding: 0 var(--space-4);
     background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
   }
 
   .row .about {

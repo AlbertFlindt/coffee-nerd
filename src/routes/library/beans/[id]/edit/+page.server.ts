@@ -26,7 +26,7 @@ export const actions: Actions = {
       updateBean(getDb(), ownerId, params.id, bean, Date.now())
     );
     if (problem) return problem;
-    // D-130: back to the bean's page; until it is built (next pull request), the Beans overview.
-    redirect(303, '/library/beans');
+    // D-130: back to the bean's page.
+    redirect(303, `/library/beans/${params.id}`);
   }
 };

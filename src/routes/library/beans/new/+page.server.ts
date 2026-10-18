@@ -39,11 +39,12 @@ export const actions: Actions = {
   default: async ({ locals, request }) => {
     if (!locals.user) error(401);
     const ownerId = locals.user.id;
+    let id = '';
     const problem = await saveBeanForm(request, (bean) => {
-      addBean(getDb(), ownerId, bean, Date.now());
+      id = addBean(getDb(), ownerId, bean, Date.now());
     });
     if (problem) return problem;
-    // D-140: the new bean's page opens; until it is built (next pull request), the Beans overview.
-    redirect(303, '/library/beans');
+    // D-140: the new bean's page opens.
+    redirect(303, `/library/beans/${id}`);
   }
 };
