@@ -367,6 +367,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* a new installation has nothing to brew with (D-88); the guide gets a new user to a first shot.
 - **D-158 — What new gear starts with.** Add machine starts as Semi-auto with Temperature and Flat pressure switched on, the phases off, and a 58 mm group. Add grinder starts as Electric, Flat burrs, a Stepless dial with steps of 0.1, finest 0 and coarsest 10. Add basket starts as Precision, Double, 58 mm, without a dose range. The name (or the basket's brand) starts empty; everything can be changed before saving. Refines D-147.
   - *Why:* the most common home setups, so most new gear needs only a name and a few taps.
+- **D-159 — The grinder's step interval is typed.** On the grinder page, "How the dial works" has three typed fields: **Step interval**, **Finest** and **Coarsest** (for example 0.25, 0.0 and 50.0). The step interval is how far − or + moves the grind on the shot form; any positive number is accepted, there is no fixed list of steps. Refines D-48.
+  - *Why:* grinders differ widely; a typed step and range cover the most equipment and let the user choose the resolution.
 - **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-18: see D-78, D-83, D-147, D-148, D-149.)*
   - **My setup** (a light cream card so it stands out): default machine, grinder, basket and puck prep routine, plus **default values** (dose, yield, grind, temperature, pressure profile). One "Edit" button.
   - Defaults are the **starting point for a bean's first shot** (and when switching gear). After that, D-03 applies: new shots copy the last shot.
@@ -377,7 +379,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - No built-in model catalog: the user sets everything. Type only labels the machine; it does not switch features on or off.
   - Grinders get the same pattern (dial type: stepped/stepless, step size, range) — to be drawn.
   - *Why:* a hand-set profile works for any machine, including modified or rare ones, and keeps the app free of a catalog to maintain.
-- **D-48 — Gear detail (grinder).** *(Revised 2026-10-17: see D-79.)* Same pattern as the machine page (D-44), set by hand. Name; **type** (Electric / Hand) and **burrs** (Flat / Conical) side by side; **burr size** (mm). Then **"How the dial works"**, which drives the grind control on the shot form:
+- **D-48 — Gear detail (grinder).** *(Revised 2026-10-18: see D-79, D-159.)* Same pattern as the machine page (D-44), set by hand. Name; **type** (Electric / Hand) and **burrs** (Flat / Conical) side by side; **burr size** (mm). Then **"How the dial works"**, which drives the grind control on the shot form:
   - **Dial:** Stepped (clicks or numbers) or Stepless (any point on the dial).
   - **Step per tap:** how much − or + moves the grind (0.1 for the Timemore 064S).
   - **Finest** and **Coarsest** dial values (0.0 and 16.0 for the 064S).
