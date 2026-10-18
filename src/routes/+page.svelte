@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { resolve } from '$app/paths';
+  import TabBar from '#lib/components/TabBar.svelte';
   import logo from '../../design-system/logo/coffee-nerd-mark.svg';
   import type { PageProps } from './$types';
 
@@ -26,27 +26,12 @@
   {/if}
   <img src={logo} width="64" height="64" alt="" />
   <h1 class="cn-type-display">Coffee Nerd</h1>
-  <!-- Until the tab bar and its "+" exist (M8), a new shot starts here (D-31). -->
-  <a class="cn-btn-add tap-strong" href={resolve('/shot/new')}>
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2.4"
-      stroke-linecap="round"
-      aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg
-    >
-    New shot
-  </a>
-  <!-- Until the tab bar exists, the Journal opens from here (docs/open-items.md). -->
-  <a class="cn-btn-secondary tap journal" href={resolve('/journal')}>Journal</a>
   <!-- Until Settings exists (M11), signing out lives here; not designed (docs/open-items.md). -->
   <form method="POST" action="/logout">
     <button class="cn-btn-secondary tap" type="submit">Sign out</button>
   </form>
 </main>
+<TabBar current="home" />
 
 <style>
   main {
@@ -61,10 +46,6 @@
 
   h1 {
     margin: 0;
-  }
-
-  a {
-    text-decoration: none;
   }
 
   .message {
@@ -91,14 +72,6 @@
     color: var(--ink);
     font-size: 15px;
     font-weight: 700;
-  }
-
-  .journal {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    box-sizing: border-box;
   }
 
   main > form {

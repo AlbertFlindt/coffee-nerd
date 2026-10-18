@@ -11,6 +11,7 @@ import { REFERENCE, seedReferenceSetup, type SeededIds } from './seed';
 import {
   clearBrewNext,
   editShot,
+  rateShot,
   reopenAutoFinishedBean,
   saveShot,
   ShotRejected,
@@ -323,6 +324,29 @@ describe('saveShot', () => {
 });
 
 describe('editShot', () => {
+  it('D-113: a shot can move to an open bean, not to a finished one; its own finished bean stays fine', () => {
+    const { shotId } = save(input({}, 1));
+    const other = newId(T0);
+    db.insert(bean)
+      .values({
+        id: other,
+        ownerId: ids.userId,
+        name: 'Kiambu AA',
+        roastDate: '2026-10-01',
+        status: 'finished',
+        createdAt: T0,
+        updatedAt: T0
+      })
+      .run();
+    const moveTo = (beanId: string) =>
+      editShot(db, ids.userId, shotId, { ...input({ beanId }, 1), id: shotId }, T0);
+    expect(() => moveTo(other)).toThrow(ShotRejected);
+    db.update(bean).set({ status: 'finished' }).where(eq(bean.id, ids.beanId)).run();
+    expect(moveTo(ids.beanId).status).toBe('saved');
+    db.update(bean).set({ status: 'open' }).where(eq(bean.id, other)).run();
+    expect(moveTo(other).status).toBe('saved');
+  });
+
   it('D-57: editing a shot that moves it to a new recipe removes the recipe left without shots', () => {
     const first = save(input({ grind: 1600 }, 1));
     const { shotId, recipeId } = save(input({ grind: 1500 }, 2));
@@ -463,3 +487,31 @@ function seedOtherAccount() {
     .run();
   return { userId, machineId, beanId };
 }
+
+describe('rateShot', () => {
+  it('D-111: sets the score of an unrated shot and nothing else', () => {
+    const shotId = save(input({ notes: 'thin' }, 1)).shotId;
+    expect(rateShot(db, ids.userId, shotId, 7, T0 + 5 * MINUTE)).toBe(true);
+    const row = db.select().from(shot).where(eq(shot.id, shotId)).get()!;
+    expect(row).toMatchObject({
+      score: 7,
+      balance: null,
+      notes: 'thin',
+      updatedAt: T0 + 5 * MINUTE
+    });
+  });
+
+  it('D-09: only whole scores from 1 to 10', () => {
+    const shotId = save(input({}, 1)).shotId;
+    for (const score of [0, 11, 7.5])
+      expect(() => rateShot(db, ids.userId, shotId, score, T0)).toThrow(ShotRejected);
+    expect(db.select().from(shot).where(eq(shot.id, shotId)).get()!.score).toBeNull();
+  });
+
+  it('D-60: another user’s shot, or an unknown one, is left alone', () => {
+    const shotId = save(input({}, 1)).shotId;
+    expect(rateShot(db, 'someone-else', shotId, 7, T0)).toBe(false);
+    expect(rateShot(db, ids.userId, 'nope', 7, T0)).toBe(false);
+    expect(db.select().from(shot).where(eq(shot.id, shotId)).get()!.score).toBeNull();
+  });
+});

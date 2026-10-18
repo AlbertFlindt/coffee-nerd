@@ -7,7 +7,7 @@ import { openDatabase, type Db } from './client';
 import { newId } from './ids';
 import { appState, bean, gear, shot, tag, userSettings } from './schema';
 import { REFERENCE, seedReferenceSetup, type SeededIds } from './seed';
-import { loadShotForm, type ShotFormData } from './shot-form';
+import { loadEditShotForm, loadShotForm, type ShotFormData } from './shot-form';
 import { saveShot, type ShotInput } from './shots';
 
 const dir = mkdtempSync(join(tmpdir(), 'coffee-nerd-shot-form-'));
@@ -241,3 +241,72 @@ describe('loadShotForm', () => {
 });
 
 const noTaste = { score: null, balance: null, body: null, sweetness: null, aftertaste: null };
+
+describe('loadEditShotForm', () => {
+  const rated = { score: 7, balance: -2, body: 6, sweetness: null, aftertaste: null };
+
+  it('D-57: starts from the shot itself: its values, taste, flavor notes and notes', () => {
+    const berry = db.select().from(tag).where(eq(tag.name, 'Berry')).get()!;
+    const { shotId } = save(
+      { grind: 1500, yield: 38500, time: 25500, taste: rated, tagIds: [berry.id], notes: 'thin' },
+      1
+    );
+    const form = ready(loadEditShotForm(db, ids.userId, shotId)!);
+    expect(form.prefill).toMatchObject({ grind: 1500, dose: 18000, yield: 38500, time: 25500 });
+    expect(form.edit).toEqual({ shotId, taste: rated, tagIds: [berry.id], notes: 'thin' });
+    expect(form.bean.id).toBe(ids.beanId);
+  });
+
+  it('D-113: compares with the bean’s shot before this one, and counts only earlier shots', () => {
+    save({ yield: 36000 }, 1);
+    const second = save({ yield: 37000, taste: rated }, 2).shotId;
+    save({ yield: 39000 }, 3); // later: not seen when editing the second
+    const form = ready(loadEditShotForm(db, ids.userId, second)!);
+    expect(form.lastShot?.yield).toBe(36000);
+    expect(form.recipes).toHaveLength(1);
+    expect(form.recipes[0]).toMatchObject({ shotCount: 1, lastScore: null });
+  });
+
+  it('D-113: the first shot of a bean has nothing before it', () => {
+    const first = save({}, 1).shotId;
+    save({}, 2);
+    const form = ready(loadEditShotForm(db, ids.userId, first)!);
+    expect(form.lastShot).toBeNull();
+    expect(form.recipes.every((r) => r.shotCount === 0)).toBe(true);
+  });
+
+  it('D-113: another open bean can be chosen; it is compared with its own shots before this one', () => {
+    const shotId = save({}, 5).shotId;
+    const other = newId(T0);
+    db.insert(bean)
+      .values({
+        id: other,
+        ownerId: ids.userId,
+        name: 'Kiambu AA',
+        roastDate: '2026-10-01',
+        status: 'open',
+        createdAt: T0,
+        updatedAt: T0
+      })
+      .run();
+    save({ beanId: other, grind: 1800 }, 3);
+    save({ beanId: other, grind: 1900 }, 7); // after the edited shot
+    const form = ready(loadEditShotForm(db, ids.userId, shotId, other)!);
+    expect(form.bean.name).toBe('Kiambu AA');
+    expect(form.lastShot?.recipe.grind).toBe(1800);
+    expect(form.prefill.grind).toBe(1600); // the values stay the shot's
+  });
+
+  it('D-113: the shot’s own bean stays a choice after it is finished, first in the list', () => {
+    const shotId = save({}, 1).shotId;
+    db.update(bean).set({ status: 'finished' }).where(eq(bean.id, ids.beanId)).run();
+    const form = ready(loadEditShotForm(db, ids.userId, shotId)!);
+    expect(form.openBeans[0].id).toBe(ids.beanId);
+    expect(form.bean.id).toBe(ids.beanId);
+  });
+
+  it('D-60: another user’s shot is not found', () => {
+    const shotId = save({}, 1).shotId;
+    expect(loadEditShotForm(db, 'someone-else', shotId)).toBeNull();
+  });
+});

@@ -1,6 +1,7 @@
 <script lang="ts">
   // One shot in the Journal (D-54): score block (or a dashed amber "Rate" block when unrated), bean and
-  // time, core values, then taste and the recipe tag (cherry, D-16). The whole row opens the shot.
+  // time, core values, then taste and the recipe tag (cherry, D-16). The row opens the shot; the Rate
+  // block is a button of its own that opens the score sheet (D-111).
   import { resolve } from '$app/paths';
   import { recipeTagText } from '../domain/fingerprint';
   import { clockTime, coreValuesText, journalTasteText } from '../domain/journal';
@@ -10,40 +11,57 @@
   let {
     shot,
     timeZone,
-    steps
+    steps,
+    onrate
   }: {
     shot: JournalShot;
     timeZone: string;
     steps: { dose: Thousandths; yield: Thousandths; time: Thousandths };
+    onrate: () => void;
   } = $props();
 
   const taste = $derived(journalTasteText(shot.score, shot.balance));
 </script>
 
-<a class="row tap" href={resolve('/journal/[id]', { id: shot.id })}>
+<div class="item">
+  <a class="row tap" href={resolve('/journal/[id]', { id: shot.id })}>
+    {#if shot.score === null}
+      <!-- Room for the Rate button, which sits on top of the row (a button cannot be inside a link). -->
+      <span class="block-space"></span>
+    {:else}
+      <span class="score"
+        ><span class="number">{shot.score}</span><span class="word">score</span></span
+      >
+    {/if}
+    <span class="text">
+      <span class="top"
+        ><span class="bean">{shot.beanName}</span><span>{clockTime(shot.brewedAt, timeZone)}</span
+        ></span
+      >
+      <span class="values">{coreValuesText(shot, { ...steps, grind: shot.grindStep })}</span>
+      <span class="bottom">
+        {#if taste}<span class="taste">{taste}</span>{/if}
+        <span class="cn-tag" class:cn-tag--new={shot.recipeTag.kind === 'new'}
+          >{recipeTagText(shot.recipeTag)}</span
+        >
+      </span>
+    </span>
+  </a>
   {#if shot.score === null}
-    <span class="rate">Rate</span>
-  {:else}
-    <span class="score"
-      ><span class="number">{shot.score}</span><span class="word">score</span></span
+    <button
+      type="button"
+      class="rate tap"
+      aria-label="Rate the shot at {clockTime(shot.brewedAt, timeZone)}"
+      onclick={onrate}>Rate</button
     >
   {/if}
-  <span class="text">
-    <span class="top"
-      ><span class="bean">{shot.beanName}</span><span>{clockTime(shot.brewedAt, timeZone)}</span
-      ></span
-    >
-    <span class="values">{coreValuesText(shot, { ...steps, grind: shot.grindStep })}</span>
-    <span class="bottom">
-      {#if taste}<span class="taste">{taste}</span>{/if}
-      <span class="cn-tag" class:cn-tag--new={shot.recipeTag.kind === 'new'}
-        >{recipeTagText(shot.recipeTag)}</span
-      >
-    </span>
-  </span>
-</a>
+</div>
 
 <style>
+  .item {
+    position: relative;
+  }
+
   .row {
     display: flex;
     align-items: center;
@@ -56,7 +74,8 @@
   }
 
   .score,
-  .rate {
+  .rate,
+  .block-space {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -85,6 +104,11 @@
 
   /* An unrated shot (D-11): amber, your input still to give. */
   .rate {
+    position: absolute;
+    left: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
     border: 1.5px dashed var(--amber);
     color: var(--amber);
     font-size: 13px;

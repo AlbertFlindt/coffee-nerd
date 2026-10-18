@@ -153,6 +153,20 @@ export function editShot(
       .where(and(eq(shot.id, shotId), eq(shot.ownerId, ownerId)))
       .get();
     if (!existing) throw new ShotRejected(['shot: not found']);
+    // D-113: a shot keeps its own bean (even when finished since) or moves to an open one.
+    const ownBean = tx
+      .select({ beanId: recipe.beanId })
+      .from(recipe)
+      .where(eq(recipe.id, existing.recipeId))
+      .get()!.beanId;
+    if (input.beanId !== ownBean) {
+      const target = tx
+        .select({ status: bean.status })
+        .from(bean)
+        .where(and(eq(bean.id, input.beanId), eq(bean.ownerId, ownerId)))
+        .get();
+      if (target?.status !== 'open') throw new ShotRejected(['bean: not open']);
+    }
 
     const setup = validate(tx, ownerId, input);
     const tagIds = [...input.tagIds, ...addTags(tx, ownerId, input.newTagNames ?? [], now)];
@@ -412,6 +426,27 @@ function finishBeanIfUsedUp(
     .where(and(eq(bean.id, input.beanId), eq(bean.ownerId, ownerId)))
     .run();
   return true;
+}
+
+/**
+ * The Journal's Rate sheet (D-111): sets only the score of one shot. True when the shot was found.
+ * The recipe does not change: the score is a result, not part of the recipe (D-13).
+ */
+export function rateShot(
+  db: Db,
+  ownerId: string,
+  shotId: string,
+  score: number,
+  now: number
+): boolean {
+  if (!tasteSchema.shape.score.safeParse(score).success)
+    throw new ShotRejected(['score: a whole number from 1 to 10']);
+  const result = db
+    .update(shot)
+    .set({ score, updatedAt: now })
+    .where(and(eq(shot.id, shotId), eq(shot.ownerId, ownerId)))
+    .run();
+  return result.changes > 0;
 }
 
 /** "Use last shot recipe" (D-43): the next shot starts from the last shot again. */

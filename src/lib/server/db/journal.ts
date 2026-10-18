@@ -1,14 +1,14 @@
 // The Journal (D-54) and the shot detail (D-57). Every query is scoped by the owner (D-60).
 import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 import type { RecipeMatch } from '../../domain/fingerprint';
-import { shotsThisWeek } from '../../domain/journal';
+import { recipeFilterLabel, shotsThisWeek } from '../../domain/journal';
 import type { GrinderSpec, MachineSpec } from '../../domain/schemas';
 import { setupDetail } from '../../domain/shot-form';
 import type { Thousandths } from '../../domain/units';
 import type { Queryable } from './client';
 import { bean, gear, recipe, shot, shotTag, tag, userSettings } from './schema';
 
-export type JournalFilter = { beanId?: string; unrated?: boolean };
+export type JournalFilter = { beanId?: string; recipeId?: string; unrated?: boolean };
 
 export type JournalShot = {
   id: string;
@@ -24,6 +24,8 @@ export type JournalShot = {
   balance: number | null;
   /** The recipe tag as it was when the shot was brewed (D-16): reused N× before it, or new. */
   recipeTag: RecipeMatch;
+  /** The score of the recipe's latest rated shot before this one, the faint marker of the Rate sheet (D-12). */
+  previousScore: number | null;
 };
 
 export type Journal = {
@@ -32,8 +34,12 @@ export type Journal = {
   beans: { id: string; name: string }[];
   /** The bean filter in effect; null for all beans (an unknown bean is ignored). */
   beanId: string | null;
+  /** The chosen bean's recipes, most recently brewed first, for the recipe filter (D-112); empty without a bean. */
+  recipes: { id: string; label: string }[];
+  /** The recipe filter in effect: only with a bean, and only one of its recipes. */
+  recipeId: string | null;
   unrated: boolean;
-  /** Unrated shots within the bean filter: "Unrated · N". */
+  /** Unrated shots within the bean and recipe filters: "Unrated · N". */
   unratedCount: number;
   /** All shots since Monday, whatever the filter: "9 shots this week". */
   shotsThisWeek: number;
@@ -61,6 +67,7 @@ export function loadJournal(
       beanName: bean.name,
       grind: recipe.grind,
       dose: recipe.dose,
+      setup: recipe.setup,
       grinderSpec: gear.spec,
       yield: shot.yield,
       time: shot.time,
@@ -81,10 +88,27 @@ export function loadJournal(
     if (!beans.some((b) => b.id === row.beanId)) beans.push({ id: row.beanId, name: row.beanName });
   const beanId = beans.some((b) => b.id === filter.beanId) ? filter.beanId! : null;
   const ofBean = rows.filter((r) => beanId === null || r.beanId === beanId);
+  const recipes: Journal['recipes'] = [];
+  if (beanId !== null)
+    for (const row of ofBean) {
+      if (recipes.some((r) => r.id === row.recipeId)) continue;
+      const label = recipeFilterLabel(
+        {
+          grind: row.grind,
+          dose: row.dose,
+          routine: row.setup.routine?.name ?? null,
+          shotCount: ofBean.filter((r) => r.recipeId === row.recipeId).length
+        },
+        { grind: (row.grinderSpec as GrinderSpec).dial.step, dose: steps.dose }
+      );
+      recipes.push({ id: row.recipeId, label });
+    }
+  const recipeId = recipes.some((r) => r.id === filter.recipeId) ? filter.recipeId! : null;
+  const filtered = ofBean.filter((r) => recipeId === null || r.recipeId === recipeId);
   const unrated = filter.unrated === true;
 
   return {
-    shots: ofBean
+    shots: filtered
       .filter((r) => !unrated || r.score === null)
       .map((r) => ({
         id: r.id,
@@ -97,12 +121,15 @@ export function loadJournal(
         time: r.time,
         score: r.score,
         balance: r.balance,
-        recipeTag: tags.get(r.id)!
+        recipeTag: tags.get(r.id)!.tag,
+        previousScore: tags.get(r.id)!.previousScore
       })),
     beans,
     beanId,
+    recipes,
+    recipeId,
     unrated,
-    unratedCount: ofBean.filter((r) => r.score === null).length,
+    unratedCount: filtered.filter((r) => r.score === null).length,
     shotsThisWeek: shotsThisWeek(
       rows.map((r) => r.brewedAt),
       now,
@@ -136,6 +163,8 @@ export type ShotDetail = {
     aftertaste: number | null;
   };
   flavors: string[];
+  /** "Compared with this recipe" (D-109): the recipe's shot count and its other shots' results. */
+  recipe: { shotCount: number; others: { time: Thousandths | null; score: number | null }[] };
   notes: string | null;
   timeZone: string;
   steps: Steps;
@@ -172,12 +201,14 @@ export function loadShotDetail(db: Queryable, ownerId: string, shotId: string): 
     .all()
     .map((t) => t.name);
 
-  const earlier = db
-    .select({ id: shot.id, brewedAt: shot.brewedAt })
+  const recipeShots = db
+    .select({ id: shot.id, brewedAt: shot.brewedAt, time: shot.time, score: shot.score })
     .from(shot)
     .where(and(eq(shot.ownerId, ownerId), eq(shot.recipeId, r.id)))
-    .all()
-    .filter((o) => before(o, s)).length;
+    .orderBy(asc(shot.brewedAt), asc(shot.id))
+    .all();
+  const earlier = recipeShots.filter((o) => before(o, s)).length;
+  const others = recipeShots.filter((o) => o.id !== s.id);
 
   const { timeZone, steps } = settingsOf(db, ownerId);
   return {
@@ -204,6 +235,10 @@ export function loadShotDetail(db: Queryable, ownerId: string, shotId: string): 
       aftertaste: s.aftertaste
     },
     flavors,
+    recipe: {
+      shotCount: recipeShots.length,
+      others: others.map(({ time, score }) => ({ time, score }))
+    },
     notes: s.notes,
     timeZone,
     steps
@@ -216,22 +251,22 @@ function before(a: { id: string; brewedAt: number }, b: { id: string; brewedAt: 
 }
 
 /**
- * The recipe tag of each shot at the time it was brewed (D-16): "Recipe reused N×" with N the recipe's
+ * The recipe tag of each shot at the time it was brewed (D-16), and its recipe's last score before it (D-12): "Recipe reused N×" with N the recipe's
  * earlier shots, or "New recipe" for its first. What changed is not named here: that compares with the
  * shot before it on the form (D-81), and the Journal shows "New recipe" alone.
  */
 function recipeTags(
-  newestFirst: readonly { id: string; recipeId: string }[]
-): Map<string, RecipeMatch> {
-  const seen = new Map<string, number>();
-  const tags = new Map<string, RecipeMatch>();
+  newestFirst: readonly { id: string; recipeId: string; score: number | null }[]
+): Map<string, { tag: RecipeMatch; previousScore: number | null }> {
+  const seen = new Map<string, { count: number; lastScore: number | null }>();
+  const tags = new Map<string, { tag: RecipeMatch; previousScore: number | null }>();
   for (const row of [...newestFirst].reverse()) {
-    const earlier = seen.get(row.recipeId) ?? 0;
-    tags.set(
-      row.id,
-      earlier === 0 ? { kind: 'new', changes: [] } : { kind: 'reused', shotCount: earlier }
-    );
-    seen.set(row.recipeId, earlier + 1);
+    const { count, lastScore } = seen.get(row.recipeId) ?? { count: 0, lastScore: null };
+    tags.set(row.id, {
+      tag: count === 0 ? { kind: 'new', changes: [] } : { kind: 'reused', shotCount: count },
+      previousScore: lastScore
+    });
+    seen.set(row.recipeId, { count: count + 1, lastScore: row.score ?? lastScore });
   }
   return tags;
 }

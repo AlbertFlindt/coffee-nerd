@@ -1,5 +1,6 @@
 // The Journal and the shot detail (D-54, D-57): days, times and the short texts on a shot's row.
 import { localDate, roastAgeDays } from './bean';
+import { mean, standardDeviation } from './statistics';
 import { tasteWords } from './taste';
 import { decimalsFor, formatQuantity, type Thousandths } from './units';
 
@@ -96,6 +97,60 @@ export function journalTasteText(score: number | null, balance: number | null): 
 export function roastAgeText(roastDate: string, brewedAt: number, timeZone: string): string {
   const days = roastAgeDays(roastDate, brewedAt, timeZone);
   return `${days} ${days === 1 ? 'day' : 'days'} since roast`;
+}
+
+export type RecipeComparison =
+  | { kind: 'no-value' }
+  | { kind: 'not-enough' }
+  /** `sigmas`: how many σ this shot lies from the others' average; null when the others do not vary. */
+  | { kind: 'compared'; mean: number; sigmas: number | null };
+
+/**
+ * "Compared with this recipe" (D-57, D-109): this shot's value against the recipe's other shots, never
+ * itself. Needs two other shots with a value; σ is the sample standard deviation (n − 1).
+ */
+export function compareWithRecipe(
+  value: number | null,
+  others: readonly (number | null)[]
+): RecipeComparison {
+  if (value === null) return { kind: 'no-value' };
+  const values = others.filter((v): v is number => v !== null);
+  if (values.length < 2) return { kind: 'not-enough' };
+  const average = mean(values)!;
+  const sigma = standardDeviation(values)!;
+  return {
+    kind: 'compared',
+    mean: average,
+    sigmas: sigma === 0 ? null : (value - average) / sigma
+  };
+}
+
+/** "Within normal range" within one σ; further away "1.7σ faster than usual" and the like (D-110). */
+export function comparisonText(measure: 'time' | 'score', sigmas: number | null): string | null {
+  if (sigmas === null) return null;
+  // Compared as shown, to one decimal, so a sentence never reads "1.0σ faster than usual".
+  const shown = Math.round(Math.abs(sigmas) * 10) / 10;
+  if (shown <= 1) return 'Within normal range';
+  const words =
+    measure === 'time' ? (sigmas < 0 ? 'faster' : 'slower') : sigmas < 0 ? 'lower' : 'higher';
+  return `${shown.toFixed(1)}σ ${words} than usual`;
+}
+
+/** A recipe in the Journal's recipe filter (D-112): "1.6 · 18.0 g · Daily routine · 3 shots". */
+export function recipeFilterLabel(
+  recipe: { grind: Thousandths; dose: Thousandths; routine: string | null; shotCount: number },
+  steps: { grind: Thousandths; dose: Thousandths }
+): string {
+  const parts = [
+    formatQuantity(recipe.grind, { decimals: decimalsFor(recipe.grind, steps.grind) }),
+    formatQuantity(recipe.dose, {
+      decimals: Math.max(1, decimalsFor(recipe.dose, steps.dose)),
+      unit: 'g'
+    })
+  ];
+  if (recipe.routine) parts.push(recipe.routine);
+  parts.push(`${recipe.shotCount} ${recipe.shotCount === 1 ? 'shot' : 'shots'}`);
+  return parts.join(' · ');
 }
 
 function dayNumber(isoDate: string): number {
