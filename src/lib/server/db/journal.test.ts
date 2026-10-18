@@ -148,6 +148,35 @@ describe('loadJournal', () => {
     expect(filtered.beanId).toBe(kiambu);
   });
 
+  it('D-112: with a bean chosen, its recipes, most recently brewed first, filter the list', () => {
+    const kiambu = secondBean();
+    save(shotAt(T0 - 4 * DAY)); // recipe A
+    save(shotAt(T0 - 3 * DAY, { grind: 1500 })); // recipe B
+    save(shotAt(T0 - 2 * DAY)); // recipe A
+    save(shotAt(T0 - DAY, { beanId: kiambu }));
+    expect(loadJournal(db, ids.userId, {}, T0).recipes).toEqual([]);
+
+    const guji = loadJournal(db, ids.userId, { beanId: ids.beanId }, T0);
+    expect(guji.recipes.map((r) => r.label)).toEqual([
+      '1.6 · 18.0 g · Daily routine · 2 shots',
+      '1.5 · 18.0 g · Daily routine · 1 shot'
+    ]);
+    const onlyB = loadJournal(
+      db,
+      ids.userId,
+      { beanId: ids.beanId, recipeId: guji.recipes[1].id },
+      T0
+    );
+    expect(onlyB.recipeId).toBe(guji.recipes[1].id);
+    expect(onlyB.shots.map((s) => s.grind)).toEqual([1500]);
+  });
+
+  it('D-112: a recipe filter needs its bean; without one it is ignored', () => {
+    save(shotAt(T0 - DAY));
+    const recipeId = loadJournal(db, ids.userId, { beanId: ids.beanId }, T0).recipes[0].id;
+    expect(loadJournal(db, ids.userId, { recipeId }, T0)).toMatchObject({ recipeId: null });
+  });
+
   it('D-54: "Unrated · N" counts the unrated shots and filters to them', () => {
     const unrated = { score: null, balance: -1, body: null, sweetness: null, aftertaste: null };
     save(shotAt(T0 - 3 * DAY));

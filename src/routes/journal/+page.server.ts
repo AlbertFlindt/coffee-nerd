@@ -15,6 +15,7 @@ export const load: PageServerLoad = ({ locals, url }) => {
       locals.user.id,
       {
         beanId: url.searchParams.get('bean') ?? undefined,
+        recipeId: url.searchParams.get('recipe') ?? undefined,
         unrated: url.searchParams.get('unrated') === '1'
       },
       now

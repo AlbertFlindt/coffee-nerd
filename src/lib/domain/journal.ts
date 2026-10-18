@@ -134,6 +134,23 @@ export function comparisonText(measure: 'time' | 'score', sigmas: number | null)
   return `${Math.abs(sigmas).toFixed(1)}σ ${words} than usual`;
 }
 
+/** A recipe in the Journal's recipe filter (D-112): "1.6 · 18.0 g · Daily routine · 3 shots". */
+export function recipeFilterLabel(
+  recipe: { grind: Thousandths; dose: Thousandths; routine: string | null; shotCount: number },
+  steps: { grind: Thousandths; dose: Thousandths }
+): string {
+  const parts = [
+    formatQuantity(recipe.grind, { decimals: decimalsFor(recipe.grind, steps.grind) }),
+    formatQuantity(recipe.dose, {
+      decimals: Math.max(1, decimalsFor(recipe.dose, steps.dose)),
+      unit: 'g'
+    })
+  ];
+  if (recipe.routine) parts.push(recipe.routine);
+  parts.push(`${recipe.shotCount} ${recipe.shotCount === 1 ? 'shot' : 'shots'}`);
+  return parts.join(' · ');
+}
+
 function dayNumber(isoDate: string): number {
   const [year, month, day] = isoDate.split('-').map(Number);
   return Date.UTC(year, month - 1, day) / 86_400_000;

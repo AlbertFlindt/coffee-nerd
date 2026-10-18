@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   clockTime,
   compareWithRecipe,
+  recipeFilterLabel,
   comparisonText,
   coreValuesText,
   dayLabel,
@@ -177,5 +178,25 @@ describe('comparisonText', () => {
 
   it('D-110: without a σ, no sentence', () => {
     expect(comparisonText('time', null)).toBeNull();
+  });
+});
+
+describe('recipeFilterLabel', () => {
+  it('D-112: a recipe by its values: grind · dose · routine · shots', () => {
+    expect(
+      recipeFilterLabel(
+        { grind: 1600, dose: 18000, routine: 'Daily routine', shotCount: 3 },
+        { grind: 100, dose: 100 }
+      )
+    ).toBe('1.6 · 18.0 g · Daily routine · 3 shots');
+  });
+
+  it('D-112: without a routine, and with one shot', () => {
+    expect(
+      recipeFilterLabel(
+        { grind: 15000, dose: 18500, routine: null, shotCount: 1 },
+        { grind: 1000, dose: 100 }
+      )
+    ).toBe('15 · 18.5 g · 1 shot');
   });
 });

@@ -149,9 +149,29 @@ test('D-54: the bean filter lists the beans that have shots', async () => {
   await expect(sheet).toBeHidden();
   await expect(page).toHaveURL(/[?&]bean=/);
   await expect(rows()).toHaveCount(total);
+
+  // D-112: with a bean chosen, its recipes filter the list.
+  const filters = page.getByRole('group', { name: 'Filters' });
+  await filters.getByRole('button', { name: 'Any recipe' }).click();
+  const recipes = page.getByRole('region', { name: 'Choose a recipe' });
+  await expect(
+    recipes.getByRole('button', { name: /^1\.6 · 18\.0 g · Daily routine · \d+ shots$/ })
+  ).toBeVisible();
+  await recipes.getByRole('button', { name: '1.5 · 18.0 g · Daily routine · 1 shot' }).click();
+  await expect(recipes).toBeHidden();
+  await expect(page).toHaveURL(/[?&]recipe=/);
+  await expect(rows()).toHaveCount(1);
+  await expect(rows().first()).toContainText('1.5 · 18.0');
+  await expect(filters.getByRole('button', { name: /^1\.5 · 18\.0 g/ })).toHaveClass(/is-on/);
+  await expectNoPageScroll();
+  await screenshot('JournalFiltered');
+
+  // Choosing all beans again drops the recipe filter too.
   await chip.click();
   await sheet.getByRole('button', { name: 'All beans' }).click();
   await expect(page.getByRole('button', { name: 'All beans' })).toBeVisible();
+  await expect(filters.getByRole('button', { name: /recipe|·.*shot/ })).toHaveCount(0);
+  await expect(rows()).toHaveCount(total);
 });
 
 test('ShotDetail, D-57: tapping a shot opens it', async () => {

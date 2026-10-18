@@ -20,6 +20,8 @@
     `${journal.shotsThisWeek} ${journal.shotsThisWeek === 1 ? 'shot' : 'shots'} this week`
   );
   let beanSheet = $state(false);
+  let recipeSheet = $state(false);
+  const recipeLabel = $derived(journal.recipes.find((r) => r.id === journal.recipeId)?.label);
 
   // D-111: the Rate sheet. A tap on a score saves it; a slide saves where the finger lifts (D-10).
   let rating: (typeof journal.shots)[number] | null = $state(null);
@@ -37,6 +39,19 @@
   };
 </script>
 
+{#snippet chevron()}
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.2"
+    stroke-linecap="round"
+    aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg
+  >
+{/snippet}
+
 <header>
   <h1 class="cn-type-display">Journal</h1>
   <span class="week">{weekText}</span>
@@ -51,19 +66,11 @@
     onclick={() => (beanSheet = true)}
   >
     <span class="chip-label">{beanName ?? 'All beans'}</span>
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2.2"
-      stroke-linecap="round"
-      aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg
-    >
+    {@render chevron()}
   </button>
   <form method="GET">
     {#if journal.beanId}<input type="hidden" name="bean" value={journal.beanId} />{/if}
+    {#if journal.recipeId}<input type="hidden" name="recipe" value={journal.recipeId} />{/if}
     <button
       type="submit"
       class="cn-chip chip"
@@ -74,6 +81,19 @@
       Unrated · {journal.unratedCount}
     </button>
   </form>
+  <!-- D-112: the recipe filter appears once a bean is chosen. -->
+  {#if journal.beanId}
+    <button
+      type="button"
+      class="cn-chip chip"
+      class:is-on={recipeLabel !== undefined}
+      aria-haspopup="dialog"
+      onclick={() => (recipeSheet = true)}
+    >
+      <span class="chip-label">{recipeLabel ?? 'Any recipe'}</span>
+      {@render chevron()}
+    </button>
+  {/if}
 </div>
 
 <main>
@@ -121,6 +141,37 @@
           class="bean tap"
           onclick={() => (beanSheet = false)}
           aria-pressed={b.id === journal.beanId}>{b.name}</button
+        >
+      {/each}
+    </form>
+  </BottomSheet>
+{/if}
+
+{#if recipeSheet}
+  <BottomSheet
+    label="Choose a recipe"
+    closeLabel="Close recipe list"
+    onclose={() => (recipeSheet = false)}
+  >
+    <h2 class="cn-type-heading sheet-title">Recipes</h2>
+    <!-- Not designed yet: a plain list of the bean's recipes (D-112, docs/open-items.md). -->
+    <form class="beans" method="GET" action={resolve('/journal')}>
+      <input type="hidden" name="bean" value={journal.beanId} />
+      {#if journal.unrated}<input type="hidden" name="unrated" value="1" />{/if}
+      <button
+        type="submit"
+        class="bean tap"
+        onclick={() => (recipeSheet = false)}
+        aria-pressed={journal.recipeId === null}>Any recipe</button
+      >
+      {#each journal.recipes as r (r.id)}
+        <button
+          type="submit"
+          name="recipe"
+          value={r.id}
+          class="bean tap"
+          onclick={() => (recipeSheet = false)}
+          aria-pressed={r.id === journal.recipeId}>{r.label}</button
         >
       {/each}
     </form>
@@ -195,12 +246,18 @@
     display: flex;
     gap: var(--space-2);
     padding: var(--space-1) var(--space-5) var(--space-3);
-    overflow: hidden;
+    /* With a long bean or recipe name the chips slide sideways, never off the screen for good. */
+    overflow-x: auto;
+  }
+
+  .filters form {
+    flex: none;
   }
 
   .chip {
     height: var(--touch-min);
     flex: none;
+    white-space: nowrap;
     max-width: 200px;
   }
 

@@ -1,14 +1,14 @@
 // The Journal (D-54) and the shot detail (D-57). Every query is scoped by the owner (D-60).
 import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 import type { RecipeMatch } from '../../domain/fingerprint';
-import { shotsThisWeek } from '../../domain/journal';
+import { recipeFilterLabel, shotsThisWeek } from '../../domain/journal';
 import type { GrinderSpec, MachineSpec } from '../../domain/schemas';
 import { setupDetail } from '../../domain/shot-form';
 import type { Thousandths } from '../../domain/units';
 import type { Queryable } from './client';
 import { bean, gear, recipe, shot, shotTag, tag, userSettings } from './schema';
 
-export type JournalFilter = { beanId?: string; unrated?: boolean };
+export type JournalFilter = { beanId?: string; recipeId?: string; unrated?: boolean };
 
 export type JournalShot = {
   id: string;
@@ -34,8 +34,12 @@ export type Journal = {
   beans: { id: string; name: string }[];
   /** The bean filter in effect; null for all beans (an unknown bean is ignored). */
   beanId: string | null;
+  /** The chosen bean's recipes, most recently brewed first, for the recipe filter (D-112); empty without a bean. */
+  recipes: { id: string; label: string }[];
+  /** The recipe filter in effect: only with a bean, and only one of its recipes. */
+  recipeId: string | null;
   unrated: boolean;
-  /** Unrated shots within the bean filter: "Unrated · N". */
+  /** Unrated shots within the bean and recipe filters: "Unrated · N". */
   unratedCount: number;
   /** All shots since Monday, whatever the filter: "9 shots this week". */
   shotsThisWeek: number;
@@ -63,6 +67,7 @@ export function loadJournal(
       beanName: bean.name,
       grind: recipe.grind,
       dose: recipe.dose,
+      setup: recipe.setup,
       grinderSpec: gear.spec,
       yield: shot.yield,
       time: shot.time,
@@ -83,10 +88,27 @@ export function loadJournal(
     if (!beans.some((b) => b.id === row.beanId)) beans.push({ id: row.beanId, name: row.beanName });
   const beanId = beans.some((b) => b.id === filter.beanId) ? filter.beanId! : null;
   const ofBean = rows.filter((r) => beanId === null || r.beanId === beanId);
+  const recipes: Journal['recipes'] = [];
+  if (beanId !== null)
+    for (const row of ofBean) {
+      if (recipes.some((r) => r.id === row.recipeId)) continue;
+      const label = recipeFilterLabel(
+        {
+          grind: row.grind,
+          dose: row.dose,
+          routine: row.setup.routine?.name ?? null,
+          shotCount: ofBean.filter((r) => r.recipeId === row.recipeId).length
+        },
+        { grind: (row.grinderSpec as GrinderSpec).dial.step, dose: steps.dose }
+      );
+      recipes.push({ id: row.recipeId, label });
+    }
+  const recipeId = recipes.some((r) => r.id === filter.recipeId) ? filter.recipeId! : null;
+  const filtered = ofBean.filter((r) => recipeId === null || r.recipeId === recipeId);
   const unrated = filter.unrated === true;
 
   return {
-    shots: ofBean
+    shots: filtered
       .filter((r) => !unrated || r.score === null)
       .map((r) => ({
         id: r.id,
@@ -104,8 +126,10 @@ export function loadJournal(
       })),
     beans,
     beanId,
+    recipes,
+    recipeId,
     unrated,
-    unratedCount: ofBean.filter((r) => r.score === null).length,
+    unratedCount: filtered.filter((r) => r.score === null).length,
     shotsThisWeek: shotsThisWeek(
       rows.map((r) => r.brewedAt),
       now,
