@@ -198,6 +198,54 @@ describe('saveMySetup', () => {
     expect(shotForm.prefill.setup.features[key]).toMatchObject({ on: true, value: 6000 });
   });
 
+  it('D-161: a list of your own keeps its chosen option as the default', () => {
+    const key = 'custom-1c7d7b63-7b1f-4b2a-8d66-4a2a1a7e3b22';
+    const spec = db.select().from(gear).where(eq(gear.id, ids.machineId)).get()!
+      .spec as MachineSpec;
+    db.update(gear)
+      .set({
+        spec: {
+          ...spec,
+          features: [
+            ...spec.features,
+            {
+              key,
+              label: 'Water',
+              builtIn: false,
+              enabled: true,
+              switchable: true,
+              value: {
+                kind: 'choice',
+                options: [
+                  { id: 'soft', label: 'Soft' },
+                  { id: 'hard', label: 'Hard' }
+                ]
+              }
+            }
+          ]
+        }
+      })
+      .where(eq(gear.id, ids.machineId))
+      .run();
+    const input = current();
+    saveMySetup(
+      db,
+      ids.userId,
+      {
+        ...input,
+        features: { ...input.features, [key]: { label: 'Water', on: true, choice: 'hard' } }
+      },
+      T0
+    );
+    const shotForm = loadShotForm(db, ids.userId);
+    if (shotForm.state !== 'ready') throw new Error('Expected a ready shot form');
+    expect(shotForm.prefill.setup.features[key]).toMatchObject({ on: true, choice: 'hard' });
+    // Switched on without an option, it waits for one (D-78).
+    expect(
+      rejection({ ...input, features: { ...input.features, [key]: { label: 'Water', on: true } } })
+    ).toEqual(['Set Water first.']);
+  });
+
   it('D-45: pressure profile values are saved with My setup', () => {
     const input = current();
     input.features.low_bar_start = { ...input.features.low_bar_start, value: 6000, pressure: 3000 };
