@@ -138,7 +138,14 @@ export function comparisonText(measure: 'time' | 'score', sigmas: number | null)
 
 /** A recipe in the Journal's recipe filter (D-112): "1.6 · 18.0 g · Daily routine · 3 shots". */
 export function recipeFilterLabel(
-  recipe: { grind: Thousandths; dose: Thousandths; routine: string | null; shotCount: number },
+  recipe: {
+    grind: Thousandths;
+    dose: Thousandths;
+    routine: string | null;
+    shotCount: number;
+    /** Setup values that tell it apart from a recipe with the same values (D-121). */
+    differences?: readonly string[];
+  },
   steps: { grind: Thousandths; dose: Thousandths }
 ): string {
   const parts = [
@@ -149,8 +156,27 @@ export function recipeFilterLabel(
     })
   ];
   if (recipe.routine) parts.push(recipe.routine);
+  parts.push(...(recipe.differences ?? []));
   parts.push(`${recipe.shotCount} ${recipe.shotCount === 1 ? 'shot' : 'shots'}`);
   return parts.join(' · ');
+}
+
+/**
+ * For each recipe, the setup values in which it differs from the recipes with the same `values`
+ * (grind, dose and routine), in the order given; empty when no other recipe has its values (D-121).
+ */
+export function setupDifferences(
+  recipes: readonly { values: string; setup: readonly { key: string; text: string }[] }[]
+): string[][] {
+  return recipes.map((recipe) => {
+    const group = recipes.filter((r) => r.values === recipe.values);
+    if (group.length < 2) return [];
+    const textOf = (r: (typeof recipes)[number], key: string) =>
+      r.setup.find((part) => part.key === key)?.text ?? null;
+    return recipe.setup
+      .filter((part) => group.some((other) => textOf(other, part.key) !== part.text))
+      .map((part) => part.text);
+  });
 }
 
 function dayNumber(isoDate: string): number {

@@ -1,9 +1,9 @@
 // The Journal (D-54) and the shot detail (D-57). Every query is scoped by the owner (D-60).
 import { and, asc, desc, eq, inArray, lt, or } from 'drizzle-orm';
 import { describeChange, type RecipeMatch } from '../../domain/fingerprint';
-import { recipeFilterLabel, shotsThisWeek } from '../../domain/journal';
+import { recipeFilterLabel, setupDifferences, shotsThisWeek } from '../../domain/journal';
 import type { GrinderSpec, MachineSpec } from '../../domain/schemas';
-import { setupDetail } from '../../domain/shot-form';
+import { setupDetail, setupParts } from '../../domain/shot-form';
 import type { Thousandths } from '../../domain/units';
 import type { Queryable } from './client';
 import { bean, gear, recipe, shot, shotTag, tag, userSettings } from './schema';
@@ -68,6 +68,9 @@ export function loadJournal(
       grind: recipe.grind,
       dose: recipe.dose,
       setup: recipe.setup,
+      machineId: recipe.machineId,
+      grinderId: recipe.grinderId,
+      basketId: recipe.basketId,
       grinderSpec: gear.spec,
       yield: shot.yield,
       time: shot.time,
@@ -89,20 +92,43 @@ export function loadJournal(
   const beanId = beans.some((b) => b.id === filter.beanId) ? filter.beanId! : null;
   const ofBean = rows.filter((r) => beanId === null || r.beanId === beanId);
   const recipes: Journal['recipes'] = [];
-  if (beanId !== null)
-    for (const row of ofBean) {
-      if (recipes.some((r) => r.id === row.recipeId)) continue;
+  if (beanId !== null) {
+    const ofRecipe = ofBean.filter(
+      (row, i) => ofBean.findIndex((r) => r.recipeId === row.recipeId) === i
+    );
+    // Two recipes with the same values say which setup values tell them apart (D-121).
+    const gearRows = db.select().from(gear).where(eq(gear.ownerId, ownerId)).all();
+    const gearOf = new Map(gearRows.map((g) => [g.id, g]));
+    const differences = setupDifferences(
+      ofRecipe.map((row) => {
+        const named = [
+          { key: 'machine', id: row.machineId },
+          { key: 'grinder', id: row.grinderId },
+          { key: 'basket', id: row.basketId }
+        ].flatMap(({ key, id }) =>
+          id && gearOf.has(id) ? [{ key, text: gearOf.get(id)!.name }] : []
+        );
+        const machineSpec = gearOf.get(row.machineId)?.spec as MachineSpec | undefined;
+        return {
+          values: JSON.stringify([row.grind, row.dose, row.setup.routine?.name ?? null]),
+          setup: [...named, ...setupParts(row.setup, machineSpec?.features ?? [])]
+        };
+      })
+    );
+    ofRecipe.forEach((row, i) => {
       const label = recipeFilterLabel(
         {
           grind: row.grind,
           dose: row.dose,
           routine: row.setup.routine?.name ?? null,
-          shotCount: ofBean.filter((r) => r.recipeId === row.recipeId).length
+          shotCount: ofBean.filter((r) => r.recipeId === row.recipeId).length,
+          differences: differences[i]
         },
         { grind: (row.grinderSpec as GrinderSpec).dial.step, dose: steps.dose }
       );
       recipes.push({ id: row.recipeId, label });
-    }
+    });
+  }
   const recipeId = recipes.some((r) => r.id === filter.recipeId) ? filter.recipeId! : null;
   const filtered = ofBean.filter((r) => recipeId === null || r.recipeId === recipeId);
   const unrated = filter.unrated === true;

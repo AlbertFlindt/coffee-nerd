@@ -3,6 +3,7 @@ import {
   clockTime,
   compareWithRecipe,
   recipeFilterLabel,
+  setupDifferences,
   comparisonText,
   coreValuesText,
   dayLabel,
@@ -203,5 +204,48 @@ describe('recipeFilterLabel', () => {
         { grind: 1000, dose: 100 }
       )
     ).toBe('15 · 18.5 g · 1 shot');
+  });
+
+  it('D-121: the setup values that tell two recipes apart come before the shots', () => {
+    expect(
+      recipeFilterLabel(
+        { grind: 1600, dose: 18000, routine: null, shotCount: 3, differences: ['94 °C'] },
+        { grind: 100, dose: 100 }
+      )
+    ).toBe('1.6 · 18.0 g · 94 °C · 3 shots');
+  });
+});
+
+describe('setupDifferences', () => {
+  const temp = (text: string) => ({ key: 'temperature', text });
+  const flat = { key: 'flat_pressure', text: 'Flat 9.0 bar' };
+
+  it('D-121: recipes with the same values get the setup values in which they differ', () => {
+    expect(
+      setupDifferences([
+        { values: 'a', setup: [temp('93 °C'), flat] },
+        { values: 'a', setup: [temp('94 °C'), flat] },
+        { values: 'b', setup: [temp('95 °C'), flat] }
+      ])
+    ).toEqual([['93 °C'], ['94 °C'], []]);
+  });
+
+  it('D-121: every differing value, in order; one a recipe lacks is left out for it', () => {
+    const paddle = { key: 'paddle', text: 'Paddle Low' };
+    expect(
+      setupDifferences([
+        { values: 'a', setup: [temp('93 °C'), flat, paddle] },
+        { values: 'a', setup: [temp('94 °C'), flat] }
+      ])
+    ).toEqual([['93 °C', 'Paddle Low'], ['94 °C']]);
+  });
+
+  it('D-112: recipes whose labels differ anyway get nothing added', () => {
+    expect(
+      setupDifferences([
+        { values: 'a', setup: [temp('93 °C')] },
+        { values: 'b', setup: [temp('94 °C')] }
+      ])
+    ).toEqual([[], []]);
   });
 });

@@ -171,6 +171,23 @@ describe('loadJournal', () => {
     expect(onlyB.shots.map((s) => s.grind)).toEqual([1500]);
   });
 
+  it('D-121: recipes that differ only in setup say which value tells them apart', () => {
+    const at94 = shotAt(T0 - 2 * DAY);
+    at94.setup.features = {
+      ...at94.setup.features,
+      temperature: { ...at94.setup.features.temperature, value: 94000 }
+    };
+    save(at94);
+    save(shotAt(T0 - DAY));
+    const labels = loadJournal(db, ids.userId, { beanId: ids.beanId }, T0).recipes.map(
+      (r) => r.label
+    );
+    expect(labels).toEqual([
+      '1.6 · 18.0 g · Daily routine · 93 °C · 1 shot',
+      '1.6 · 18.0 g · Daily routine · 94 °C · 1 shot'
+    ]);
+  });
+
   it('D-112: a recipe filter needs its bean; without one it is ignored', () => {
     save(shotAt(T0 - DAY));
     const recipeId = loadJournal(db, ids.userId, { beanId: ids.beanId }, T0).recipes[0].id;
