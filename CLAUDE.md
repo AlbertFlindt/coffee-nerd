@@ -55,15 +55,23 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 
 ## Workflow
 
-- Branch per task from `main` (`m3-shot-form`), pull request into `main`. Pushing to `main` is blocked by a hook.
+- Branch from an up-to-date `main` (in a cloud session, use the branch the session names), pull request into `main`. Pushing to `main` is blocked by a hook. GitHub is reached through its connector (`mcp__github__*`), not `gh`.
 - Use plan mode first for anything that touches more than two files or a decision.
 - Domain logic: write the failing test first. Test names cite the decision: `it('D-16: returning to an earlier grind reuses that recipe')`.
 - Screens: use the `/build-screen` skill. Not done until your screenshot matches the PNG in `docs/screens/`.
-- Before a pull request: `npm run check && npm run lint && npm test`, then have the `decision-reviewer` subagent review the diff and fix what it finds about correctness or decisions.
+- Before a pull request: `npm run check && npm run lint && npm test && npm run test:e2e`, then have the `decision-reviewer` subagent review the diff and fix what it finds about correctness or decisions.
 - When reporting work as done, show evidence: the commands you ran and their results, screenshots for UI.
 - When the owner settles a question, record it with the `record-decision` skill before building on it.
 - Keep `docs/open-items.md` current in every pull request: add any question you could not answer, any state without a design, any shortcut or limitation you leave; delete items you settle. Nothing open lives only in a chat or a pull request description.
 - Pull requests use `.github/pull_request_template.md`: decisions touched, evidence, anything not designed yet.
+
+## Working with the owner
+
+- Ask with question cards (`AskUserQuestion`): 2–4 options, the recommended one first, marked "(Recommended)", each with its consequence in one line. Group related questions, up to four per card. Ask before building anything they affect; never guess product behavior.
+- One pull request at a time. Its description says what is done, what comes next and what is blocked. When it is green, tell the owner with the link, keep watching it, and wait for the merge before starting the next one from the new `main`.
+- Show each screen's screenshot next to its reference PNG.
+- Helpers (subagents) only for work in separate files, with the screen, the D-numbers and the exact files they may touch; they do not build, run the browser tests, format the whole repository or touch git. Review every line they write and run all checks yourself.
+- Report in plain words, without code names, and keep messages short.
 
 ## When compacting
 
