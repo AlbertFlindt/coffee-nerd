@@ -266,7 +266,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - **Finished** beans collapse into compact rows below (name, roaster · origin · process, best score, recipes · shots); this list is the part that scrolls (D-36).
   - "Add bean" sits in the header.
   - *Why:* open beans are what you choose between, so they get the space and the freshness signal; finished beans are history you look up now and then.
-- **D-41 — Add bean form.** *(Revised 2026-10-18: see D-73, D-126, D-133, D-138, D-139, D-140.)* Full-screen form opened from "Add bean"; fits the screen without scrolling (D-36). Top to bottom:
+- **D-41 — Add bean form.** *(Revised 2026-10-18: see D-73, D-126, D-133, D-138, D-139, D-140, D-141.)* Full-screen form opened from "Add bean"; fits the screen without scrolling (D-36). Top to bottom:
   - **"Same as before"** shortcut: pick a past bean to re-buy it. Everything is copied except roast date and bag weight. The new bag is linked to the earlier one, so its history and best recipe carry over (as a starting point, not merged scores).
   - **Name** (required).
   - **Roaster** (full width).
@@ -333,6 +333,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* you see what the new bag is linked to and can change your mind.
 - **D-140 — After adding a bean, its page opens.** "Add bean" saves the bean and opens its detail page (D-42). Adding a bean does not change the bean Home and "+" start from (D-32); a shot does. Refines D-41.
   - *Why:* the new bag's page is where you check what was saved and, after a re-buy, which recipe it starts from.
+- **D-141 — Small details of the Add bean form.** The re-buy card's second line reads "Only roast date and bag weight are new" (D-139). Process and Roast level are optional: tapping the chosen chip or level again clears it. Refines D-41 and D-139.
+  - *Why:* the line says exactly what the copy leaves out; a wrong tap on an optional choice can be undone without picking something else.
 - **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-17: see D-78, D-83.)*
   - **My setup** (a light cream card so it stands out): default machine, grinder, basket and puck prep routine, plus **default values** (dose, yield, grind, temperature, pressure profile). One "Edit" button.
   - Defaults are the **starting point for a bean's first shot** (and when switching gear). After that, D-03 applies: new shots copy the last shot.
