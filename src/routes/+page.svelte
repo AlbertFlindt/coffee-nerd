@@ -17,7 +17,7 @@
         <span>Shot saved. {data.flash.beanName} is finished: its bag is used up.</span>
         <form method="POST" action="?/undoFinish">
           <input type="hidden" name="beanId" value={data.flash.beanId} />
-          <button type="submit" class="undo tap">Undo</button>
+          <button type="submit" class="undo cn-tap">Undo</button>
         </form>
       {:else}
         <span>{data.flash.beanName} is open again.</span>
@@ -28,7 +28,7 @@
   <h1 class="cn-type-display">Coffee Nerd</h1>
   <!-- Until Settings exists (M11), signing out lives here; not designed (docs/open-items.md). -->
   <form method="POST" action="/logout">
-    <button class="cn-btn-secondary tap" type="submit">Sign out</button>
+    <button class="cn-btn-secondary cn-tap" type="submit">Sign out</button>
   </form>
 </main>
 <TabBar current="home" />

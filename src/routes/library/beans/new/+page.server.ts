@@ -36,7 +36,7 @@ export const load: PageServerLoad = ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-  default: async ({ locals, request }) => {
+  save: async ({ locals, request }) => {
     if (!locals.user) error(401);
     const ownerId = locals.user.id;
     let id = '';

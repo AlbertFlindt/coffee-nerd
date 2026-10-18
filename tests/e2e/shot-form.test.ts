@@ -357,7 +357,7 @@ test('D-106, D-107, D-108: empty sliders show a handle, buttons flash when press
 
   // D-106: an empty slider shows a hollow dashed handle in the middle.
   const balance = page.getByRole('slider', { name: 'Balance, sour to bitter' });
-  await expect(balance.locator('.handle.empty')).toHaveCSS('border-top-style', 'dashed');
+  await expect(balance.locator('.cn-slider-handle--empty')).toHaveCSS('border-top-style', 'dashed');
 
   // D-107: a −/+ button turns amber while it is held down.
   const plus = page.getByRole('button', { name: 'Dose plus 0.1 gram' });
@@ -381,7 +381,7 @@ test('D-106, D-107, D-108: empty sliders show a handle, buttons flash when press
       return (await sheet.boundingBox())!.y === before;
     })
     .toBe(true);
-  const grip = (await sheet.locator('.grip').boundingBox())!;
+  const grip = (await sheet.locator('.cn-sheet__grip').boundingBox())!;
   // The whole 44 px strip from the sheet's top edge can be dragged; the handle sits in its middle.
   const sheetBox = (await sheet.boundingBox())!;
   const handle = (await sheet.locator('.cn-sheet__handle').boundingBox())!;

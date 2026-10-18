@@ -31,46 +31,4 @@ body {
   display: none;
 }
 
-/*
- * D-107: buttons show that they were pressed. `.tap` flashes amber (your input and actions, D-19) while
- * pressed and fades back; `.tap-strong` is for buttons that are already amber (Save, Add). Choices that
- * change state (score, chips, tabs, switches) show their new state instead. The browser's own blue tap
- * flash is turned off so it does not compete.
- */
-.cn-root {
-  -webkit-tap-highlight-color: transparent;
-}
-
-.cn-root .tap {
-  transition:
-    background-color 200ms ease-out,
-    color 200ms ease-out;
-}
-
-.cn-root .tap:active {
-  background: var(--amber);
-  color: var(--on-amber);
-  transition: none;
-}
-
-.cn-root .tap:active .cn-step__amt {
-  color: var(--on-amber);
-}
-
-.cn-root .tap-strong {
-  transition:
-    transform 120ms ease-out,
-    filter 120ms ease-out;
-}
-
-.cn-root .tap-strong:active {
-  transform: scale(0.98);
-  filter: brightness(1.12);
-  transition: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cn-root .tap-strong:active {
-    transform: none;
-  }
-}
+/* D-107: the pressed states live in the design system now (cn-tap, cn-tap-strong, D-146). */

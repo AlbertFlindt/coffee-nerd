@@ -50,6 +50,8 @@ Choose one of 2–4 options (roast level, machine type, dial). Selected value = 
 - **Primary** (amber, 56px, full width): the one action of a task screen — Save shot, Add bean, Save setup. Sits at the bottom with 28px under it.
 - **Secondary** (surface): quiet actions like Mark as finished.
 - **Add** pill (amber): sits in the header of Library pages (Add bean, Add gear, New routine). The center + in the tab bar is reserved for new shots (D-31).
+- **Quiet** (`cn-btn-quiet`, no background, ink-muted, 44px): a destructive or rare action at the end of a form, below its primary button — Delete shot, Delete bean (D-116, D-145). It always opens a confirmation sheet first.
+- **Pressed** (D-107): buttons flash amber while pressed and fade back (`cn-tap`); amber buttons press in slightly and brighten instead (`cn-tap-strong`). Choices that change state (score, chips, segments, switches) show their new state instead. The browser's own tap flash is off.
 
 ## RecipeTag
 
@@ -63,6 +65,12 @@ Bottom sheet for secondary detail (More, Add your own feature, New step).
 - Background surface-sheet, top corners radius-sheet, a handle, then content.
 - Behind it the screen is dimmed with scrim; tapping the scrim closes the sheet.
 - On the shot form the sheet stops above the Save button, which stays usable (D-21).
+- The handle sits in the middle of a 44px strip at the top (`cn-sheet__grip`), so it has room above and below; dragging the strip down closes the sheet (D-108).
+- **Confirmation sheet** (D-116, D-145): a short sheet with a question as its title ("Delete this shot?"), one line saying what happens, then the action as a primary button ("Delete shot") and "Keep it" as a secondary button below it.
+
+## TasteSlider
+
+A 0–10 or −10…+10 scale for balance, body, sweetness and aftertaste (D-08, D-23). It starts empty (D-11): a hollow dashed handle in the middle (`cn-slider-handle--empty`, ink-muted) shows where to tap or drag; once set, the handle is solid and the value is named in words next to the title.
 
 ## PreviewFrame
 
@@ -70,7 +78,7 @@ Shows the exact element a setting will produce, framed with a dashed line so it 
 
 ## TabBar
 
-Five slots: Home, Journal, the amber + (new shot, the only way to add one, D-31), Library, Insights. Icons are 22px stroke icons above 12px labels. On tablet it becomes a left rail.
+Five slots: Home, Journal, the amber + (new shot, the only way to add one, D-31), Library, Insights. Icons are 22px stroke icons above 12px labels. It is `tabbar-h` (100px) tall: 84px of bar and 16px of bottom safe area. On tablet it becomes a left rail.
 
 ## InsightCard
 

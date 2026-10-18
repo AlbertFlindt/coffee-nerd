@@ -122,7 +122,11 @@ const SUMMARY_LEFT_OUT = new Set(['flat_pressure']);
  * the machine's order, then the temperature. Flat pressure and the basket are left out; a feature still
  * waiting for its value (D-78) too.
  */
-export function setupSummary(setup: SetupSnapshot, features: readonly FeatureDefinition[]): string {
+export function setupSummary(
+  setup: SetupSnapshot,
+  features: readonly FeatureDefinition[],
+  { temperature: withTemperature = true }: { temperature?: boolean } = {}
+): string {
   const parts: string[] = [];
   let temperature: string | null = null;
   for (const definition of features) {
@@ -133,7 +137,8 @@ export function setupSummary(setup: SetupSnapshot, features: readonly FeatureDef
     if (definition.key === SUMMARY_LAST) temperature = text;
     else parts.push(text);
   }
-  if (temperature) parts.push(temperature);
+  // D-144: the bean page leaves it out when all of a bean's recipes share it.
+  if (temperature && withTemperature) parts.push(temperature);
   return parts.join(' · ');
 }
 

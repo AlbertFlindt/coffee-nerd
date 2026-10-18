@@ -14,5 +14,6 @@
   beanId={page.params.id}
   text={data.text}
   today={data.today}
+  deletable={data.deletable}
   problems={form?.problems}
 />

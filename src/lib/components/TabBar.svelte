@@ -37,7 +37,7 @@
   >
   <!-- The prefill must be current when the form opens (D-03, D-43): load on tap, not on hover. -->
   <a
-    class="cn-plus tap-strong"
+    class="cn-plus cn-tap-strong"
     href={resolve('/shot/new')}
     aria-label="New shot"
     data-sveltekit-preload-data="tap"

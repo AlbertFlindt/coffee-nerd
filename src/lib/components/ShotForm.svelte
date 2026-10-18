@@ -138,7 +138,7 @@
 <div class="page">
   <div class="above-save">
     <header>
-      <a class="back tap" href={back} aria-label="Back without saving">
+      <a class="back cn-tap" href={back} aria-label="Back without saving">
         <svg
           width="22"
           height="22"
@@ -243,7 +243,7 @@
 
       <button
         type="button"
-        class="more tap"
+        class="more cn-tap"
         aria-expanded={sheet === 'more'}
         onclick={() => (sheet = 'more')}
       >
@@ -286,7 +286,7 @@
             {#each data.openBeans as b (b.id)}
               <button
                 type="button"
-                class="bean tap"
+                class="bean cn-tap"
                 aria-pressed={b.id === data.bean.id}
                 onclick={() => chooseBeanForEdit(b.id)}
               >
@@ -302,7 +302,7 @@
                 type="submit"
                 name="bean"
                 value={b.id}
-                class="bean tap"
+                class="bean cn-tap"
                 aria-pressed={b.id === data.bean.id}
                 onclick={() => (sheet = null)}
               >
@@ -330,10 +330,10 @@
           class="delete-actions"
           onsubmit={() => (deleting = true)}
         >
-          <button class="cn-btn-primary tap-strong" type="submit" disabled={deleting}
+          <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={deleting}
             >Delete shot</button
           >
-          <button class="cn-btn-secondary tap" type="button" onclick={() => (sheet = null)}
+          <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (sheet = null)}
             >Keep it</button
           >
         </form>
@@ -358,12 +358,12 @@
       }}
     >
       <input type="hidden" name="shot" value={JSON.stringify(shot)} />
-      <button class="cn-btn-primary tap-strong" type="submit" disabled={saving}
+      <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={saving}
         >{data.edit ? 'Save changes' : 'Save shot'}</button
       >
       {#if data.edit}
         <!-- D-116: the edit form ends with "Delete shot". -->
-        <button class="delete cn-type-section tap" type="button" onclick={() => (sheet = 'delete')}
+        <button class="cn-btn-quiet delete cn-tap" type="button" onclick={() => (sheet = 'delete')}
           >Delete shot</button
         >
       {/if}
@@ -373,20 +373,14 @@
 
 {#snippet useLastShot()}
   <form method="POST" action="?/useLastShot">
-    <button type="submit" class="use-last tap">Use last shot recipe</button>
+    <button type="submit" class="use-last cn-tap">Use last shot recipe</button>
   </form>
 {/snippet}
 
 <style>
   /* D-116: a quiet action next to Save; it asks before deleting. */
   .delete {
-    width: 100%;
-    height: var(--touch-min);
     margin-top: var(--space-1);
-    border: none;
-    border-radius: var(--radius-md);
-    background: none;
-    color: var(--ink-muted);
   }
 
   .delete-note {

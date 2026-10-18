@@ -24,7 +24,7 @@
 </script>
 
 <div class="item">
-  <a class="row tap" href={resolve('/journal/[id]', { id: shot.id })}>
+  <a class="row cn-tap" href={resolve('/journal/[id]', { id: shot.id })}>
     {#if shot.score === null}
       <!-- Room for the Rate button, which sits on top of the row (a button cannot be inside a link). -->
       <span class="block-space"></span>
@@ -50,7 +50,7 @@
   {#if shot.score === null}
     <button
       type="button"
-      class="rate tap"
+      class="rate cn-tap"
       aria-label="Rate the shot at {clockTime(shot.brewedAt, timeZone)}"
       onclick={onrate}>Rate</button
     >

@@ -13,7 +13,7 @@ Implements D-13 (recipe vs. result), D-16 (recipe matching), D-43 (Brew next), D
 4. **Decimal numbers are stored as whole numbers in thousandths.** 18.0 g is stored as `18000`, grind 1.6 as `1600`. Floating-point values drift (0.1 + 0.2 is not exactly 0.3), and drift would break recipe matching. The code converts at the edges; nobody sees thousandths in the UI.
 5. **IDs are UUID version 7** strings. They can be made on the phone (needed for the offline queue, D-61), never collide, and sort by creation time.
 6. **Everything a person creates has an owner** (`owner_id`). Library items also carry `shared` (off by default, no UI yet, D-60).
-7. **Things that shots point to are archived, not deleted** (`archived_at`). Archived beans, gear, steps and routines disappear from pickers, but past shots keep their links. Gear and routines that My setup uses cannot be archived (D-83).
+7. **Things that shots point to are archived, not deleted** (`archived_at`). Archived beans, gear, steps and routines disappear from pickers, but past shots keep their links. Gear and routines that My setup uses cannot be archived (D-83). A bean that no shot points to can be deleted (D-145).
 8. **Times are stored in UTC** (milliseconds). The user's time zone decides what "Today" and "this week" mean; weeks start on Monday (ISO weeks).
 9. **Brew method is recorded from day one.** Recipes carry `method` (only `espresso` for now, D-01), so pour-over later is an addition, not a migration.
 

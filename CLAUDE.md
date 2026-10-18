@@ -8,7 +8,7 @@ Read the relevant one before changing behavior or visuals. Do not import them he
 
 - `docs/ux-decision-log.md`: every product decision (D-01 …) and open topics. Behavior must match it.
 - `docs/data-model.md`: entities, recipe matching, prefill, best recipe, Insights query system.
-- `design-system/`: tokens, `components.css` (`cn-` classes), `components.md`. Synced copy, read-only.
+- `design-system/`: tokens, `components.css` (`cn-` classes), `components.md`. Synced with the design-system artifact; change it only as part of a sync (D-146).
 - `docs/screens/`: every designed screen as PNG + static HTML at 412 × 915. Match them.
 - `docs/roadmap.md`: milestones with acceptance criteria. Work on one milestone at a time.
 - `docs/open-items.md`: unanswered questions, screens not designed yet, deferred code and tooling, each with the milestone that needs it.
@@ -30,7 +30,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - `npm run db:seed`: fill an empty database with the reference setup (sign in as "Demo" / "coffee-nerd"); development and screenshots only (D-88)
 - `docker compose up --build`: the production image on port 3000, data in the `/data` volume
 - `docker compose exec coffee-nerd node scripts/reset-password.mjs`: set a new password and sign out every device (D-87)
-- `node design-system/build-tokens.mjs`: regenerate `tokens.css`. Only as part of a design-system sync the owner starts; `design-system/` is otherwise read-only (D-69).
+- `node design-system/build-tokens.mjs`: regenerate `tokens.css` after changing `tokens.json`, as part of a design-system sync (D-69, D-146).
 
 ## Architecture
 

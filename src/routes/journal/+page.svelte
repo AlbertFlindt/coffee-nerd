@@ -131,7 +131,7 @@
       {#if journal.unrated}<input type="hidden" name="unrated" value="1" />{/if}
       <button
         type="submit"
-        class="bean tap"
+        class="bean cn-tap"
         onclick={() => (beanSheet = false)}
         aria-pressed={journal.beanId === null}>All beans</button
       >
@@ -140,7 +140,7 @@
           type="submit"
           name="bean"
           value={b.id}
-          class="bean tap"
+          class="bean cn-tap"
           onclick={() => (beanSheet = false)}
           aria-pressed={b.id === journal.beanId}>{b.name}</button
         >
@@ -162,7 +162,7 @@
       {#if journal.unrated}<input type="hidden" name="unrated" value="1" />{/if}
       <button
         type="submit"
-        class="bean tap"
+        class="bean cn-tap"
         onclick={() => (recipeSheet = false)}
         aria-pressed={journal.recipeId === null}>Any recipe</button
       >
@@ -171,7 +171,7 @@
           type="submit"
           name="recipe"
           value={r.id}
-          class="bean tap"
+          class="bean cn-tap"
           onclick={() => (recipeSheet = false)}
           aria-pressed={r.id === journal.recipeId}>{r.label}</button
         >

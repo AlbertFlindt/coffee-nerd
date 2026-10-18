@@ -113,7 +113,7 @@
   <div class="cn-steppers">
     <button
       type="button"
-      class="cn-step tap"
+      class="cn-step cn-tap"
       aria-label="{label} minus {spokenStep}"
       onclick={() => onchange(applyStep(value, step, '-', { min, max }))}
     >
@@ -121,7 +121,7 @@
     </button>
     <button
       type="button"
-      class="cn-step tap"
+      class="cn-step cn-tap"
       aria-label="{label} plus {spokenStep}"
       onclick={() => onchange(applyStep(value, step, '+', { min, max }))}
     >

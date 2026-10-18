@@ -33,6 +33,7 @@
   --space-5: 20px;
   --space-6: 28px;
   --radius-sm: 10px;
+  --radius-block: 12px;
   --radius-md: 14px;
   --radius-lg: 16px;
   --radius-xl: 18px;
@@ -41,7 +42,7 @@
   --touch-min: 44px;
   --button-primary-h: 56px;
   --field-h: 56px;
-  --tabbar-h: 84px;
+  --tabbar-h: 100px;
   --plus-button: 56px;
   --viewport-ref-w: 412px;
   --viewport-ref-h: 915px;

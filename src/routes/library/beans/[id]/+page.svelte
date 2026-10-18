@@ -31,7 +31,7 @@
 {/snippet}
 
 <header>
-  <a class="icon tap" href={resolve('/library/beans')} aria-label="Back to Beans">
+  <a class="icon cn-tap" href={resolve('/library/beans')} aria-label="Back to Beans">
     <svg
       width="22"
       height="22"
@@ -45,7 +45,7 @@
     >
   </a>
   <h1>{bean.name}</h1>
-  <a class="edit tap" href={resolve('/library/beans/[id]/edit', { id: bean.id })}>Edit</a>
+  <a class="edit cn-tap" href={resolve('/library/beans/[id]/edit', { id: bean.id })}>Edit</a>
 </header>
 
 <main>
@@ -90,7 +90,7 @@
         <!-- D-125: a recipe opens the Journal filtered to this bean and recipe. -->
         <form class="recipe-link" method="GET" action={resolve('/journal')}>
           <input type="hidden" name="bean" value={bean.id} />
-          <button class="recipe-open tap" name="recipe" value={r.id}>
+          <button class="recipe-open cn-tap" name="recipe" value={r.id}>
             <span class="recipe-text">
               <span class="title">{r.title}</span>
               {#if r.detail}<span class="soft detail">{r.detail}</span>{/if}
@@ -112,7 +112,7 @@
         <form method="POST" action="?/brewNext" use:enhance>
           <input type="hidden" name="recipeId" value={r.id} />
           <button
-            class="brew tap"
+            class="brew cn-tap"
             aria-pressed={r.marked}
             aria-label={r.marked ? 'Brewing next. Tap to undo' : 'Brew this recipe next'}
             >{@render cup()}</button
@@ -130,7 +130,7 @@
       <div class="cn-card message" role="status">
         <span>{bean.name} is finished</span>
         <form method="POST" action="?/reopen" use:enhance>
-          <button class="undo tap">Undo</button>
+          <button class="undo cn-tap">Undo</button>
         </form>
       </div>
     {:else if form?.brewNext === 'reopened'}
@@ -140,11 +140,11 @@
     {/if}
     {#if bean.status === 'open'}
       <form method="POST" action="?/finish" use:enhance>
-        <button class="cn-btn-secondary tap">Mark as finished</button>
+        <button class="cn-btn-secondary cn-tap">Mark as finished</button>
       </form>
     {:else}
       <form method="POST" action="?/reopen" use:enhance>
-        <button class="cn-btn-secondary tap">Reopen</button>
+        <button class="cn-btn-secondary cn-tap">Reopen</button>
       </form>
     {/if}
   </footer>
@@ -396,7 +396,7 @@
     width: 52px;
     height: 52px;
     flex: none;
-    border-radius: 12px;
+    border-radius: var(--radius-block);
     background: var(--bg);
   }
 

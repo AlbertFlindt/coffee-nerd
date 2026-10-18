@@ -73,7 +73,7 @@
       <span class="words" class:small={heading === 'h3'}>{words}</span>
     {/if}
     {#if value !== null}
-      <button type="button" class="clear tap" onclick={() => onchange(null)}>
+      <button type="button" class="clear cn-tap" onclick={() => onchange(null)}>
         Clear<span class="hidden"> {title.toLowerCase()}</span>
       </button>
     {/if}
@@ -100,7 +100,7 @@
       <div class="handle" style:left="{percent(value)}%"></div>
     {:else}
       <!-- D-106: nothing set yet; a hollow dashed handle in the middle shows where to tap or drag. -->
-      <div class="handle empty" style:left="50%"></div>
+      <div class="handle cn-slider-handle--empty" style:left="50%"></div>
     {/if}
   </div>
   <div class="ends cn-label">
@@ -222,7 +222,8 @@
     border: 4px solid var(--behind);
   }
 
-  .handle.empty {
+  /* The empty look comes from the design system (cn-slider-handle--empty, D-106); this wins over .handle. */
+  .handle.cn-slider-handle--empty {
     background: transparent;
     border: 1.5px dashed var(--ink-muted);
     width: 24px;

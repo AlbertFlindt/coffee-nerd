@@ -117,7 +117,7 @@
       {:else}
         <button
           type="button"
-          class="pressure tap"
+          class="pressure cn-tap"
           class:changed={pressureChanged}
           aria-label="{label} pressure, {pressure.value === undefined
             ? 'not set'
@@ -137,7 +137,7 @@
   {#if on}
     <button
       type="button"
-      class="cn-row__btn tap"
+      class="cn-row__btn cn-tap"
       aria-label="{label} minus {formatNumber(step, decimals(step, step))} {unit}"
       onclick={() => onvalue(applyStep(value ?? null, step, '-', { min, max }))}>−</button
     >
@@ -149,7 +149,7 @@
     </span>
     <button
       type="button"
-      class="cn-row__btn tap"
+      class="cn-row__btn cn-tap"
       aria-label="{label} plus {formatNumber(step, decimals(step, step))} {unit}"
       onclick={() => onvalue(applyStep(value ?? null, step, '+', { min, max }))}>+</button
     >
@@ -218,7 +218,7 @@
     padding: 0 8px;
     margin-left: -8px;
     border: none;
-    border-radius: 12px;
+    border-radius: var(--radius-pill);
     background: transparent;
     color: var(--amber);
     font-size: 13px;

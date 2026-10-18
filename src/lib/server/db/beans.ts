@@ -317,6 +317,15 @@ export function loadBeanDetail(
   const byRecipe = recipes.map((r) => ({ recipeId: r.id, shots: ofRecipe(r.id) }));
   const order = rankRecipes(byRecipe);
   const today = localDate(now, settings.timeZone);
+  // D-144: the rows name the temperature only when the bean's recipes do not all share it.
+  // Compared as the rows would show them, not as stored (label or key order do not count).
+  const temperatures = new Set(
+    recipes.map((r) => {
+      const t = r.setup.features.temperature;
+      return t?.on ? (t.value ?? null) : null;
+    })
+  );
+  const temperature = temperatures.size > 1;
 
   return {
     id: b.id,
@@ -345,7 +354,7 @@ export function loadBeanDetail(
           }
         ),
         detail: recipeRowDetail(
-          setupSummary(r.setup, machine?.features ?? []),
+          setupSummary(r.setup, machine?.features ?? [], { temperature }),
           its.map((s) => s.time),
           settings.timeStep
         ),
@@ -413,4 +422,63 @@ export function finishBean(db: Db, ownerId: string, beanId: string, now: number)
 /** "Reopen", and the Undo after finishing by hand (D-40, D-127). True when a bean was reopened. */
 export function reopenBean(db: Db, ownerId: string, beanId: string, now: number): boolean {
   return reopen(db, ownerId, beanId, now);
+}
+
+/**
+ * Deletes a bean that has no shots (D-145), for a bag added by mistake; a bean with shots is finished,
+ * never deleted. A recipe kept only by its Brew next mark goes too, with the mark (data-model §4.1), Home
+ * stops pointing at it (D-32), and a later re-buy links to the bag before it instead (D-73).
+ */
+export function deleteBean(
+  db: Db,
+  ownerId: string,
+  beanId: string
+): 'deleted' | 'has_shots' | null {
+  return db.transaction((tx) => {
+    const b = ownBean(tx, ownerId, beanId);
+    if (!b) return null;
+    if (beanHasShots(tx, ownerId, beanId)) return 'has_shots';
+
+    const recipeIds = tx
+      .select({ id: recipe.id })
+      .from(recipe)
+      .where(and(eq(recipe.beanId, beanId), eq(recipe.ownerId, ownerId)))
+      .all()
+      .map((r) => r.id);
+    const state = tx.select().from(appState).where(eq(appState.userId, ownerId)).get();
+    if (state) {
+      const marked = state.brewNextRecipeId !== null && recipeIds.includes(state.brewNextRecipeId);
+      tx.update(appState)
+        .set({
+          brewNextRecipeId: marked ? null : state.brewNextRecipeId,
+          currentBeanId: state.currentBeanId === beanId ? null : state.currentBeanId
+        })
+        .where(eq(appState.userId, ownerId))
+        .run();
+    }
+    for (const id of recipeIds)
+      tx.delete(recipe)
+        .where(and(eq(recipe.id, id), eq(recipe.ownerId, ownerId)))
+        .run();
+    tx.update(bean)
+      .set({ rebuyOfId: b.rebuyOfId })
+      .where(and(eq(bean.rebuyOfId, beanId), eq(bean.ownerId, ownerId)))
+      .run();
+    tx.delete(bean)
+      .where(and(eq(bean.id, beanId), eq(bean.ownerId, ownerId)))
+      .run();
+    return 'deleted';
+  });
+}
+
+/** True when any shot was brewed with this bean (D-145: only a bean without shots can be deleted). */
+export function beanHasShots(db: Queryable, ownerId: string, beanId: string): boolean {
+  return (
+    db
+      .select({ id: shot.id })
+      .from(shot)
+      .innerJoin(recipe, eq(recipe.id, shot.recipeId))
+      .where(and(eq(recipe.beanId, beanId), eq(shot.ownerId, ownerId)))
+      .get() !== undefined
+  );
 }

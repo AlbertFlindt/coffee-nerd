@@ -159,7 +159,7 @@
           {#each choices as item (item.id)}
             <button
               type="button"
-              class="pick tap"
+              class="pick cn-tap"
               aria-pressed={item.chosen}
               onclick={() => {
                 item.pick();
@@ -222,13 +222,13 @@
             {/each}
           </div>
         {/if}
-        <button type="button" class="link-row tap" onclick={() => (picking = 'basket')}>
+        <button type="button" class="link-row cn-tap" onclick={() => (picking = 'basket')}>
           <span class="strong">Basket</span>
           <span class="end" class:changed={changes.basket}
             >{shot.basketId ? (gearNames[shot.basketId] ?? '') : 'None'}{@render chevron()}</span
           >
         </button>
-        <button type="button" class="link-row prep tap" onclick={() => (picking = 'routine')}>
+        <button type="button" class="link-row prep cn-tap" onclick={() => (picking = 'routine')}>
           <span class="prep-text">
             <span class="strong">Puck prep <span class="soft">· {routineName}</span></span>
             <span class="flow" class:changed={changes.routine}>
@@ -319,7 +319,11 @@
               }}
             />
           {:else}
-            <button type="button" class="cn-chip cn-chip--add tap" onclick={() => (adding = true)}>
+            <button
+              type="button"
+              class="cn-chip cn-chip--add cn-tap"
+              onclick={() => (adding = true)}
+            >
               <svg
                 width="14"
                 height="14"

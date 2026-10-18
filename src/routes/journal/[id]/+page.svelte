@@ -84,7 +84,7 @@
 
 <header>
   <a
-    class="back tap"
+    class="back cn-tap"
     href={data.filters ? resolve(`/journal?${data.filters}`) : resolve('/journal')}
     aria-label="Back to Journal"
   >
@@ -105,7 +105,7 @@
     <span class="when">{when}</span>
   </div>
   <!-- D-57, D-113: the shot form in edit mode. -->
-  <a class="edit tap" href={resolve('/journal/[id]/edit', { id: shot.id })}>Edit</a>
+  <a class="edit cn-tap" href={resolve('/journal/[id]/edit', { id: shot.id })}>Edit</a>
 </header>
 
 <main>
@@ -418,7 +418,7 @@
 
   .flavors li {
     padding: var(--space-1) 10px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-block);
     background: var(--bg);
     font-size: 13px;
     font-weight: 600;

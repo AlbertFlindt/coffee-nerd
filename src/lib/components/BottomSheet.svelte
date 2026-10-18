@@ -71,7 +71,7 @@
     <!-- D-108: the handle and the strip around it can be dragged down to close; Escape and tapping
          outside do the same for keyboards and screen readers. -->
     <div
-      class="grip"
+      class="cn-sheet__grip"
       aria-hidden="true"
       {onpointerdown}
       {onpointermove}
@@ -117,22 +117,6 @@
 
   .sheet.dragging {
     transition: none;
-  }
-
-  /*
-   * A 44 px strip at the top of the sheet with the handle in its middle, so the handle has room above
-   * and below it (owner feedback) and the whole strip can be dragged (D-108).
-   */
-  .grip {
-    flex: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: var(--touch-min);
-    /* From the sheet's top edge (its 10px top padding) to the content, which follows after the gap. */
-    margin: -10px calc(-1 * var(--space-5)) calc(-1 * var(--space-3));
-    touch-action: none;
-    cursor: grab;
   }
 
   @media (prefers-reduced-motion: reduce) {

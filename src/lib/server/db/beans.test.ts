@@ -6,6 +6,7 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   addBean as addBeanFromForm,
   BeanRejected,
+  deleteBean,
   finishBean,
   loadBeanDetail,
   reopenBean,
@@ -292,7 +293,8 @@ describe('loadBeanDetail', () => {
     expect(detail.recipes).toMatchObject([
       {
         title: 'Grind 1.6 · 18.0 g → 36.0 g',
-        detail: 'Preinfusion 4 s · Low bar start 5 s · 93 °C · avg 28.0 s',
+        // D-144: both recipes are brewed at 93 °C, so the rows leave it out.
+        detail: 'Preinfusion 4 s · Low bar start 5 s · avg 28.0 s',
         history: { text: 'Reused 1x', reused: true },
         best: 9,
         marked: false
@@ -304,6 +306,38 @@ describe('loadBeanDetail', () => {
         marked: false
       }
     ]);
+  });
+
+  it('D-144: when the recipes differ in temperature, every row names it', () => {
+    shot(T0 - 2 * DAY);
+    const hot = shot(T0 - DAY, {
+      setup: {
+        features: {
+          ...REFERENCE.myFeatures,
+          temperature: { ...REFERENCE.myFeatures.temperature, value: 94000 }
+        },
+        routine: null
+      }
+    });
+    const rows = loadBeanDetail(db, ids.userId, ids.beanId, T0)!.recipes;
+    expect(rows.find((r) => r.id === hot.recipeId)?.detail).toMatch(/· 94 °C ·/);
+    expect(rows.find((r) => r.id !== hot.recipeId)?.detail).toMatch(/· 93 °C ·/);
+  });
+
+  it('D-144: the same temperature under another label still counts as shared', () => {
+    shot(T0 - 2 * DAY);
+    shot(T0 - DAY, {
+      grind: 1500,
+      setup: {
+        features: {
+          ...REFERENCE.myFeatures,
+          temperature: { ...REFERENCE.myFeatures.temperature, label: 'Brew temperature' }
+        },
+        routine: null
+      }
+    });
+    const rows = loadBeanDetail(db, ids.userId, ids.beanId, T0)!.recipes;
+    for (const row of rows) expect(row.detail).not.toMatch(/°C/);
   });
 
   it('D-60: another user’s bean is not found', () => {
@@ -399,5 +433,46 @@ describe('finishing a bean', () => {
   it('D-60: not another user’s bean', () => {
     expect(finishBean(db, 'someone-else', ids.beanId, T0)).toBe(false);
     expect(statusOf(ids.beanId).status).toBe('open');
+  });
+});
+
+describe('deleteBean', () => {
+  it('D-145: a bean without shots is deleted', () => {
+    const id = addBean({ name: 'Mistake' });
+    expect(deleteBean(db, ids.userId, id)).toBe('deleted');
+    expect(db.select().from(bean).where(eq(bean.id, id)).get()).toBeUndefined();
+  });
+
+  it('D-145: a bean with shots is never deleted', () => {
+    shot(T0 - DAY);
+    expect(deleteBean(db, ids.userId, ids.beanId)).toBe('has_shots');
+    expect(statusOf(ids.beanId)).toBeDefined();
+  });
+
+  it('D-145: a recipe kept only by its Brew next mark goes with the bean, and so does the mark', () => {
+    const saved = shot(T0 - DAY);
+    toggleBrewNext(db, ids.userId, ids.beanId, saved.recipeId, T0);
+    deleteShot(db, ids.userId, saved.shotId);
+    expect(deleteBean(db, ids.userId, ids.beanId)).toBe('deleted');
+    expect(brewNext()).toBeNull();
+    expect(db.select().from(recipe).where(eq(recipe.id, saved.recipeId)).get()).toBeUndefined();
+  });
+
+  it('D-32, D-145: Home no longer points at a deleted bean', () => {
+    expect(db.select().from(appState).get()?.currentBeanId).toBe(ids.beanId);
+    deleteBean(db, ids.userId, ids.beanId);
+    expect(db.select().from(appState).get()?.currentBeanId).toBeNull();
+  });
+
+  it('D-73, D-145: a re-buy of the deleted bag links to the bag before it', () => {
+    const middle = addBean({ name: 'Guji Hambela', rebuyOfId: ids.beanId });
+    const latest = addBean({ name: 'Guji Hambela', rebuyOfId: middle });
+    deleteBean(db, ids.userId, middle);
+    expect(statusOf(latest).rebuyOfId).toBe(ids.beanId);
+  });
+
+  it('D-60: not another user’s bean', () => {
+    expect(deleteBean(db, 'someone-else', ids.beanId)).toBeNull();
+    expect(statusOf(ids.beanId)).toBeDefined();
   });
 });
