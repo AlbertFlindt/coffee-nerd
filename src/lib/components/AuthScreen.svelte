@@ -27,7 +27,7 @@
     {/if}
   </div>
 
-  <button class="cn-btn-primary tap-strong" type="submit">{action}</button>
+  <button class="cn-btn-primary cn-tap-strong" type="submit">{action}</button>
 </form>
 
 <style>

@@ -50,7 +50,7 @@
 
 <header>
   <a
-    class="icon tap"
+    class="icon cn-tap"
     href={beanId ? resolve('/library/beans/[id]', { id: beanId }) : resolve('/library/beans')}
     aria-label="Close without saving"
   >
@@ -72,7 +72,7 @@
 <form id="bean-form" method="POST" use:enhance>
   {#if mode === 'add'}
     <div class="rebuy">
-      <button type="button" class="rebuy-open tap" onclick={() => (sheet = 'rebuy')}>
+      <button type="button" class="rebuy-open cn-tap" onclick={() => (sheet = 'rebuy')}>
         <svg
           width="22"
           height="22"
@@ -109,7 +109,7 @@
         {/if}
       </button>
       {#if rebuy}
-        <a class="icon tap clear" href={resolve('/library/beans/new')} aria-label="Not a re-buy">
+        <a class="icon cn-tap clear" href={resolve('/library/beans/new')} aria-label="Not a re-buy">
           <svg
             width="16"
             height="16"
@@ -146,7 +146,7 @@
   <div class="pair">
     <button
       type="button"
-      class="field picker tap"
+      class="field picker cn-tap"
       aria-label="Country, {countryName(values.countryCode) ?? 'not set'}. Tap to choose"
       onclick={() => {
         search = '';
@@ -238,7 +238,7 @@
 
   <div class="pair">
     <!-- D-138: the date input lies over the field, so a tap opens the device's own picker. -->
-    <label class="field date tap">
+    <label class="field date cn-tap">
       <span class="cn-caption label">Roast date <span>Required</span></span>
       {#if roast}
         <span class="value">{roast.date}</span>
@@ -287,7 +287,7 @@
       data-sveltekit-replacestate
     >
       {#each choices as choice (choice.id)}
-        <button type="submit" name="rebuy" value={choice.id} class="row tap">
+        <button type="submit" name="rebuy" value={choice.id} class="row cn-tap">
           <span class="row-name">{choice.name}</span>
           {#if choice.origin}<span class="soft">{choice.origin}</span>{/if}
         </button>
@@ -315,7 +315,7 @@
       {#each searchCountries(search) as country (country.code)}
         <button
           type="button"
-          class="row tap"
+          class="row cn-tap"
           aria-pressed={values.countryCode === country.code}
           onclick={() => {
             values.countryCode = values.countryCode === country.code ? '' : country.code;
