@@ -6,13 +6,16 @@ import { isHttps } from './auth/csrf';
 const COOKIE = 'journal-filters';
 const KEYS = ['bean', 'recipe', 'unrated'] as const;
 
-/** Called by the Journal on each visit with its URL. */
-export function rememberJournalFilters(cookies: Cookies, url: URL, request: Request): void {
+/** Called by the Journal on each visit with the filters in effect (unknown ids already dropped). */
+export function rememberJournalFilters(
+  cookies: Cookies,
+  filters: { beanId: string | null; recipeId: string | null; unrated: boolean },
+  request: Request
+): void {
   const kept = new URLSearchParams();
-  for (const key of KEYS) {
-    const value = url.searchParams.get(key);
-    if (value) kept.set(key, value);
-  }
+  if (filters.beanId) kept.set('bean', filters.beanId);
+  if (filters.recipeId) kept.set('recipe', filters.recipeId);
+  if (filters.unrated) kept.set('unrated', '1');
   cookies.set(COOKIE, kept.toString(), {
     path: '/',
     httpOnly: true,

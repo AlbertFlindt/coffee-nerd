@@ -8,21 +8,20 @@ import type { Actions, PageServerLoad } from './$types';
 // Journal (screen 22, D-54): every shot, newest first; ?bean=, ?recipe= and ?unrated=1 filter it.
 export const load: PageServerLoad = ({ locals, url, cookies, request }) => {
   if (!locals.user) error(401);
-  rememberJournalFilters(cookies, url, request); // D-117
   const now = Date.now();
-  return {
-    now,
-    journal: loadJournal(
-      getDb(),
-      locals.user.id,
-      {
-        beanId: url.searchParams.get('bean') ?? undefined,
-        recipeId: url.searchParams.get('recipe') ?? undefined,
-        unrated: url.searchParams.get('unrated') === '1'
-      },
-      now
-    )
-  };
+  const journal = loadJournal(
+    getDb(),
+    locals.user.id,
+    {
+      beanId: url.searchParams.get('bean') ?? undefined,
+      recipeId: url.searchParams.get('recipe') ?? undefined,
+      unrated: url.searchParams.get('unrated') === '1'
+    },
+    now
+  );
+  // D-117: remember the filters in effect; ids that no longer exist are dropped.
+  rememberJournalFilters(cookies, journal, request);
+  return { now, journal };
 };
 
 export const actions: Actions = {

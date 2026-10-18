@@ -116,7 +116,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the Journal is reachable the way it will always be, without a stand-in link.
 - **D-115 — The shot detail shows aftertaste when it is set.** Below balance, body and sweetness, a fourth scale shows aftertaste, only for a shot that has one. Refines D-57.
   - *Why:* nothing you entered stays hidden.
-- **D-116 — A shot can be deleted from the edit form.** The edit form ends with "Delete shot"; a confirmation asks first. Deleting removes the shot and its flavor notes; a recipe left with no shots is removed unless it is marked Brew next (data-model §4.1). The app then returns to the Journal. Refines D-57.
+- **D-116 — A shot can be deleted from the edit form.** The edit form ends with "Delete shot"; a confirmation asks first. Deleting removes the shot and its flavor notes; a recipe left with no shots is removed unless it is marked Brew next (data-model §4.1). The app then returns to the Journal. A bean that this shot finished automatically (D-40) stays finished; it is reopened from the bean page. Refines D-57.
   - *Why:* a mistaken shot should not stay in the statistics forever; the edit form is where you already change a shot.
 - **D-117 — "Back" returns to the Journal as you left it.** From the shot detail, "Back" opens the Journal with the filters you had (bean, recipe, unrated). "N shots this week" in the Journal header counts every shot, whatever the filters. Refines D-54 and D-57.
   - *Why:* checking one shot should not lose the view you were working in; the header describes the Journal, the filters the list.

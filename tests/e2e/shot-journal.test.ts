@@ -292,3 +292,21 @@ test('D-116: a shot is deleted from the edit form, after a confirmation', async 
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
   await expect(rows()).toHaveCount(before - 1);
 });
+
+test('D-116, D-117: after deleting, the Journal keeps its filters', async () => {
+  const chip = page.getByRole('button', { name: /^Unrated · \d+$/ });
+  const unrated = Number((await chip.textContent())!.match(/\d+/)![0]);
+  await chip.click();
+  await expect(page).toHaveURL(/[?&]unrated=1/);
+  await rows().first().click();
+  await page.getByRole('link', { name: 'Edit' }).click();
+  await page.getByRole('button', { name: 'Delete shot' }).click();
+  await page
+    .getByRole('region', { name: 'Delete this shot' })
+    .getByRole('button', { name: 'Delete shot' })
+    .click();
+  await expect(page).toHaveURL(/[?&]unrated=1/);
+  await expect(page.getByRole('button', { name: /^Unrated · / })).toHaveText(
+    `Unrated · ${unrated - 1}`
+  );
+});

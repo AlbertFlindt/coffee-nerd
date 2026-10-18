@@ -65,7 +65,8 @@ export const actions: Actions = {
   // D-116: delete after the confirmation; back to the Journal as you left it (D-117).
   delete: ({ locals, params, cookies }) => {
     if (!locals.user) error(401);
-    if (!deleteShot(getDb(), locals.user.id, params.id)) error(404, 'Shot not found');
+    // A second tap finds the shot already gone: the Journal is still the right place to land.
+    deleteShot(getDb(), locals.user.id, params.id);
     redirect(303, journalWithFilters(cookies));
   }
 };
