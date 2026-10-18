@@ -22,6 +22,7 @@ Last updated: 2026-10-18
 
 | What is missing | Needed by | Source |
 |---|---|---|
+| Add bean: built without a design, from the form's own parts: the "Same as before" sheet (name and roaster · country · process per row, "No beans yet"), the country sheet (search field, then countries as rows), the picked re-buy card with its × (D-139), the problem lines above the button, and Edit bean (D-130). Review in the design-system sync | M5 (design-system sync, D-119) | D-126, D-130, D-133, D-138, D-139 |
 | Proper design for the sign-in and "Create your account" pages (built simple for now) | Before release (M11) | D-84 |
 | First-run guide: after creating the account, how you add your gear, puck prep and My setup | M6 | D-88 |
 | Gear: the message on an item My setup uses, "Used in My setup · choose another default first" | M6 | D-83 |
@@ -66,7 +67,7 @@ Last updated: 2026-10-18
 
 | Item | When | Source |
 |---|---|---|
-| Beans overview: "Add bean" is dimmed and the beans are not links until the Add bean form and the bean detail page are built | M5 (next two pull requests) | D-37, D-41, D-42 |
+| Beans overview: the beans are not links, and "Add bean" and "Save changes" return to the Beans overview instead of the bean's page (D-140, D-130), until the bean detail page is built | M5 (next pull request) | D-42, D-130, D-140 |
 | Recipe filter labels (D-121) add the differing gear and machine features, not the routine's step values: two recipes with the same routine whose steps differ (e.g. WDT 20 s vs 30 s) still read the same | M7 (Puck prep, when step values become editable there) | D-121, D-51 |
 | `main` is not protected: GitHub does not enforce the "Require pull request" ruleset on a private repository without a Team plan. The push-guard hook and the review step are the safeguard. | When the repository goes public | Roadmap M0, D-62 |
 | Playwright is pinned to 1.56.1 and CI to `ubuntu-24.04`, to match the browser in the development environment. Upgrade both together. | Any time | PR #1 |

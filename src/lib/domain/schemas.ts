@@ -1,6 +1,7 @@
 // Shapes of the JSON the app stores (D-64), checked in the browser and again on the server.
 // Numbers that are quantities are whole thousandths (data-model §1.4); see ./units.ts.
 import { z } from 'zod';
+import { countryName } from './countries';
 
 const thousandths = z.number().int();
 const step = z.number().int().positive();
@@ -349,3 +350,41 @@ export const tasteSchema = z.object({
   aftertaste: scale(0, 10)
 });
 export type Taste = z.infer<typeof tasteSchema>;
+
+// --- a bean as entered on the Add bean form (D-35, D-41) ---
+
+const optionalText = z.string().trim().min(1).nullable();
+const metres = z.number().int().positive().nullable();
+/** A real calendar date, "2026-10-14". */
+const calendarDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .refine((d) => {
+    const date = new Date(`${d}T00:00:00Z`);
+    return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(d);
+  }, 'Not a date');
+
+export const beanInputSchema = z
+  .object({
+    name,
+    roaster: optionalText,
+    countryCode: z
+      .string()
+      .refine((code) => countryName(code) !== null, 'Not a country')
+      .nullable(),
+    region: optionalText,
+    variety: optionalText,
+    process: z.enum(['washed', 'natural', 'honey', 'anaerobic', 'other']).nullable(),
+    altitudeMinM: metres,
+    altitudeMaxM: metres,
+    roastLevel: z.enum(['light', 'medium_light', 'medium', 'dark']).nullable(),
+    roastDate: calendarDate,
+    bagWeight: thousandths.positive().nullable(),
+    /** The earlier bag a re-buy repeats ("Same as before", D-41, D-139). */
+    rebuyOfId: id.nullable()
+  })
+  .refine(
+    (b) => rangeIsOrdered({ min: b.altitudeMinM ?? undefined, max: b.altitudeMaxM ?? undefined }),
+    { message: RANGE_MESSAGE, path: ['altitudeMaxM'] }
+  );
+export type BeanInput = z.infer<typeof beanInputSchema>;

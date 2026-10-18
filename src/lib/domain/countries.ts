@@ -20,3 +20,25 @@ const names = new Intl.DisplayNames(['en'], { type: 'region' });
 export function countryName(code: string): string | null {
   return known.has(code) ? (names.of(code) ?? null) : null;
 }
+
+const fold = (text: string) =>
+  text
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
+
+const ALL = COUNTRY_CODES.map((code) => ({ code, name: countryName(code)! })).sort((a, b) =>
+  a.name.localeCompare(b.name, 'en')
+);
+
+/**
+ * Countries whose name contains the search, ignoring case and accents (D-133): those that start with it
+ * first, each part A to Z.
+ */
+export function searchCountries(search: string): { code: string; name: string }[] {
+  const wanted = fold(search.trim());
+  if (wanted === '') return ALL;
+  const matches = ALL.filter((c) => fold(c.name).includes(wanted));
+  const starts = (c: { name: string }) => fold(c.name).startsWith(wanted);
+  return [...matches.filter(starts), ...matches.filter((c) => !starts(c))];
+}
