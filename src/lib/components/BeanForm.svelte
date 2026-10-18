@@ -14,6 +14,7 @@
   let {
     mode,
     beanId,
+    deletable = false,
     text,
     today,
     rebuy = null,
@@ -23,6 +24,8 @@
     mode: 'add' | 'edit';
     /** The bean being edited: closing goes back to its page (D-130). */
     beanId?: string;
+    /** Editing a bean without shots: it can be deleted (D-145). */
+    deletable?: boolean;
     text: BeanFormText;
     /** Today in your time zone, "YYYY-MM-DD": no roast date after it (D-138). */
     today: string;
@@ -36,7 +39,8 @@
   // The form keeps what you typed; the page starts it again ({#key}) when a re-buy is picked.
   let values = $state(untrack(() => ({ ...text })));
 
-  let sheet: 'rebuy' | 'country' | null = $state(null);
+  let sheet: 'rebuy' | 'country' | 'delete' | null = $state(null);
+  let deleting = $state(false);
   let search = $state('');
 
   const ROAST_LEVELS = [
@@ -69,7 +73,7 @@
   <span></span>
 </header>
 
-<form id="bean-form" method="POST" use:enhance>
+<form id="bean-form" class="fields" method="POST" action="?/save" use:enhance>
   {#if mode === 'add'}
     <div class="rebuy">
       <button type="button" class="rebuy-open cn-tap" onclick={() => (sheet = 'rebuy')}>
@@ -271,9 +275,15 @@
   {#each problems as problem (problem)}
     <p class="problem" role="alert">{problem}</p>
   {/each}
-  <button class="cn-btn-primary" form="bean-form">
+  <button class="cn-btn-primary cn-tap-strong" form="bean-form">
     {mode === 'add' ? 'Add bean' : 'Save changes'}
   </button>
+  {#if mode === 'edit' && deletable}
+    <!-- D-145: only a bean without shots can be deleted; a confirmation asks first. -->
+    <button class="cn-btn-quiet cn-tap" type="button" onclick={() => (sheet = 'delete')}
+      >Delete bean</button
+    >
+  {/if}
 </footer>
 
 {#if sheet === 'rebuy'}
@@ -294,6 +304,25 @@
       {:else}
         <p class="soft">No beans yet</p>
       {/each}
+    </form>
+  </BottomSheet>
+{:else if sheet === 'delete'}
+  <!-- D-145: the confirmation sheet, as for a shot (D-116). -->
+  <BottomSheet
+    short
+    label="Delete this bean"
+    closeLabel="Keep the bean"
+    onclose={() => (sheet = null)}
+  >
+    <h2 class="cn-type-heading sheet-title">Delete this bean?</h2>
+    <p class="cn-type-body note">It has no shots yet. This cannot be undone.</p>
+    <form class="confirm" method="POST" action="?/delete" onsubmit={() => (deleting = true)}>
+      <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={deleting}
+        >Delete bean</button
+      >
+      <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (sheet = null)}
+        >Keep it</button
+      >
     </form>
   </BottomSheet>
 {:else if sheet === 'country'}
@@ -354,7 +383,7 @@
     color: var(--ink);
   }
 
-  form {
+  .fields {
     flex: 1;
     min-height: 0;
     display: flex;
@@ -525,6 +554,17 @@
 
   .sheet-title {
     margin: 4px 0 0;
+  }
+
+  .note {
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  .confirm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
   }
 
   .list {

@@ -419,3 +419,62 @@ export function finishBean(db: Db, ownerId: string, beanId: string, now: number)
 export function reopenBean(db: Db, ownerId: string, beanId: string, now: number): boolean {
   return reopen(db, ownerId, beanId, now);
 }
+
+/**
+ * Deletes a bean that has no shots (D-145), for a bag added by mistake; a bean with shots is finished,
+ * never deleted. A recipe kept only by its Brew next mark goes too, with the mark (data-model §4.1), Home
+ * stops pointing at it (D-32), and a later re-buy links to the bag before it instead (D-73).
+ */
+export function deleteBean(
+  db: Db,
+  ownerId: string,
+  beanId: string
+): 'deleted' | 'has_shots' | null {
+  return db.transaction((tx) => {
+    const b = ownBean(tx, ownerId, beanId);
+    if (!b) return null;
+    if (beanHasShots(tx, ownerId, beanId)) return 'has_shots';
+
+    const recipeIds = tx
+      .select({ id: recipe.id })
+      .from(recipe)
+      .where(and(eq(recipe.beanId, beanId), eq(recipe.ownerId, ownerId)))
+      .all()
+      .map((r) => r.id);
+    const state = tx.select().from(appState).where(eq(appState.userId, ownerId)).get();
+    if (state) {
+      const marked = state.brewNextRecipeId !== null && recipeIds.includes(state.brewNextRecipeId);
+      tx.update(appState)
+        .set({
+          brewNextRecipeId: marked ? null : state.brewNextRecipeId,
+          currentBeanId: state.currentBeanId === beanId ? null : state.currentBeanId
+        })
+        .where(eq(appState.userId, ownerId))
+        .run();
+    }
+    for (const id of recipeIds)
+      tx.delete(recipe)
+        .where(and(eq(recipe.id, id), eq(recipe.ownerId, ownerId)))
+        .run();
+    tx.update(bean)
+      .set({ rebuyOfId: b.rebuyOfId })
+      .where(and(eq(bean.rebuyOfId, beanId), eq(bean.ownerId, ownerId)))
+      .run();
+    tx.delete(bean)
+      .where(and(eq(bean.id, beanId), eq(bean.ownerId, ownerId)))
+      .run();
+    return 'deleted';
+  });
+}
+
+/** True when any shot was brewed with this bean (D-145: only a bean without shots can be deleted). */
+export function beanHasShots(db: Queryable, ownerId: string, beanId: string): boolean {
+  return (
+    db
+      .select({ id: shot.id })
+      .from(shot)
+      .innerJoin(recipe, eq(recipe.id, shot.recipeId))
+      .where(and(eq(recipe.beanId, beanId), eq(shot.ownerId, ownerId)))
+      .get() !== undefined
+  );
+}

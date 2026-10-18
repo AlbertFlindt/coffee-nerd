@@ -187,6 +187,9 @@ test('D-130: Edit bean is the form filled in, without "Same as before"', async (
   await expect(page.getByRole('button', { name: /Same as before/ })).toHaveCount(0);
   await expect(page.getByLabel('Name')).toHaveValue('Guji Hambela');
   await expect(page.getByText('2 days ago')).toBeVisible();
+  // D-145: this bag has no shots yet, so it can be deleted.
+  await expect(page.getByRole('button', { name: 'Delete bean' })).toBeVisible();
+  await expectNoPageScroll();
   await page.getByLabel('Bag weight').fill('1,000');
   await page.getByRole('button', { name: 'Save changes' }).click();
   // D-130: back to the bean's page.
@@ -194,6 +197,32 @@ test('D-130: Edit bean is the form filled in, without "Same as before"', async (
   await page.getByRole('link', { name: 'Back to Beans' }).click();
   // D-142: "1,000" is a thousand grams (shown without a separator, like other quantities).
   await expect(page.getByRole('main').locator('.card', { hasText: '1000 g left' })).toHaveCount(1);
+});
+
+test('D-145: a bean without shots can be deleted; one with shots cannot', async () => {
+  const db = new Database(DATABASE, { readonly: true });
+  const [earliest, latest] = (
+    db.prepare("select id from bean where name = 'Guji Hambela' order by created_at").all() as {
+      id: string;
+    }[]
+  ).map((b) => b.id);
+  db.close();
+  await page.goto(`/library/beans/${earliest}/edit`);
+  await expect(page.getByRole('heading', { name: 'Edit bean', level: 1 })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Delete bean' })).toHaveCount(0);
+
+  await page.goto(`/library/beans/${latest}/edit`);
+  await page.getByRole('button', { name: 'Delete bean' }).click();
+  await expect(page.getByRole('heading', { name: 'Delete this bean?' })).toBeVisible();
+  await page.getByRole('button', { name: 'Keep it' }).click();
+  await expect(page.getByRole('heading', { name: 'Delete this bean?' })).toBeHidden();
+  await page.getByRole('button', { name: 'Delete bean' }).click();
+  await page
+    .getByRole('region', { name: 'Delete this bean' })
+    .getByRole('button', { name: 'Delete bean' })
+    .click();
+  await expect(page.getByRole('heading', { name: 'Beans', level: 1 })).toBeVisible();
+  await expect(page.getByRole('main').locator('.card', { hasText: 'Guji Hambela' })).toHaveCount(1);
 });
 
 const earliestGuji = () => page.locator('.card', { hasText: 'Guji Hambela' }).last();
