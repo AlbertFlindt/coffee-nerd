@@ -96,8 +96,43 @@ describe('loadShotForm', () => {
     expect(form.lastShot).toBeNull();
     expect(form.recipes).toEqual([]);
     expect(form.bean).toMatchObject({ id: ids.beanId, name: 'Guji Hambela', process: 'natural' });
-    expect(form.machine.name).toBe('Lelit Bianca');
-    expect(form.grinder).toMatchObject({ name: 'Timemore 064S', dial: { step: 100 } });
+    expect(form.machines.map((m) => m.name)).toEqual(['Lelit Bianca']);
+    expect(form.grinders).toMatchObject([{ name: 'Timemore 064S', dial: { step: 100 } }]);
+  });
+
+  it('D-153: every machine and grinder you can pick, archived ones left out', () => {
+    const add = (kind: 'machine' | 'grinder', name: string, archivedAt: number | null) => {
+      const id = newId(T0);
+      const spec = kind === 'machine' ? REFERENCE.machine.spec : REFERENCE.grinder.spec;
+      db.insert(gear)
+        .values({
+          id,
+          ownerId: ids.userId,
+          kind,
+          name,
+          spec,
+          archivedAt,
+          createdAt: T0,
+          updatedAt: T0
+        })
+        .run();
+      return id;
+    };
+    add('grinder', 'Comandante C40', null);
+    add('machine', 'Old Gaggia', T0);
+    const form = ready(loadShotForm(db, ids.userId));
+    expect(form.machines.map((m) => m.name)).toEqual(['Lelit Bianca']);
+    expect(form.machines[0].features.every((f) => f.enabled)).toBe(true);
+    expect(form.grinders.map((g) => g.name)).toEqual(['Comandante C40', 'Timemore 064S']);
+    // Switching the machine fills new features from My setup (D-38, D-153).
+    expect(form.defaultFeatures).toMatchObject({ temperature: { on: true, value: 93000 } });
+  });
+
+  it('D-154: a basket comes with its dose range for the hint', () => {
+    const form = ready(loadShotForm(db, ids.userId));
+    expect(form.baskets).toEqual([
+      { id: ids.basketId, name: 'VST · 18 g', doseRange: { from: 17000, to: 19000 } }
+    ]);
   });
 
   it('D-03, D-16, D-12: the next shot starts from the last one, and knows the bean’s recipes', () => {

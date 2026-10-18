@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { prefill, type PrefillContext, type RecipeValues } from './prefill';
+import { prefill, reconcileFeatures, type PrefillContext, type RecipeValues } from './prefill';
 import type { FeatureDefinition, MachineSpec } from './schemas';
 
 const BIANCA = 'machine-bianca';
@@ -496,5 +496,29 @@ describe('prefill', () => {
   it('D-02: fails clearly when the machine is unknown', () => {
     expect(() => prefill(context({ machines: {} }))).toThrow(/machine/);
     expect(() => prefill(context({ routines: {} }))).toThrow(/routine/);
+  });
+});
+
+describe('reconcileFeatures', () => {
+  it('D-153: switching the machine keeps the values both machines share and takes the rest from My setup', () => {
+    const lever = {
+      features: [
+        feature('temperature', 'Temperature', true, false, {
+          kind: 'number',
+          unit: '°C',
+          step: 1000
+        }),
+        feature('preinfusion', 'Preinfusion', true, true, { kind: 'phase', step: 1000 })
+      ]
+    };
+    const current = {
+      temperature: { label: 'Temperature', unit: '°C', on: true, value: 91000 },
+      low_bar_end: { label: 'Low bar end', on: true, value: 3000 }
+    };
+    const defaults = { preinfusion: { label: 'Preinfusion', on: true, value: 4000 } };
+    expect(reconcileFeatures(lever, current, defaults)).toEqual({
+      temperature: { label: 'Temperature', unit: '°C', on: true, value: 91000 },
+      preinfusion: { label: 'Preinfusion', on: true, value: 4000 }
+    });
   });
 });

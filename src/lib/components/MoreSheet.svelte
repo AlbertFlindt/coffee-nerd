@@ -70,25 +70,44 @@
     };
   }
 
-  /** What the basket or puck prep picker offers (minimal until the Gear and Puck prep pages, M6–M7). */
+  /** What the basket or puck prep picker offers; each starts with leaving it out (D-155). */
   const choices = $derived(
     picking === 'basket'
-      ? baskets.map((b) => ({
-          id: b.id,
-          name: b.name,
-          chosen: shot.basketId === b.id,
-          pick: () => (shot.basketId = b.id)
-        }))
-      : routines.map((r) => ({
-          id: r.id,
-          name: r.name,
-          chosen: shot.routineId === r.id,
-          pick: () => {
-            // D-76: a routine is used as it is now.
-            shot.routineId = r.id;
-            shot.setup.routine = structuredClone(r.routine);
-          }
-        }))
+      ? [
+          {
+            id: 'none',
+            name: 'No basket',
+            chosen: shot.basketId === null,
+            pick: () => (shot.basketId = null)
+          },
+          ...baskets.map((b) => ({
+            id: b.id,
+            name: b.name,
+            chosen: shot.basketId === b.id,
+            pick: () => (shot.basketId = b.id)
+          }))
+        ]
+      : [
+          {
+            id: 'none',
+            name: 'No puck prep',
+            chosen: shot.routineId === null,
+            pick: () => {
+              shot.routineId = null;
+              shot.setup.routine = null;
+            }
+          },
+          ...routines.map((r) => ({
+            id: r.id,
+            name: r.name,
+            chosen: shot.routineId === r.id,
+            pick: () => {
+              // D-76: a routine is used as it is now.
+              shot.routineId = r.id;
+              shot.setup.routine = structuredClone(r.routine);
+            }
+          }))
+        ]
   );
 
   const routineName = $derived(shot.setup.routine?.name ?? 'None');
@@ -168,6 +187,11 @@
             >
           {/each}
         </div>
+        {#if picking === 'routine'}
+          <p class="nudge">
+            Shots are easier to repeat with a puck prep routine. Add one in Library › Puck prep.
+          </p>
+        {/if}
       {:else}
         {#if temperature}
           <div class="single">
@@ -484,6 +508,13 @@
 
   .changed {
     color: var(--sage);
+  }
+
+  .nudge {
+    margin: var(--space-2) 2px 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ink-muted);
   }
 
   .list {

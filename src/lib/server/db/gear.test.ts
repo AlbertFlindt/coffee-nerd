@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import type { BasketSpec } from '../../domain/schemas';
+import type { BasketSpec, FeatureDefinition, MachineSpec } from '../../domain/schemas';
 import { openDatabase, type Db } from './client';
 import {
   addGear,
@@ -13,10 +13,11 @@ import {
   loadGearPage,
   loadLibrary,
   loadMachineSizes,
-  saveGear
+  saveGear,
+  usedFeatureKeys
 } from './gear';
 import { newId } from './ids';
-import { bean, gear } from './schema';
+import { bean, gear, recipe } from './schema';
 import { REFERENCE, seedReferenceSetup, type SeededIds } from './seed';
 
 const dir = mkdtempSync(join(tmpdir(), 'coffee-nerd-gear-'));
@@ -208,5 +209,91 @@ describe('loadLibrary', () => {
     expect(library.gear).toEqual(['3 items', 'Lelit Bianca · Timemore 064S']);
     expect(library.puckPrep).toEqual(['1 routine · 4 steps', 'In use: Daily routine']);
     expect(library.tags[0]).toMatch(/^\d+ flavor notes$/);
+  });
+});
+
+describe('custom features (D-46, D-151)', () => {
+  const KEY = 'custom-0b6c6a52-6a0e-4a1f-9c55-3f1f0f6d2a11';
+  const bloom: FeatureDefinition = {
+    key: KEY,
+    label: 'Bloom pause',
+    builtIn: false,
+    enabled: true,
+    switchable: true,
+    value: { kind: 'seconds', step: 1000 }
+  };
+  const machine = (features: FeatureDefinition[]) => ({
+    kind: 'machine' as const,
+    name: 'Lelit Bianca',
+    spec: { ...REFERENCE.machine.spec, features } satisfies MachineSpec
+  });
+  const withBloom = () => machine([...REFERENCE.machine.spec.features, bloom]);
+
+  /** A recipe whose setup has the feature: a shot used it. */
+  function useIt(ownerId = ids.userId) {
+    db.insert(recipe)
+      .values({
+        id: newId(T0),
+        ownerId,
+        beanId: ids.beanId,
+        machineId: ids.machineId,
+        grinderId: ids.grinderId,
+        grind: 1600,
+        dose: 18000,
+        setup: {
+          features: { [KEY]: { label: 'Bloom pause', on: true, value: 6000 } },
+          routine: null
+        },
+        fingerprint: 'f',
+        createdAt: T0,
+        updatedAt: T0
+      })
+      .run();
+  }
+
+  it('D-46: adding a custom feature saves it with the machine', () => {
+    saveGear(db, ids.userId, ids.machineId, withBloom(), T0);
+    const spec = loadGear(db, ids.userId, ids.machineId)!.spec as MachineSpec;
+    expect(spec.features.at(-1)).toMatchObject({ key: KEY, label: 'Bloom pause' });
+  });
+
+  it('D-151: a custom feature no shot used can be deleted', () => {
+    saveGear(db, ids.userId, ids.machineId, withBloom(), T0);
+    saveGear(db, ids.userId, ids.machineId, machine(REFERENCE.machine.spec.features), T0);
+    const spec = loadGear(db, ids.userId, ids.machineId)!.spec as MachineSpec;
+    expect(spec.features.map((f) => f.key)).not.toContain(KEY);
+  });
+
+  it('D-151: a custom feature a shot used cannot be deleted', () => {
+    saveGear(db, ids.userId, ids.machineId, withBloom(), T0);
+    useIt();
+    expect(() =>
+      saveGear(db, ids.userId, ids.machineId, machine(REFERENCE.machine.spec.features), T0)
+    ).toThrow(new GearRejected(['spec.features: used']));
+    expect((loadGear(db, ids.userId, ids.machineId)!.spec as MachineSpec).features).toHaveLength(
+      REFERENCE.machine.spec.features.length + 1
+    );
+  });
+
+  it('D-151: a custom feature a shot used can be renamed and switched off', () => {
+    saveGear(db, ids.userId, ids.machineId, withBloom(), T0);
+    useIt();
+    const renamed = { ...bloom, label: 'Bloom', enabled: false };
+    saveGear(
+      db,
+      ids.userId,
+      ids.machineId,
+      machine([...REFERENCE.machine.spec.features, renamed]),
+      T0
+    );
+    const spec = loadGear(db, ids.userId, ids.machineId)!.spec as MachineSpec;
+    expect(spec.features.at(-1)).toMatchObject({ label: 'Bloom', enabled: false });
+  });
+
+  it('D-151, D-60: usedFeatureKeys lists the keys of your recipes only', () => {
+    expect(usedFeatureKeys(db, ids.userId)).toEqual([]);
+    useIt();
+    expect(usedFeatureKeys(db, ids.userId)).toEqual([KEY]);
+    expect(usedFeatureKeys(db, 'someone-else')).toEqual([]);
   });
 });

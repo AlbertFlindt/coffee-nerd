@@ -13,7 +13,7 @@ import { setupDetail } from '../../domain/shot-form';
 import { decimalsFor, formatQuantity } from '../../domain/units';
 import type { Db, Queryable } from './client';
 import { newId } from './ids';
-import { bean, gear, prepStep, routine, shotTag, tag, userSettings } from './schema';
+import { bean, gear, prepStep, recipe, routine, shotTag, tag, userSettings } from './schema';
 
 type Kind = 'machine' | 'grinder' | 'basket';
 
@@ -203,9 +203,35 @@ export function addGear(db: Db, ownerId: string, input: GearInput, now: number):
   return id;
 }
 
+/** Feature keys any of your recipes has in its setup, i.e. features a shot used (D-151). */
+export function usedFeatureKeys(db: Queryable, ownerId: string): string[] {
+  const keys = new Set<string>();
+  for (const { setup } of db
+    .select({ setup: recipe.setup })
+    .from(recipe)
+    .where(eq(recipe.ownerId, ownerId))
+    .all())
+    for (const key of Object.keys(setup.features)) keys.add(key);
+  return [...keys];
+}
+
+/** D-151: a custom feature can be deleted only while no shot has used it. */
+function assertUsedFeaturesKept(db: Queryable, ownerId: string, id: string, spec: MachineSpec) {
+  const existing = loadGear(db, ownerId, id);
+  if (existing?.kind !== 'machine') return;
+  const kept = new Set(spec.features.map((f) => f.key));
+  const dropped = (existing.spec as MachineSpec).features
+    .filter((f) => !f.builtIn && !kept.has(f.key))
+    .map((f) => f.key);
+  if (dropped.length === 0) return;
+  const used = new Set(usedFeatureKeys(db, ownerId));
+  if (dropped.some((key) => used.has(key))) throw new GearRejected(['spec.features: used']);
+}
+
 /** Saves a gear page (D-44, D-48, D-49). The kind never changes; archived gear is not saved (D-148). */
 export function saveGear(db: Db, ownerId: string, id: string, input: GearInput, now: number): void {
   const item = checked(input);
+  if (item.kind === 'machine') assertUsedFeaturesKept(db, ownerId, id, item.spec as MachineSpec);
   const result = db
     .update(gear)
     .set({ name: item.name, spec: item.spec, updatedAt: now })

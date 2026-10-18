@@ -1,7 +1,7 @@
 <script lang="ts">
   // The shot form's bean card (D-14): bean, machine and grinder, the setup summary (D-100) and the recipe
-  // tag (D-16). Tapping it switches the bean (D-94). Started from Brew next, it says so and offers
-  // "Use last shot recipe" (D-43).
+  // tag (D-16). Tapping it switches the bean (D-94); tapping the gear line switches the machine or grinder
+  // (D-153). Started from Brew next, it says so and offers "Use last shot recipe" (D-43).
   import type { Snippet } from 'svelte';
 
   let {
@@ -10,7 +10,8 @@
     summary,
     tag,
     brewNext,
-    onopen
+    onopen,
+    ongear
   }: {
     title: string;
     gear: string;
@@ -19,6 +20,7 @@
     /** The "Use last shot recipe" control, shown when the shot started from Brew next. */
     brewNext?: Snippet;
     onopen: () => void;
+    ongear: () => void;
   } = $props();
 </script>
 
@@ -29,12 +31,14 @@
 {/snippet}
 
 <div class="card" class:compact={!!brewNext}>
-  <button
-    type="button"
-    class="main cn-tap"
-    aria-label="{title}, choose another bean"
-    onclick={onopen}
-  >
+  <div class="main">
+    <!-- The whole card opens the bean list; the gear line on top of it opens the gear list (D-153). -->
+    <button
+      type="button"
+      class="pick cn-tap"
+      aria-label="{title}, choose another bean"
+      onclick={onopen}
+    ></button>
     <span class="icon">
       <svg
         width="22"
@@ -51,8 +55,13 @@
       >
     </span>
     <span class="text">
-      <span class="name">{title}</span>
-      <span class="line">{gear}</span>
+      <span class="name" aria-hidden="true">{title}</span>
+      <button
+        type="button"
+        class="line gear"
+        aria-label="{gear}, choose another machine or grinder"
+        onclick={ongear}>{gear}</button
+      >
       {#if summary}<span class="line">{summary}</span>{/if}
     </span>
     <svg
@@ -66,7 +75,7 @@
       stroke-linecap="round"
       aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg
     >
-  </button>
+  </div>
   {#if brewNext}
     <div class="bottom">
       <span class="status">
@@ -111,16 +120,54 @@
   }
 
   .main {
+    position: relative;
     display: flex;
     align-items: center;
     gap: var(--space-3);
     width: 100%;
+    color: var(--ink);
+    text-align: left;
+  }
+
+  /* The bean button lies under the card's content and takes every tap the gear line does not. */
+  .pick {
+    position: absolute;
+    inset: 0;
     padding: 0;
     border: none;
     border-radius: var(--radius-md);
     background: transparent;
-    color: var(--ink);
+  }
+
+  .main > :not(.pick) {
+    position: relative;
+    pointer-events: none;
+  }
+
+  .pick:active ~ :not(.icon),
+  .pick:active ~ .text .line {
+    color: var(--on-amber);
+  }
+
+  .gear {
+    position: relative;
+    align-self: flex-start;
+    padding: 0;
+    border: none;
+    background: transparent;
     text-align: left;
+    pointer-events: auto;
+  }
+
+  /* A larger tap area around the one-line gear text that stops short of the bean name's middle. */
+  .gear::before {
+    content: '';
+    position: absolute;
+    inset: -9px -8px;
+  }
+
+  .gear:active {
+    color: var(--amber);
   }
 
   .icon {

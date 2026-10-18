@@ -194,7 +194,7 @@ function routineNow(
  * Also used when the machine is switched on the shot form (D-153) or in Edit My setup (D-45).
  */
 export function reconcileFeatures(
-  machine: MachineSpec,
+  machine: Pick<MachineSpec, 'features'>,
   copied: Record<string, FeatureValue>,
   defaults: Record<string, FeatureValue>
 ): Record<string, FeatureValue> {

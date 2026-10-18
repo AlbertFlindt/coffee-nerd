@@ -13,7 +13,14 @@ import {
   type RoutineNow,
   type ShotResult
 } from '../../domain/prefill';
-import type { FeatureDefinition, GrinderSpec, MachineSpec, Taste } from '../../domain/schemas';
+import type {
+  BasketSpec,
+  FeatureDefinition,
+  FeatureValue,
+  GrinderSpec,
+  MachineSpec,
+  Taste
+} from '../../domain/schemas';
 import type { KnownRecipe } from '../../domain/shot-form';
 import type { Thousandths } from '../../domain/units';
 import type { Queryable } from './client';
@@ -40,12 +47,15 @@ export type ShotFormData = {
   bean: BeanChoice;
   /** Open beans for the bean switcher (D-94). */
   openBeans: BeanChoice[];
-  machine: { id: string; name: string; features: FeatureDefinition[] };
-  grinder: { id: string; name: string; dial: GrinderSpec['dial'] };
+  /** Machines and grinders you can pick (D-153), with their switched-on features and dial. */
+  machines: MachineChoice[];
+  grinders: GrinderChoice[];
+  /** My setup's feature values: what a machine switched to on the form starts from (D-38, D-153). */
+  defaultFeatures: Record<string, FeatureValue>;
   /** Names of every machine, grinder and basket, archived ones included, for what a recipe points to. */
   gearNames: Record<string, string>;
-  /** Baskets and routines you can pick (archived ones are left out). */
-  baskets: { id: string; name: string }[];
+  /** Baskets and routines you can pick (archived ones are left out), a basket with its dose range (D-154). */
+  baskets: { id: string; name: string; doseRange?: BasketSpec['doseRange'] }[];
   routines: { id: string; name: string; routine: RoutineNow }[];
   /** This bean's recipes, for matching while the form changes (D-16, D-12). */
   recipes: KnownRecipe[];
@@ -58,6 +68,38 @@ export type ShotFormData = {
   /** Editing a saved shot (D-57, D-113): its id and what it already has besides the recipe. */
   edit?: { shotId: string; taste: Taste; tagIds: string[]; notes: string | null };
 };
+
+export type MachineChoice = { id: string; name: string; features: FeatureDefinition[] };
+export type GrinderChoice = { id: string; name: string; dial: GrinderSpec['dial'] };
+
+type GearRow = typeof gear.$inferSelect;
+
+/**
+ * The machines, grinders and baskets the form offers: the ones not archived, plus the ones in `keep`
+ * (what the shot already uses, even when archived since), sorted by name.
+ */
+function gearChoices(rows: GearRow[], keep: (string | null)[]) {
+  const offered = rows
+    .filter((g) => g.archivedAt === null || keep.includes(g.id))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const of = (kind: GearRow['kind']) => offered.filter((g) => g.kind === kind);
+  return {
+    machines: of('machine').map((g) => ({
+      id: g.id,
+      name: g.name,
+      features: (g.spec as MachineSpec).features.filter((f) => f.enabled)
+    })),
+    grinders: of('grinder').map((g) => ({
+      id: g.id,
+      name: g.name,
+      dial: (g.spec as GrinderSpec).dial
+    })),
+    baskets: of('basket').map((g) => {
+      const { doseRange } = g.spec as BasketSpec;
+      return doseRange ? { id: g.id, name: g.name, doseRange } : { id: g.id, name: g.name };
+    })
+  };
+}
 
 export type ShotFormEmpty = { state: 'empty'; missing: 'setup' | 'bean' };
 
@@ -118,24 +160,14 @@ export function loadShotForm(
   };
   const start = prefill(context);
 
-  const byId = new Map(gearRows.map((g) => [g.id, g]));
-  const machine = byId.get(start.machineId)!;
-  const grinder = byId.get(start.grinderId)!;
   return {
     state: 'ready',
     prefill: start,
     bean: current,
     openBeans,
-    machine: {
-      id: machine.id,
-      name: machine.name,
-      features: (machine.spec as MachineSpec).features.filter((f) => f.enabled)
-    },
-    grinder: { id: grinder.id, name: grinder.name, dial: (grinder.spec as GrinderSpec).dial },
+    ...gearChoices(gearRows, []),
+    defaultFeatures: mySetup.features,
     gearNames: Object.fromEntries(gearRows.map((g) => [g.id, g.name])),
-    baskets: gearRows
-      .filter((g) => g.kind === 'basket' && g.archivedAt === null)
-      .map((g) => ({ id: g.id, name: g.name })),
     routines: routineRows
       .filter((r) => r.archivedAt === null)
       .map((r) => ({ id: r.id, name: r.name, routine: routines[r.id] })),
@@ -187,9 +219,6 @@ export function loadEditShotForm(
   const gearRows = db.select().from(gear).where(eq(gear.ownerId, ownerId)).all();
   const routineRows = db.select().from(routine).where(eq(routine.ownerId, ownerId)).all();
   const routines = routinesNow(db, ownerId, routineRows);
-  const byId = new Map(gearRows.map((g) => [g.id, g]));
-  const machine = byId.get(r.machineId)!;
-  const grinder = byId.get(r.grinderId)!;
   const before = { brewedAt: s.brewedAt, id: s.id };
   const previous = latestShotOfBean(db, ownerId, current.id, before);
   const tagIds = db
@@ -211,16 +240,10 @@ export function loadEditShotForm(
     },
     bean: current,
     openBeans,
-    machine: {
-      id: machine.id,
-      name: machine.name,
-      features: (machine.spec as MachineSpec).features.filter((f) => f.enabled)
-    },
-    grinder: { id: grinder.id, name: grinder.name, dial: (grinder.spec as GrinderSpec).dial },
+    // The shot keeps its own gear, even when archived since (D-113).
+    ...gearChoices(gearRows, [r.machineId, r.grinderId, r.basketId]),
+    defaultFeatures: settings.defaultFeatures,
     gearNames: Object.fromEntries(gearRows.map((g) => [g.id, g.name])),
-    baskets: gearRows
-      .filter((g) => g.kind === 'basket' && (g.archivedAt === null || g.id === r.basketId))
-      .map((g) => ({ id: g.id, name: g.name })),
     routines: routineRows
       .filter((x) => x.archivedAt === null || x.id === r.routineId)
       .map((x) => ({ id: x.id, name: x.name, routine: routines[x.id] })),

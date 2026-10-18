@@ -1,6 +1,12 @@
 // Short texts about gear for the Gear page and the gear pages (D-38, D-48, D-49, D-150). Pure.
 import type { BasketSpec, FeatureDefinition, GrinderSpec, MachineSpec } from './schemas';
-import { decimalsForStep, formatQuantity, formatNumber, type Thousandths } from './units';
+import {
+  decimalsForStep,
+  formatQuantity,
+  formatNumber,
+  toThousandths,
+  type Thousandths
+} from './units';
 
 const MACHINE_TYPE = {
   automatic: 'Automatic',
@@ -115,3 +121,23 @@ export const NEW_GEAR = {
     diameterMm: 58000
   })
 };
+
+const NUMBER = String.raw`\d+(?:[.,]\d+)?`;
+
+/** The number at the start of typed text, "1 s" → 1000; null when there is none (D-46). */
+export function readQuantity(text: string): Thousandths | null {
+  const match = new RegExp(`^\\s*(${NUMBER}|[.,]\\d+)`).exec(text);
+  return match ? toThousandths(match[1]) : null;
+}
+
+/**
+ * The optional range of an own feature, typed "0–30 s" (D-46). Nothing typed is no range ({}); null when
+ * the text is not "low–high" or runs the wrong way round.
+ */
+export function readRange(text: string): { min?: Thousandths; max?: Thousandths } | null {
+  if (text.trim() === '') return {};
+  const match = new RegExp(`^\\s*(${NUMBER})\\s*[–—-]\\s*(${NUMBER})(?:\\s*\\D.*)?$`).exec(text);
+  if (!match) return null;
+  const [min, max] = [toThousandths(match[1]), toThousandths(match[2])];
+  return min <= max ? { min, max } : null;
+}

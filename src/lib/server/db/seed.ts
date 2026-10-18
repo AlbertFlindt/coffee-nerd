@@ -48,7 +48,8 @@ export const REFERENCE = {
       sizeG: 18000,
       type: 'precision',
       shotSize: 'double',
-      diameterMm: 58000
+      diameterMm: 58000,
+      doseRange: { from: 17000, to: 19000 }
     } satisfies BasketSpec
   },
   steps: [

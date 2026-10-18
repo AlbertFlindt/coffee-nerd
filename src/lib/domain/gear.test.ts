@@ -6,6 +6,8 @@ import {
   grinderSummary,
   machineSummary,
   NEW_GEAR,
+  readQuantity,
+  readRange,
   trimmed
 } from './gear';
 import { basketSpecSchema, grinderSpecSchema, machineSpecSchema } from './schemas';
@@ -120,5 +122,31 @@ describe('trimmed', () => {
     expect(trimmed(58000, 'mm')).toBe('58 mm');
     expect(trimmed(58500, 'mm')).toBe('58.5 mm');
     expect(trimmed(63250)).toBe('63.25');
+  });
+});
+
+describe('readQuantity', () => {
+  it('D-46: reads the number at the start of what was typed, with or without a unit', () => {
+    expect(readQuantity('1 s')).toBe(1000);
+    expect(readQuantity('0,5')).toBe(500);
+    expect(readQuantity(' 2.25 ml ')).toBe(2250);
+    expect(readQuantity('s')).toBeNull();
+    expect(readQuantity('')).toBeNull();
+  });
+});
+
+describe('readRange', () => {
+  it('D-46: an empty range is optional, a typed one runs from low to high', () => {
+    expect(readRange('')).toEqual({});
+    expect(readRange('  ')).toEqual({});
+    expect(readRange('0–30 s')).toEqual({ min: 0, max: 30000 });
+    expect(readRange('0-30')).toEqual({ min: 0, max: 30000 });
+    expect(readRange('0.5 – 2.5 bar')).toEqual({ min: 500, max: 2500 });
+  });
+
+  it('D-46: a range that is not low to high, or not a range, is refused', () => {
+    expect(readRange('30–0')).toBeNull();
+    expect(readRange('30')).toBeNull();
+    expect(readRange('abc')).toBeNull();
   });
 });
