@@ -86,6 +86,7 @@
     flex: none;
   }
 
+  /* Touch targets of at least 44 px (CLAUDE.md); icon and label stay centred. */
   .bar a {
     min-height: var(--touch-min);
     justify-content: center;

@@ -153,6 +153,20 @@ export function editShot(
       .where(and(eq(shot.id, shotId), eq(shot.ownerId, ownerId)))
       .get();
     if (!existing) throw new ShotRejected(['shot: not found']);
+    // D-113: a shot keeps its own bean (even when finished since) or moves to an open one.
+    const ownBean = tx
+      .select({ beanId: recipe.beanId })
+      .from(recipe)
+      .where(eq(recipe.id, existing.recipeId))
+      .get()!.beanId;
+    if (input.beanId !== ownBean) {
+      const target = tx
+        .select({ status: bean.status })
+        .from(bean)
+        .where(and(eq(bean.id, input.beanId), eq(bean.ownerId, ownerId)))
+        .get();
+      if (target?.status !== 'open') throw new ShotRejected(['bean: not open']);
+    }
 
     const setup = validate(tx, ownerId, input);
     const tagIds = [...input.tagIds, ...addTags(tx, ownerId, input.newTagNames ?? [], now)];

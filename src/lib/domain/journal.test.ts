@@ -166,6 +166,11 @@ describe('comparisonText', () => {
     expect(comparisonText('score', -1)).toBe('Within normal range');
   });
 
+  it('D-110: just over one σ, shown as 1.0σ, is still within normal range', () => {
+    expect(comparisonText('time', -1.04)).toBe('Within normal range');
+    expect(comparisonText('score', 1.05)).toBe('1.1σ higher than usual');
+  });
+
   it('D-110: further away, time is faster or slower than usual', () => {
     expect(comparisonText('time', -1.71)).toBe('1.7σ faster than usual');
     expect(comparisonText('time', 2.04)).toBe('2.0σ slower than usual');

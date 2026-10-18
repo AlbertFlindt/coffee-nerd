@@ -128,10 +128,12 @@ export function compareWithRecipe(
 /** "Within normal range" within one σ; further away "1.7σ faster than usual" and the like (D-110). */
 export function comparisonText(measure: 'time' | 'score', sigmas: number | null): string | null {
   if (sigmas === null) return null;
-  if (Math.abs(sigmas) <= 1) return 'Within normal range';
+  // Compared as shown, to one decimal, so a sentence never reads "1.0σ faster than usual".
+  const shown = Math.round(Math.abs(sigmas) * 10) / 10;
+  if (shown <= 1) return 'Within normal range';
   const words =
     measure === 'time' ? (sigmas < 0 ? 'faster' : 'slower') : sigmas < 0 ? 'lower' : 'higher';
-  return `${Math.abs(sigmas).toFixed(1)}σ ${words} than usual`;
+  return `${shown.toFixed(1)}σ ${words} than usual`;
 }
 
 /** A recipe in the Journal's recipe filter (D-112): "1.6 · 18.0 g · Daily routine · 3 shots". */

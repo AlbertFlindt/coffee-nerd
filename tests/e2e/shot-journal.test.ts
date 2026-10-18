@@ -210,6 +210,7 @@ test('D-57: back returns to the Journal', async () => {
 
 test('D-57, D-113: Edit opens the shot form on the shot; "Save changes" returns to it', async () => {
   await rows().first().click();
+  const brewed = await page.getByText(/^Today \d\d:\d\d$/).textContent();
   await page.getByRole('link', { name: 'Edit' }).click();
   await expect(page.getByRole('heading', { name: 'Edit shot' })).toBeVisible();
   // The shot's own taste stays (D-11 is about new shots).
@@ -222,6 +223,8 @@ test('D-57, D-113: Edit opens the shot form on the shot; "Save changes" returns 
   await page.getByRole('button', { name: 'Save changes' }).click();
 
   await expect(page.getByRole('heading', { name: 'Shot', level: 1 })).toBeVisible();
+  // D-113: the brewing time stays as it was.
+  await expect(page.getByText(/^Today \d\d:\d\d$/)).toHaveText(brewed!);
   const values = page.getByRole('region', { name: 'Core values' });
   await expect(values).toContainText('1.5');
   await expect(page.getByRole('region', { name: 'Taste' })).toContainText('Dark chocolate');

@@ -28,8 +28,10 @@
   let score: number | null = $state(null);
   let pressing = false;
   let rateForm: HTMLFormElement | undefined = $state();
+  let rateFailed = $state(false);
   const openRate = (shot: (typeof journal.shots)[number]) => {
     score = null;
+    rateFailed = false;
     rating = shot;
   };
   const submitScore = async () => {
@@ -194,9 +196,11 @@
       method="POST"
       action="?/rate"
       use:enhance={() =>
-        async ({ update }) => {
+        async ({ result, update }) => {
           await update();
-          rating = null;
+          // Closes only once the score is saved; otherwise the sheet stays with a message.
+          if (result.type === 'success') rating = null;
+          else rateFailed = true;
         }}
     >
       <input type="hidden" name="shotId" value={rating.id} />
@@ -220,6 +224,10 @@
         />
       </div>
     </form>
+    {#if rateFailed}
+      <!-- Not designed yet (docs/open-items.md). -->
+      <p class="problem" role="alert">The score could not be saved. Nothing was changed.</p>
+    {/if}
   </BottomSheet>
 {/if}
 
@@ -295,6 +303,12 @@
   .empty {
     margin: 0;
     color: var(--ink-muted);
+  }
+
+  .problem {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink-soft);
   }
 
   .sheet-title {
