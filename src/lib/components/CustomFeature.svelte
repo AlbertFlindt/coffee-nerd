@@ -131,6 +131,16 @@
     return Math.min(max ?? Infinity, Math.max(min ?? 0, s * 6));
   });
   const previewName = $derived(name.trim() || 'Your feature');
+  // D-160, D-162: what a used feature can still change, by its kind.
+  const usedNote = $derived(
+    kind === 'number'
+      ? 'its unit stays; you can rename it, switch it off or change its step and range'
+      : kind === 'seconds'
+        ? 'you can rename it, switch it off or change its step and range'
+        : kind === 'choice'
+          ? 'you can rename it, switch it off or add options'
+          : 'you can rename it or switch it off'
+  );
   const previewOption = $derived(labels.find((l) => l !== '') ?? '—');
 </script>
 
@@ -178,6 +188,7 @@
             plain
             autocomplete="off"
             placeholder="e.g. ml"
+            readonly={used}
             bind:value={unit}
           />
         {:else}
@@ -291,7 +302,8 @@
     {#if editing && !used}
       <button type="button" class="cn-btn-quiet cn-tap" onclick={ondelete}>Delete feature</button>
     {:else if editing}
-      <p class="in-use">Used by shots · you can rename it or switch it off</p>
+      <!-- D-160, D-162: a used feature keeps its kind, unit and options. -->
+      <p class="in-use">Used by shots · {usedNote}</p>
     {/if}
   </div>
 </BottomSheet>

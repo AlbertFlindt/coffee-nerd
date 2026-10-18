@@ -26,7 +26,7 @@ describe('gearProblems', () => {
 
   it('D-151: a feature that shots have used cannot be deleted, in plain words', () => {
     expect(gearProblems(['spec.features: used'], 'machine')).toEqual([
-      'A feature that shots have used cannot be deleted, change its kind or lose an option'
+      'A feature that shots have used cannot be deleted, change its kind or unit, or lose an option'
     ]);
     expect(gearProblems(['spec.features.5.label: Too small'], 'machine')).toEqual([
       'Each feature needs a name, and names must differ'

@@ -416,6 +416,14 @@ test('D-46, D-02: your own feature appears on More › Setup', async () => {
   const more = page.getByRole('region', { name: 'More', exact: true });
   await expect(more.getByRole('switch', { name: 'Bloom pause' })).toBeVisible();
 
+  // D-161: Edit My setup shows it too, so a new bean can start with it.
+  await page.goto('/library/gear/setup');
+  await expect(page.getByRole('switch', { name: 'Bloom pause' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Bloom pause plus 1 s' })).toHaveCount(0);
+  await page.getByRole('switch', { name: 'Bloom pause' }).click();
+  await expect(page.getByRole('button', { name: 'Bloom pause plus 1 s' })).toBeVisible();
+  await expectNoPageScroll();
+
   // No shot used it, so it can be deleted again (D-151), leaving the reference setup as it was.
   await page.goto('/library/gear');
   await page.getByRole('link', { name: /^Lelit Bianca/ }).click();
