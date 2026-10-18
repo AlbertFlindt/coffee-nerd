@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  beanInputSchema,
   basketSpecSchema,
   featureDefinitionSchema,
   gearSchema,
@@ -463,5 +464,50 @@ describe('taste', () => {
     ]) {
       expect(tasteSchema.safeParse(bad).success, JSON.stringify(bad)).toBe(false);
     }
+  });
+});
+
+describe('beanInputSchema', () => {
+  const bean = {
+    name: 'Guji Hambela',
+    roaster: 'Nordlys Roasters',
+    countryCode: 'ET',
+    region: 'Guji',
+    variety: null,
+    process: 'natural',
+    altitudeMinM: 1900,
+    altitudeMaxM: 2100,
+    roastLevel: 'light',
+    roastDate: '2026-10-14',
+    bagWeight: 250000,
+    rebuyOfId: null
+  };
+
+  it('D-41: a bean with name and roast date; everything else optional', () => {
+    expect(beanInputSchema.safeParse(bean).success).toBe(true);
+    const bare = {
+      ...bean,
+      roaster: null,
+      countryCode: null,
+      region: null,
+      process: null,
+      altitudeMinM: null,
+      altitudeMaxM: null,
+      roastLevel: null,
+      bagWeight: null
+    };
+    expect(beanInputSchema.safeParse(bare).success).toBe(true);
+  });
+
+  it('D-41: name and roast date are required', () => {
+    expect(beanInputSchema.safeParse({ ...bean, name: ' ' }).success).toBe(false);
+    expect(beanInputSchema.safeParse({ ...bean, roastDate: '' }).success).toBe(false);
+    expect(beanInputSchema.safeParse({ ...bean, roastDate: '2026-02-30' }).success).toBe(false);
+  });
+
+  it('D-41: a country from the list, altitude low to high, a positive bag weight (D-35)', () => {
+    expect(beanInputSchema.safeParse({ ...bean, countryCode: 'XX' }).success).toBe(false);
+    expect(beanInputSchema.safeParse({ ...bean, altitudeMinM: 2200 }).success).toBe(false);
+    expect(beanInputSchema.safeParse({ ...bean, bagWeight: 0 }).success).toBe(false);
   });
 });
