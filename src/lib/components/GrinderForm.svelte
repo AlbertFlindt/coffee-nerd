@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The grinder page (screen 15, D-48, D-79, D-147, D-158): name, type, burrs, burr size, and how the dial
+  // The grinder page (screen 15, D-48, D-79, D-147, D-158, D-159): name, type, burrs, burr size, and how the dial
   // works, with a preview of the shot form's Grind card so you see what the settings do.
   import { untrack } from 'svelte';
   import GearFormShell from '#lib/components/GearFormShell.svelte';
@@ -31,8 +31,6 @@
   let nameValue = $state(untrack(() => name));
   let value: GrinderSpec = $state(untrack(() => structuredClone(spec ?? NEW_GEAR.grinder())));
 
-  /** The steps a tap can move by (D-48), in thousandths. */
-  const STEPS: Thousandths[] = [10, 50, 100, 250, 500, 1000];
   const BURR_STEP = 500;
   const BURR_START = 58000;
   const PREVIEW_VALUE = 1600;
@@ -63,16 +61,16 @@
     );
   }
 
-  const stepIndex = $derived(
-    STEPS.reduce(
-      (best, s, i) =>
-        Math.abs(s - value.dial.step) < Math.abs(STEPS[best] - value.dial.step) ? i : best,
-      0
-    )
-  );
-  function moveStep(by: 1 | -1) {
-    const next = STEPS[Math.min(STEPS.length - 1, Math.max(0, stepIndex + by))];
-    value.dial.step = next;
+  // D-159: the step interval is typed; any positive number is how far − or + moves.
+  let step = $state(untrack(() => formatNumber(value.dial.step, decimalsForStep(value.dial.step))));
+  function readStep() {
+    try {
+      const typed = toThousandths(step);
+      if (typed > 0) value.dial.step = typed;
+    } catch {
+      // Not a number: keep the previous step.
+    }
+    step = formatNumber(value.dial.step, decimalsForStep(value.dial.step));
   }
 
   let finest = $state(
@@ -188,30 +186,15 @@
   </fieldset>
 
   <div class="group">
-    <div class="cn-row row steprow">
-      <div class="label">
-        <span class="cn-row__label">Step per tap</span>
-        <span class="cn-caption">How much − or + moves</span>
-      </div>
-      <button
-        type="button"
-        class="cn-row__btn cn-tap"
-        aria-label="Smaller step"
-        disabled={stepIndex === 0}
-        onclick={() => moveStep(-1)}>−</button
-      >
-      <span class="cn-row__value stepval"
-        >{formatNumber(value.dial.step, decimalsForStep(value.dial.step))}</span
-      >
-      <button
-        type="button"
-        class="cn-row__btn cn-tap"
-        aria-label="Larger step"
-        disabled={stepIndex === STEPS.length - 1}
-        onclick={() => moveStep(1)}>+</button
-      >
-    </div>
     <div class="range">
+      <TextField
+        label="Step interval"
+        id="grinder-step"
+        inputmode="decimal"
+        autocomplete="off"
+        bind:value={step}
+        onchange={readStep}
+      />
       <TextField
         label="Finest"
         id="grinder-min"
@@ -229,6 +212,7 @@
         onchange={() => read('coarsest')}
       />
     </div>
+    <p class="cn-caption note">Step interval is how much − or + moves the grind.</p>
   </div>
 
   <section aria-label="Preview" class="preview-section">
@@ -296,23 +280,7 @@
     background: var(--surface);
   }
 
-  .steprow {
-    border-radius: 0;
-  }
-
-  .label {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
   .val {
-    font-size: 18px;
-  }
-
-  .stepval {
-    width: 60px;
     font-size: 18px;
   }
 
@@ -329,10 +297,6 @@
   .small {
     font-size: 14px;
     font-weight: 500;
-  }
-
-  .cn-row__btn:disabled {
-    opacity: 0.4;
   }
 
   .heading {
@@ -380,9 +344,6 @@
   .group {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    border-radius: var(--radius-md);
-    overflow: hidden;
   }
 
   .group :global(.field) {
@@ -391,8 +352,15 @@
 
   .range {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 2px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .note {
+    margin: 4px 2px 0;
+    line-height: 1.4;
   }
 
   .preview-section {

@@ -60,6 +60,8 @@ describe('migration 0003_basket_brand_size', () => {
     );
     add.run('a', 'VST 18 g');
     add.run('b', 'Stock double');
+    add.run('c', 'IMS E61 18.5 g');
+    add.run('d', 'Gaggia E61 g');
     const migration = readFileSync(
       join(process.cwd(), 'drizzle/0003_basket_brand_size.sql'),
       'utf8'
@@ -72,7 +74,13 @@ describe('migration 0003_basket_brand_size', () => {
     }[];
     expect(rows.map((r) => [r.name, JSON.parse(r.spec)])).toEqual([
       ['VST · 18 g', { type: 'precision', shotSize: 'double', brand: 'VST', sizeG: 18000 }],
-      ['Stock double', { type: 'precision', shotSize: 'double', brand: 'Stock double' }]
+      ['Stock double', { type: 'precision', shotSize: 'double', brand: 'Stock double' }],
+      // A brand that ends in digits keeps them; only a separate size is split off.
+      [
+        'IMS E61 · 18.5 g',
+        { type: 'precision', shotSize: 'double', brand: 'IMS E61', sizeG: 18500 }
+      ],
+      ['Gaggia E61 g', { type: 'precision', shotSize: 'double', brand: 'Gaggia E61 g' }]
     ]);
     // Running it again changes nothing.
     for (const statement of migration.split('--> statement-breakpoint')) raw.exec(statement);

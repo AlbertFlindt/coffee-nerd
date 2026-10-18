@@ -16,4 +16,11 @@ describe('gearProblems', () => {
       'Brand is required'
     ]);
   });
+
+  it('D-150, D-159: a size or step interval of 0 is named', () => {
+    expect(gearProblems(['spec.sizeG: Too small', 'spec.dial.step: Too small'], 'basket')).toEqual([
+      'Size must be more than 0',
+      'The step interval must be more than 0'
+    ]);
+  });
 });

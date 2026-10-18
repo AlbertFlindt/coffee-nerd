@@ -7,6 +7,8 @@ import { GearRejected, type GearInput } from '#lib/server/db/gear.ts';
 const PROBLEM: [RegExp, string][] = [
   [/^name/, 'Name is required'],
   [/^spec\.brand/, 'Brand is required'],
+  [/^spec\.sizeG/, 'Size must be more than 0'],
+  [/^spec\.dial\.step/, 'The step interval must be more than 0'],
   [/^spec\.dial/, 'Finest and coarsest must differ'],
   [/^spec\.doseRange/, 'The dose range must run from low to high'],
   [/^spec\.features/, 'Each feature needs a name, and names must differ'],

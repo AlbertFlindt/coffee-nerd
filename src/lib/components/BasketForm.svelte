@@ -62,7 +62,9 @@
       return;
     }
     try {
-      value.sizeG = toThousandths(size);
+      // "18 g" and "18g" read as 18; zero or less is not a size.
+      const typed = toThousandths(size.trim().replace(/\s*g$/i, ''));
+      if (typed > 0) value.sizeG = typed;
     } catch {
       // Not a number: keep the previous size.
     }
@@ -120,7 +122,7 @@
       label="Size"
       id="basket-size"
       inputmode="decimal"
-      placeholder="e.g. 18 g"
+      placeholder="e.g. 18"
       autocomplete="off"
       bind:value={size}
       onchange={readSize}

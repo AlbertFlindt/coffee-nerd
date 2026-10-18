@@ -174,11 +174,15 @@ export function loadGear(db: Queryable, ownerId: string, id: string): GearItem |
 
 /** The input checked against its kind's schema (D-44, D-48, D-49); a basket's name comes from it (D-150). */
 function checked(input: GearInput): { kind: Kind; name: string; spec: GearItem['spec'] } {
-  const name = input.kind === 'basket' ? basketName(input.spec) : input.name;
+  // A basket's name is built after the check, from its trimmed brand and size; until then it only has to
+  // pass the name rule, which a missing brand reports instead.
+  const name = input.kind === 'basket' ? 'basket' : input.name;
   const parsed = gearSchema.safeParse({ kind: input.kind, name, spec: input.spec });
   if (!parsed.success)
     throw new GearRejected(parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`));
-  return parsed.data;
+  return parsed.data.kind === 'basket'
+    ? { ...parsed.data, name: basketName(parsed.data.spec) }
+    : parsed.data;
 }
 
 /** Adds a machine, grinder or basket (D-147). */
@@ -199,13 +203,20 @@ export function addGear(db: Db, ownerId: string, input: GearInput, now: number):
   return id;
 }
 
-/** Saves a gear page (D-44, D-48, D-49). The kind never changes. */
+/** Saves a gear page (D-44, D-48, D-49). The kind never changes; archived gear is not saved (D-148). */
 export function saveGear(db: Db, ownerId: string, id: string, input: GearInput, now: number): void {
   const item = checked(input);
   const result = db
     .update(gear)
     .set({ name: item.name, spec: item.spec, updatedAt: now })
-    .where(and(eq(gear.id, id), eq(gear.ownerId, ownerId), eq(gear.kind, item.kind)))
+    .where(
+      and(
+        eq(gear.id, id),
+        eq(gear.ownerId, ownerId),
+        eq(gear.kind, item.kind),
+        isNull(gear.archivedAt)
+      )
+    )
     .run();
   if (result.changes === 0) throw new GearRejected(['gear: not found']);
 }

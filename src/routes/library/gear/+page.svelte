@@ -82,7 +82,7 @@
         <h2 class="setup-name">My setup</h2>
         <span class="muted">Starting point for new beans</span>
       </div>
-      <span class="edit later" aria-disabled="true">Edit</span>
+      <span class="edit later">Edit<span class="sr">, not available yet</span></span>
     </div>
     {#if page.mySetup}
       <div class="grid">
@@ -213,6 +213,14 @@
     color: var(--ink);
     font-size: 14px;
     font-weight: 600;
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
 
   .later {

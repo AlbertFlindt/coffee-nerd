@@ -80,7 +80,7 @@
     {@render chevron()}
   </a>
   <!-- D-156: Puck prep and Tags arrive in M7; until then their rows are dimmed and do nothing. -->
-  <div class="door later" aria-disabled="true">
+  <div class="door later">
     <span class="tile"
       ><svg
         width="24"
@@ -102,9 +102,10 @@
       ></span
     >
     {@render text('Puck prep', library.puckPrep)}
+    <span class="sr">Not available yet</span>
     {@render chevron()}
   </div>
-  <div class="door later" aria-disabled="true">
+  <div class="door later">
     <span class="tile"
       ><svg
         width="24"
@@ -120,6 +121,7 @@
       ></span
     >
     {@render text('Tags', library.tags)}
+    <span class="sr">Not available yet</span>
     {@render chevron()}
   </div>
 </main>
@@ -164,6 +166,14 @@
     background: var(--surface);
     color: var(--ink);
     text-decoration: none;
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
 
   .later {

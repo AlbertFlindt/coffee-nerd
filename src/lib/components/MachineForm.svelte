@@ -33,7 +33,6 @@
   ] as const;
 
   const GROUP_STEP = 500; // D-79: 0.5 mm
-  const groupSize = $derived(trimmed(spec.groupSizeMm ?? 58000));
 
   function detail({ value }: FeatureDefinition): string {
     switch (value.kind) {
@@ -51,7 +50,12 @@
   }
 
   function stepGroup(direction: '+' | '-') {
-    spec.groupSizeMm = applyStep(spec.groupSizeMm ?? 58000, GROUP_STEP, direction, {
+    // Not set yet: the first tap starts at the most common size (D-158).
+    if (spec.groupSizeMm === undefined) {
+      spec.groupSizeMm = 58000;
+      return;
+    }
+    spec.groupSizeMm = applyStep(spec.groupSizeMm, GROUP_STEP, direction, {
       min: GROUP_STEP
     });
   }
@@ -103,7 +107,7 @@
       </div>
     {/each}
     <!-- Not built yet: a later pull request adds the sheet for your own feature (D-46). -->
-    <button type="button" class="add" aria-disabled="true">
+    <button type="button" class="add" aria-disabled="true" aria-describedby="add-feature-later">
       <svg
         width="18"
         height="18"
@@ -114,6 +118,7 @@
         stroke-linecap="round"
         aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg
       >Add your own feature
+      <span id="add-feature-later" class="sr">Not available yet</span>
     </button>
   </div>
 
@@ -125,7 +130,11 @@
       aria-label="Group size smaller"
       onclick={() => stepGroup('-')}>−</button
     >
-    <span class="value">{groupSize}<span class="unit">&nbsp;mm</span></span>
+    <span class="value">
+      {#if spec.groupSizeMm === undefined}<span class="unset">Not set</span>{:else}{trimmed(
+          spec.groupSizeMm
+        )}<span class="unit">&nbsp;mm</span>{/if}
+    </span>
     <button
       type="button"
       class="step cn-tap"
@@ -262,6 +271,20 @@
     text-align: center;
     font-size: 18px;
     font-weight: 600;
+  }
+
+  .unset {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-muted);
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
 
   .unit {

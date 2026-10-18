@@ -87,6 +87,17 @@ describe('addGear and saveGear', () => {
       kind: 'basket',
       name: 'Lelit · 18 g'
     });
+    // The name is built from the checked brand, so spaces around it never reach the name.
+    const spaced = addGear(
+      db,
+      ids.userId,
+      {
+        kind: 'basket',
+        spec: { ...stock, brand: '  VST ', sizeG: 20000 }
+      },
+      T0
+    );
+    expect(db.select().from(gear).where(eq(gear.id, spaced)).get()?.name).toBe('VST · 20 g');
   });
 
   it('D-44: a machine is saved with its name and spec, checked first', () => {
@@ -147,6 +158,14 @@ describe('archiveGear', () => {
     expect(archiveGear(db, ids.userId, id, T0)).toBe('archived');
     expect(db.select().from(gear).where(eq(gear.id, id)).get()?.archivedAt).toBe(T0);
     expect(loadGear(db, ids.userId, id)).toMatchObject({ archived: true });
+  });
+
+  it('D-148: archived gear is no longer saved from its page', () => {
+    const id = addGear(db, ids.userId, { kind: 'basket', spec: stock }, T0);
+    archiveGear(db, ids.userId, id, T0);
+    expect(() =>
+      saveGear(db, ids.userId, id, { kind: 'basket', spec: { ...stock, brand: 'Later' } }, T0)
+    ).toThrow(GearRejected);
   });
 
   it('D-83: an item My setup uses is not archived', () => {

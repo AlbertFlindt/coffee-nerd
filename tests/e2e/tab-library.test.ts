@@ -297,8 +297,10 @@ test('Library, D-50, D-156: four doors; Puck prep and Tags wait for M7', async (
   await expect(page.getByText('The nerdy basement')).toBeVisible();
   await expect(page.getByRole('link', { name: /^Beans .*open/ })).toBeVisible();
   await expect(page.getByRole('link', { name: /^Gear .*items/ })).toBeVisible();
-  for (const name of ['Puck prep', 'Tags'])
-    await expect(page.locator('[aria-disabled="true"]', { hasText: name })).toBeVisible();
+  for (const name of ['Puck prep', 'Tags']) {
+    await expect(page.getByRole('link', { name: new RegExp(`^${name}`) })).toHaveCount(0);
+    await expect(page.locator('.door', { hasText: name })).toContainText('Not available yet');
+  }
   await expectNoPageScroll();
   await screenshot('Library');
 });
@@ -345,8 +347,16 @@ test('GrinderDetail, D-48: the dial and its preview', async () => {
   await expect(page.getByRole('heading', { name: 'Grinder', level: 1 })).toBeVisible();
   await expect(page.getByText('Shot form › Grind')).toBeVisible();
   await expect(page.getByText(/Range 0\.0–16\.0/)).toBeVisible();
+  await expect(page.getByLabel('Step interval')).toHaveValue('0.1');
   await expectNoPageScroll();
   await screenshot('GrinderDetail');
+  // D-159: any typed step interval is what − and + move by.
+  await page.getByLabel('Step interval').fill('0.25');
+  await page.getByLabel('Step interval').blur();
+  await expect(page.locator('.cn-step__amt').first()).toHaveText('0.25');
+  await page.getByLabel('Step interval').fill('0');
+  await page.getByLabel('Step interval').blur();
+  await expect(page.getByLabel('Step interval')).toHaveValue('0.25');
   await page.getByRole('link', { name: 'Back to Gear' }).click();
 });
 
