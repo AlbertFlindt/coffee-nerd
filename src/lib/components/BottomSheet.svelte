@@ -10,8 +10,16 @@
     label,
     closeLabel,
     onclose,
+    short = false,
     children
-  }: { label: string; closeLabel: string; onclose: () => void; children: Snippet } = $props();
+  }: {
+    label: string;
+    closeLabel: string;
+    onclose: () => void;
+    /** As tall as its content, for a sheet with one control (the Rate sheet, D-111). */
+    short?: boolean;
+    children: Snippet;
+  } = $props();
 
   /** Pixels dragged down past which letting go closes the sheet; shorter drags spring back. */
   const CLOSE_AFTER = 80;
@@ -55,6 +63,7 @@
     bind:this={sheet}
     class="cn-sheet sheet"
     class:dragging={dragFrom !== null}
+    class:short
     aria-label={label}
     style:transform={dragged > 0 ? `translateY(${dragged}px)` : undefined}
     transition:fly={{ y: sheet?.offsetHeight ?? 600, duration, easing: cubicOut }}
@@ -100,6 +109,10 @@
     bottom: 0;
     overflow: hidden;
     transition: transform 200ms ease-out;
+  }
+
+  .sheet.short {
+    top: auto;
   }
 
   .sheet.dragging {

@@ -24,6 +24,8 @@ export type JournalShot = {
   balance: number | null;
   /** The recipe tag as it was when the shot was brewed (D-16): reused N× before it, or new. */
   recipeTag: RecipeMatch;
+  /** The score of the recipe's latest rated shot before this one, the faint marker of the Rate sheet (D-12). */
+  previousScore: number | null;
 };
 
 export type Journal = {
@@ -97,7 +99,8 @@ export function loadJournal(
         time: r.time,
         score: r.score,
         balance: r.balance,
-        recipeTag: tags.get(r.id)!
+        recipeTag: tags.get(r.id)!.tag,
+        previousScore: tags.get(r.id)!.previousScore
       })),
     beans,
     beanId,
@@ -224,22 +227,22 @@ function before(a: { id: string; brewedAt: number }, b: { id: string; brewedAt: 
 }
 
 /**
- * The recipe tag of each shot at the time it was brewed (D-16): "Recipe reused N×" with N the recipe's
+ * The recipe tag of each shot at the time it was brewed (D-16), and its recipe's last score before it (D-12): "Recipe reused N×" with N the recipe's
  * earlier shots, or "New recipe" for its first. What changed is not named here: that compares with the
  * shot before it on the form (D-81), and the Journal shows "New recipe" alone.
  */
 function recipeTags(
-  newestFirst: readonly { id: string; recipeId: string }[]
-): Map<string, RecipeMatch> {
-  const seen = new Map<string, number>();
-  const tags = new Map<string, RecipeMatch>();
+  newestFirst: readonly { id: string; recipeId: string; score: number | null }[]
+): Map<string, { tag: RecipeMatch; previousScore: number | null }> {
+  const seen = new Map<string, { count: number; lastScore: number | null }>();
+  const tags = new Map<string, { tag: RecipeMatch; previousScore: number | null }>();
   for (const row of [...newestFirst].reverse()) {
-    const earlier = seen.get(row.recipeId) ?? 0;
-    tags.set(
-      row.id,
-      earlier === 0 ? { kind: 'new', changes: [] } : { kind: 'reused', shotCount: earlier }
-    );
-    seen.set(row.recipeId, earlier + 1);
+    const { count, lastScore } = seen.get(row.recipeId) ?? { count: 0, lastScore: null };
+    tags.set(row.id, {
+      tag: count === 0 ? { kind: 'new', changes: [] } : { kind: 'reused', shotCount: count },
+      previousScore: lastScore
+    });
+    seen.set(row.recipeId, { count: count + 1, lastScore: row.score ?? lastScore });
   }
   return tags;
 }

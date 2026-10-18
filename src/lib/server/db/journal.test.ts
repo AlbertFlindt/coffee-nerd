@@ -116,6 +116,20 @@ describe('loadJournal', () => {
     ]);
   });
 
+  it('D-12, D-111: each row knows its recipe’s last score before it', () => {
+    const unrated = { score: null, balance: null, body: null, sweetness: null, aftertaste: null };
+    save(shotAt(T0 - 3 * DAY)); // 8
+    save(shotAt(T0 - 2 * DAY, { taste: unrated }));
+    save(shotAt(T0 - DAY, { grind: 1500, taste: unrated })); // another recipe
+    save(shotAt(T0 - MINUTE, { taste: unrated }));
+    expect(loadJournal(db, ids.userId, {}, T0).shots.map((s) => s.previousScore)).toEqual([
+      8,
+      null,
+      8,
+      null
+    ]);
+  });
+
   it('D-54: "9 shots this week" counts from Monday, in the user’s time zone', () => {
     save(shotAt(T0 - MINUTE)); // Saturday
     save(shotAt(Date.UTC(2026, 9, 11, 22, 30))); // Monday 00:30 in Copenhagen

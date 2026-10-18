@@ -414,6 +414,27 @@ function finishBeanIfUsedUp(
   return true;
 }
 
+/**
+ * The Journal's Rate sheet (D-111): sets only the score of one shot. True when the shot was found.
+ * The recipe does not change: the score is a result, not part of the recipe (D-13).
+ */
+export function rateShot(
+  db: Db,
+  ownerId: string,
+  shotId: string,
+  score: number,
+  now: number
+): boolean {
+  if (!tasteSchema.shape.score.safeParse(score).success)
+    throw new ShotRejected(['score: a whole number from 1 to 10']);
+  const result = db
+    .update(shot)
+    .set({ score, updatedAt: now })
+    .where(and(eq(shot.id, shotId), eq(shot.ownerId, ownerId)))
+    .run();
+  return result.changes > 0;
+}
+
 /** "Use last shot recipe" (D-43): the next shot starts from the last shot again. */
 export function clearBrewNext(db: Db, ownerId: string, now: number): void {
   db.update(appState)

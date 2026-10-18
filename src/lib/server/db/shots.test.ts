@@ -11,6 +11,7 @@ import { REFERENCE, seedReferenceSetup, type SeededIds } from './seed';
 import {
   clearBrewNext,
   editShot,
+  rateShot,
   reopenAutoFinishedBean,
   saveShot,
   ShotRejected,
@@ -463,3 +464,31 @@ function seedOtherAccount() {
     .run();
   return { userId, machineId, beanId };
 }
+
+describe('rateShot', () => {
+  it('D-111: sets the score of an unrated shot and nothing else', () => {
+    const shotId = save(input({ notes: 'thin' }, 1)).shotId;
+    expect(rateShot(db, ids.userId, shotId, 7, T0 + 5 * MINUTE)).toBe(true);
+    const row = db.select().from(shot).where(eq(shot.id, shotId)).get()!;
+    expect(row).toMatchObject({
+      score: 7,
+      balance: null,
+      notes: 'thin',
+      updatedAt: T0 + 5 * MINUTE
+    });
+  });
+
+  it('D-09: only whole scores from 1 to 10', () => {
+    const shotId = save(input({}, 1)).shotId;
+    for (const score of [0, 11, 7.5])
+      expect(() => rateShot(db, ids.userId, shotId, score, T0)).toThrow(ShotRejected);
+    expect(db.select().from(shot).where(eq(shot.id, shotId)).get()!.score).toBeNull();
+  });
+
+  it('D-60: another user’s shot, or an unknown one, is left alone', () => {
+    const shotId = save(input({}, 1)).shotId;
+    expect(rateShot(db, 'someone-else', shotId, 7, T0)).toBe(false);
+    expect(rateShot(db, ids.userId, 'nope', 7, T0)).toBe(false);
+    expect(db.select().from(shot).where(eq(shot.id, shotId)).get()!.score).toBeNull();
+  });
+});

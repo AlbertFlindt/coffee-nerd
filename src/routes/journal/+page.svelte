@@ -1,10 +1,13 @@
 <script lang="ts">
   // Journal (screen 22, D-54): header, filter chips, then the shots grouped by day. Only the list
   // scrolls (D-36).
+  import { tick } from 'svelte';
+  import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import JournalRow from '#lib/components/JournalRow.svelte';
-  import { groupByDay } from '#lib/domain/journal.ts';
+  import ScoreRow from '#lib/components/ScoreRow.svelte';
+  import { clockTime, groupByDay } from '#lib/domain/journal.ts';
   import TabBar from '#lib/components/TabBar.svelte';
   import type { PageProps } from './$types';
 
@@ -17,6 +20,21 @@
     `${journal.shotsThisWeek} ${journal.shotsThisWeek === 1 ? 'shot' : 'shots'} this week`
   );
   let beanSheet = $state(false);
+
+  // D-111: the Rate sheet. A tap on a score saves it; a slide saves where the finger lifts (D-10).
+  let rating: (typeof journal.shots)[number] | null = $state(null);
+  let score: number | null = $state(null);
+  let pressing = false;
+  let rateForm: HTMLFormElement | undefined = $state();
+  const openRate = (shot: (typeof journal.shots)[number]) => {
+    score = null;
+    rating = shot;
+  };
+  const submitScore = async () => {
+    if (score === null) return;
+    await tick(); // the hidden input carries the new score first
+    rateForm?.requestSubmit();
+  };
 </script>
 
 <header>
@@ -63,7 +81,12 @@
     <section aria-label={group.label}>
       <h2>{group.label}</h2>
       {#each group.shots as shot (shot.id)}
-        <JournalRow {shot} timeZone={journal.timeZone} steps={journal.steps} />
+        <JournalRow
+          {shot}
+          timeZone={journal.timeZone}
+          steps={journal.steps}
+          onrate={() => openRate(shot)}
+        />
       {/each}
     </section>
   {:else}
@@ -100,6 +123,51 @@
           aria-pressed={b.id === journal.beanId}>{b.name}</button
         >
       {/each}
+    </form>
+  </BottomSheet>
+{/if}
+
+{#if rating}
+  <BottomSheet
+    short
+    label="Rate the shot"
+    closeLabel="Close without rating"
+    onclose={() => (rating = null)}
+  >
+    <!-- Not designed yet beyond D-111: the shot as the title, then the score row (docs/open-items.md). -->
+    <h2 class="cn-type-heading sheet-title">
+      {`${rating.beanName} · ${clockTime(rating.brewedAt, journal.timeZone)}`}
+    </h2>
+    <form
+      bind:this={rateForm}
+      method="POST"
+      action="?/rate"
+      use:enhance={() =>
+        async ({ update }) => {
+          await update();
+          rating = null;
+        }}
+    >
+      <input type="hidden" name="shotId" value={rating.id} />
+      <input type="hidden" name="score" value={score ?? ''} />
+      <div
+        role="presentation"
+        onpointerdowncapture={() => (pressing = true)}
+        onpointerup={() => {
+          pressing = false;
+          submitScore();
+        }}
+        onpointercancel={() => (pressing = false)}
+      >
+        <ScoreRow
+          value={score}
+          previous={rating.previousScore}
+          onchange={(v) => {
+            score = v;
+            if (!pressing) submitScore();
+          }}
+        />
+      </div>
     </form>
   </BottomSheet>
 {/if}

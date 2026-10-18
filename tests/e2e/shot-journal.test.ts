@@ -107,12 +107,30 @@ test('D-54, D-11: "Unrated · N" shows the N unrated shots, with a Rate block', 
     'true'
   );
   await expect(rows()).toHaveCount(n);
-  if (n > 0) await expect(rows().first()).toContainText('Rate');
+  await expect(page.getByRole('button', { name: /^Rate the shot at / })).toHaveCount(n);
   await page.getByRole('button', { name: /^Unrated · / }).click();
   await expect(page.getByRole('button', { name: /^Unrated · / })).toHaveAttribute(
     'aria-pressed',
     'false'
   );
+});
+
+test('D-111: the Rate block opens a score sheet; a tap saves the score', async () => {
+  const chip = page.getByRole('button', { name: /^Unrated · \d+$/ });
+  const before = Number((await chip.textContent())!.match(/\d+/)![0]);
+  const rate = page.getByRole('button', { name: /^Rate the shot at / }).first();
+  const href = await rate.locator('xpath=..').getByRole('link').getAttribute('href');
+  const row = page.locator(`a[href="${href}"]`);
+  await rate.click();
+  const sheet = page.getByRole('region', { name: 'Rate the shot' });
+  await expect(sheet.getByRole('radiogroup', { name: 'Overall score 1 to 10' })).toBeVisible();
+  await screenshot('JournalRate');
+  await sheet.getByRole('radio', { name: '6', exact: true }).click();
+  await expect(sheet).toBeHidden();
+  await expect(page.getByRole('button', { name: /^Unrated · / })).toHaveText(
+    `Unrated · ${before - 1}`
+  );
+  await expect(row).toContainText('6score');
 });
 
 test('D-54: the bean filter lists the beans that have shots', async () => {
