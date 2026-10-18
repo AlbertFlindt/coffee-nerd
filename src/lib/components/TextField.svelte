@@ -20,7 +20,9 @@
 </script>
 
 <div class="field">
-  <label class="cn-caption label" for={id}>{label}{#if hint}<span>{hint}</span>{/if}</label>
+  <label class="cn-caption label" for={id}
+    >{label}{#if hint}<span>{hint}</span>{/if}</label
+  >
   <input {id} class:plain bind:value {...input} />
 </div>
 
