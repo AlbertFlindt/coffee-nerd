@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bestRecipe, type RecipeShots } from './best-recipe';
+import { bestRecipe, rankRecipes, type RecipeShots } from './best-recipe';
 
 const day = 86_400_000;
 const shots = (scores: (number | null)[], start = 0) =>
@@ -76,5 +76,37 @@ describe('bestRecipe', () => {
   it('D-66: no rated shots at all means no best recipe', () => {
     expect(bestRecipe([{ recipeId: 'a', shots: shots([null, null]) }])).toBeNull();
     expect(bestRecipe([])).toBeNull();
+  });
+});
+
+describe('rankRecipes', () => {
+  it('D-135: averages of recipes with 3 rated shots first, then single best scores, unrated last', () => {
+    const recipes: RecipeShots[] = [
+      { recipeId: 'unrated', shots: shots([null, null], 9 * day) },
+      { recipeId: 'lucky', shots: shots([9]) },
+      { recipeId: 'steady', shots: shots([8, 8, 8]) },
+      { recipeId: 'ok', shots: shots([7, 7, 7, 7]) },
+      { recipeId: 'fine', shots: shots([6]) }
+    ];
+    expect(rankRecipes(recipes)).toEqual(['steady', 'ok', 'lucky', 'fine', 'unrated']);
+  });
+
+  it('D-66, D-135: the first is the best recipe; ties by more rated shots, then the latest', () => {
+    const recipes: RecipeShots[] = [
+      { recipeId: 'older', shots: shots([8], 0) },
+      { recipeId: 'newer', shots: shots([8], 5 * day) },
+      { recipeId: 'more', shots: shots([8, 8], 0) }
+    ];
+    expect(rankRecipes(recipes)).toEqual(['more', 'newer', 'older']);
+    expect(bestRecipe(recipes)?.recipeId).toBe('more');
+  });
+
+  it('D-135: recipes without rated shots, most recent first', () => {
+    const recipes: RecipeShots[] = [
+      { recipeId: 'none', shots: [] },
+      { recipeId: 'old', shots: shots([null], 0) },
+      { recipeId: 'new', shots: shots([null], 3 * day) }
+    ];
+    expect(rankRecipes(recipes)).toEqual(['new', 'old', 'none']);
   });
 });
