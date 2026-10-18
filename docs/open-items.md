@@ -84,6 +84,5 @@ Last updated: 2026-10-18
 | Basket row on the Setup tab shows the basket's name ("VST 18 g"); the design shows brand · size ("VST · 18 g"), which needs separate fields on the basket | M6 | D-49, M3 |
 | Shot form: a puck prep step's value is taken from the routine (D-76) and cannot be changed for one shot; only the routine can be switched | M7 | D-51, M3 |
 | `npm audit`: 4 moderate advisories from an old esbuild inside drizzle-kit (development only, not in the Docker image). Recheck when drizzle-kit updates. | Each dependency update | PR #1 |
-| End-to-end: the sheet handle test (D-108, `shot-form.test.ts`) failed in 2 of 6 local runs (handle position off by 2.9 px once, drag strip 43.99999 px once), measured while the sheet may still move; it touches nothing this pull request changed and passed in the other runs. Watch it; make the measurement wait for the sheet to stop if it fails again | If it fails again | M4 |
 | End-to-end: the Journal test expects the shots under Today, Yesterday and one earlier date; a run that crosses midnight in Copenhagen (the seed's time zone) would see one more day | Only if it gets in the way | M4 |
 | The push guard still blocks a command whose single-line commit text looks like a push to `main` (e.g. a literal `push\nto main`). Safe side; a fix needs a shell parser. | Only if it gets in the way | PR #2 |
