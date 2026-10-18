@@ -2,7 +2,7 @@
 
 Status: living document. Each decision records **what** was decided and **why**, so later design and code can be checked against it. Technical decisions start at section 13.
 
-Last updated: 2026-10-17
+Last updated: 2026-10-18
 
 ---
 
@@ -58,7 +58,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 ## 6. Information architecture
 
-- **D-30 — Bottom tab bar: Home · Journal · + · Library · Insights.** On tablet the bar becomes a left side rail. Settings (units, backup, export) sit behind a gear icon on Home, not in a tab.
+- **D-30 — Bottom tab bar: Home · Journal · + · Library · Insights.** *(Revised 2026-10-18: see D-114.)* On tablet the bar becomes a left side rail. Settings (units, backup, export) sit behind a gear icon on Home, not in a tab.
 
 | Tab | Purpose |
 |---|---|
@@ -84,7 +84,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 - **D-39 — One word per concept in the UI.** Machines, grinders, baskets and accessories are called **Gear** everywhere (page title, buttons, links), never "Equipment". The same rule applies to every term: once a concept has a name, all screens use it.
   - *Why:* "Equipment" as a title next to an "Add gear" button made users wonder if they were two things; "Gear" also sounds more modern.
 
-- **D-54 — Journal.** Every shot, newest first, grouped by day (Today, Yesterday, then dates). Header "Journal" with "9 shots this week". **Filter chips:** All beans ▾, Unrated · N, Any recipe ▾. Each shot is a row: score block on the left (or a dashed amber **"Rate"** block for unrated shots), bean name and time, core values ("1.6 · 18.0 → 38.5 g · 25.5 s"), then taste and the recipe tag (cherry, D-16). The list is the scrolling region (D-36). Tapping a shot opens it.
+- **D-54 — Journal.** *(Revised 2026-10-18: see D-111, D-112.)* Every shot, newest first, grouped by day (Today, Yesterday, then dates). Header "Journal" with "9 shots this week". **Filter chips:** All beans ▾, Unrated · N, Any recipe ▾. Each shot is a row: score block on the left (or a dashed amber **"Rate"** block for unrated shots), bean name and time, core values ("1.6 · 18.0 → 38.5 g · 25.5 s"), then taste and the recipe tag (cherry, D-16). The list is the scrolling region (D-36). Tapping a shot opens it.
   - *Why:* one quick scan answers "what did I pull, how was it, and was it the same recipe?"; the Rate block turns unrated shots into a one-tap job instead of a nag.
 
 - **D-55 — Insights: plain-language insight cards, four topics.** Header "Insights" with the data basis ("From 214 shots · 9 beans"). Topic chips: **What I like** (origins, processes, roasters, flavor families), **Progress** (score and consistency over time), **Dial-in** (how grind, ratio, preinfusion etc. relate to score and sour/bitter), **Comparisons** (routines, grinders, baskets compared fairly — same bean, everything else equal). Each **card** states one finding as a sentence ("You score natural coffees 1.1 points higher than washed ones"), shows a small chart, and names its basis ("Average score · 86 rated shots · 7 beans"). The card list scrolls (D-36).
@@ -100,8 +100,20 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - **Chart colors:** score data in amber (D-19); other measures (time, yield) in cream; reference marks and secondary data in muted brown. Groups are identified by their axis labels, never by color alone. Grids are faint; axes on scores start where honest (bars from zero; box plots and dot plots on the full 1–10 scale or a labelled range).
   - In the app every chart gets a tap/hover tooltip with the exact numbers (dataviz rule); mockups show the static state.
   - *Why:* coffee nerds want to see spread, not just averages — σ and distributions answer "is this a better recipe or just a lucky shot?"
-- **D-57 — Shot detail.** Tapping a Journal row opens it. Header: back to Journal, "Shot" with date and time, **Edit** (opens the shot form in edit mode, D-14, with "Save changes"). Then: **bean & setup card** (bean, roast age at the time, gear, puck prep routine, pressure profile, recipe tag); **core values** as four tiles (grind, dose, yield, time) and the ratio; **taste** (score block, balance, body and sweetness as small scales, flavor chips); **"Compared with this recipe"** — this shot against the recipe's history, e.g. "25.5 s vs μ 27.9 s · 1.7σ faster than usual", "Score 7 vs average 7.7 · within normal range"; **notes** (labelled "just for you", D-27).
+- **D-57 — Shot detail.** *(Revised 2026-10-18: see D-109, D-110, D-113.)* Tapping a Journal row opens it. Header: back to Journal, "Shot" with date and time, **Edit** (opens the shot form in edit mode, D-14, with "Save changes"). Then: **bean & setup card** (bean, roast age at the time, gear, puck prep routine, pressure profile, recipe tag); **core values** as four tiles (grind, dose, yield, time) and the ratio; **taste** (score block, balance, body and sweetness as small scales, flavor chips); **"Compared with this recipe"** — this shot against the recipe's history, e.g. "25.5 s vs μ 27.9 s · 1.7σ faster than usual", "Score 7 vs average 7.7 · within normal range"; **notes** (labelled "just for you", D-27).
   - *Why:* a shot only means something next to its recipe's history; the σ comparison tells you instantly whether this shot was an outlier or normal variation.
+- **D-109 — "Compared with this recipe" uses the recipe's other shots.** The shot detail compares this shot with the recipe's other shots, not including itself. It needs at least two other shots with a value; with fewer, the line says "Not enough shots yet". The count in the card's header ("3 shots") counts all of the recipe's shots. Refines D-57.
+  - *Why:* an outlier should not pull the average and the spread towards itself.
+- **D-110 — Within one σ is "within normal range".** A shot whose time or score lies within one σ of the other shots' average reads "Within normal range". Further away, time reads "1.7σ faster than usual" or "slower than usual", and score "higher than usual" or "lower than usual". Time and score are compared, as on the screen. Refines D-57.
+  - *Why:* matches the screen, where 1.7σ is named as unusual; one σ is a common, easily explained bar.
+- **D-111 — The Rate block opens a score sheet.** Tapping the dashed "Rate" block on a Journal row opens a small sheet with the score row; tapping a score saves it and closes the sheet. The rest of the row still opens the shot. Refines D-54.
+  - *Why:* rating an unrated shot becomes the one-tap job D-54 promises.
+- **D-112 — "Any recipe" lists the chosen bean's recipes.** The Journal's recipe filter appears once a bean is chosen and lists that bean's recipes by their values ("1.6 · 18.0 g · Daily routine · 3 shots"), most recently brewed first. Refines D-54.
+  - *Why:* recipes have no names; within one bean their values tell them apart.
+- **D-113 — Editing a shot compares with the shot before it.** In edit mode, the changes (sage, D-15) and the recipe tag (D-16) compare with the same bean's shot brewed before this one, as when the shot was brewed. The bean card can switch the shot to another open bean, keeping the values entered; the comparison then uses that bean's shot before this one. The brewing time stays as it was. "Save changes" returns to the shot detail. Refines D-57 and D-94.
+  - *Why:* the shot keeps telling the same story it told when it was logged.
+- **D-114 — The tab bar comes before all its pages.** The tab bar (D-30) is built now on the tab screens; Library and Insights are shown dimmed and do nothing until their milestones. Refines D-30.
+  - *Why:* the Journal is reachable the way it will always be, without a stand-in link.
 
 ## 7. Shot form (espresso)
 
@@ -157,7 +169,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 - **D-107 — Buttons show that they were pressed.** Every −/+ and every plain button flashes amber while pressed and fades back quickly; the amber Save and Add buttons get lighter and press in slightly. Choices that change state (score, chips, tabs, switches) already show the new state and need no flash. Refines D-14 and D-19 (amber is your input and actions).
   - *Why:* at the brew station you look at the scale, not the phone; a short flash confirms a tap was taken without reading the value.
-- **D-94 — The bean card switches the bean.** Tapping the bean card on the shot form opens a list of open beans. Picking one starts the form again from that bean's starting values (D-03, D-43, D-73, D-38). Choosing another machine or grinder on the shot form waits for the Gear pages (roadmap M6). Refines D-14.
+- **D-94 — The bean card switches the bean.** *(Revised 2026-10-18: see D-113.)* Tapping the bean card on the shot form opens a list of open beans. Picking one starts the form again from that bean's starting values (D-03, D-43, D-73, D-38). Choosing another machine or grinder on the shot form waits for the Gear pages (roadmap M6). Refines D-14.
   - *Why:* switching between open beans is the change you make at the brew station; gear changes are rare and belong with the Gear pages.
 - **D-95 — After saving, the app goes back with a message.** "Save shot" returns to the page where "+" was pressed, with a short "Shot saved" message. When the shot used up the bag and the bean was finished automatically (D-40), the message says so, with an Undo that reopens the bean. Refines D-14 and D-40.
   - *Why:* you see that the shot is safe without an extra screen, and the automatic finish can be undone right where it is announced.

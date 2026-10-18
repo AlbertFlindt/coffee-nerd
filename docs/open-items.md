@@ -8,7 +8,7 @@ Everything that is unanswered, not designed yet, or deliberately left for later,
 
 The decision log keeps the history of product topics; this file is the working list.
 
-Last updated: 2026-10-17
+Last updated: 2026-10-18
 
 ---
 
@@ -16,12 +16,7 @@ Last updated: 2026-10-17
 
 | Question | Needed by | Source |
 |---|---|---|
-| **"Compared with this recipe" (D-57): which shots is this shot compared with?** (a) The recipe's *other* shots, not this one; at least 2 with a value, otherwise the line says "Not enough shots yet" — *recommended*, since an outlier should not pull the average towards itself. (b) All the recipe's shots, this one included, from 2 shots on. (c) As (a), but only from 3 other shots on. The "3 shots" in the header would count all the recipe's shots either way. | M4 | D-57, data-model §5 |
-| **"Compared with this recipe": when is a shot "within normal range"?** (a) Within 1σ of the average; outside it says "1.7σ faster/slower than usual" for time and "1.2σ higher/lower than usual" for score — *recommended*, matches the screen (1.7σ is not normal). (b) Within 2σ (only clear outliers are named). (c) Show the σ number always, without "within normal range". Values compared: time and score, as designed; yield too? | M4 | D-57 |
-| **The Journal's "Rate" block (D-54): what does tapping it do?** (a) Opens a small sheet with the score row; tapping a score saves it and closes the sheet — *recommended*, the "one-tap job" of D-54. (b) Opens the shot form in edit mode (all of taste, but more taps). (c) Nothing of its own: it opens the shot like the rest of the row (built this way for now). | M4 | D-54 |
-| **The Journal's "Any recipe" filter (D-54): how are recipes listed?** (a) Only once a bean is chosen; that bean's recipes by their values ("1.6 · 18.0 g · Daily routine · 3 shots"), most recently brewed first — *recommended*. (b) Every recipe, grouped by bean. (c) Leave the chip out until the recipe detail page (M5) gives recipes a home. Not built yet. | M4 | D-54 |
-| **Editing a shot (D-57): what does the form compare with?** (a) With the shot as it was before this edit: sage marks what you changed now, the tag says "Recipe reused" or "New recipe · grind changed"; the bean and the brewing time stay fixed; "Save changes" returns to the shot detail without a message — *recommended*. (b) With the bean's shot before this one, as when the shot was brewed. Not built yet. | M4 | D-57, D-14, D-15, D-16 |
-| **The tab bar (D-30) before Library and Insights exist**: the Journal and shot detail screens show it. (a) Build it now on the tab screens; Library and Insights are shown dimmed and do nothing until their milestones — *recommended*. (b) Library and Insights open a plain "Coming later" page. (c) Wait for M8; until then the start page links to the Journal (built this way for now, with the phone's back gesture to return). | M4 | D-30, D-31 |
+| *(none open)* | | |
 
 ## 2. Screens and states not designed yet
 
