@@ -1,7 +1,10 @@
 <script lang="ts">
   // The shot form (D-14): bean card, the four core values, ratio, balance, score, More, Save. The recipe
   // tag, deltas and earlier score are worked out in the browser on every change (data-model §4.1).
+  // With `data.edit` it edits a saved shot (D-57, D-113): "Save changes", back to the shot, and the bean
+  // card moves the shot to another bean while keeping the values.
   import { enhance } from '$app/forms';
+  import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { onMount } from 'svelte';
   import { v7 } from 'uuid';
@@ -30,9 +33,10 @@
 
   function initial(): ShotState {
     const p = data.prefill;
+    const edit = data.edit;
     return {
       // D-61: the id is made here, so sending the same shot twice saves it once.
-      id: v7(),
+      id: edit?.shotId ?? v7(),
       beanId: p.beanId,
       machineId: p.machineId,
       grinderId: p.grinderId,
@@ -43,14 +47,30 @@
       setup: structuredClone(p.setup),
       yield: p.yield,
       time: p.time,
-      taste: { ...p.taste },
-      tagIds: [],
+      taste: { ...(edit?.taste ?? p.taste) },
+      tagIds: [...(edit?.tagIds ?? [])],
       newTagNames: [],
-      notes: null
+      notes: edit?.notes ?? null
     };
   }
 
   let shot: ShotState = $state(initial());
+  const back = $derived(
+    data.edit ? resolve('/journal/[id]', { id: data.edit.shotId }) : resolve('/')
+  );
+
+  // D-113: in edit mode another bean keeps the values; the page loads that bean's recipes to compare with.
+  $effect(() => {
+    if (data.edit) shot.beanId = data.bean.id;
+  });
+  function chooseBeanForEdit(beanId: string) {
+    sheet = null;
+    const shotId = data.edit!.shotId;
+    goto(resolve(`/journal/[id]/edit?bean=${beanId}`, { id: shotId }), {
+      replace: true,
+      reset: false
+    });
+  }
   let sheet: 'more' | 'bean' | null = $state(null);
   let tab: 'setup' | 'tasting' = $state('setup');
   let saving = $state(false);
@@ -118,7 +138,7 @@
 <div class="page">
   <div class="above-save">
     <header>
-      <a class="back tap" href={resolve('/')} aria-label="Back without saving">
+      <a class="back tap" href={back} aria-label="Back without saving">
         <svg
           width="22"
           height="22"
@@ -131,7 +151,7 @@
           aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg
         >
       </a>
-      <h1 class="cn-type-title">New shot</h1>
+      <h1 class="cn-type-title">{data.edit ? 'Edit shot' : 'New shot'}</h1>
       <span></span>
     </header>
 
@@ -260,21 +280,37 @@
         onclose={() => (sheet = null)}
       >
         <h2 class="cn-type-heading sheet-title">Open beans</h2>
-        <!-- D-94: picking a bean opens the form for it, from its own starting values. -->
-        <form class="beans" method="GET" action={resolve('/shot/new')}>
-          {#each data.openBeans as b (b.id)}
-            <button
-              type="submit"
-              name="bean"
-              value={b.id}
-              class="bean tap"
-              aria-pressed={b.id === data.bean.id}
-              onclick={() => (sheet = null)}
-            >
-              {b.name}{#if b.process}<span class="soft"> · {PROCESS[b.process]}</span>{/if}
-            </button>
-          {/each}
-        </form>
+        {#if data.edit}
+          <!-- D-113: editing, another bean keeps the values entered. -->
+          <div class="beans">
+            {#each data.openBeans as b (b.id)}
+              <button
+                type="button"
+                class="bean tap"
+                aria-pressed={b.id === data.bean.id}
+                onclick={() => chooseBeanForEdit(b.id)}
+              >
+                {b.name}{#if b.process}<span class="soft"> · {PROCESS[b.process]}</span>{/if}
+              </button>
+            {/each}
+          </div>
+        {:else}
+          <!-- D-94: picking a bean opens the form for it, from its own starting values. -->
+          <form class="beans" method="GET" action={resolve('/shot/new')}>
+            {#each data.openBeans as b (b.id)}
+              <button
+                type="submit"
+                name="bean"
+                value={b.id}
+                class="bean tap"
+                aria-pressed={b.id === data.bean.id}
+                onclick={() => (sheet = null)}
+              >
+                {b.name}{#if b.process}<span class="soft"> · {PROCESS[b.process]}</span>{/if}
+              </button>
+            {/each}
+          </form>
+        {/if}
       </BottomSheet>
     {/if}
   </div>
@@ -296,7 +332,9 @@
       }}
     >
       <input type="hidden" name="shot" value={JSON.stringify(shot)} />
-      <button class="cn-btn-primary tap-strong" type="submit" disabled={saving}>Save shot</button>
+      <button class="cn-btn-primary tap-strong" type="submit" disabled={saving}
+        >{data.edit ? 'Save changes' : 'Save shot'}</button
+      >
     </form>
   </footer>
 </div>

@@ -1,6 +1,6 @@
 <script lang="ts">
-  // Shot detail (screen 26, D-57): bean and setup card, core values and ratio, taste, notes.
-  // Not here yet, waiting on the owner (docs/open-items.md): "Compared with this recipe" and Edit.
+  // Shot detail (screen 26, D-57): bean and setup card, core values and ratio, taste, "Compared with this
+  // recipe" (D-109, D-110), notes, and Edit (D-113).
   import { resolve } from '$app/paths';
   import { recipeTagText } from '#lib/domain/fingerprint.ts';
   import {
@@ -94,6 +94,8 @@
     <h1 class="cn-type-title">Shot</h1>
     <span class="when">{when}</span>
   </div>
+  <!-- D-57, D-113: the shot form in edit mode. -->
+  <a class="edit tap" href={resolve('/journal/[id]/edit', { id: shot.id })}>Edit</a>
 </header>
 
 <main>
@@ -217,6 +219,19 @@
     justify-content: center;
     border-radius: var(--radius-sm);
     color: var(--ink);
+  }
+
+  /* Amber: an action you take (D-19). */
+  .edit {
+    display: flex;
+    align-items: center;
+    height: var(--touch-min);
+    padding: 0 14px;
+    border-radius: var(--radius-sm);
+    color: var(--amber);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
   }
 
   .title {

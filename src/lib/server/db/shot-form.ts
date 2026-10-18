@@ -1,7 +1,7 @@
 // Everything the shot form needs (data-model §4.1, §4.2): the prefill, the bean's recipes for matching in
 // the browser, the bean's last shot for deltas (D-15, D-81), and the choices its pickers offer. Every query
 // is scoped by the owner (D-60).
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, lt, or, sql, type SQL } from 'drizzle-orm';
 import { bestRecipe } from '../../domain/best-recipe';
 import type { RecipeIdentity } from '../../domain/fingerprint';
 import {
@@ -12,7 +12,7 @@ import {
   type RoutineNow,
   type ShotResult
 } from '../../domain/prefill';
-import type { FeatureDefinition, GrinderSpec, MachineSpec } from '../../domain/schemas';
+import type { FeatureDefinition, GrinderSpec, MachineSpec, Taste } from '../../domain/schemas';
 import type { KnownRecipe } from '../../domain/shot-form';
 import type { Thousandths } from '../../domain/units';
 import type { Queryable } from './client';
@@ -53,6 +53,8 @@ export type ShotFormData = {
   tags: { id: string; name: string }[];
   /** −/+ steps for dose, yield and time (D-89). */
   steps: { dose: Thousandths; yield: Thousandths; time: Thousandths };
+  /** Editing a saved shot (D-57, D-113): its id and what it already has besides the recipe. */
+  edit?: { shotId: string; taste: Taste; tagIds: string[]; notes: string | null };
 };
 
 export type ShotFormEmpty = { state: 'empty'; missing: 'setup' | 'bean' };
@@ -146,6 +148,105 @@ export function loadShotForm(
   };
 }
 
+/**
+ * The shot form for editing a saved shot (D-57, D-113): it starts from the shot's own values, taste,
+ * flavor notes and notes. The changes and the recipe tag compare with the bean's shot brewed before it,
+ * and only earlier shots count, as when it was brewed. `beanId` moves the shot to another open bean,
+ * which is then compared with its own shots before this one. Null when the shot is not yours.
+ */
+export function loadEditShotForm(
+  db: Queryable,
+  ownerId: string,
+  shotId: string,
+  beanId?: string
+): ShotFormData | null {
+  const row = db
+    .select({ shot, recipe })
+    .from(shot)
+    .innerJoin(recipe, eq(recipe.id, shot.recipeId))
+    .where(and(eq(shot.id, shotId), eq(shot.ownerId, ownerId)))
+    .get();
+  const settings = db.select().from(userSettings).where(eq(userSettings.userId, ownerId)).get();
+  if (!row || !settings) return null;
+  const { shot: s, recipe: r } = row;
+
+  const choice = { id: bean.id, name: bean.name, process: bean.process };
+  const openBeans = db
+    .select(choice)
+    .from(bean)
+    .where(and(eq(bean.ownerId, ownerId), eq(bean.status, 'open')))
+    .orderBy(desc(bean.createdAt), desc(bean.id))
+    .all();
+  // The shot's own bean may be finished by now; it stays a choice for its own shot.
+  const own =
+    openBeans.find((b) => b.id === r.beanId) ??
+    db
+      .select(choice)
+      .from(bean)
+      .where(and(eq(bean.id, r.beanId), eq(bean.ownerId, ownerId)))
+      .get()!;
+  const beans = openBeans.some((b) => b.id === own.id) ? openBeans : [own, ...openBeans];
+  const current = beans.find((b) => b.id === beanId) ?? own;
+
+  const gearRows = db.select().from(gear).where(eq(gear.ownerId, ownerId)).all();
+  const routineRows = db.select().from(routine).where(eq(routine.ownerId, ownerId)).all();
+  const routines = routinesNow(db, ownerId, routineRows);
+  const byId = new Map(gearRows.map((g) => [g.id, g]));
+  const machine = byId.get(r.machineId)!;
+  const grinder = byId.get(r.grinderId)!;
+  const before = { brewedAt: s.brewedAt, id: s.id };
+  const previous = latestShotOfBean(db, ownerId, current.id, before);
+  const tagIds = db
+    .select({ id: shotTag.tagId })
+    .from(shotTag)
+    .where(eq(shotTag.shotId, s.id))
+    .all()
+    .map((t) => t.id);
+
+  return {
+    state: 'ready',
+    prefill: {
+      ...toValues(r),
+      beanId: current.id,
+      yield: s.yield,
+      time: s.time,
+      source: 'last_shot',
+      taste: { score: null, balance: null, body: null, sweetness: null, aftertaste: null }
+    },
+    bean: current,
+    openBeans: beans,
+    machine: {
+      id: machine.id,
+      name: machine.name,
+      features: (machine.spec as MachineSpec).features.filter((f) => f.enabled)
+    },
+    grinder: { id: grinder.id, name: grinder.name, dial: (grinder.spec as GrinderSpec).dial },
+    gearNames: Object.fromEntries(gearRows.map((g) => [g.id, g.name])),
+    baskets: gearRows
+      .filter((g) => g.kind === 'basket' && (g.archivedAt === null || g.id === r.basketId))
+      .map((g) => ({ id: g.id, name: g.name })),
+    routines: routineRows
+      .filter((x) => x.archivedAt === null || x.id === r.routineId)
+      .map((x) => ({ id: x.id, name: x.name, routine: routines[x.id] })),
+    recipes: knownRecipes(db, ownerId, current.id, before),
+    lastShot: previous ? { recipe: previous.recipe, ...previous.shot } : null,
+    tags: tagsByUse(db, ownerId),
+    steps: { dose: settings.doseStep, yield: settings.yieldStep, time: settings.timeStep },
+    edit: {
+      shotId: s.id,
+      taste: {
+        score: s.score,
+        balance: s.balance,
+        body: s.body,
+        sweetness: s.sweetness,
+        aftertaste: s.aftertaste
+      },
+      tagIds,
+      notes: s.notes
+    }
+  };
+}
+
 function readMySetup(settings: typeof userSettings.$inferSelect): PrefillContext['mySetup'] | null {
   const { defaultMachineId, defaultGrinderId, defaultGrind, defaultDose } = settings;
   if (!defaultMachineId || !defaultGrinderId || defaultGrind === null || defaultDose === null)
@@ -179,6 +280,18 @@ function toValues(row: RecipeRow): RecipeValues {
 
 const newestShot = [desc(shot.brewedAt), desc(shot.id)];
 
+/** A shot's place in time; the same moment falls back to the id, which is time-ordered (UUID v7). */
+type ShotMoment = { brewedAt: number; id: string };
+
+/** Shots brewed before `before`; every shot without it. */
+function brewedBefore(before?: ShotMoment): SQL | undefined {
+  if (!before) return undefined;
+  return or(
+    lt(shot.brewedAt, before.brewedAt),
+    and(eq(shot.brewedAt, before.brewedAt), lt(shot.id, before.id))
+  );
+}
+
 function latestShotOfRecipe(db: Queryable, ownerId: string, recipeId: string): ShotResult | null {
   return (
     db
@@ -193,13 +306,14 @@ function latestShotOfRecipe(db: Queryable, ownerId: string, recipeId: string): S
 function latestShotOfBean(
   db: Queryable,
   ownerId: string,
-  beanId: string
+  beanId: string,
+  before?: ShotMoment
 ): { recipe: RecipeValues; shot: ShotResult } | null {
   const row = db
     .select({ recipe, yield: shot.yield, time: shot.time })
     .from(shot)
     .innerJoin(recipe, eq(shot.recipeId, recipe.id))
-    .where(and(eq(recipe.beanId, beanId), eq(shot.ownerId, ownerId)))
+    .where(and(eq(recipe.beanId, beanId), eq(shot.ownerId, ownerId), brewedBefore(before)))
     .orderBy(...newestShot)
     .get();
   return row ? { recipe: toValues(row.recipe), shot: { yield: row.yield, time: row.time } } : null;
@@ -288,7 +402,16 @@ function routinesNow(
 }
 
 /** This bean's recipes with their shot count and the score of their latest rated shot (D-12, D-16). */
-function knownRecipes(db: Queryable, ownerId: string, beanId: string): KnownRecipe[] {
+function knownRecipes(
+  db: Queryable,
+  ownerId: string,
+  beanId: string,
+  before?: ShotMoment
+): KnownRecipe[] {
+  // Editing (D-113): only the shots brewed before the edited one count, as when it was brewed.
+  const earlier = before
+    ? sql`and (s.brewed_at < ${before.brewedAt} or (s.brewed_at = ${before.brewedAt} and s.id < ${before.id}))`
+    : sql``;
   const rows = db
     .select({
       id: recipe.id,
@@ -296,11 +419,11 @@ function knownRecipes(db: Queryable, ownerId: string, beanId: string): KnownReci
       fingerprint: recipe.fingerprint,
       shotCount: sql<number>`count(${shot.id})`,
       lastScore: sql<number | null>`(
-        select s.score from shot s where s.recipe_id = ${recipe.id} and s.score is not null
+        select s.score from shot s where s.recipe_id = ${recipe.id} and s.score is not null ${earlier}
         order by s.brewed_at desc, s.id desc limit 1)`
     })
     .from(recipe)
-    .leftJoin(shot, eq(shot.recipeId, recipe.id))
+    .leftJoin(shot, and(eq(shot.recipeId, recipe.id), brewedBefore(before)))
     .where(and(eq(recipe.beanId, beanId), eq(recipe.ownerId, ownerId)))
     .groupBy(recipe.id)
     .all();

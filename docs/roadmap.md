@@ -46,7 +46,7 @@ New shot with prefill, deltas, recipe tag, balance, score, More sheet (Setup and
 
 **Done when:** screenshots of each state match `Main`, `Rated`, `RecipeChanged`, `MoreSetup`, `MoreTasting`, `BrewNext`; end-to-end test: log three shots, go back to the first grind, tag says "Recipe reused".
 
-## M4 — Journal and shot detail ◐  (screens 22, 26)
+## M4 — Journal and shot detail ☑  (screens 22, 26)
 Day-grouped list, filters, Rate block, shot detail with "Compared with this recipe" (σ), edit via the shot form.
 
 ## M5 — Beans ☐  (screens 7, 9, 10)

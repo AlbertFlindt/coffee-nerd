@@ -207,3 +207,52 @@ test('D-57: back returns to the Journal', async () => {
   await page.getByRole('link', { name: 'Back to Journal' }).click();
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
 });
+
+test('D-57, D-113: Edit opens the shot form on the shot; "Save changes" returns to it', async () => {
+  await rows().first().click();
+  await page.getByRole('link', { name: 'Edit' }).click();
+  await expect(page.getByRole('heading', { name: 'Edit shot' })).toBeVisible();
+  // The shot's own taste stays (D-11 is about new shots).
+  await expect(page.getByRole('radio', { name: /^7/ })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('button', { name: 'Grind minus 0.1' }).click();
+  // Compared with the shot before it, where 1.5 had been brewed once (D-113, D-16).
+  await expect(page.locator('.cn-tag')).toHaveText(/^Recipe reused \d+x$/);
+  await expectNoPageScroll();
+  await screenshot('EditShot');
+  await page.getByRole('button', { name: 'Save changes' }).click();
+
+  await expect(page.getByRole('heading', { name: 'Shot', level: 1 })).toBeVisible();
+  const values = page.getByRole('region', { name: 'Core values' });
+  await expect(values).toContainText('1.5');
+  await expect(page.getByRole('region', { name: 'Taste' })).toContainText('Dark chocolate');
+  await expect(page.getByRole('region', { name: 'Notes' })).toContainText('Ran fast');
+});
+
+test('D-113: editing, another bean keeps the values entered', async () => {
+  const db = new Database(DATABASE);
+  const owner = db.prepare('select owner_id as o from bean limit 1').get() as { o: string };
+  const now = Date.now();
+  db.prepare(
+    `insert into bean (id, owner_id, name, roast_date, status, created_at, updated_at)
+     values (?, ?, 'Kiambu AA', '2026-10-01', 'open', ?, ?)`
+  ).run('01999999-0000-7000-8000-000000000001', owner.o, now, now);
+  db.close();
+
+  await page.getByRole('link', { name: 'Edit' }).click();
+  await page.getByRole('button', { name: 'Time plus 1 second' }).click();
+  const time = await page.getByRole('button', { name: /^Time, .*tap to type$/ }).textContent();
+  await page.getByRole('button', { name: /choose another bean/ }).click();
+  await page
+    .getByRole('region', { name: 'Choose a bean' })
+    .getByRole('button', { name: 'Kiambu AA' })
+    .click();
+  await expect(
+    page.getByRole('button', { name: /^Kiambu AA, choose another bean$/ })
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Time, .*tap to type$/ })).toHaveText(time!);
+  await expect(page.getByRole('button', { name: /^Grind, 1\.5,/ })).toBeVisible();
+  // The new bean has no shots before this one: a new recipe (D-113, D-77).
+  await expect(page.locator('.cn-tag')).toHaveText('New recipe');
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.getByRole('region', { name: 'Bean and setup' })).toContainText('Kiambu AA');
+});
