@@ -2,11 +2,13 @@ import { error, fail } from '@sveltejs/kit';
 import { getDb } from '#lib/server/db/connection.ts';
 import { loadJournal } from '#lib/server/db/journal.ts';
 import { rateShot, ShotRejected } from '#lib/server/db/shots.ts';
+import { rememberJournalFilters } from '#lib/server/journal-filters.ts';
 import type { Actions, PageServerLoad } from './$types';
 
-// Journal (screen 22, D-54): every shot, newest first; ?bean= and ?unrated=1 filter it.
-export const load: PageServerLoad = ({ locals, url }) => {
+// Journal (screen 22, D-54): every shot, newest first; ?bean=, ?recipe= and ?unrated=1 filter it.
+export const load: PageServerLoad = ({ locals, url, cookies, request }) => {
   if (!locals.user) error(401);
+  rememberJournalFilters(cookies, url, request); // D-117
   const now = Date.now();
   return {
     now,

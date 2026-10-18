@@ -32,19 +32,10 @@ Last updated: 2026-10-18
 | The "Shot saved" message, the automatic-finish message with Undo, and "… is open again" (built as a plain card on the start page) | M8 | D-95 |
 | Shot form when there is nothing to brew with (no My setup or no open bean): built as a plain "Nothing to brew with yet" message | M6 | D-88, M3 |
 | Shot form: the bean list behind the bean card (D-94), built as a plain "Open beans" list in a sheet | M5 | D-94, M3 |
-| Taste sliders: the "Clear" control (D-98), built as small text after the value words | M4 | D-98, M3 |
-| Journal: the empty list ("No shots yet.", "No unrated shots."), and the bean filter's list (built as a plain list of the beans that have shots, in a sheet; the chosen bean's name replaces "All beans" on the chip, in amber) | M4 | D-54 |
-| Journal row: a shot without a yield or time leaves it out of the values ("1.6 · 18.0 g · 25.5 s"); the taste line shows the balance in words, "Not rated" for an unrated shot without one, and nothing for a rated shot without one; a date in another year names the year ("Tue 30 Dec 2025") | M4 | D-54, D-91 |
-| Journal: the Rate sheet (D-111), built as a short bottom sheet with the shot ("Guji Hambela · 07:42") as its title and the score row with its last-score marker (D-12); a tap saves, a slide saves where the finger lifts | M4 | D-111 |
-| Journal: the recipe filter's list (D-112), built as a plain list in a sheet with "Any recipe" first; the chosen recipe's label replaces "Any recipe" on the chip, in amber. Two recipes that differ only in setup (e.g. temperature) get the same label. The chip row slides sideways when the chips do not fit | M4 | D-112 |
-| Editing a shot (D-113): the form is titled "Edit shot" and its button "Save changes"; the bean list in edit mode also offers the shot's own bean when it is finished. Deleting a shot is not designed or decided | M4 | D-57, D-113 |
-| Shot detail, "Compared with this recipe": a shot without a time or score says "Not set" or "Not rated" there; when the other shots do not vary at all (σ = 0) only the average is shown, without a sentence | M4 | D-109, D-110 |
 | The Rate sheet when the score cannot be saved: it stays open with "The score could not be saved. Nothing was changed." under the score row | M10 | D-111 |
-| Tab bar: the screens (Journal.png, ShotDetail.png) draw it about 100 px tall, the design system's `--tabbar-h` is 84 px; built at 84 px, so icons sit about 8 px lower than in the PNGs. Settle in the design system | M8 | D-30, D-114 |
-| "Compared with this recipe": the distance is compared as shown, to one decimal, so 1.04σ reads "Within normal range" (never "1.0σ faster than usual") | M4 | D-110 |
-| Journal header: "N shots this week" counts every shot, whatever the filter; "Unrated · N" counts within the bean and recipe filters | M4 | D-54 |
-| Shot detail: an unrated shot ("Not rated" in the score block), a taste scale that is not set ("Not set", no handle), an empty yield or time tile ("Not set"); the notes card and the flavor notes are left out when empty; aftertaste is not shown (D-57 names balance, body and sweetness); a recipe's first shot says just "New recipe", without what changed; a long note scrolls inside the notes card; the score block and flavor notes use the 10 px corner (`--radius-sm`) where the screens draw 12 px, which has no token | M4 | D-57, D-11, D-36 |
-| Shot detail: "Back" always returns to the Journal without its filters | M4 | D-57 |
+| Tab bar: the screens (Journal.png, ShotDetail.png) draw it about 100 px tall, the design system's `--tabbar-h` is 84 px; built at 84 px, so icons sit about 8 px lower than in the PNGs. Settle in the design-system sync | M5 (D-119) | D-30, D-114 |
+| "Compared with this recipe": the distance is compared as shown, to one decimal, so 1.04σ reads "Within normal range" (never "1.0σ faster than usual"); a reading of D-110 to confirm | M9 (Insights uses the same σ) | D-110 |
+| Editing a shot: the "Delete shot" button above "Save changes" and its confirmation sheet ("Delete this shot?", "Delete shot" / "Keep it") are not designed yet (D-116) | M5 (design-system sync, D-119) | D-116 |
 | Shot form: the message when the server refuses a shot ("The shot could not be saved. Nothing was changed.", above Save) | M10 | M3 |
 | Shot form: the message when a switched-on feature has no value yet ("Set Low bar end first.", above Save) | M6 | D-78, M3 |
 | More › Setup: rows for custom features that are on/off or "Pick from a list" (built as a switch with "On"/"Off", and a value that cycles through the options on tap) | M6 | D-46, M3 |
@@ -57,7 +48,7 @@ Last updated: 2026-10-18
 | Shot form: choosing another machine or grinder (D-94 waits for the Gear pages) | M6 | D-94 |
 | Shot form: the gentle hint when the dose is outside the basket's dose range | M6 | D-49 |
 | Tablet layouts, light theme, focus and hover styles | Not scheduled | Open topic 5, design-system README |
-| Design system: the empty slider handle (D-106, built as a hollow dashed circle in ink-muted) and the pressed state of buttons (D-107, built as an amber flash, and a slight press for amber buttons) are not in the design system yet; the sheet handle now sits in the middle of a 44 px drag strip, with more room around it than the screens show (owner feedback, D-108); add them to the master and sync | M4 | D-106, D-107, D-108 |
+| Design system: the empty slider handle (D-106, built as a hollow dashed circle in ink-muted) and the pressed state of buttons (D-107, built as an amber flash, and a slight press for amber buttons) are not in the design system yet; the sheet handle now sits in the middle of a 44 px drag strip, with more room around it than the screens show (owner feedback, D-108); add them to the master and sync | M5 (owner syncs the design system first, D-119) | D-106, D-107, D-108, D-119 |
 | Shorter screens: the shot form tightens its spacing below 880 px and 760 px of height (D-36). Below about 740 px it no longer fits and the form area scrolls inside itself, so More can scroll out of view; a design for small phones is still to do | M10 | D-36 |
 
 ## 3. Product topics not decided yet

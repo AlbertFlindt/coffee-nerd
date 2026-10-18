@@ -254,6 +254,16 @@ describe('loadShotDetail', () => {
     });
   });
 
+  it('D-118: a recipe’s first shot names what changed since the bean’s shot before it', () => {
+    const first = save(shotAt(T0 - 2 * DAY));
+    const second = save(shotAt(T0 - DAY, { grind: 1500, dose: 18500 }));
+    expect(loadShotDetail(db, ids.userId, first)!.recipeTag).toEqual({ kind: 'new', changes: [] });
+    expect(loadShotDetail(db, ids.userId, second)!.recipeTag).toEqual({
+      kind: 'new',
+      changes: ['grind', 'dose']
+    });
+  });
+
   it('D-60: another user’s shot, or an unknown one, is not found', () => {
     const id = save(shotAt(T0 - DAY));
     const otherId = otherUser();

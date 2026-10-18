@@ -1,6 +1,6 @@
 // The Journal (D-54) and the shot detail (D-57). Every query is scoped by the owner (D-60).
-import { and, asc, desc, eq, inArray } from 'drizzle-orm';
-import type { RecipeMatch } from '../../domain/fingerprint';
+import { and, asc, desc, eq, inArray, lt, or } from 'drizzle-orm';
+import { describeChange, type RecipeMatch } from '../../domain/fingerprint';
 import { recipeFilterLabel, shotsThisWeek } from '../../domain/journal';
 import type { GrinderSpec, MachineSpec } from '../../domain/schemas';
 import { setupDetail } from '../../domain/shot-form';
@@ -221,7 +221,9 @@ export function loadShotDetail(db: Queryable, ownerId: string, shotId: string): 
       .join(' · '),
     setup: setupDetail(r.setup, (machine.spec as MachineSpec).features),
     recipeTag:
-      earlier === 0 ? { kind: 'new', changes: [] } : { kind: 'reused', shotCount: earlier },
+      earlier === 0
+        ? { kind: 'new', changes: changesSincePrevious(db, ownerId, r, s) }
+        : { kind: 'reused', shotCount: earlier },
     grind: r.grind,
     grindStep: (grinder.spec as GrinderSpec).dial.step,
     dose: r.dose,
@@ -243,6 +245,32 @@ export function loadShotDetail(db: Queryable, ownerId: string, shotId: string): 
     timeZone,
     steps
   };
+}
+
+/**
+ * D-118: for a recipe's first shot, what changed since the bean's shot before it (D-81, D-113), named as
+ * on the shot form; nothing when the bean had no shot before.
+ */
+function changesSincePrevious(
+  db: Queryable,
+  ownerId: string,
+  r: typeof recipe.$inferSelect,
+  s: { id: string; brewedAt: number }
+): string[] {
+  const previous = db
+    .select({ recipe })
+    .from(shot)
+    .innerJoin(recipe, eq(recipe.id, shot.recipeId))
+    .where(
+      and(
+        eq(shot.ownerId, ownerId),
+        eq(recipe.beanId, r.beanId),
+        or(lt(shot.brewedAt, s.brewedAt), and(eq(shot.brewedAt, s.brewedAt), lt(shot.id, s.id)))
+      )
+    )
+    .orderBy(desc(shot.brewedAt), desc(shot.id))
+    .get();
+  return previous ? describeChange(r, previous.recipe) : [];
 }
 
 /** Brewed before the other shot; the same moment falls back to the id, which is time-ordered (UUID v7). */

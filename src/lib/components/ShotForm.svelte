@@ -71,7 +71,7 @@
       reset: false
     });
   }
-  let sheet: 'more' | 'bean' | null = $state(null);
+  let sheet: 'more' | 'bean' | 'delete' | null = $state(null);
   let tab: 'setup' | 'tasting' = $state('setup');
   let saving = $state(false);
   let localProblems: string[] = $state([]);
@@ -312,6 +312,25 @@
           </form>
         {/if}
       </BottomSheet>
+    {:else if sheet === 'delete'}
+      <!-- D-116: deleting asks first. The confirmation is not designed yet (docs/open-items.md). -->
+      <BottomSheet
+        short
+        label="Delete this shot"
+        closeLabel="Keep the shot"
+        onclose={() => (sheet = null)}
+      >
+        <h2 class="cn-type-heading sheet-title">Delete this shot?</h2>
+        <p class="delete-note">
+          It is removed from the Journal and from every average. This cannot be undone.
+        </p>
+        <form method="POST" action="?/delete" class="delete-actions">
+          <button class="cn-btn-primary tap-strong" type="submit">Delete shot</button>
+          <button class="cn-btn-secondary tap" type="button" onclick={() => (sheet = null)}
+            >Keep it</button
+          >
+        </form>
+      </BottomSheet>
     {/if}
   </div>
 
@@ -332,6 +351,11 @@
       }}
     >
       <input type="hidden" name="shot" value={JSON.stringify(shot)} />
+      {#if data.edit}
+        <button class="delete tap" type="button" onclick={() => (sheet = 'delete')}
+          >Delete shot</button
+        >
+      {/if}
       <button class="cn-btn-primary tap-strong" type="submit" disabled={saving}
         >{data.edit ? 'Save changes' : 'Save shot'}</button
       >
@@ -346,6 +370,31 @@
 {/snippet}
 
 <style>
+  /* D-116: a quiet action next to Save; it asks before deleting. */
+  .delete {
+    width: 100%;
+    height: var(--touch-min);
+    margin-bottom: var(--space-2);
+    border: none;
+    border-radius: var(--radius-md);
+    background: none;
+    color: var(--ink-muted);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .delete-note {
+    margin: 0;
+    font-size: 15px;
+    color: var(--ink-soft);
+  }
+
+  .delete-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
   .page {
     flex: 1;
     min-height: 0;

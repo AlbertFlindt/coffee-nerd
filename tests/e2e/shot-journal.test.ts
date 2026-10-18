@@ -25,7 +25,7 @@ test.beforeAll(async ({ browser }) => {
     id: string;
   };
   db.prepare(
-    'update shot set notes = ?, score = 7, balance = -2, body = 7, sweetness = 8 where id = ?'
+    'update shot set notes = ?, score = 7, balance = -2, body = 7, sweetness = 8, aftertaste = 6 where id = ?'
   ).run('Ran fast, a bit thin. Try 0.1 finer tomorrow.', latest.id);
   for (const name of ['Berry', 'Dark chocolate'])
     db.prepare(
@@ -166,6 +166,12 @@ test('D-54: the bean filter lists the beans that have shots', async () => {
   await expectNoPageScroll();
   await screenshot('JournalFiltered');
 
+  // D-117: "Back" from the shot returns to the Journal as it was left.
+  await rows().first().click();
+  await page.getByRole('link', { name: 'Back to Journal' }).click();
+  await expect(page).toHaveURL(/[?&]recipe=/);
+  await expect(rows()).toHaveCount(1);
+
   // Choosing all beans again drops the recipe filter too.
   await chip.click();
   await sheet.getByRole('button', { name: 'All beans' }).click();
@@ -187,7 +193,9 @@ test('ShotDetail, D-57: tapping a shot opens it', async () => {
   for (const label of ['Grind', 'Dose', 'Yield', 'Time']) await expect(values).toContainText(label);
   await expect(page.getByText(/^Ratio 1 : \d\.\d$/)).toBeVisible();
   const taste = page.getByRole('region', { name: 'Taste' });
-  for (const label of ['Balance', 'Body', 'Sweetness']) await expect(taste).toContainText(label);
+  // D-115: aftertaste shows because this shot has one.
+  for (const label of ['Balance', 'Body', 'Sweetness', 'Aftertaste'])
+    await expect(taste).toContainText(label);
   await expect(taste).toContainText('Slightly sour');
   await expect(taste.getByRole('list', { name: 'Flavor notes' })).toContainText('Dark chocolate');
   // D-109, D-110: against the recipe's other shots; the count includes this one.
@@ -258,4 +266,29 @@ test('D-113: editing, another bean keeps the values entered', async () => {
   await expect(page.locator('.cn-tag')).toHaveText('New recipe');
   await page.getByRole('button', { name: 'Save changes' }).click();
   await expect(page.getByRole('region', { name: 'Bean and setup' })).toContainText('Kiambu AA');
+});
+
+test('D-116: a shot is deleted from the edit form, after a confirmation', async () => {
+  await page.getByRole('link', { name: 'Back to Journal' }).click();
+  await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
+  await expect(rows().first()).toBeVisible();
+  const before = await rows().count();
+  await rows().first().click();
+  await page.getByRole('link', { name: 'Edit' }).click();
+  await page.getByRole('button', { name: 'Delete shot' }).click();
+  const confirm = page.getByRole('region', { name: 'Delete this shot' });
+  await expect(confirm).toContainText('This cannot be undone.');
+  await confirm.getByRole('button', { name: 'Keep it' }).click();
+  await expect(confirm).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'Edit shot' })).toBeVisible();
+  // D-36: with "Delete shot" the edit form still fits a phone browser (412 × 780), Save in view.
+  await page.setViewportSize({ width: 412, height: 780 });
+  await expectNoPageScroll();
+  await expect(page.getByRole('button', { name: 'Save changes' })).toBeInViewport();
+  await page.setViewportSize({ width: 412, height: 915 });
+
+  await page.getByRole('button', { name: 'Delete shot' }).click();
+  await confirm.getByRole('button', { name: 'Delete shot' }).click();
+  await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
+  await expect(rows()).toHaveCount(before - 1);
 });
