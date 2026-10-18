@@ -8,7 +8,7 @@
 - Installable as an app on your phone or tablet (PWA); opens offline, and shots saved offline are sent when you're back online.
 - Built for coffee nerds: recipe matching across your whole history, σ and distributions in Insights, any machine described by hand.
 
-> **Status:** the shot form works (milestone M3); Journal, Library, Home and Insights come next. Not ready for daily use yet. Private for now; it will become open source once it is mature.
+> **Status:** the shot form, the Journal and the shot detail work (milestones M3 and M4); Library, Home and Insights come next. Not ready for daily use yet. Private for now; it will become open source once it is mature.
 
 ## Try the latest build on your server (Dockge)
 

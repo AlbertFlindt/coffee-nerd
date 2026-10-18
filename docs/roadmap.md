@@ -52,6 +52,8 @@ Day-grouped list, filters, Rate block, shot detail with "Compared with this reci
 ## M5 — Beans ☐  (screens 7, 9, 10)
 Overview, Add bean with "Same as before", bean detail with recipes and Brew next, finish and reopen with undo.
 
+**Before starting:** the owner syncs the design system (D-119: empty slider handle, pressed buttons, the sheet's drag strip, the tab bar's height) and reviews the M4 details listed for M5 in `docs/open-items.md`.
+
 ## M6 — Gear and My setup ☐  (screens 8, 12–16)
 Gear list, machine/grinder/basket detail, Add your own feature, Edit My setup. Library landing (screen 17).
 
