@@ -35,10 +35,6 @@ Last updated: 2026-10-18
 | The Rate sheet when the score cannot be saved: it stays open with "The score could not be saved. Nothing was changed." under the score row | M10 | D-111 |
 | Tab bar: the screens (Journal.png, ShotDetail.png) draw it about 100 px tall, the design system's `--tabbar-h` is 84 px; built at 84 px, so icons sit about 8 px lower than in the PNGs. Settle in the design-system sync | M5 (D-119) | D-30, D-114 |
 | "Compared with this recipe": the distance is compared as shown, to one decimal, so 1.04σ reads "Within normal range" (never "1.0σ faster than usual"); a reading of D-110 to confirm | M9 (Insights uses the same σ) | D-110 |
-| Journal row details: a missing yield or time is left out of the values ("1.6 · 18.0 g · 25.5 s"); a rated shot without a balance shows nothing on the taste line; a date in another year names the year ("Tue 30 Dec 2025") | M5 (review with the design-system sync) | D-54, D-91 |
-| Journal: "Unrated · N" counts within the bean and recipe filters (the header's "this week" counts all, D-117); two recipes that differ only in setup (e.g. temperature) get the same label in the recipe filter | M5 (review with the design-system sync) | D-54, D-112 |
-| Editing: the bean list also offers the shot's own bean when it has been finished since (D-113 names "another open bean") | M5 (review with the design-system sync) | D-113 |
-| Shot detail: "Compared with this recipe" shows only the average when the other shots do not vary (σ = 0); the notes card and the flavor notes are left out when empty; a long note scrolls inside its card; corners of the score block and flavor notes use `--radius-sm` (10 px) where the screens draw 12 px, which has no token | M5 (review with the design-system sync) | D-57, D-109, D-36 |
 | Editing a shot: the "Delete shot" button below "Save changes" and its confirmation sheet ("Delete this shot?", "Delete shot" / "Keep it") are not designed yet (D-116) | M5 (design-system sync, D-119) | D-116 |
 | Shot form: the message when the server refuses a shot ("The shot could not be saved. Nothing was changed.", above Save) | M10 | M3 |
 | Shot form: the message when a switched-on feature has no value yet ("Set Low bar end first.", above Save) | M6 | D-78, M3 |
@@ -52,7 +48,7 @@ Last updated: 2026-10-18
 | Shot form: choosing another machine or grinder (D-94 waits for the Gear pages) | M6 | D-94 |
 | Shot form: the gentle hint when the dose is outside the basket's dose range | M6 | D-49 |
 | Tablet layouts, light theme, focus and hover styles | Not scheduled | Open topic 5, design-system README |
-| Design system: the empty slider handle (D-106, built as a hollow dashed circle in ink-muted) and the pressed state of buttons (D-107, built as an amber flash, and a slight press for amber buttons) are not in the design system yet; the sheet handle now sits in the middle of a 44 px drag strip, with more room around it than the screens show (owner feedback, D-108); add them to the master and sync | M5 (owner syncs the design system first, D-119) | D-106, D-107, D-108, D-119 |
+| Design system: the empty slider handle (D-106, built as a hollow dashed circle in ink-muted) and the pressed state of buttons (D-107, built as an amber flash, and a slight press for amber buttons) are not in the design system yet; the sheet handle now sits in the middle of a 44 px drag strip, with more room around it than the screens show (owner feedback, D-108); the 12 px corners of the shot detail's score block and flavor notes (D-123, built with `--radius-sm`, 10 px); add them to the master and sync | M5 (owner syncs the design system first, D-119) | D-106, D-107, D-108, D-119, D-123 |
 | Shorter screens: the shot form tightens its spacing below 880 px and 760 px of height (D-36). Below about 740 px it no longer fits and the form area scrolls inside itself, so More can scroll out of view; a design for small phones is still to do | M10 | D-36 |
 
 ## 3. Product topics not decided yet

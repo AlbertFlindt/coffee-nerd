@@ -124,6 +124,14 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the detail is where you look for why a shot differs; the list stays short.
 - **D-119 — The Journal's undesigned states are accepted as built.** The Rate sheet, the bean and recipe lists, the empty Journal, the "Edit shot" wording, the "Not set" and "Not rated" states, the sliding chip row and the taste sliders' "Clear" control stay as built in M4 until the canvas designs them. The design system will be synced (empty slider handle, pressed buttons, the sheet's drag strip, the tab bar's height) before M5.
   - *Why:* they work at the brew station; a redesign can replace them later without changing behavior.
+- **D-120 — The Journal's row details and unrated count stay as built.** A Journal row leaves out a missing yield or time ("1.6 · 18.0 g · 25.5 s"), shows nothing on the taste line for a rated shot without a balance, and names the year for a date in another year ("Tue 30 Dec 2025"). "Unrated · N" counts the shots within the chosen bean and recipe filters. Refines D-54 and D-117.
+  - *Why:* the row stays short and shows only what was entered; the count matches the list you get when you tap it.
+- **D-121 — Recipes with the same values say what tells them apart.** When two recipes in the Journal's recipe filter would get the same label because they differ only in setup (for example temperature), each label adds the setup values in which they differ: "1.6 · 18.0 g · 94 °C · 3 shots". Refines D-112.
+  - *Why:* two entries that read the same cannot be told apart.
+- **D-122 — Editing a shot offers open beans only.** The bean list on the edit form lists open beans only, also when the shot's own bean has been finished since; the shot keeps its bean until another open bean is picked. Refines D-113.
+  - *Why:* the list is the same as the shot form's; finished beans stay out of the way.
+- **D-123 — The shot detail's details stay as built.** When the recipe's other shots do not vary, "Compared with this recipe" shows only the average. The notes card and the flavor notes are left out when empty, and a long note scrolls inside its card (D-36). The score block and the flavor notes get 12 px corners from a new design-system token, added in the design-system sync. Refines D-57 and D-109.
+  - *Why:* without spread there is no normal range to compare with; empty cards add nothing; the screens draw 12 px corners.
 
 ## 7. Shot form (espresso)
 
