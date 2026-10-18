@@ -274,6 +274,12 @@ describe('setupSummary', () => {
     const waiting = withFeatures({ temperature: { label: 'Temperature', unit: '°C', on: true } });
     expect(setupSummary(waiting.setup, features)).toBe('Preinfusion 4 s · Low bar start 5 s');
   });
+
+  it('D-144: the temperature can be left out', () => {
+    expect(setupSummary(base.setup, features, { temperature: false })).toBe(
+      'Preinfusion 4 s · Low bar start 5 s'
+    );
+  });
 });
 
 describe('setupDetail', () => {

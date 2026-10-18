@@ -317,6 +317,11 @@ export function loadBeanDetail(
   const byRecipe = recipes.map((r) => ({ recipeId: r.id, shots: ofRecipe(r.id) }));
   const order = rankRecipes(byRecipe);
   const today = localDate(now, settings.timeZone);
+  // D-144: the rows name the temperature only when the bean's recipes do not all share it.
+  const temperatures = new Set(
+    recipes.map((r) => JSON.stringify(r.setup.features.temperature ?? null))
+  );
+  const temperature = temperatures.size > 1;
 
   return {
     id: b.id,
@@ -345,7 +350,7 @@ export function loadBeanDetail(
           }
         ),
         detail: recipeRowDetail(
-          setupSummary(r.setup, machine?.features ?? []),
+          setupSummary(r.setup, machine?.features ?? [], { temperature }),
           its.map((s) => s.time),
           settings.timeStep
         ),

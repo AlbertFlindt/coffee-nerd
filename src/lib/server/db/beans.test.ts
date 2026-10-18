@@ -292,7 +292,8 @@ describe('loadBeanDetail', () => {
     expect(detail.recipes).toMatchObject([
       {
         title: 'Grind 1.6 · 18.0 g → 36.0 g',
-        detail: 'Preinfusion 4 s · Low bar start 5 s · 93 °C · avg 28.0 s',
+        // D-144: both recipes are brewed at 93 °C, so the rows leave it out.
+        detail: 'Preinfusion 4 s · Low bar start 5 s · avg 28.0 s',
         history: { text: 'Reused 1x', reused: true },
         best: 9,
         marked: false
@@ -304,6 +305,22 @@ describe('loadBeanDetail', () => {
         marked: false
       }
     ]);
+  });
+
+  it('D-144: when the recipes differ in temperature, every row names it', () => {
+    shot(T0 - 2 * DAY);
+    const hot = shot(T0 - DAY, {
+      setup: {
+        features: {
+          ...REFERENCE.myFeatures,
+          temperature: { ...REFERENCE.myFeatures.temperature, value: 94000 }
+        },
+        routine: null
+      }
+    });
+    const rows = loadBeanDetail(db, ids.userId, ids.beanId, T0)!.recipes;
+    expect(rows.find((r) => r.id === hot.recipeId)?.detail).toMatch(/· 94 °C ·/);
+    expect(rows.find((r) => r.id !== hot.recipeId)?.detail).toMatch(/· 93 °C ·/);
   });
 
   it('D-60: another user’s bean is not found', () => {
