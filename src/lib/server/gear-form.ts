@@ -13,8 +13,10 @@ const PROBLEM: [RegExp, string][] = [
   [/^gear: not found/, 'This gear could not be found']
 ];
 
-export function gearProblems(problems: string[]): string[] {
-  const words = problems.map(
+export function gearProblems(problems: string[], kind?: string): string[] {
+  // A basket's name is built from its brand (D-150), so a missing name is the missing brand.
+  const relevant = kind === 'basket' ? problems.filter((p) => !p.startsWith('name')) : problems;
+  const words = relevant.map(
     (p) =>
       PROBLEM.find(([pattern]) => pattern.test(p))?.[1] ?? 'Something on this page is not right'
   );
@@ -34,7 +36,7 @@ export async function saveGearForm(request: Request, save: (input: GearInput) =>
     save(input);
   } catch (err) {
     if (!(err instanceof GearRejected)) throw err;
-    return fail(400, { problems: gearProblems(err.problems) });
+    return fail(400, { problems: gearProblems(err.problems, input.kind) });
   }
   return null;
 }

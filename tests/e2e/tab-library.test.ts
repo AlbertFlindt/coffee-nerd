@@ -41,12 +41,14 @@ async function screenshot(name: string) {
   await page.screenshot({ path: `screenshots/${name}.png` });
 }
 
-test('Beans, D-124: the Library tab opens the Beans overview', async () => {
+test('Beans, D-156: the Library tab opens Library, and Beans is one of its doors', async () => {
   const bar = page.getByRole('navigation', { name: 'Main' });
   await bar.getByRole('link', { name: 'Library' }).click();
+  await expect(page.getByRole('heading', { name: 'Library', level: 1 })).toBeVisible();
+  await page.getByRole('link', { name: /^Beans/ }).click();
   await expect(page.getByRole('heading', { name: 'Beans', level: 1 })).toBeVisible();
   await expect(bar.getByRole('link', { name: 'Library' })).toHaveAttribute('aria-current', 'page');
-  await expect(page.getByRole('link', { name: 'Back to Library' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Back to Library' })).toBeVisible();
 
   // D-37: open beans as cards with their roast age, origin and numbers (D-132); shot-form.test.ts added
   // a second open bean.
@@ -288,4 +290,100 @@ test('D-129: Brew next on a finished bean reopens it', async () => {
   await expect(first).toContainText('Next shot starts here');
   // Leave no mark behind.
   await first.getByRole('button', { name: 'Brewing next. Tap to undo' }).click();
+});
+
+test('Library, D-50, D-156: four doors; Puck prep and Tags wait for M7', async () => {
+  await page.goto('/library');
+  await expect(page.getByText('The nerdy basement')).toBeVisible();
+  await expect(page.getByRole('link', { name: /^Beans .*open/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: /^Gear .*items/ })).toBeVisible();
+  for (const name of ['Puck prep', 'Tags'])
+    await expect(page.locator('[aria-disabled="true"]', { hasText: name })).toBeVisible();
+  await expectNoPageScroll();
+  await screenshot('Library');
+});
+
+test('Equipment, D-38: My setup on top, gear by kind with the Default chip', async () => {
+  await page.getByRole('link', { name: /^Gear/ }).click();
+  await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
+  const setup = page.getByRole('region', { name: 'My setup' });
+  await expect(setup).toContainText('Lelit Bianca');
+  await expect(setup).toContainText('Timemore 064S');
+  await expect(setup).toContainText('VST · 18 g');
+  await expect(setup).toContainText('Daily routine');
+  await expect(setup).toContainText(/Dose \d+\.\d g/);
+  for (const group of ['Machines', 'Grinders', 'Baskets'])
+    await expect(page.getByRole('heading', { name: group })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Lelit Bianca Semi-auto.*Default/ })).toBeVisible();
+  await expectNoPageScroll();
+  await screenshot('Equipment');
+});
+
+test('GearDetail, D-44: switching a feature off changes what the machine can do', async () => {
+  await page.getByRole('link', { name: /^Lelit Bianca/ }).click();
+  await expect(page.getByRole('heading', { name: 'Machine', level: 1 })).toBeVisible();
+  await expect(page.getByText('Used in My setup · choose another default first')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Archive' })).toHaveCount(0);
+  await expectNoPageScroll();
+  await screenshot('GearDetail');
+  await page.getByRole('switch', { name: 'Low bar end' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
+  await expect(page.getByRole('link', { name: /^Lelit Bianca/ })).toContainText(
+    'Semi-auto · Preinfusion, low bar start'
+  );
+  await expect(page.getByRole('link', { name: /^Lelit Bianca/ })).not.toContainText('low bar end');
+  // Switch it back, so the reference setup stays as it was.
+  await page.getByRole('link', { name: /^Lelit Bianca/ }).click();
+  await page.getByRole('switch', { name: 'Low bar end' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
+});
+
+test('GrinderDetail, D-48: the dial and its preview', async () => {
+  await page.getByRole('link', { name: /^Timemore 064S/ }).click();
+  await expect(page.getByRole('heading', { name: 'Grinder', level: 1 })).toBeVisible();
+  await expect(page.getByText('Shot form › Grind')).toBeVisible();
+  await expect(page.getByText(/Range 0\.0–16\.0/)).toBeVisible();
+  await expectNoPageScroll();
+  await screenshot('GrinderDetail');
+  await page.getByRole('link', { name: 'Back to Gear' }).click();
+});
+
+test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then archive it', async () => {
+  await page.getByRole('link', { name: /^VST · 18 g/ }).click();
+  await expect(page.getByRole('heading', { name: 'Basket', level: 1 })).toBeVisible();
+  await expect(page.getByLabel('Brand')).toHaveValue('VST');
+  await expect(page.getByText('Fits Lelit Bianca')).toBeVisible();
+  await expectNoPageScroll();
+  await screenshot('BasketDetail');
+  await page.getByRole('link', { name: 'Back to Gear' }).click();
+
+  await page.getByRole('button', { name: 'Add gear' }).click();
+  await page.getByRole('button', { name: 'Basket' }).click();
+  await expect(page.getByRole('heading', { name: 'Add basket', level: 1 })).toBeVisible();
+  // D-158: a new basket starts as a precision double for 58 mm.
+  await expect(page.getByRole('radio', { name: 'Precision' })).toHaveAttribute(
+    'aria-checked',
+    'true'
+  );
+  await expect(page.getByRole('radio', { name: 'Double' })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('button', { name: 'Add basket' }).click();
+  await expect(page.getByRole('alert')).toHaveText('Brand is required');
+  await page.getByLabel('Brand').fill('IMS');
+  await page.getByLabel('Size', { exact: true }).fill('20');
+  await page.getByLabel('Size', { exact: true }).blur();
+  await page.getByRole('button', { name: 'Add basket' }).click();
+  await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
+  const ims = page.getByRole('link', { name: /^IMS · 20 g/ });
+  await expect(ims).toContainText('Precision · 58 mm');
+
+  await ims.click();
+  await page.getByRole('button', { name: 'Archive' }).click();
+  await page
+    .getByRole('region', { name: 'Archive this basket' })
+    .getByRole('button', { name: 'Archive' })
+    .click();
+  await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
+  await expect(page.getByRole('link', { name: /^IMS/ })).toHaveCount(0);
 });

@@ -56,7 +56,8 @@
   {#each problems as problem (problem)}
     <p class="problem" role="alert">{problem}</p>
   {/each}
-  <form method="POST" action="?/save" use:enhance>
+  <!-- Adding keeps ?kind= in the URL, so the page can show what to fix (D-147). -->
+  <form method="POST" action={adding ? `?kind=${kind}&/save` : '?/save'} use:enhance>
     <input type="hidden" name="payload" value={payload} />
     <button class="cn-btn-primary cn-tap-strong">{adding ? `Add ${kind}` : 'Save'}</button>
   </form>

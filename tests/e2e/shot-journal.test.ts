@@ -82,14 +82,11 @@ test('Journal, D-54: every shot, newest first, grouped by day', async () => {
   await expect(first.locator('.cn-tag')).toHaveText(/^(Recipe reused \d+x|New recipe)$/);
   // The oldest shot is its recipe's first (D-16).
   await expect(rows().last().locator('.cn-tag')).toHaveText('New recipe');
-  // D-30, D-114, D-124: the tab bar; Library opens Beans, Insights waits for its page.
+  // D-30, D-114, D-156: the tab bar; Library opens the Library page, Insights waits for its page.
   const bar = page.getByRole('navigation', { name: 'Main' });
   await expect(bar.getByRole('link', { name: 'Journal' })).toHaveAttribute('aria-current', 'page');
   await expect(bar.getByRole('link', { name: 'New shot' })).toBeVisible();
-  await expect(bar.getByRole('link', { name: 'Library' })).toHaveAttribute(
-    'href',
-    '/library/beans'
-  );
+  await expect(bar.getByRole('link', { name: 'Library' })).toHaveAttribute('href', '/library');
   await expect(bar.getByText('Insights')).toHaveAttribute('aria-disabled', 'true');
   await expectNoPageScroll();
   await screenshot('Journal');
