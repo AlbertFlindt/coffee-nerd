@@ -110,7 +110,7 @@ describe('loadBeans', () => {
     expect(loadBeans(db, ids.userId, T0).open[0].gramsLeft).toBe('232 g left');
   });
 
-  it('D-37: open beans newest first; finished beans below, most recently finished first', () => {
+  it('D-137: open beans newest first; finished beans below, most recently finished first', () => {
     const kiambu = addBean({ name: 'Kiambu AA', createdAt: T0 });
     addBean({ name: 'Huila', status: 'finished', finishedAt: T0 - 9 * DAY });
     addBean({ name: 'Cerrado', status: 'finished', finishedAt: T0 - 2 * DAY });

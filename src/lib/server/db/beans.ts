@@ -27,7 +27,7 @@ export type BeanSummary = {
 
 export type Beans = { open: BeanSummary[]; finished: BeanSummary[] };
 
-/** Open beans newest first, then finished beans, most recently finished first (D-37). */
+/** Open beans newest first, then finished beans, most recently finished first (D-37, D-137). */
 export function loadBeans(db: Queryable, ownerId: string, now: number): Beans {
   const beans = db
     .select()

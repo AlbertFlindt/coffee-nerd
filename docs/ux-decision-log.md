@@ -261,7 +261,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 - **D-50 — Library landing page.** What the Library tab opens to. Title "Library" with the subtitle "The nerdy basement", then **four full-width rows** — **Beans, Gear, Puck prep, Tags** — each with a cream icon tile on the left, its name and two short live summaries, and a chevron on the right (e.g. "2 open · 6 finished" / "Freshest: 4 days"; "4 items" / "Bianca · Timemore 064S"; "2 routines · 6 steps" / "In use: Daily routine"; "18 flavor notes" / "Most used: Berry"). No add buttons here; each section page has its own (D-33).
   - *Why:* four equal doors into the basement, each telling you something useful before you tap; the summaries make the landing page worth a glance rather than just a menu. Rows (instead of a 2×2 grid) give the summaries room to read in one line and match the list pattern used elsewhere in Library.
-- **D-37 — Bean overview: open beans as cards, finished beans as rows.** *(Revised 2026-10-18: see D-131, D-132, D-135, D-136.)*
+- **D-37 — Bean overview: open beans as cards, finished beans as rows.** *(Revised 2026-10-18: see D-131, D-132, D-135, D-136, D-137.)*
   - **Open** beans (several can be open at once) get a card with a large **roast age** block ("12 days since roast") on the left, then name, roaster · origin · process, and **best score · recipes · shots**. A bean with no rated shots says "Not rated yet".
   - **Finished** beans collapse into compact rows below (name, roaster · origin · process, best score, recipes · shots); this list is the part that scrolls (D-36).
   - "Add bean" sits in the header.
@@ -325,6 +325,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the bean's number agrees with its best recipe, the one a re-buy starts from (D-73); a row's number says how good that recipe has been at its best.
 - **D-136 — The Beans overview scrolls as one list.** Below the header, the open bean cards and the finished rows scroll together as one list; the header and the tab bar stay in place. While everything fits, nothing moves. Revises D-37, where only the finished list scrolled.
   - *Why:* with many open bags the cards would otherwise push the finished list off the screen.
+- **D-137 — The order of beans.** On the Beans overview, open beans are listed by when they were added, newest first, as in the shot form's bean list; finished beans by when they were finished, most recent first. Refines D-37.
+  - *Why:* the bag you just bought is the one you are dialing in; the bag you just finished is the one you look back on.
 - **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-17: see D-78, D-83.)*
   - **My setup** (a light cream card so it stands out): default machine, grinder, basket and puck prep routine, plus **default values** (dose, yield, grind, temperature, pressure profile). One "Edit" button.
   - Defaults are the **starting point for a bean's first shot** (and when switching gear). After that, D-03 applies: new shots copy the last shot.
