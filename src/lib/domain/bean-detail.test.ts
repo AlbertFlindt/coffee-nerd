@@ -25,6 +25,11 @@ describe('recipeRowDetail', () => {
     );
   });
 
+  it('D-128: the average is rounded to the time step’s decimals', () => {
+    expect(recipeRowDetail('', [25000, 27000, 27000], 100)).toBe('avg 26.3 s');
+    expect(recipeRowDetail('', [25000, 26000], 500)).toBe('avg 25.5 s');
+  });
+
   it('D-128: times that were not entered are left out; no time, no average', () => {
     expect(recipeRowDetail('93 °C', [null, 25000], 100)).toBe('93 °C · avg 25.0 s');
     expect(recipeRowDetail('93 °C', [null], 100)).toBe('93 °C');

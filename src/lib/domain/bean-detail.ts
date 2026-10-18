@@ -1,5 +1,5 @@
 // The bean detail page's recipe rows (D-42, D-128, D-143). Pure, like the rest of the domain.
-import { decimalsFor, formatQuantity, type Thousandths } from './units';
+import { decimalsFor, decimalsForStep, formatQuantity, type Thousandths } from './units';
 import { altitudeText, PROCESS_LABEL, roastDateText, type Process } from './bean';
 import { countryName } from './countries';
 
@@ -26,10 +26,12 @@ export function recipeRowDetail(
   const entered = times.filter((t): t is Thousandths => t !== null);
   const parts = setup ? [setup] : [];
   if (entered.length > 0) {
-    const average = Math.round(entered.reduce((sum, t) => sum + t, 0) / entered.length);
-    parts.push(
-      `avg ${formatQuantity(average, { decimals: Math.max(1, decimalsFor(average, timeStep)), unit: 's' })}`
-    );
+    // Shown to the time step's decimals (at least one), like the times themselves (D-07).
+    const decimals = Math.max(1, decimalsForStep(timeStep));
+    const unit = 10 ** (3 - decimals);
+    const average =
+      Math.round(entered.reduce((sum, t) => sum + t, 0) / entered.length / unit) * unit;
+    parts.push(`avg ${formatQuantity(average, { decimals, unit: 's' })}`);
   }
   return parts.join(' · ');
 }
