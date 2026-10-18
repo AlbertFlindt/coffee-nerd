@@ -13,7 +13,7 @@ const PROBLEM: [RegExp, string][] = [
   [/^spec\.doseRange/, 'The dose range must run from low to high'],
   [
     /^spec\.features: used/,
-    'A feature that shots have used cannot be deleted, change its kind or lose an option'
+    'A feature that shots have used cannot be deleted, change its kind or unit, or lose an option'
   ],
   [/^spec\.features/, 'Each feature needs a name, and names must differ'],
   [/^gear: not found/, 'This gear could not be found']

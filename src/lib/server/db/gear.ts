@@ -216,8 +216,9 @@ export function usedFeatureKeys(db: Queryable, ownerId: string): string[] {
 }
 
 /**
- * D-151: a custom feature a shot used stays, with its kind of value and its list options, so the values
- * recipes hold keep their meaning. It can still be renamed, switched off and given new options.
+ * D-151, D-160, D-162: a custom feature a shot used stays, with its kind of value, its unit and its list
+ * options, so the values recipes hold keep their meaning. It can still be renamed, switched off, given
+ * new options, and a new step or range.
  */
 function assertUsedFeaturesKept(db: Queryable, ownerId: string, id: string, spec: MachineSpec) {
   const existing = loadGear(db, ownerId, id);
@@ -227,6 +228,9 @@ function assertUsedFeaturesKept(db: Queryable, ownerId: string, id: string, spec
     if (f.builtIn) return false;
     const next = now.get(f.key);
     if (!next || next.kind !== f.value.kind) return true;
+    // D-162: the unit is what the stored numbers mean.
+    if (f.value.kind === 'number' && next.kind === 'number' && next.unit !== f.value.unit)
+      return true;
     if (f.value.kind !== 'choice' || next.kind !== 'choice') return false;
     const ids = new Set(next.options.map((o) => o.id));
     return f.value.options.some((o) => !ids.has(o.id));

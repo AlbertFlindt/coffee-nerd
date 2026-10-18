@@ -178,6 +178,7 @@
             plain
             autocomplete="off"
             placeholder="e.g. ml"
+            readonly={used}
             bind:value={unit}
           />
         {:else}
@@ -291,7 +292,10 @@
     {#if editing && !used}
       <button type="button" class="cn-btn-quiet cn-tap" onclick={ondelete}>Delete feature</button>
     {:else if editing}
-      <p class="in-use">Used by shots · you can rename it or switch it off</p>
+      <!-- D-160, D-162: a used feature keeps its kind, unit and options. -->
+      <p class="in-use">
+        Used by shots · its unit stays; you can rename it, switch it off or change its step
+      </p>
     {/if}
   </div>
 </BottomSheet>

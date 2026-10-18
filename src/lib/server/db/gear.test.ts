@@ -347,6 +347,40 @@ describe('custom features (D-46, D-151)', () => {
     );
   });
 
+  it('D-162: a used feature keeps its unit; its step and range can change', () => {
+    const water: FeatureDefinition = {
+      ...bloom,
+      label: 'Water',
+      value: { kind: 'number', unit: 'ml', step: 1000 }
+    };
+    saveGear(
+      db,
+      ids.userId,
+      ids.machineId,
+      machine([...REFERENCE.machine.spec.features, water]),
+      T0
+    );
+    useIt();
+    const changed = (value: FeatureDefinition['value']) =>
+      machine([...REFERENCE.machine.spec.features, { ...water, value }]);
+    expect(() =>
+      saveGear(
+        db,
+        ids.userId,
+        ids.machineId,
+        changed({ kind: 'number', unit: 'g', step: 1000 }),
+        T0
+      )
+    ).toThrow(new GearRejected(['spec.features: used']));
+    saveGear(
+      db,
+      ids.userId,
+      ids.machineId,
+      changed({ kind: 'number', unit: 'ml', step: 500, min: 0, max: 50000 }),
+      T0
+    );
+  });
+
   it('D-152: a list of your own needs at least two options', () => {
     const one: FeatureDefinition = {
       ...bloom,

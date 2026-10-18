@@ -3,6 +3,7 @@
   // (D-22, D-24, D-25), changes since the last shot in sage (D-90). Tasting: body, sweetness, aftertaste,
   // flavor notes and notes (D-23, D-27, D-97, D-101); all start empty (D-11).
   import BottomSheet from './BottomSheet.svelte';
+  import ChoiceRow from './ChoiceRow.svelte';
   import SetupRow from './SetupRow.svelte';
   import TasteSlider from './TasteSlider.svelte';
   import type { ShotState } from './shot-state';
@@ -217,31 +218,7 @@
               {#if f.value.kind === 'number' || f.value.kind === 'seconds'}
                 <SetupRow label={f.label} switchable {...rowProps(f)} />
               {:else}
-                {@const kind = f.value}
-                <div class="cn-row custom">
-                  <button
-                    type="button"
-                    class="cn-switch"
-                    role="switch"
-                    aria-checked={v.on}
-                    aria-label={f.label}
-                    onclick={() => update(f.key, { on: !v.on })}
-                  ></button>
-                  <span class="cn-row__label" class:muted={!v.on}>{f.label}</span>
-                  {#if kind.kind === 'choice' && v.on}
-                    <button
-                      type="button"
-                      class="choice"
-                      aria-label="{f.label}, tap for the next option"
-                      onclick={() => {
-                        const i = kind.options.findIndex((o) => o.id === v.choice);
-                        update(f.key, { choice: kind.options[(i + 1) % kind.options.length].id });
-                      }}>{kind.options.find((o) => o.id === v.choice)?.label ?? '—'}</button
-                    >
-                  {:else}
-                    <span class="off">{v.on ? 'On' : 'Off'}</span>
-                  {/if}
-                </div>
+                <ChoiceRow feature={f} value={v} onupdate={(patch) => update(f.key, patch)} />
               {/if}
             {/each}
           </div>
@@ -424,33 +401,6 @@
     border-radius: var(--radius-md);
     overflow: hidden;
     flex: none;
-  }
-
-  .custom {
-    border-radius: 0;
-    min-height: 56px;
-    padding-right: 14px;
-  }
-
-  .muted {
-    font-weight: 500;
-    color: var(--ink-muted);
-  }
-
-  .off {
-    font-size: 14px;
-    color: var(--ink-muted);
-  }
-
-  .choice {
-    height: var(--touch-min);
-    padding: 0 10px;
-    border: none;
-    border-radius: var(--radius-pill);
-    background: transparent;
-    color: var(--amber);
-    font-size: 15px;
-    font-weight: 600;
   }
 
   .link-row {
