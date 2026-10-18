@@ -297,11 +297,11 @@ describe('loadEditShotForm', () => {
     expect(form.prefill.grind).toBe(1600); // the values stay the shot's
   });
 
-  it('D-113: the shot’s own bean stays a choice after it is finished, first in the list', () => {
+  it('D-122: a finished own bean is not offered, but the shot keeps it until another is picked', () => {
     const shotId = save({}, 1).shotId;
     db.update(bean).set({ status: 'finished' }).where(eq(bean.id, ids.beanId)).run();
     const form = ready(loadEditShotForm(db, ids.userId, shotId)!);
-    expect(form.openBeans[0].id).toBe(ids.beanId);
+    expect(form.openBeans.some((b) => b.id === ids.beanId)).toBe(false);
     expect(form.bean.id).toBe(ids.beanId);
   });
 

@@ -143,19 +143,33 @@ export function setupSummary(setup: SetupSnapshot, features: readonly FeatureDef
  * waiting for its value (D-78) is left out.
  */
 export function setupDetail(setup: SetupSnapshot, features: readonly FeatureDefinition[]): string {
+  return setupParts(setup, features)
+    .filter((part) => setup.features[part.key]?.on)
+    .map((part) => part.text)
+    .join(' · ');
+}
+
+/**
+ * Each feature of a setup in the shot detail's order (D-57), switched-off ones as "Preinfusion off", for
+ * telling recipes apart (D-121). A feature still waiting for its value (D-78) is left out.
+ */
+export function setupParts(
+  setup: SetupSnapshot,
+  features: readonly FeatureDefinition[]
+): { key: string; text: string }[] {
   const first = ['temperature', 'flat_pressure'];
   const ordered = [
     ...first.flatMap((key) => features.filter((f) => f.key === key)),
     ...features.filter((f) => !first.includes(f.key))
   ];
-  const parts: string[] = [];
+  const parts: { key: string; text: string }[] = [];
   for (const definition of ordered) {
     const value = setup.features[definition.key];
-    if (!value?.on) continue;
-    const text = featureText(definition, value, true);
-    if (text !== null) parts.push(text);
+    if (!value) continue;
+    const text = value.on ? featureText(definition, value, true) : `${definition.label} off`;
+    if (text !== null) parts.push({ key: definition.key, text });
   }
-  return parts.join(' · ');
+  return parts;
 }
 
 /**

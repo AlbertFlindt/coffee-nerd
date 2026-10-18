@@ -177,7 +177,7 @@ export function loadEditShotForm(
     .where(and(eq(bean.ownerId, ownerId), eq(bean.status, 'open')))
     .orderBy(desc(bean.createdAt), desc(bean.id))
     .all();
-  // The shot's own bean may be finished by now; it stays a choice for its own shot.
+  // The shot's own bean may be finished by now: the shot keeps it, but only open beans are offered (D-122).
   const own =
     openBeans.find((b) => b.id === r.beanId) ??
     db
@@ -185,8 +185,7 @@ export function loadEditShotForm(
       .from(bean)
       .where(and(eq(bean.id, r.beanId), eq(bean.ownerId, ownerId)))
       .get()!;
-  const beans = openBeans.some((b) => b.id === own.id) ? openBeans : [own, ...openBeans];
-  const current = beans.find((b) => b.id === beanId) ?? own;
+  const current = openBeans.find((b) => b.id === beanId) ?? own;
 
   const gearRows = db.select().from(gear).where(eq(gear.ownerId, ownerId)).all();
   const routineRows = db.select().from(routine).where(eq(routine.ownerId, ownerId)).all();
@@ -214,7 +213,7 @@ export function loadEditShotForm(
       taste: { score: null, balance: null, body: null, sweetness: null, aftertaste: null }
     },
     bean: current,
-    openBeans: beans,
+    openBeans,
     machine: {
       id: machine.id,
       name: machine.name,

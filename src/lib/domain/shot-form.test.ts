@@ -6,6 +6,7 @@ import {
   matchRecipe,
   setupChanges,
   setupDetail,
+  setupParts,
   setupSummary,
   type KnownRecipe
 } from './shot-form';
@@ -297,5 +298,22 @@ describe('setupDetail', () => {
     expect(setupDetail(waiting.setup, features)).toBe(
       'Flat 9.0 bar · Preinfusion 4 s · Low bar start 5 s at 2.0 bar'
     );
+  });
+});
+
+describe('setupParts', () => {
+  it('D-121: each feature in the shot detail’s order, switched-off ones as off', () => {
+    const withPaddle = withFeatures({
+      [PADDLE]: { label: 'Paddle', on: true, choice: 'mid' },
+      preinfusion: { label: 'Preinfusion', on: false }
+    });
+    expect(setupParts(withPaddle.setup, features)).toEqual([
+      { key: 'temperature', text: '93 °C' },
+      { key: 'flat_pressure', text: 'Flat 9.0 bar' },
+      { key: 'preinfusion', text: 'Preinfusion off' },
+      { key: 'low_bar_start', text: 'Low bar start 5 s at 2.0 bar' },
+      { key: 'low_bar_end', text: 'Low bar end off' },
+      { key: PADDLE, text: 'Paddle Middle' }
+    ]);
   });
 });
