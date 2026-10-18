@@ -1,5 +1,6 @@
 // The Journal and the shot detail (D-54, D-57): days, times and the short texts on a shot's row.
 import { localDate, roastAgeDays } from './bean';
+import { mean, standardDeviation } from './statistics';
 import { tasteWords } from './taste';
 import { decimalsFor, formatQuantity, type Thousandths } from './units';
 
@@ -96,6 +97,41 @@ export function journalTasteText(score: number | null, balance: number | null): 
 export function roastAgeText(roastDate: string, brewedAt: number, timeZone: string): string {
   const days = roastAgeDays(roastDate, brewedAt, timeZone);
   return `${days} ${days === 1 ? 'day' : 'days'} since roast`;
+}
+
+export type RecipeComparison =
+  | { kind: 'no-value' }
+  | { kind: 'not-enough' }
+  /** `sigmas`: how many σ this shot lies from the others' average; null when the others do not vary. */
+  | { kind: 'compared'; mean: number; sigmas: number | null };
+
+/**
+ * "Compared with this recipe" (D-57, D-109): this shot's value against the recipe's other shots, never
+ * itself. Needs two other shots with a value; σ is the sample standard deviation (n − 1).
+ */
+export function compareWithRecipe(
+  value: number | null,
+  others: readonly (number | null)[]
+): RecipeComparison {
+  if (value === null) return { kind: 'no-value' };
+  const values = others.filter((v): v is number => v !== null);
+  if (values.length < 2) return { kind: 'not-enough' };
+  const average = mean(values)!;
+  const sigma = standardDeviation(values)!;
+  return {
+    kind: 'compared',
+    mean: average,
+    sigmas: sigma === 0 ? null : (value - average) / sigma
+  };
+}
+
+/** "Within normal range" within one σ; further away "1.7σ faster than usual" and the like (D-110). */
+export function comparisonText(measure: 'time' | 'score', sigmas: number | null): string | null {
+  if (sigmas === null) return null;
+  if (Math.abs(sigmas) <= 1) return 'Within normal range';
+  const words =
+    measure === 'time' ? (sigmas < 0 ? 'faster' : 'slower') : sigmas < 0 ? 'lower' : 'higher';
+  return `${Math.abs(sigmas).toFixed(1)}σ ${words} than usual`;
 }
 
 function dayNumber(isoDate: string): number {

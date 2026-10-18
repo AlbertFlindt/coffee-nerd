@@ -163,6 +163,24 @@ describe('loadJournal', () => {
 });
 
 describe('loadShotDetail', () => {
+  it('D-109: the recipe’s shot count and its other shots, without this one', () => {
+    save(shotAt(T0 - 3 * DAY, { time: 28000 }));
+    save(shotAt(T0 - 2 * DAY, { grind: 1500 })); // another recipe
+    save(
+      shotAt(T0 - DAY, {
+        time: 29000,
+        taste: { score: 7, balance: null, body: null, sweetness: null, aftertaste: null }
+      })
+    );
+    const id = save(shotAt(T0 - MINUTE, { time: 25500 }));
+    const detail = loadShotDetail(db, ids.userId, id)!;
+    expect(detail.recipe.shotCount).toBe(3);
+    expect(detail.recipe.others).toEqual([
+      { time: 28000, score: 8 },
+      { time: 29000, score: 7 }
+    ]);
+  });
+
   it('D-57: the bean, roast age, gear, routine, setup, values, taste, flavor notes and notes', () => {
     const berry = db.select().from(tag).where(eq(tag.name, 'Berry')).get()!;
     save(shotAt(T0 - DAY));

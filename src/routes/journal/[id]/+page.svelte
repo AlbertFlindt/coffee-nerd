@@ -3,7 +3,13 @@
   // Not here yet, waiting on the owner (docs/open-items.md): "Compared with this recipe" and Edit.
   import { resolve } from '$app/paths';
   import { recipeTagText } from '#lib/domain/fingerprint.ts';
-  import { clockTime, dayLabel, roastAgeText } from '#lib/domain/journal.ts';
+  import {
+    clockTime,
+    compareWithRecipe,
+    comparisonText,
+    dayLabel,
+    roastAgeText
+  } from '#lib/domain/journal.ts';
   import { tasteWords, type TasteScale } from '#lib/domain/taste.ts';
   import { decimalsFor, formatNumber, formatRatio, type Thousandths } from '#lib/domain/units.ts';
   import TabBar from '#lib/components/TabBar.svelte';
@@ -31,6 +37,32 @@
       label: 'Time',
       value: shot.time === null ? null : shown(shot.time, shot.steps.time, 1),
       unit: 's'
+    }
+  ]);
+
+  // D-109, D-110: time and score against the recipe's other shots.
+  const comparisons = $derived([
+    {
+      label: 'Time',
+      measure: 'time' as const,
+      value: shot.time === null ? null : `${shown(shot.time, shot.steps.time, 1)} s`,
+      missing: 'Not set',
+      result: compareWithRecipe(
+        shot.time,
+        shot.recipe.others.map((o) => o.time)
+      ),
+      average: (mean: number) => `vs μ ${formatNumber(Math.round(mean), 1)} s`
+    },
+    {
+      label: 'Score',
+      measure: 'score' as const,
+      value: shot.taste.score === null ? null : String(shot.taste.score),
+      missing: 'Not rated',
+      result: compareWithRecipe(
+        shot.taste.score,
+        shot.recipe.others.map((o) => o.score)
+      ),
+      average: (mean: number) => `vs average ${mean.toFixed(1)}`
     }
   ]);
 
@@ -122,6 +154,38 @@
           {#each shot.flavors as flavor (flavor)}<li>{flavor}</li>{/each}
         </ul>
       {/if}
+    </div>
+  </section>
+
+  <section class="cn-card compared" aria-labelledby="compared-title">
+    <div class="compared-head">
+      <h2 id="compared-title">Compared with this recipe</h2>
+      <span class="count"
+        >{shot.recipe.shotCount} {shot.recipe.shotCount === 1 ? 'shot' : 'shots'}</span
+      >
+    </div>
+    <div class="measures">
+      {#each comparisons as c (c.label)}
+        {@const sentence =
+          c.result.kind === 'compared' ? comparisonText(c.measure, c.result.sigmas) : null}
+        <div class="measure">
+          <span class="soft-13">{c.label}</span>
+          {#if c.value === null}
+            <span class="soft-13">{c.missing}</span>
+          {:else}
+            <span
+              ><b>{c.value}</b>{#if c.result.kind === 'compared'}<span class="soft-13"
+                  >{` ${c.average(c.result.mean)}`}</span
+                >{/if}</span
+            >
+            {#if c.result.kind === 'not-enough'}
+              <span class="verdict">Not enough shots yet</span>
+            {:else if sentence}
+              <span class="verdict">{sentence}</span>
+            {/if}
+          {/if}
+        </div>
+      {/each}
     </div>
   </section>
 
@@ -332,6 +396,57 @@
     background: var(--bg);
     font-size: 13px;
     font-weight: 600;
+  }
+
+  .compared {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .compared-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .compared h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  /* The recipe's history is cherry (D-19). */
+  .count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--cherry);
+  }
+
+  .measures {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    font-size: 13px;
+  }
+
+  .measure {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .measure b {
+    font-weight: 700;
+  }
+
+  .soft-13 {
+    color: var(--ink-muted);
+  }
+
+  .verdict {
+    color: var(--ink-soft);
   }
 
   .notes {

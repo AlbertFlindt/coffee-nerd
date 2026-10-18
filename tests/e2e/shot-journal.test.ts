@@ -152,6 +152,14 @@ test('ShotDetail, D-57: tapping a shot opens it', async () => {
   for (const label of ['Balance', 'Body', 'Sweetness']) await expect(taste).toContainText(label);
   await expect(taste).toContainText('Slightly sour');
   await expect(taste.getByRole('list', { name: 'Flavor notes' })).toContainText('Dark chocolate');
+  // D-109, D-110: against the recipe's other shots; the count includes this one.
+  const reused = Number((await card.locator('.cn-tag').textContent())!.match(/\d+/)?.[0] ?? 0);
+  const compared = page.getByRole('region', { name: 'Compared with this recipe' });
+  await expect(compared).toContainText(`${reused + 1} shots`);
+  await expect(compared).toContainText(/Time\s*\d+\.\d s/);
+  await expect(compared).toContainText(/vs μ \d+\.\d s/);
+  await expect(compared).toContainText(/Within normal range|\d\.\dσ (faster|slower) than usual/);
+  await expect(compared).toContainText(/Score\s*7/);
   await expect(page.getByRole('region', { name: 'Notes' })).toContainText('Notes · just for you');
   await expectNoPageScroll();
   await screenshot('ShotDetail');

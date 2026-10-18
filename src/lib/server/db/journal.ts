@@ -136,6 +136,8 @@ export type ShotDetail = {
     aftertaste: number | null;
   };
   flavors: string[];
+  /** "Compared with this recipe" (D-109): the recipe's shot count and its other shots' results. */
+  recipe: { shotCount: number; others: { time: Thousandths | null; score: number | null }[] };
   notes: string | null;
   timeZone: string;
   steps: Steps;
@@ -172,12 +174,14 @@ export function loadShotDetail(db: Queryable, ownerId: string, shotId: string): 
     .all()
     .map((t) => t.name);
 
-  const earlier = db
-    .select({ id: shot.id, brewedAt: shot.brewedAt })
+  const recipeShots = db
+    .select({ id: shot.id, brewedAt: shot.brewedAt, time: shot.time, score: shot.score })
     .from(shot)
     .where(and(eq(shot.ownerId, ownerId), eq(shot.recipeId, r.id)))
-    .all()
-    .filter((o) => before(o, s)).length;
+    .orderBy(asc(shot.brewedAt), asc(shot.id))
+    .all();
+  const earlier = recipeShots.filter((o) => before(o, s)).length;
+  const others = recipeShots.filter((o) => o.id !== s.id);
 
   const { timeZone, steps } = settingsOf(db, ownerId);
   return {
@@ -204,6 +208,10 @@ export function loadShotDetail(db: Queryable, ownerId: string, shotId: string): 
       aftertaste: s.aftertaste
     },
     flavors,
+    recipe: {
+      shotCount: recipeShots.length,
+      others: others.map(({ time, score }) => ({ time, score }))
+    },
     notes: s.notes,
     timeZone,
     steps

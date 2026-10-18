@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   clockTime,
+  compareWithRecipe,
+  comparisonText,
   coreValuesText,
   dayLabel,
   groupByDay,
@@ -125,5 +127,55 @@ describe('roastAgeText', () => {
     expect(roastAgeText('2026-10-05', at(17, 5, 42), copenhagen)).toBe('12 days since roast');
     expect(roastAgeText('2026-10-16', at(17, 5, 42), copenhagen)).toBe('1 day since roast');
     expect(roastAgeText('2026-10-17', at(17, 5, 42), copenhagen)).toBe('0 days since roast');
+  });
+});
+
+describe('compareWithRecipe', () => {
+  it('D-109: compares with the recipe’s other shots, not this one', () => {
+    // Others: 28.0, 29.0, 26.7 s → μ 27.9 s, σ √1.33 ≈ 1.153 s.
+    const result = compareWithRecipe(25500, [28000, 29000, 26700]);
+    expect(result.kind).toBe('compared');
+    if (result.kind !== 'compared') return;
+    expect(result.mean).toBeCloseTo(27900, 6);
+    expect(result.sigmas).toBeCloseTo((25500 - 27900) / Math.sqrt(1_330_000), 6);
+  });
+
+  it('D-109: needs at least two other shots with a value', () => {
+    expect(compareWithRecipe(25500, [28000])).toEqual({ kind: 'not-enough' });
+    expect(compareWithRecipe(25500, [28000, null])).toEqual({ kind: 'not-enough' });
+    expect(compareWithRecipe(25500, [])).toEqual({ kind: 'not-enough' });
+  });
+
+  it('D-109: a shot without the value has nothing to compare', () => {
+    expect(compareWithRecipe(null, [28000, 29000])).toEqual({ kind: 'no-value' });
+  });
+
+  it('D-109: other shots without spread give an average but no σ', () => {
+    expect(compareWithRecipe(25500, [28000, 28000])).toEqual({
+      kind: 'compared',
+      mean: 28000,
+      sigmas: null
+    });
+  });
+});
+
+describe('comparisonText', () => {
+  it('D-110: within one σ is "Within normal range"', () => {
+    expect(comparisonText('time', 0.4)).toBe('Within normal range');
+    expect(comparisonText('score', -1)).toBe('Within normal range');
+  });
+
+  it('D-110: further away, time is faster or slower than usual', () => {
+    expect(comparisonText('time', -1.71)).toBe('1.7σ faster than usual');
+    expect(comparisonText('time', 2.04)).toBe('2.0σ slower than usual');
+  });
+
+  it('D-110: further away, score is higher or lower than usual', () => {
+    expect(comparisonText('score', 1.25)).toBe('1.3σ higher than usual');
+    expect(comparisonText('score', -3)).toBe('3.0σ lower than usual');
+  });
+
+  it('D-110: without a σ, no sentence', () => {
+    expect(comparisonText('time', null)).toBeNull();
   });
 });
