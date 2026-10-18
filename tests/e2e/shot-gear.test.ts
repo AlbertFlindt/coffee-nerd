@@ -37,9 +37,6 @@ async function screenshot(name: string) {
   await page.screenshot({ path: `screenshots/${name}.png` });
 }
 
-const grindCard = () =>
-  page.getByRole('region', { name: 'Core values' }).locator('.cn-value-card', { hasText: 'Grind' });
-
 test('D-153: the gear line switches the grinder for this shot; the grind control follows', async () => {
   await page.goto('/library/gear');
   await page.getByRole('button', { name: 'Add gear' }).click();
@@ -53,7 +50,7 @@ test('D-153: the gear line switches the grinder for this shot; the grind control
   await expect(page.getByRole('link', { name: /^Comandante C40/ })).toBeVisible();
 
   await page.goto('/shot/new');
-  await expect(grindCard()).toContainText('+ 0.1');
+  await expect(page.getByRole('button', { name: 'Grind plus 0.1' })).toBeVisible();
   await page.getByRole('button', { name: /choose another machine or grinder$/ }).click();
   const sheet = page.getByRole('region', { name: 'Choose machine and grinder' });
   await expect(sheet.getByRole('button', { name: 'Lelit Bianca' })).toHaveAttribute(
@@ -68,7 +65,7 @@ test('D-153: the gear line switches the grinder for this shot; the grind control
   await screenshot('ShotGearSheet');
   await sheet.getByRole('button', { name: 'Comandante C40' }).click();
   await expect(page.locator('.card')).toContainText('Lelit Bianca · Comandante C40');
-  await expect(grindCard()).toContainText('+ 1');
+  await expect(page.getByRole('button', { name: 'Grind plus 1' })).toBeVisible();
   await expect(page.locator('.cn-tag')).toContainText('New recipe');
 });
 
@@ -86,8 +83,8 @@ test('D-154: a dose outside the basket’s range shows a gentle hint, never a bl
 
 test('D-155: the basket and puck prep pickers start with leaving them out', async () => {
   await page.goto('/shot/new');
-  await page.getByRole('button', { name: 'More' }).click();
-  const sheet = page.getByRole('region', { name: 'More' });
+  await page.getByRole('button', { name: 'More', exact: true }).click();
+  const sheet = page.getByRole('region', { name: 'More', exact: true });
   await sheet.getByRole('button', { name: /^Basket/ }).click();
   await expect(sheet.locator('.pick').first()).toHaveText('No basket');
   await sheet.getByRole('button', { name: 'No basket' }).click();

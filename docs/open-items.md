@@ -16,7 +16,7 @@ Last updated: 2026-10-18
 
 | Question | Needed by | Source |
 |---|---|---|
-| *(none open)* | | |
+| D-151 reads "used" as: any recipe of yours has the feature in its setup, switched on or off. A recipe records a feature as soon as the machine has it switched on, so a feature that was on the machine during any shot can no longer be deleted, even if it was switched off for that shot. Deleting it would change how later shots match earlier recipes. Is that the right reading? | M6 | D-151, D-65 |
 
 ## 2. Screens and states not designed yet
 
@@ -26,6 +26,9 @@ Last updated: 2026-10-18
 | Delete bean (D-145): the confirmation sheet's line "It has no shots yet. This cannot be undone." and the problem line "A bean with shots cannot be deleted" (shown only if a shot is saved while the sheet is open) are wording no decision fixes | When the canvas designs them | D-145, D-116 |
 | Bean detail: the "Guji Hambela is finished" message with Undo and "… is open again" reuse Home's message card above the button (D-127, D-129); a recipe kept only by its Brew next mark shows "New recipe" in muted text without a dot (D-128); a long name in the header is cut with "…"; "Not rated yet" sits in the Best score tile (D-131). Accepted as built (D-119, D-146) until the canvas designs them | When the canvas designs them | D-127, D-128, D-129, D-131 |
 | Add bean: built without a design, from the form's own parts: the "Same as before" sheet (name and roaster · country · process per row, "No beans yet"), the country sheet (search field, then countries as rows), the picked re-buy card with its × (D-139), the problem lines above the button, and Edit bean (D-130). Accepted as built (D-119, D-146) until the canvas designs them | When the canvas designs them | D-126, D-130, D-133, D-138, D-139 |
+| Shot form gear built without a design (D-153 to D-155): the gear line on the bean card opens a sheet "Machine" / "Grinder" with one row per item, picking one closes it; the gear line's tap area is about 36 px tall, not 44, so it stays clear of the bean name; switching the grinder keeps the grind value as it is; the dose hint "VST · 18 g holds 17.0–19.0 g" is its own muted line under the ratio; the basket and puck prep pickers are plain lists inside More, starting with "No basket" / "No puck prep", and the Setup tab then reads "None" | When the canvas designs them | D-153, D-154, D-155 |
+| Add your own feature, built beyond the design: Number with unit puts Step and Unit side by side ("e.g. ml") with Range below; a list option row has the placeholder "Option 1" and a × only while there are more than two; the button stays disabled with a line above it ("Name is required", "Unit is required", "The step must be more than 0", "The range must run from low to high, like 0–30", "Give at least two options a name"); an empty name previews as "Your feature". Tapping your own feature on the machine page opens the same sheet titled with its name, with "Save feature" and a quiet "Delete feature"; its kind cannot change; once used it shows "Used by shots · you can rename it or switch it off" and its options cannot be removed. Saving a machine without a used feature says "A feature that shots have used cannot be deleted" | When the canvas designs them | D-46, D-151, D-152 |
+| Edit My setup, built beyond the design: pickers are plain sheets ("No machines yet. Add one in Library › Gear." when empty, the button then reads "Choose"); the pressure profile sheet holds the same rows as More › Setup and closes like any sheet (no Done button); the summary reads "Not set" without a phase or value; switching the grinder keeps the grind; problem lines above Save: "Set Temperature first.", "Set the pressure for Low bar start first.", "Set Dose first.", "Set Grind first.", "Choose a machine", "Choose a grinder", "Grind must be within the grinder’s range", "Yield must be 0 or more", "Temperature is out of range", "This gear could not be found"; the value cards are drawn smaller, as in screen 13, and yield has no way to be emptied | When the canvas designs them | D-45, D-78, D-155 |
 | Proper design for the sign-in and "Create your account" pages (built simple for now) | Before release (M11) | D-84 |
 | First-run guide: after creating the account, how you add your gear, puck prep and My setup | M6 | D-88 |
 | Tag sheet: rename, merge, remove | M7 | Open topic 14, D-29, D-53 |
@@ -38,14 +41,11 @@ Last updated: 2026-10-18
 | Shot form: the message when the server refuses a shot ("The shot could not be saved. Nothing was changed.", above Save) | M10 | M3 |
 | Shot form: the message when a switched-on feature has no value yet ("Set Low bar end first.", above Save) | M6 | D-78, M3 |
 | More › Setup: rows for custom features that are on/off or "Pick from a list" (built as a switch with "On"/"Off", and a value that cycles through the options on tap) | M6 | D-46, M3 |
-| More › Setup: the basket and puck prep pickers (built as a plain list inside the sheet) | M6, M7 | D-22, D-25, M3 |
 | Where "Sign out" lives (for now on the placeholder start page; Settings is the likely home) | M11 | M2 |
 | **Insights: the Dial-in tab has no design** (What I like, Progress and Comparisons do); more Dial-in cards, e.g. grind vs. time, sour/bitter vs. ratio | M9 | Open topic 16, D-55, D-56 |
 | Journal: how a shot that is still waiting to sync looks | M10 | Open topic 23, D-61 |
 | App icon for the home screen (PWA) | M10 | Open topic 17 |
 | Settings (units, backup, export, and the dose, yield and time steps of D-89) | M11 | Roadmap M11, D-89 |
-| Shot form: choosing another machine or grinder (D-94 waits for the Gear pages) | M6 | D-94 |
-| Shot form: the gentle hint when the dose is outside the basket's dose range | M6 | D-49 |
 | Tablet layouts, light theme, focus and hover styles | Not scheduled | Open topic 5, design-system README |
 | Shorter screens: the shot form tightens its spacing below 880 px and 760 px of height (D-36). Below about 740 px it no longer fits and the form area scrolls inside itself, so More can scroll out of view; a design for small phones is still to do | M10 | D-36 |
 
@@ -66,7 +66,6 @@ Last updated: 2026-10-18
 
 | Item | When | Source |
 |---|---|---|
-| Gear: "Edit" on the My setup card and "Add your own feature" on the machine page are dimmed until the next pull request builds Edit My setup and the feature sheet | M6 (next pull request) | D-45, D-46 |
 | Recipe filter labels (D-121) add the differing gear and machine features, not the routine's step values: two recipes with the same routine whose steps differ (e.g. WDT 20 s vs 30 s) still read the same | M7 (Puck prep, when step values become editable there) | D-121, D-51 |
 | `main` is not protected: GitHub does not enforce the "Require pull request" ruleset on a private repository without a Team plan. The push-guard hook and the review step are the safeguard. | When the repository goes public | Roadmap M0, D-62 |
 | Playwright is pinned to 1.56.1 and CI to `ubuntu-24.04`, to match the browser in the development environment. Upgrade both together. | Any time | PR #1 |
@@ -74,7 +73,6 @@ Last updated: 2026-10-18
 | Install guide: create the account right after starting the server, before others can reach it; until then anyone who can open the app can claim it (D-88) | M11 | M2 |
 | Install guide: behind a reverse proxy with https, forward `X-Forwarded-Proto` (and `X-Forwarded-Host` if the proxy changes the host), so the sign-in cookie is marked secure and forms are accepted | M11 | M2 |
 | "Back" and "Save shot" always return to the start page, also when "+" was pressed on the Journal; D-95 wants them to return to where "+" was pressed, with the "Shot saved" message there (the message lives only on the start page for now) | M8 | M3, D-114 |
-| The basket and puck prep pickers offer no "None", so once set they cannot be removed for one shot | M6 | M3 |
 | Switching the bean (D-94) or "Use last shot recipe" (D-43) starts the form again and drops edits already made, without a warning; the local draft of D-61 may cover it | M10 | M3 |
 | Shot form: a puck prep step's value is taken from the routine (D-76) and cannot be changed for one shot; only the routine can be switched | M7 | D-51, M3 |
 | `npm audit`: 4 moderate advisories from an old esbuild inside drizzle-kit (development only, not in the Docker image). Recheck when drizzle-kit updates. | Each dependency update | PR #1 |

@@ -92,7 +92,9 @@ test('CustomFeature, D-152: a list needs at least two options', async () => {
     .click();
   await expect(sheet.getByRole('button', { name: /^Remove option/ })).toHaveCount(0);
   await expectNoPageScroll();
-  await page.getByRole('button', { name: 'Close without adding' }).click();
+  await page
+    .getByRole('button', { name: 'Close without adding' })
+    .click({ position: { x: 200, y: 20 } });
   await expect(sheet).toHaveCount(0);
 });
 
