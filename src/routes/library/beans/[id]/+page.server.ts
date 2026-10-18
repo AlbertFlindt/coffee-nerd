@@ -13,10 +13,10 @@ export const load: PageServerLoad = ({ locals, params }) => {
 
 export const actions: Actions = {
   // D-43: mark or clear Brew next; on a finished bean, marking reopens it (D-129).
-  brewNext: async ({ locals, request }) => {
+  brewNext: async ({ locals, request, params }) => {
     if (!locals.user) error(401);
     const recipeId = String((await request.formData()).get('recipeId') ?? '');
-    const result = toggleBrewNext(getDb(), locals.user.id, recipeId, Date.now());
+    const result = toggleBrewNext(getDb(), locals.user.id, params.id, recipeId, Date.now());
     if (!result) return fail(404);
     return { brewNext: result };
   },

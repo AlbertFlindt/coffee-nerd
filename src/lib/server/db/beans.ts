@@ -254,8 +254,9 @@ export type BeanDetail = {
   name: string;
   status: 'open' | 'finished';
   roastAgeDays: number;
-  /** The about card's lines (D-42). */
+  /** The about card's lines (D-42); the first is the roaster when `roaster` is set. */
   about: string[];
+  roaster: boolean;
   /** The best score as shown (D-135); null when no shot is rated. */
   best: string | null;
   recipeCount: number;
@@ -323,6 +324,7 @@ export function loadBeanDetail(
     status: b.status,
     roastAgeDays: roastAgeDays(b.roastDate, now, settings.timeZone),
     about: aboutLines(b, today),
+    roaster: b.roaster !== null,
     best: bestScoreText(bestRecipe(byRecipe)),
     recipeCount: recipes.length,
     shotCount: shots.length,
@@ -357,19 +359,22 @@ export function loadBeanDetail(
 
 /**
  * The Brew next button (D-43): marks this recipe, moving the mark from another; tapping the marked one
- * clears it. On a finished bean, marking reopens the bean (D-129). Null when the recipe is not yours.
+ * clears it. On a finished bean, marking reopens the bean (D-129). Null when the recipe is not one of
+ * yours on this bean.
  */
 export function toggleBrewNext(
   db: Db,
   ownerId: string,
+  beanId: string,
   recipeId: string,
   now: number
 ): 'marked' | 'cleared' | 'reopened' | null {
   return db.transaction((tx) => {
+    // Only a recipe of the bean whose page this is (D-42).
     const r = tx
       .select({ id: recipe.id, beanId: recipe.beanId })
       .from(recipe)
-      .where(and(eq(recipe.id, recipeId), eq(recipe.ownerId, ownerId)))
+      .where(and(eq(recipe.id, recipeId), eq(recipe.ownerId, ownerId), eq(recipe.beanId, beanId)))
       .get();
     if (!r) return null;
     if (markedRecipe(tx, ownerId) === recipeId) {

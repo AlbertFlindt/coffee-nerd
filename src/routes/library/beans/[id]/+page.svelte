@@ -57,7 +57,7 @@
     </div>
     <div class="lines">
       {#each bean.about as line, i (i)}
-        <span class:first={i === 0}>{line}</span>
+        <span class:first={i === 0 && bean.roaster}>{line}</span>
       {/each}
     </div>
   </section>
@@ -414,7 +414,7 @@
     width: var(--touch-min);
     height: var(--touch-min);
     flex: none;
-    border-radius: 22px;
+    border-radius: var(--radius-pill);
     border: none;
     background: var(--control);
     color: var(--ink);
