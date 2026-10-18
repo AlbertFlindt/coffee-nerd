@@ -24,7 +24,6 @@
       "Read(./.env.*)",
       "Read(!.env.example)",
       "Read(./data/**)",
-      "Edit(/design-system/**)",
       "Edit(/docs/screens/**)",
       "Bash(git push --force *)",
       "Bash(git push -f *)",
