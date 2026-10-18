@@ -6,6 +6,7 @@
   import { clockTime, dayLabel, roastAgeText } from '#lib/domain/journal.ts';
   import { tasteWords, type TasteScale } from '#lib/domain/taste.ts';
   import { decimalsFor, formatNumber, formatRatio, type Thousandths } from '#lib/domain/units.ts';
+  import TabBar from '#lib/components/TabBar.svelte';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -131,6 +132,8 @@
     </section>
   {/if}
 </main>
+
+<TabBar current="journal" />
 
 <style>
   header {

@@ -5,6 +5,7 @@
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import JournalRow from '#lib/components/JournalRow.svelte';
   import { groupByDay } from '#lib/domain/journal.ts';
+  import TabBar from '#lib/components/TabBar.svelte';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -102,6 +103,8 @@
     </form>
   </BottomSheet>
 {/if}
+
+<TabBar current="journal" />
 
 <style>
   header {

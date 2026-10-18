@@ -28,7 +28,7 @@ Last updated: 2026-10-18
 | Gear: the message on an item My setup uses, "Used in My setup · choose another default first" | M6 | D-83 |
 | Tag sheet: rename, merge, remove | M7 | Open topic 14, D-29, D-53 |
 | Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency) | M8 | Open topic 15, D-32 |
-| Home: replace the placeholder start page (logo, name, a temporary "New shot" link standing in for the tab bar's "+", and a temporary "Sign out" button) | M8 | M0, M2, M3 |
+| Home: replace the placeholder start page (logo, name and a temporary "Sign out" button above the tab bar) | M8 | M0, M2, M3 |
 | The "Shot saved" message, the automatic-finish message with Undo, and "… is open again" (built as a plain card on the start page) | M8 | D-95 |
 | Shot form when there is nothing to brew with (no My setup or no open bean): built as a plain "Nothing to brew with yet" message | M6 | D-88, M3 |
 | Shot form: the bean list behind the bean card (D-94), built as a plain "Open beans" list in a sheet | M5 | D-94, M3 |
@@ -76,7 +76,7 @@ Last updated: 2026-10-18
 | Install guide: create the account right after starting the server, before others can reach it; until then anyone who can open the app can claim it (D-88) | M11 | M2 |
 | Install guide: behind a reverse proxy with https, forward `X-Forwarded-Proto` (and `X-Forwarded-Host` if the proxy changes the host), so the sign-in cookie is marked secure and forms are accepted | M11 | M2 |
 | The Brew next end-to-end test sets the mark directly in the test database, since nothing in the app can mark a recipe before the bean detail page; switch it to the button | M5 | M3 |
-| "Back" and "Save shot" always return to the start page; once the tab bar exists they return to where "+" was pressed (D-95) | M8 | M3 |
+| "Back" and "Save shot" always return to the start page, also when "+" was pressed on the Journal; D-95 wants them to return to where "+" was pressed, with the "Shot saved" message there (the message lives only on the start page for now) | M8 | M3, D-114 |
 | The basket and puck prep pickers offer no "None", so once set they cannot be removed for one shot | M6 | M3 |
 | Switching the bean (D-94) or "Use last shot recipe" (D-43) starts the form again and drops edits already made, without a warning; the local draft of D-61 may cover it | M10 | M3 |
 | Basket row on the Setup tab shows the basket's name ("VST 18 g"); the design shows brand · size ("VST · 18 g"), which needs separate fields on the basket | M6 | D-49, M3 |

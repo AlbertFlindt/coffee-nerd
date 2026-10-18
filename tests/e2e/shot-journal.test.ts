@@ -65,7 +65,10 @@ async function screenshot(name: string) {
 const rows = () => page.getByRole('main').getByRole('link');
 
 test('Journal, D-54: every shot, newest first, grouped by day', async () => {
-  await page.getByRole('link', { name: 'Journal' }).click();
+  await page
+    .getByRole('navigation', { name: 'Main' })
+    .getByRole('link', { name: 'Journal' })
+    .click();
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
   await expect(page.getByText(/^\d+ shots? this week$/)).toBeVisible();
   const days = page.getByRole('main').getByRole('heading', { level: 2 });
@@ -79,6 +82,12 @@ test('Journal, D-54: every shot, newest first, grouped by day', async () => {
   await expect(first.locator('.cn-tag')).toHaveText(/^(Recipe reused \d+x|New recipe)$/);
   // The oldest shot is its recipe's first (D-16).
   await expect(rows().last().locator('.cn-tag')).toHaveText('New recipe');
+  // D-30, D-114: the tab bar; Library and Insights wait for their pages.
+  const bar = page.getByRole('navigation', { name: 'Main' });
+  await expect(bar.getByRole('link', { name: 'Journal' })).toHaveAttribute('aria-current', 'page');
+  await expect(bar.getByRole('link', { name: 'New shot' })).toBeVisible();
+  for (const name of ['Library', 'Insights'])
+    await expect(bar.getByText(name)).toHaveAttribute('aria-disabled', 'true');
   await expectNoPageScroll();
   await screenshot('Journal');
 });
