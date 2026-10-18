@@ -95,7 +95,7 @@ describe('loadShotForm', () => {
     });
     expect(form.lastShot).toBeNull();
     expect(form.recipes).toEqual([]);
-    expect(form.bean).toEqual({ id: ids.beanId, name: 'Guji Hambela', process: 'natural' });
+    expect(form.bean).toMatchObject({ id: ids.beanId, name: 'Guji Hambela', process: 'natural' });
     expect(form.machine.name).toBe('Lelit Bianca');
     expect(form.grinder).toMatchObject({ name: 'Timemore 064S', dial: { step: 100 } });
   });
@@ -136,6 +136,12 @@ describe('loadShotForm', () => {
     const form = ready(loadShotForm(db, ids.userId));
     expect(form.prefill).toMatchObject({ source: 'my_setup', beanId: kenya });
     expect(form.bean.id).toBe(kenya);
+  });
+
+  it('D-134: each open bean in the list has its roast age', () => {
+    const form = ready(loadShotForm(db, ids.userId, undefined, T0 + 2 * 86_400_000));
+    // The reference bean was roasted 12 days before the seed.
+    expect(form.openBeans[0]).toMatchObject({ name: 'Guji Hambela', roastAgeDays: 14 });
   });
 
   it('D-94: choosing another open bean starts from that bean; Brew next of another bean waits', () => {

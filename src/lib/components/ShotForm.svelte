@@ -6,6 +6,7 @@
   import { enhance } from '$app/forms';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
+  import { PROCESS_LABEL } from '#lib/domain/bean.ts';
   import { onMount } from 'svelte';
   import { v7 } from 'uuid';
   import BeanCard from './BeanCard.svelte';
@@ -23,13 +24,11 @@
 
   let { data, problems = [] }: { data: ShotFormData; problems?: string[] } = $props();
 
-  const PROCESS: Record<string, string> = {
-    washed: 'Washed',
-    natural: 'Natural',
-    honey: 'Honey',
-    anaerobic: 'Anaerobic',
-    other: 'Other'
-  };
+  /** "Natural · 12 days" after a bean's name in the bean list (D-134). */
+  function beanDetail(b: ShotFormData['openBeans'][number]): string {
+    const age = `${b.roastAgeDays} ${b.roastAgeDays === 1 ? 'day' : 'days'}`;
+    return b.process ? `${PROCESS_LABEL[b.process]} · ${age}` : age;
+  }
 
   function initial(): ShotState {
     const p = data.prefill;
@@ -159,7 +158,7 @@
     <main class:compact={data.prefill.source === 'brew_next'}>
       <BeanCard
         title={data.bean.process
-          ? `${data.bean.name} · ${PROCESS[data.bean.process]}`
+          ? `${data.bean.name} · ${PROCESS_LABEL[data.bean.process]}`
           : data.bean.name}
         gear="{data.machine.name} · {data.grinder.name}"
         summary={setupSummary(shot.setup, data.machine.features)}
@@ -291,7 +290,7 @@
                 aria-pressed={b.id === data.bean.id}
                 onclick={() => chooseBeanForEdit(b.id)}
               >
-                {b.name}{#if b.process}<span class="soft"> · {PROCESS[b.process]}</span>{/if}
+                {b.name}<span class="soft">&nbsp;· {beanDetail(b)}</span>
               </button>
             {/each}
           </div>
@@ -307,7 +306,7 @@
                 aria-pressed={b.id === data.bean.id}
                 onclick={() => (sheet = null)}
               >
-                {b.name}{#if b.process}<span class="soft"> · {PROCESS[b.process]}</span>{/if}
+                {b.name}<span class="soft">&nbsp;· {beanDetail(b)}</span>
               </button>
             {/each}
           </form>

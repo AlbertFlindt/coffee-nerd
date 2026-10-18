@@ -2,6 +2,7 @@
 // the browser, the bean's last shot for deltas (D-15, D-81), and the choices its pickers offer. Every query
 // is scoped by the owner (D-60).
 import { and, desc, eq, lt, or, sql, type SQL } from 'drizzle-orm';
+import { roastAgeDays } from '../../domain/bean';
 import { bestRecipe } from '../../domain/best-recipe';
 import type { RecipeIdentity } from '../../domain/fingerprint';
 import {
@@ -30,7 +31,8 @@ import {
 } from './schema';
 
 type Process = (typeof bean.$inferSelect)['process'];
-export type BeanChoice = { id: string; name: string; process: Process };
+/** A bean in the shot form's bean list, with its roast age today (D-94, D-134). */
+export type BeanChoice = { id: string; name: string; process: Process; roastAgeDays: number };
 
 export type ShotFormData = {
   state: 'ready';
@@ -66,18 +68,14 @@ export type ShotFormEmpty = { state: 'empty'; missing: 'setup' | 'bean' };
 export function loadShotForm(
   db: Queryable,
   ownerId: string,
-  beanId?: string
+  beanId?: string,
+  now = Date.now()
 ): ShotFormData | ShotFormEmpty {
   const settings = db.select().from(userSettings).where(eq(userSettings.userId, ownerId)).get();
   const mySetup = settings && readMySetup(settings);
   if (!settings || !mySetup) return { state: 'empty', missing: 'setup' };
 
-  const openBeans = db
-    .select({ id: bean.id, name: bean.name, process: bean.process })
-    .from(bean)
-    .where(and(eq(bean.ownerId, ownerId), eq(bean.status, 'open')))
-    .orderBy(desc(bean.createdAt), desc(bean.id))
-    .all();
+  const openBeans = openBeansOf(db, ownerId, settings.timeZone, now);
   const state = db.select().from(appState).where(eq(appState.userId, ownerId)).get();
   const chosen = openBeans.find((b) => b.id === beanId);
   const brewNextRow = state?.brewNextRecipeId
@@ -158,7 +156,8 @@ export function loadEditShotForm(
   db: Queryable,
   ownerId: string,
   shotId: string,
-  beanId?: string
+  beanId?: string,
+  now = Date.now()
 ): ShotFormData | null {
   const row = db
     .select({ shot, recipe })
@@ -170,21 +169,19 @@ export function loadEditShotForm(
   if (!row || !settings) return null;
   const { shot: s, recipe: r } = row;
 
-  const choice = { id: bean.id, name: bean.name, process: bean.process };
-  const openBeans = db
-    .select(choice)
-    .from(bean)
-    .where(and(eq(bean.ownerId, ownerId), eq(bean.status, 'open')))
-    .orderBy(desc(bean.createdAt), desc(bean.id))
-    .all();
+  const openBeans = openBeansOf(db, ownerId, settings.timeZone, now);
   // The shot's own bean may be finished by now: the shot keeps it, but only open beans are offered (D-122).
   const own =
     openBeans.find((b) => b.id === r.beanId) ??
-    db
-      .select(choice)
-      .from(bean)
-      .where(and(eq(bean.id, r.beanId), eq(bean.ownerId, ownerId)))
-      .get()!;
+    beanChoice(
+      db
+        .select(CHOICE)
+        .from(bean)
+        .where(and(eq(bean.id, r.beanId), eq(bean.ownerId, ownerId)))
+        .get()!,
+      settings.timeZone,
+      now
+    );
   const current = openBeans.find((b) => b.id === beanId) ?? own;
 
   const gearRows = db.select().from(gear).where(eq(gear.ownerId, ownerId)).all();
@@ -439,4 +436,26 @@ function tagsByUse(db: Queryable, ownerId: string): { id: string; name: string }
     .groupBy(tag.id)
     .orderBy(desc(sql`count(${shotTag.shotId})`), sql`lower(${tag.name})`)
     .all();
+}
+
+const CHOICE = { id: bean.id, name: bean.name, process: bean.process, roastDate: bean.roastDate };
+
+function beanChoice(
+  row: { id: string; name: string; process: Process; roastDate: string },
+  timeZone: string,
+  now: number
+): BeanChoice {
+  const { roastDate, ...rest } = row;
+  return { ...rest, roastAgeDays: roastAgeDays(roastDate, now, timeZone) };
+}
+
+/** Your open beans, newest first, for the bean list (D-94, D-134). */
+function openBeansOf(db: Queryable, ownerId: string, timeZone: string, now: number): BeanChoice[] {
+  return db
+    .select(CHOICE)
+    .from(bean)
+    .where(and(eq(bean.ownerId, ownerId), eq(bean.status, 'open')))
+    .orderBy(desc(bean.createdAt), desc(bean.id))
+    .all()
+    .map((row) => beanChoice(row, timeZone, now));
 }
