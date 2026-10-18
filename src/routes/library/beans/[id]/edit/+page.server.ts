@@ -41,6 +41,7 @@ export const actions: Actions = {
   delete: ({ locals, params }) => {
     if (!locals.user) error(401);
     const result = deleteBean(getDb(), locals.user.id, params.id);
+    if (result === null) error(404);
     if (result !== 'deleted')
       return fail(409, { problems: ['A bean with shots cannot be deleted'] });
     redirect(303, '/library/beans');

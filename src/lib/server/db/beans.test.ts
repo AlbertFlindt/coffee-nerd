@@ -324,6 +324,22 @@ describe('loadBeanDetail', () => {
     expect(rows.find((r) => r.id !== hot.recipeId)?.detail).toMatch(/· 93 °C ·/);
   });
 
+  it('D-144: the same temperature under another label still counts as shared', () => {
+    shot(T0 - 2 * DAY);
+    shot(T0 - DAY, {
+      grind: 1500,
+      setup: {
+        features: {
+          ...REFERENCE.myFeatures,
+          temperature: { ...REFERENCE.myFeatures.temperature, label: 'Brew temperature' }
+        },
+        routine: null
+      }
+    });
+    const rows = loadBeanDetail(db, ids.userId, ids.beanId, T0)!.recipes;
+    for (const row of rows) expect(row.detail).not.toMatch(/°C/);
+  });
+
   it('D-60: another user’s bean is not found', () => {
     expect(loadBeanDetail(db, 'someone-else', ids.beanId, T0)).toBeNull();
   });

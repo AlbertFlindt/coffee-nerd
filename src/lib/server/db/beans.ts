@@ -318,8 +318,12 @@ export function loadBeanDetail(
   const order = rankRecipes(byRecipe);
   const today = localDate(now, settings.timeZone);
   // D-144: the rows name the temperature only when the bean's recipes do not all share it.
+  // Compared as the rows would show them, not as stored (label or key order do not count).
   const temperatures = new Set(
-    recipes.map((r) => JSON.stringify(r.setup.features.temperature ?? null))
+    recipes.map((r) => {
+      const t = r.setup.features.temperature;
+      return t?.on ? (t.value ?? null) : null;
+    })
   );
   const temperature = temperatures.size > 1;
 

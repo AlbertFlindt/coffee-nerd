@@ -78,3 +78,4 @@
 .cn-root .cn-tap:active .cn-step__amt{color:var(--on-amber)}
 .cn-root .cn-tap-strong{transition:transform 120ms ease-out,filter 120ms ease-out}
 .cn-root .cn-tap-strong:active{transform:scale(0.98);filter:brightness(1.12);transition:none}
+@media (prefers-reduced-motion:reduce){.cn-root .cn-tap-strong:active{transform:none}}

@@ -22,6 +22,7 @@ Last updated: 2026-10-18
 
 | What is missing | Needed by | Source |
 |---|---|---|
+| Delete bean (D-145): the confirmation sheet's line "It has no shots yet. This cannot be undone." and the problem line "A bean with shots cannot be deleted" (shown only if a shot is saved while the sheet is open) are wording no decision fixes | When the canvas designs them | D-145, D-116 |
 | Bean detail: the "Guji Hambela is finished" message with Undo and "… is open again" reuse Home's message card above the button (D-127, D-129); a recipe kept only by its Brew next mark shows "New recipe" in muted text without a dot (D-128); a long name in the header is cut with "…"; "Not rated yet" sits in the Best score tile (D-131). Accepted as built (D-119, D-146) until the canvas designs them | When the canvas designs them | D-127, D-128, D-129, D-131 |
 | Add bean: built without a design, from the form's own parts: the "Same as before" sheet (name and roaster · country · process per row, "No beans yet"), the country sheet (search field, then countries as rows), the picked re-buy card with its × (D-139), the problem lines above the button, and Edit bean (D-130). Accepted as built (D-119, D-146) until the canvas designs them | When the canvas designs them | D-126, D-130, D-133, D-138, D-139 |
 | Proper design for the sign-in and "Create your account" pages (built simple for now) | Before release (M11) | D-84 |

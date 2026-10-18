@@ -32,9 +32,3 @@ body {
 }
 
 /* D-107: the pressed states live in the design system now (cn-tap, cn-tap-strong, D-146). */
-
-@media (prefers-reduced-motion: reduce) {
-  .cn-root .tap-strong:active {
-    transform: none;
-  }
-}
