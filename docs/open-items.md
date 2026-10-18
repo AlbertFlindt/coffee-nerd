@@ -68,6 +68,7 @@ Last updated: 2026-10-18
 
 | Item | When | Source |
 |---|---|---|
+| Recipe filter labels (D-121) add the differing gear and machine features, not the routine's step values: two recipes with the same routine whose steps differ (e.g. WDT 20 s vs 30 s) still read the same | M7 (Puck prep, when step values become editable there) | D-121, D-51 |
 | `main` is not protected: GitHub does not enforce the "Require pull request" ruleset on a private repository without a Team plan. The push-guard hook and the review step are the safeguard. | When the repository goes public | Roadmap M0, D-62 |
 | Playwright is pinned to 1.56.1 and CI to `ubuntu-24.04`, to match the browser in the development environment. Upgrade both together. | Any time | PR #1 |
 | The image is published to GitHub Packages as a private package (`ghcr.io/albertflindt/coffee-nerd:main`, Linux x86-64 only), with a short "Try the latest build" guide in the README that seeds the reference setup (D-105). At M11: remove `scripts/seed.mjs` from the runtime image, replace the guide with the real install guide, and publish a public image. Until then the guide warns that the app can be claimed, or opened with the Demo password, until it is seeded and the password reset | M11 | D-105 |
