@@ -1,5 +1,7 @@
 // Values about a bean and its shots that are always calculated, never stored (data-model §3).
-import type { Thousandths } from './units';
+import type { BestRecipe } from './best-recipe';
+import { countryName } from './countries';
+import { formatQuantity, type Thousandths } from './units';
 
 /** Yield per gram of dose, in thousandths (38.5 g from 18.0 g → 2139), for statistics and charts. Display uses `formatRatio`. */
 export function ratio(
@@ -53,4 +55,44 @@ export function shouldAutoFinish(
   if (bagWeight === null) return false;
   const before = earlierDoses.reduce((sum, d) => sum + d, 0);
   return before < bagWeight && before + dose >= bagWeight;
+}
+
+export type Process = 'washed' | 'natural' | 'honey' | 'anaerobic' | 'other';
+
+/** How a process is written on screen (D-41). */
+export const PROCESS_LABEL: Record<Process, string> = {
+  washed: 'Washed',
+  natural: 'Natural',
+  honey: 'Honey',
+  anaerobic: 'Anaerobic',
+  other: 'Other'
+};
+
+/**
+ * A bean's best score (D-135): its best recipe's average with one decimal ("7.7") once that recipe has
+ * 3 rated shots, otherwise the highest single score ("8"). Null without a rated shot ("Not rated yet").
+ */
+export function bestScoreText(best: BestRecipe | null): string | null {
+  if (best === null) return null;
+  return best.basis === 'average' ? best.score.toFixed(1) : String(best.score);
+}
+
+/** "120 g left" in whole grams (D-132); null without a bag weight (D-35). */
+export function gramsLeftText(grams: Thousandths | null): string | null {
+  return grams === null ? null : `${formatQuantity(grams, { decimals: 0, unit: 'g' })} left`;
+}
+
+/** "Nordlys Roasters · Ethiopia · Natural" (D-37), leaving out what is not set. */
+export function originLine(bean: {
+  roaster: string | null;
+  countryCode: string | null;
+  process: Process | null;
+}): string {
+  return [
+    bean.roaster,
+    bean.countryCode ? countryName(bean.countryCode) : null,
+    bean.process ? PROCESS_LABEL[bean.process] : null
+  ]
+    .filter((part) => part)
+    .join(' · ');
 }

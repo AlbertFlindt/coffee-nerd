@@ -49,10 +49,12 @@ New shot with prefill, deltas, recipe tag, balance, score, More sheet (Setup and
 ## M4 — Journal and shot detail ☑  (screens 22, 26)
 Day-grouped list, filters, Rate block, shot detail with "Compared with this recipe" (σ), edit via the shot form.
 
-## M5 — Beans ☐  (screens 7, 9, 10)
+## M5 — Beans ◐  (screens 7, 9, 10)
 Overview, Add bean with "Same as before", bean detail with recipes and Brew next, finish and reopen with undo.
 
-**Before starting:** the owner syncs the design system (D-119: empty slider handle, pressed buttons, the sheet's drag strip, the tab bar's height) and reviews the M4 details listed for M5 in `docs/open-items.md`.
+Built in three pull requests: the overview (D-124, D-132, D-134, D-135), then Add bean (D-126, D-130, D-133), then the bean detail page (D-125, D-127 to D-129, D-131). The M4 details were reviewed (D-120 to D-123); the design-system sync (D-119, D-123) runs alongside, as its own pull request.
+
+**Done when:** screenshots match `Beans`, `AddBean` and `BeanDetail`; end-to-end tests: add a bean, re-buy it with "Same as before" and its first shot starts from the earlier bag's best recipe (D-73); mark a recipe Brew next with its button and "+" starts from it; finish a bean, undo, reopen.
 
 ## M6 — Gear and My setup ☐  (screens 8, 12–16)
 Gear list, machine/grinder/basket detail, Add your own feature, Edit My setup. Library landing (screen 17).

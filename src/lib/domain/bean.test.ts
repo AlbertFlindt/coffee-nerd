@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { gramsLeft, localDate, ratio, roastAgeDays, shouldAutoFinish } from './bean';
+import {
+  bestScoreText,
+  gramsLeft,
+  gramsLeftText,
+  localDate,
+  originLine,
+  ratio,
+  roastAgeDays,
+  shouldAutoFinish
+} from './bean';
 
 describe('ratio', () => {
   it('D-03: yield divided by dose, in thousandths', () => {
@@ -63,5 +72,43 @@ describe('gramsLeft and shouldAutoFinish', () => {
   it('D-40: never automatically without a bag weight, or with a bag weight of 0', () => {
     expect(shouldAutoFinish(null, [18000], 18000)).toBe(false);
     expect(shouldAutoFinish(0, [], 18000)).toBe(false);
+  });
+});
+
+describe('bestScoreText', () => {
+  it('D-135: the best recipe’s average with one decimal once it has 3 rated shots', () => {
+    expect(bestScoreText({ recipeId: 'r', basis: 'average', score: 23 / 3, ratedShots: 3 })).toBe(
+      '7.7'
+    );
+    expect(bestScoreText({ recipeId: 'r', basis: 'average', score: 8, ratedShots: 4 })).toBe('8.0');
+  });
+
+  it('D-135: otherwise its highest single score, a whole number', () => {
+    expect(bestScoreText({ recipeId: 'r', basis: 'single', score: 8, ratedShots: 1 })).toBe('8');
+  });
+
+  it('D-37: no rated shot, no best score', () => {
+    expect(bestScoreText(null)).toBeNull();
+  });
+});
+
+describe('gramsLeftText', () => {
+  it('D-132: grams left in whole grams', () => {
+    expect(gramsLeftText(120000)).toBe('120 g left');
+    expect(gramsLeftText(0)).toBe('0 g left');
+  });
+
+  it('D-35: nothing without a bag weight', () => {
+    expect(gramsLeftText(null)).toBeNull();
+  });
+});
+
+describe('originLine', () => {
+  it('D-37: roaster · country · process, leaving out what is not set', () => {
+    expect(originLine({ roaster: 'Nordlys Roasters', countryCode: 'ET', process: 'natural' })).toBe(
+      'Nordlys Roasters · Ethiopia · Natural'
+    );
+    expect(originLine({ roaster: null, countryCode: null, process: 'washed' })).toBe('Washed');
+    expect(originLine({ roaster: null, countryCode: null, process: null })).toBe('');
   });
 });
