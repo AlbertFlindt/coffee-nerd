@@ -2,9 +2,9 @@
 // installation (D-88). Values follow the designed screens: GearDetail, GrinderDetail, BasketDetail,
 // PuckPrep, RoutineBuilder, EditSetup and BeanDetail.
 import { localDate } from '../../domain/bean';
+import { builtInFeatures } from '../../domain/gear';
 import type {
   BasketSpec,
-  FeatureDefinition,
   FeatureValue,
   GrinderSpec,
   MachineSpec,
@@ -18,48 +18,14 @@ import { appState, bean, gear, prepStep, routine, user, userSettings } from './s
 const DAY = 86_400_000;
 const TIME_ZONE = 'Europe/Copenhagen';
 
-const machineFeatures: FeatureDefinition[] = [
-  {
-    key: 'temperature',
-    label: 'Temperature',
-    builtIn: true,
-    enabled: true,
-    switchable: false,
-    value: { kind: 'number', unit: '°C', step: 1000 }
-  },
-  {
-    key: 'flat_pressure',
-    label: 'Flat pressure',
-    builtIn: true,
-    enabled: true,
-    switchable: false,
-    value: { kind: 'number', unit: 'bar', step: 500 }
-  },
-  {
-    key: 'preinfusion',
-    label: 'Preinfusion',
-    builtIn: true,
-    enabled: true,
-    switchable: true,
-    value: { kind: 'phase', step: 1000 }
-  },
-  {
-    key: 'low_bar_start',
-    label: 'Low bar start',
-    builtIn: true,
-    enabled: true,
-    switchable: true,
-    value: { kind: 'phase', step: 1000, pressure: { step: 500, min: 0, max: 12000 } }
-  },
-  {
-    key: 'low_bar_end',
-    label: 'Low bar end',
-    builtIn: true,
-    enabled: true,
-    switchable: true,
-    value: { kind: 'phase', step: 1000, pressure: { step: 500, min: 0, max: 12000 } }
-  }
-];
+// The reference machine can do all five built-in features (D-44).
+const machineFeatures = builtInFeatures({
+  temperature: true,
+  flat_pressure: true,
+  preinfusion: true,
+  low_bar_start: true,
+  low_bar_end: true
+});
 
 export const REFERENCE = {
   machine: {

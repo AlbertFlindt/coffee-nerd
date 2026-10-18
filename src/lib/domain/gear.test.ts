@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { basketName, basketSummary, fitsMachines, grinderSummary, machineSummary } from './gear';
+import {
+  basketName,
+  basketSummary,
+  fitsMachines,
+  grinderSummary,
+  machineSummary,
+  NEW_GEAR,
+  trimmed
+} from './gear';
+import { basketSpecSchema, grinderSpecSchema, machineSpecSchema } from './schemas';
 import type { FeatureDefinition } from './schemas';
 
 const feature = (key: string, label: string, enabled: boolean, switchable = true) =>
@@ -79,5 +88,37 @@ describe('fitsMachines', () => {
     expect(fitsMachines(58000, machines)).toBe('Fits Lelit Bianca');
     expect(fitsMachines(51000, machines)).toBe('Fits none of your machines');
     expect(fitsMachines(undefined, machines)).toBeNull();
+  });
+});
+
+describe('NEW_GEAR', () => {
+  it('D-158: new gear starts from common values that pass its schema (the basket once it has a brand)', () => {
+    expect(machineSpecSchema.parse(NEW_GEAR.machine())).toMatchObject({
+      type: 'semi_auto',
+      groupSizeMm: 58000
+    });
+    expect(
+      NEW_GEAR.machine()
+        .features.filter((f) => f.enabled)
+        .map((f) => f.key)
+    ).toEqual(['temperature', 'flat_pressure']);
+    expect(grinderSpecSchema.parse(NEW_GEAR.grinder()).dial).toEqual({
+      mode: 'stepless',
+      step: 100,
+      finest: 0,
+      coarsest: 10000
+    });
+    expect(basketSpecSchema.safeParse(NEW_GEAR.basket()).success).toBe(false);
+    expect(basketSpecSchema.parse({ ...NEW_GEAR.basket(), brand: 'VST' })).toMatchObject({
+      shotSize: 'double'
+    });
+  });
+});
+
+describe('trimmed', () => {
+  it('D-79: sizes without trailing zeros', () => {
+    expect(trimmed(58000, 'mm')).toBe('58 mm');
+    expect(trimmed(58500, 'mm')).toBe('58.5 mm');
+    expect(trimmed(63250)).toBe('63.25');
   });
 });

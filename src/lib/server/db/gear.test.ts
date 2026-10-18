@@ -12,6 +12,7 @@ import {
   loadGear,
   loadGearPage,
   loadLibrary,
+  loadMachineSizes,
   saveGear
 } from './gear';
 import { newId } from './ids';
@@ -158,6 +159,15 @@ describe('archiveGear', () => {
 
   it('D-60: not another user’s gear', () => {
     expect(archiveGear(db, 'someone-else', ids.basketId, T0)).toBeNull();
+  });
+});
+
+describe('loadMachineSizes', () => {
+  it('D-49: your machines and their group size, for the basket fit check', () => {
+    expect(loadMachineSizes(db, ids.userId)).toEqual([
+      { name: 'Lelit Bianca', groupSizeMm: 58000 }
+    ]);
+    expect(loadMachineSizes(db, 'someone-else')).toEqual([]);
   });
 });
 

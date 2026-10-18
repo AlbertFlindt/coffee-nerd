@@ -1,7 +1,7 @@
 <script lang="ts">
   // Beans overview (screen 7, D-37): open beans as cards with their roast age, finished beans as rows below;
-  // below the header everything scrolls as one list (D-36, D-136). The Library tab opens it directly, so there is no back arrow
-  // until the Library page exists (D-124). A bean opens its page (D-42).
+  // below the header everything scrolls as one list (D-36, D-136). Back goes to the Library page (D-156). A bean
+  // opens its page (D-42).
   import { resolve } from '$app/paths';
   import TabBar from '#lib/components/TabBar.svelte';
   import type { PageData } from './$types';
@@ -13,6 +13,19 @@
 <svelte:head><title>Beans · Coffee Nerd</title></svelte:head>
 
 <header>
+  <a class="back cn-tap" href={resolve('/library')} aria-label="Back to Library">
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" /></svg
+    >
+  </a>
   <h1>Beans</h1>
   <a class="cn-btn-add add" href={resolve('/library/beans/new')}>
     <svg
@@ -92,11 +105,21 @@
 
 <style>
   header {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    height: 64px;
+    padding: 0 var(--space-4) 0 var(--space-2);
+  }
+
+  .back {
+    width: var(--touch-min);
+    height: var(--touch-min);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    height: 64px;
-    padding: 0 var(--space-4) 0 var(--space-5);
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--ink);
   }
 
   h1 {

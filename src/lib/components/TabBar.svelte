@@ -1,7 +1,7 @@
 <script lang="ts">
   // The tab bar on tab screens (D-30): Home · Journal · + · Library · Insights. The amber + is the only way
-  // to add a shot (D-31). Library opens Beans until the Library page exists (D-124); Insights is dimmed and
-  // does nothing until its page exists (D-114).
+  // to add a shot (D-31). Library opens the Library page (D-156); Insights is dimmed and does nothing until
+  // its page exists (D-114).
   import { resolve } from '$app/paths';
 
   let { current }: { current: 'home' | 'journal' | 'library' } = $props();
@@ -53,7 +53,7 @@
       aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg
     ></a
   >
-  <a href={resolve('/library/beans')} aria-current={current === 'library' ? 'page' : undefined}>
+  <a href={resolve('/library')} aria-current={current === 'library' ? 'page' : undefined}>
     <svg
       width="22"
       height="22"

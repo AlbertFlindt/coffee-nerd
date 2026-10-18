@@ -291,3 +291,17 @@ export function loadLibrary(
     tags: lines(plural(tagCount, 'flavor note'), mostUsed ? `Most used: ${mostUsed.name}` : null)
   };
 }
+
+/** Your machines (not archived) with their group size, for a basket's fit check (D-49). */
+export function loadMachineSizes(
+  db: Queryable,
+  ownerId: string
+): { name: string; groupSizeMm?: number }[] {
+  return db
+    .select({ name: gear.name, spec: gear.spec })
+    .from(gear)
+    .where(and(eq(gear.ownerId, ownerId), eq(gear.kind, 'machine'), isNull(gear.archivedAt)))
+    .orderBy(asc(gear.createdAt), asc(gear.id))
+    .all()
+    .map((m) => ({ name: m.name, groupSizeMm: (m.spec as MachineSpec).groupSizeMm }));
+}

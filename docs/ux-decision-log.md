@@ -343,7 +343,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* rows stay short as drawn, and a recipe brewed at another temperature still says so.
 - **D-145 — A bean without shots can be deleted.** The Edit bean form ends with a quiet "Delete bean" below "Save changes", only while the bean has no shots (for a bag added by mistake); a sheet asks "Delete this bean?" with "Delete bean" / "Keep it", as for a shot (D-116). Deleting removes the bean and any recipe kept only by its Brew next mark, then opens the Beans overview. A bean with shots is finished, never deleted, so its history stays. Refines D-40 and D-130.
   - *Why:* a mistaken bag should not stay in the list, but shot history is never lost (D-60, data-model §1).
-- **D-147 — Adding gear.** "Add gear" on the Gear page opens a small sheet: Machine, Grinder, Basket. Picking one opens that kind's detail page empty, titled "Add machine" (or grinder, basket), with "Add machine" as its button. Refines D-38.
+- **D-147 — Adding gear.** *(Revised 2026-10-18: see D-158.)* "Add gear" on the Gear page opens a small sheet: Machine, Grinder, Basket. Picking one opens that kind's detail page empty, titled "Add machine" (or grinder, basket), with "Add machine" as its button. Refines D-38.
   - *Why:* one button in the header as drawn, and each kind keeps its own page.
 - **D-148 — Archiving gear.** A gear page ends with a quiet "Archive" button (D-145's pattern) and a confirmation. Archived gear leaves the Gear list and every picker; past shots keep showing its name. An item My setup uses offers no Archive and says "Used in My setup · choose another default first" (D-83). There is no list of archived gear yet. Refines D-38 and D-83.
   - *Why:* gear that shots point to is archived, never deleted (data-model §1), and a quiet button keeps it out of the way.
@@ -365,6 +365,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* with two sections working, the landing page is worth its tap.
 - **D-157 — A step-by-step start after sign-up.** After creating the account, the app walks through Machine → Grinder → Basket (can be skipped) → My setup → first bean, each on its normal page with "Step 2 of 5" under the title and "Next" as its button. Puck prep is left out until M7. Leaving halfway is fine: the next time "+" is tapped, it resumes at the first missing step. Refines D-88.
   - *Why:* a new installation has nothing to brew with (D-88); the guide gets a new user to a first shot.
+- **D-158 — What new gear starts with.** Add machine starts as Semi-auto with Temperature and Flat pressure switched on, the phases off, and a 58 mm group. Add grinder starts as Electric, Flat burrs, a Stepless dial with steps of 0.1, finest 0 and coarsest 10. Add basket starts as Precision, Double, 58 mm, without a dose range. The name (or the basket's brand) starts empty; everything can be changed before saving. Refines D-147.
+  - *Why:* the most common home setups, so most new gear needs only a name and a few taps.
 - **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-18: see D-78, D-83, D-147, D-148, D-149.)*
   - **My setup** (a light cream card so it stands out): default machine, grinder, basket and puck prep routine, plus **default values** (dose, yield, grind, temperature, pressure profile). One "Edit" button.
   - Defaults are the **starting point for a bean's first shot** (and when switching gear). After that, D-03 applies: new shots copy the last shot.

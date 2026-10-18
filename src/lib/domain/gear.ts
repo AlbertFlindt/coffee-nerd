@@ -1,5 +1,5 @@
 // Short texts about gear for the Gear page and the gear pages (D-38, D-48, D-49, D-150). Pure.
-import type { BasketSpec, GrinderSpec, MachineSpec } from './schemas';
+import type { BasketSpec, FeatureDefinition, GrinderSpec, MachineSpec } from './schemas';
 import { decimalsForStep, formatQuantity, formatNumber, type Thousandths } from './units';
 
 const MACHINE_TYPE = {
@@ -10,8 +10,8 @@ const MACHINE_TYPE = {
 };
 const BASKET_TYPE = { precision: 'Precision', standard: 'Standard', pressurized: 'Pressurized' };
 
-/** A size or weight without trailing zeros: 58 mm, 58.5 mm, 18.5 g. */
-const trimmed = (value: Thousandths, unit: string) =>
+/** A size or weight without trailing zeros: 58 mm, 58.5 mm, 18.5 g (D-79). */
+export const trimmed = (value: Thousandths, unit?: string) =>
   formatQuantity(value, {
     decimals: value % 1000 === 0 ? 0 : value % 100 === 0 ? 1 : value % 10 === 0 ? 2 : 3,
     unit
@@ -58,3 +58,60 @@ export function fitsMachines(
   const fits = machines.filter((m) => m.groupSizeMm === diameterMm).map((m) => m.name);
   return fits.length > 0 ? `Fits ${fits.join(', ')}` : 'Fits none of your machines';
 }
+
+/** The five built-in machine features (D-44, data-model §3), with their switch in "What it can do". */
+export function builtInFeatures(
+  enabled: Partial<Record<string, boolean>> = {}
+): FeatureDefinition[] {
+  const phase = (key: string, label: string, pressure: boolean): FeatureDefinition => ({
+    key,
+    label,
+    builtIn: true,
+    enabled: enabled[key] ?? false,
+    switchable: true,
+    value: pressure
+      ? { kind: 'phase', step: 1000, pressure: { step: 500, min: 0, max: 12000 } }
+      : { kind: 'phase', step: 1000 }
+  });
+  return [
+    {
+      key: 'temperature',
+      label: 'Temperature',
+      builtIn: true,
+      enabled: enabled.temperature ?? false,
+      switchable: false,
+      value: { kind: 'number', unit: '°C', step: 1000 }
+    },
+    {
+      key: 'flat_pressure',
+      label: 'Flat pressure',
+      builtIn: true,
+      enabled: enabled.flat_pressure ?? false,
+      switchable: false,
+      value: { kind: 'number', unit: 'bar', step: 500 }
+    },
+    phase('preinfusion', 'Preinfusion', false),
+    phase('low_bar_start', 'Low bar start', true),
+    phase('low_bar_end', 'Low bar end', true)
+  ];
+}
+
+/** What new gear starts with (D-158). */
+export const NEW_GEAR = {
+  machine: (): MachineSpec => ({
+    type: 'semi_auto',
+    groupSizeMm: 58000,
+    features: builtInFeatures({ temperature: true, flat_pressure: true })
+  }),
+  grinder: (): GrinderSpec => ({
+    type: 'electric',
+    burrs: 'flat',
+    dial: { mode: 'stepless', step: 100, finest: 0, coarsest: 10000 }
+  }),
+  basket: (): BasketSpec => ({
+    brand: '',
+    type: 'precision',
+    shotSize: 'double',
+    diameterMm: 58000
+  })
+};
