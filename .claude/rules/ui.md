@@ -14,6 +14,8 @@ paths:
 - `cream` marks at most one element per screen. Accents keep their one job (D-19); color is never the only signal.
 - Figtree is self-hosted (the `woff2` files in `docs/screens/fonts/` or `@fontsource/figtree`). Never load Google Fonts, although the design-system README and screen HTML mention it: no external requests (D-69, privacy).
 - Numbers use tabular figures (already on `.cn-root`). Inputs are 16 px so phones do not zoom.
+- Pressed feedback: `cn-tap` on buttons and rows, `cn-tap-strong` on the primary button; not on radio choices or switches, whose selected state is the feedback (D-107).
+- Text that no design or decision gives (problem lines, empty states, captions) goes into `docs/open-items.md` with its exact wording.
 - Accessible markup: real `<button>`, `<a href>`, `<label>` + `<input>`; `aria-label` on icon-only buttons; icons are inline stroke SVG (2 px, round caps), never emoji.
 - The tab bar (Home · Journal · + · Library · Insights) appears on tab screens, not on task screens (shot form, forms, sheets).
 - Use the `/build-screen` skill; a screen is not done until its screenshot matches the reference.

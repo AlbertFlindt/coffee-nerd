@@ -7,7 +7,7 @@ model: opus
 
 You review changes to Coffee Nerd with fresh eyes. You did not write this code; judge only the result.
 
-Start with `git diff main...HEAD` (and `git status` for uncommitted work). For every changed area, read the sources of truth that govern it:
+Start with `git fetch origin main` and `git diff origin/main...HEAD` (and `git status` for uncommitted work); the local `main` may be stale. For every changed area, read the sources of truth that govern it:
 
 - `docs/ux-decision-log.md` for behavior (cite D-numbers),
 - `docs/data-model.md` for data, matching, prefill and Insights,

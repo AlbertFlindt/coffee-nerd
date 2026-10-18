@@ -351,7 +351,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* one place decides what new beans start from.
 - **D-150 — A basket has a brand and a size instead of a name.** The basket page has Brand (text, e.g. "VST") and Size (grams, e.g. 18) side by side where Name was drawn; everywhere a basket is shown as "VST · 18 g". Existing baskets are split once ("VST 18 g" becomes VST and 18). Revises D-49.
   - *Why:* the design names baskets "VST · 18 g" on the My setup card; separate fields keep it consistent.
-- **D-151 — Custom features can be renamed, switched off, and deleted while unused.** A custom feature can always be renamed and switched off. It can be deleted only while no shot has used it. Refines D-46.
+- **D-151 — Custom features can be renamed, switched off, and deleted while unused.** *(Revised 2026-10-18: see D-160, D-162.)* A custom feature can always be renamed and switched off. It can be deleted only while no shot has used it. Refines D-46.
   - *Why:* old shots keep their meaning; a feature added by mistake can go.
 - **D-152 — Options for "Pick from a list".** In Add your own feature, "Pick from a list" shows one text row per option where Step and Range sit for numbers, with "+ Add option" below and a × on each row; at least two options. Refines D-46.
   - *Why:* each option gets a field, so commas in labels are no problem.
@@ -369,6 +369,12 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the most common home setups, so most new gear needs only a name and a few taps.
 - **D-159 — The grinder's step interval is typed.** On the grinder page, "How the dial works" has three typed fields: **Step interval**, **Finest** and **Coarsest** (for example 0.25, 0.0 and 50.0). The step interval is how far − or + moves the grind on the shot form; any positive number is accepted, there is no fixed list of steps. Refines D-48.
   - *Why:* grinders differ widely; a typed step and range cover the most equipment and let the user choose the resolution.
+- **D-160 — A feature counts as used once a recipe holds it.** A custom feature is "used" (D-151) as soon as any recipe has it in its setup, switched on or off. A recipe records every feature the machine has switched on, so a feature that was on the machine during any shot can no longer be deleted. Refines D-151.
+  - *Why:* deleting it would make later shots stop matching the recipes they repeat (D-16), even where it was switched off.
+- **D-161 — Your own features have a default in My setup.** Edit My setup shows a row for each switched-on custom feature of the chosen machine, the same row as on More › Setup, so a new bean can start with it on and at a value. Refines D-45.
+  - *Why:* a feature you use on every shot should not have to be switched on again for each new bean.
+- **D-162 — A used feature keeps its unit.** Once a custom feature is used (D-160), its unit can no longer be changed; its name, its switch, its step, its range and new list options still can. Refines D-151.
+  - *Why:* the unit is what the stored numbers mean; the step and range only change how you tap.
 - **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-18: see D-78, D-83, D-147, D-148, D-149.)*
   - **My setup** (a light cream card so it stands out): default machine, grinder, basket and puck prep routine, plus **default values** (dose, yield, grind, temperature, pressure profile). One "Edit" button.
   - Defaults are the **starting point for a bean's first shot** (and when switching gear). After that, D-03 applies: new shots copy the last shot.
@@ -399,7 +405,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - A machine feature is always something you **set before the shot**, so it is part of the **recipe** (D-13): changing it starts a new recipe and is highlighted like any other change (D-15). Stored on every shot and available to Insights.
   - *Why:* lets any machine fit without the app knowing about it in advance, while keeping the recipe-vs-result model intact.
 - **D-47 — Measuring gear is out of scope for now.** Scales, refractometers and similar tools are **gear of their own**, not features of a machine (a Bianca has no scale). How they fit — what they measure (yield, time, TDS), and whether those become result fields — is parked as an open topic. Until then, custom features are machine features only.
-- **D-45 — Edit My setup: full-screen form.** Opens from "Edit" on the My setup card. Same pattern as Add bean (D-41): close (X), title with "Starting point for new beans", one Save at the bottom, fits the screen (D-36).
+- **D-45 — Edit My setup: full-screen form.** *(Revised 2026-10-18: see D-161.)* Opens from "Edit" on the My setup card. Same pattern as Add bean (D-41): close (X), title with "Starting point for new beans", one Save at the bottom, fits the screen (D-36).
   - **Gear:** four pickers in a 2×2 grid — machine, grinder, basket, puck prep routine.
   - **Default values:** dose, yield, grind, temperature as −/+ cards (same controls as the shot form), with the calculated ratio below.
   - **Pressure profile:** one summary row that opens the same phase editor as the More sheet (D-24).

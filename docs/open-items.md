@@ -16,9 +16,7 @@ Last updated: 2026-10-18
 
 | Question | Needed by | Source |
 |---|---|---|
-| Edit My setup has default values only for temperature and the pressure profile. Your own features (a number, seconds, on/off or a list) have no row there, so a new bean always starts with them switched off. Should Edit My setup show a row for each of them? | Any time (refines M6) | D-45, D-46 |
-| A feature that shots have used can still change its unit, step and range in the sheet (its name, switch and new options are what D-151 allows). A new unit changes what earlier recipes mean, and units are not part of the recipe (D-65), so old and new shots would still count as one recipe. Should a used feature keep its unit, step and range too? | Any time (refines M6) | D-151, D-65 |
-| D-151 reads "used" as: any recipe of yours has the feature in its setup, switched on or off. A recipe records a feature as soon as the machine has it switched on, so a feature that was on the machine during any shot can no longer be deleted, even if it was switched off for that shot. Deleting it would change how later shots match earlier recipes. Is that the right reading? | Any time (refines M6) | D-151, D-65 |
+| *(none open)* | | |
 
 ## 2. Screens and states not designed yet
 
@@ -69,6 +67,7 @@ Last updated: 2026-10-18
 |---|---|---|
 | The seeded end-to-end files share one database and run in name order (`shot-*`, then `tab-*`), each leaving the reference setup as it found it; a file cannot run alone after an earlier one fails | Any time | M6 tests |
 | The rows in More › Setup and in the pressure profile sheet have −/+ only, no tap to type: from empty, flat pressure needs 18 taps to reach 9.0 bar (D-78). Tap to type on these rows would help, mostly on the first My setup | M10 or when the canvas designs it | D-78, D-24 |
+| Build D-161 (rows for your own features in Edit My setup) and D-162 (a used feature keeps its unit, also checked on the server) | M6 follow-up pull request | D-161, D-162 |
 | Recipe filter labels (D-121) add the differing gear and machine features, not the routine's step values: two recipes with the same routine whose steps differ (e.g. WDT 20 s vs 30 s) still read the same | M7 (Puck prep, when step values become editable there) | D-121, D-51 |
 | `main` is not protected: GitHub does not enforce the "Require pull request" ruleset on a private repository without a Team plan. The push-guard hook and the review step are the safeguard. | When the repository goes public | Roadmap M0, D-62 |
 | Playwright is pinned to 1.56.1 and CI to `ubuntu-24.04`, to match the browser in the development environment. Upgrade both together. | Any time | PR #1 |
