@@ -75,10 +75,37 @@ test('AddBean, D-41: name and roast date are required', async () => {
   await expectNoPageScroll();
 });
 
+test('AddBean, D-141: tapping the chosen process or roast level again clears it', async () => {
+  const washed = page.getByRole('button', { name: 'Washed' });
+  await washed.click();
+  await expect(washed).toHaveAttribute('aria-pressed', 'true');
+  await washed.click();
+  await expect(washed).toHaveAttribute('aria-pressed', 'false');
+  const dark = page.getByRole('radio', { name: 'Dark' });
+  await dark.click();
+  await expect(dark).toHaveAttribute('aria-checked', 'true');
+  await dark.click();
+  await expect(dark).toHaveAttribute('aria-checked', 'false');
+});
+
+test('AddBean, D-133: Country opens a sheet with a search', async () => {
+  await page.getByRole('button', { name: /Country, not set/ }).click();
+  await page.getByLabel('Search').fill('ken');
+  await page.getByRole('button', { name: 'Kenya' }).click();
+  await expect(page.getByRole('button', { name: /Country, Kenya/ })).toBeVisible();
+});
+
 test('AddBean, D-126, D-139: "Same as before" fills the form from an earlier bean', async () => {
   await page.getByRole('button', { name: /Same as before/ }).click();
-  await page.getByRole('link', { name: /Guji Hambela/ }).click();
+  await page.getByRole('button', { name: /Guji Hambela/ }).click();
   await expect(page.getByText('Same as Guji Hambela')).toBeVisible();
+  await expect(page.getByLabel('Name')).toHaveValue('Guji Hambela');
+  // D-139: the × undoes the choice, then it is picked again.
+  await page.getByRole('link', { name: 'Not a re-buy' }).click();
+  await expect(page.getByText('Same as before')).toBeVisible();
+  await expect(page.getByLabel('Name')).toHaveValue('');
+  await page.getByRole('button', { name: /Same as before/ }).click();
+  await page.getByRole('button', { name: /Guji Hambela/ }).click();
   await expect(page.getByLabel('Name')).toHaveValue('Guji Hambela');
   await expect(page.getByLabel('Roaster')).toHaveValue('Nordlys Roasters');
   await expect(page.getByRole('button', { name: /Country, Ethiopia/ })).toBeVisible();
@@ -143,4 +170,22 @@ test('D-73, D-140: the re-buy is added, and its first shot starts from the earli
     page.getByRole('region', { name: 'Core values' }).locator('.cn-value-card', { hasText: 'Time' })
   ).toContainText((time! / 1000).toFixed(1));
   await page.goBack();
+});
+
+test('D-130: Edit bean is the form filled in, without "Same as before"', async () => {
+  const db = new Database(DATABASE, { readonly: true });
+  const latest = db
+    .prepare("select id from bean where name = 'Guji Hambela' order by created_at desc limit 1")
+    .get() as { id: string };
+  db.close();
+  await page.goto(`/library/beans/${latest.id}/edit`);
+  await expect(page.getByRole('heading', { name: 'Edit bean', level: 1 })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Same as before/ })).toHaveCount(0);
+  await expect(page.getByLabel('Name')).toHaveValue('Guji Hambela');
+  await expect(page.getByText('2 days ago')).toBeVisible();
+  await page.getByLabel('Bag weight').fill('1,000');
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.getByRole('heading', { name: 'Beans', level: 1 })).toBeVisible();
+  // D-142: "1,000" is a thousand grams (shown without a separator, like other quantities).
+  await expect(page.getByRole('main').locator('.card', { hasText: '1000 g left' })).toHaveCount(1);
 });

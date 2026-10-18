@@ -22,6 +22,7 @@ Last updated: 2026-10-18
 
 | What is missing | Needed by | Source |
 |---|---|---|
+| Add bean: built without a design, from the form's own parts: the "Same as before" sheet (name and roaster · country · process per row, "No beans yet"), the country sheet (search field, then countries as rows), the picked re-buy card with its × (D-139), the problem lines above the button, and Edit bean (D-130). Review in the design-system sync | M5 (design-system sync, D-119) | D-126, D-130, D-133, D-138, D-139 |
 | Proper design for the sign-in and "Create your account" pages (built simple for now) | Before release (M11) | D-84 |
 | First-run guide: after creating the account, how you add your gear, puck prep and My setup | M6 | D-88 |
 | Gear: the message on an item My setup uses, "Used in My setup · choose another default first" | M6 | D-83 |

@@ -266,7 +266,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - **Finished** beans collapse into compact rows below (name, roaster · origin · process, best score, recipes · shots); this list is the part that scrolls (D-36).
   - "Add bean" sits in the header.
   - *Why:* open beans are what you choose between, so they get the space and the freshness signal; finished beans are history you look up now and then.
-- **D-41 — Add bean form.** *(Revised 2026-10-18: see D-73, D-126, D-133, D-138, D-139, D-140, D-141.)* Full-screen form opened from "Add bean"; fits the screen without scrolling (D-36). Top to bottom:
+- **D-41 — Add bean form.** *(Revised 2026-10-18: see D-73, D-126, D-133, D-138, D-139, D-140, D-141, D-142.)* Full-screen form opened from "Add bean"; fits the screen without scrolling (D-36). Top to bottom:
   - **"Same as before"** shortcut: pick a past bean to re-buy it. Everything is copied except roast date and bag weight. The new bag is linked to the earlier one, so its history and best recipe carry over (as a starting point, not merged scores).
   - **Name** (required).
   - **Roaster** (full width).
@@ -305,7 +305,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* an edit corrects history; finishing or reopening a bean by surprise during a correction would be confusing.
 - **D-125 — A recipe on the bean page opens the Journal filtered to it.** Tapping a recipe on the bean detail page opens the Journal with that bean and recipe chosen in its filters (D-112). There is no separate recipe page. Refines D-42; settles open topic 9.
   - *Why:* the Journal already lists a recipe's shots; no new screen is needed.
-- **D-126 — "Same as before" lists each bean once.** *(Revised 2026-10-18: see D-139.)* The "Same as before" sheet lists every earlier bean, open and finished, newest first. Several bags with the same name and roaster show as one row, the latest bag, which the new bag is linked to. Refines D-41.
+- **D-126 — "Same as before" lists each bean once.** *(Revised 2026-10-18: see D-139, D-142.)* The "Same as before" sheet lists every earlier bean, open and finished, newest first. Several bags with the same name and roaster show as one row, the latest bag, which the new bag is linked to. Refines D-41.
   - *Why:* you re-buy a coffee, not a particular bag; the latest bag leads back through the chain (D-73).
 - **D-127 — Finishing a bean by hand offers an undo.** "Mark as finished" keeps you on the bean page, turns the button into "Reopen" and shows a message, "Guji Hambela is finished", with Undo, as an automatic finish does. Refines D-40.
   - *Why:* one way of finishing behaves like the other, and a mistaken tap is undone where it happened.
@@ -333,8 +333,10 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* you see what the new bag is linked to and can change your mind.
 - **D-140 — After adding a bean, its page opens.** "Add bean" saves the bean and opens its detail page (D-42). Adding a bean does not change the bean Home and "+" start from (D-32); a shot does. Refines D-41.
   - *Why:* the new bag's page is where you check what was saved and, after a re-buy, which recipe it starts from.
-- **D-141 — Small details of the Add bean form.** The re-buy card's second line reads "Only roast date and bag weight are new" (D-139). Process and Roast level are optional: tapping the chosen chip or level again clears it. Refines D-41 and D-139.
+- **D-141 — Small details of the Add bean form.** *(Revised 2026-10-18: see D-142.)* The re-buy card's second line reads "Only roast date and bag weight are new" (D-139). Process and Roast level are optional: tapping the chosen chip or level again clears it. Refines D-41 and D-139.
   - *Why:* the line says exactly what the copy leaves out; a wrong tap on an optional choice can be undone without picking something else.
+- **D-142 — Typing numbers, and what counts as the same bean.** Numbers on the Add bean form are written the international way: a point for decimals and, optionally, commas between groups of three digits ("250.5 g", "1,000 g", "1,900–2,100 m"); anything else, such as "250,5", says how to write it. The unpicked "Same as before" card keeps its drawn line, "Re-buy a past bean · only roast date is new". For "Same as before", bags count as the same bean when their names and roasters match, ignoring upper and lower case and spaces at either end. Refines D-41, D-126 and D-141.
+  - *Why:* one way of writing numbers avoids reading "1,000" as one gram; small typing differences should not split a coffee into two rows.
 - **D-38 — Gear page: "My setup" card on top, gear list below.** *(Revised 2026-10-17: see D-78, D-83.)*
   - **My setup** (a light cream card so it stands out): default machine, grinder, basket and puck prep routine, plus **default values** (dose, yield, grind, temperature, pressure profile). One "Edit" button.
   - Defaults are the **starting point for a bean's first shot** (and when switching gear). After that, D-03 applies: new shots copy the last shot.

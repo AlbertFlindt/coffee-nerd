@@ -213,6 +213,11 @@ describe('rebuyChoices', () => {
     expect(choices[0]).toMatchObject({ name: 'Kiambu AA', origin: 'Havnens Rösteri' });
   });
 
+  it('D-142: the same bean despite upper and lower case and spaces at either end', () => {
+    const latest = addBean({ name: 'guji hambela ', roaster: ' Nordlys roasters', createdAt: T0 });
+    expect(rebuyChoices(db, ids.userId).map((c) => c.id)).toEqual([latest]);
+  });
+
   it('D-60: only your own beans', () => {
     expect(rebuyChoices(db, 'someone-else')).toEqual([]);
   });

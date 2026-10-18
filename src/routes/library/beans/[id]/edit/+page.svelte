@@ -1,6 +1,5 @@
 <script lang="ts">
   // Edit bean (D-130).
-  import { resolve } from '$app/paths';
   import BeanForm from '#lib/components/BeanForm.svelte';
   import type { PageProps } from './$types';
 
@@ -9,10 +8,4 @@
 
 <svelte:head><title>Edit bean · Coffee Nerd</title></svelte:head>
 
-<BeanForm
-  mode="edit"
-  text={data.text}
-  today={data.today}
-  closeHref={resolve('/library/beans')}
-  problems={form?.problems}
-/>
+<BeanForm mode="edit" text={data.text} today={data.today} problems={form?.problems} />

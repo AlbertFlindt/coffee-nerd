@@ -4,6 +4,7 @@
   // date picker (D-138).
   import { untrack } from 'svelte';
   import { enhance } from '$app/forms';
+  import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import { PROCESS_LABEL, roastDateText, type Process } from '#lib/domain/bean.ts';
@@ -14,7 +15,6 @@
     mode,
     text,
     today,
-    closeHref,
     rebuy = null,
     choices = [],
     problems = []
@@ -23,11 +23,10 @@
     text: BeanFormText;
     /** Today in your time zone, "YYYY-MM-DD": no roast date after it (D-138). */
     today: string;
-    closeHref: string;
-    /** The bean this re-buy repeats, with the link that undoes the choice (D-139). */
-    rebuy?: { name: string; clearHref: string } | null;
-    /** "Same as before" choices, each with the link that fills the form from it (D-126). */
-    choices?: { id: string; name: string; origin: string; href: string }[];
+    /** The name of the bean this re-buy repeats (D-139). */
+    rebuy?: { name: string } | null;
+    /** "Same as before" choices (D-126); picking one opens the form filled from it (?rebuy=). */
+    choices?: { id: string; name: string; origin: string }[];
     problems?: string[];
   } = $props();
 
@@ -47,7 +46,7 @@
 </script>
 
 <header>
-  <a class="icon tap" href={closeHref} aria-label="Close without saving">
+  <a class="icon tap" href={resolve('/library/beans')} aria-label="Close without saving">
     <svg
       width="22"
       height="22"
@@ -103,7 +102,7 @@
         {/if}
       </button>
       {#if rebuy}
-        <a class="icon tap clear" href={rebuy.clearHref} aria-label="Not a re-buy">
+        <a class="icon tap clear" href={resolve('/library/beans/new')} aria-label="Not a re-buy">
           <svg
             width="16"
             height="16"
@@ -273,16 +272,22 @@
 {#if sheet === 'rebuy'}
   <BottomSheet label="Same as before" closeLabel="Close bean list" onclose={() => (sheet = null)}>
     <h2 class="cn-type-heading sheet-title">Same as before</h2>
-    <div class="list">
+    <!-- D-126: picking a bean opens the form filled from it (?rebuy=), like the shot form's bean list. -->
+    <form
+      class="list"
+      method="GET"
+      action={resolve('/library/beans/new')}
+      data-sveltekit-replacestate
+    >
       {#each choices as choice (choice.id)}
-        <a class="row tap" href={choice.href} data-sveltekit-replacestate>
+        <button type="submit" name="rebuy" value={choice.id} class="row tap">
           <span class="row-name">{choice.name}</span>
           {#if choice.origin}<span class="soft">{choice.origin}</span>{/if}
-        </a>
+        </button>
       {:else}
         <p class="soft">No beans yet</p>
       {/each}
-    </div>
+    </form>
   </BottomSheet>
 {:else if sheet === 'country'}
   <BottomSheet

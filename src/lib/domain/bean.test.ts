@@ -130,6 +130,7 @@ describe('parseAltitude', () => {
     expect(parseAltitude('  ')).toBeNull();
     expect(parseAltitude('high')).toBe('invalid');
     expect(parseAltitude('2100–1900')).toBe('invalid');
+    expect(parseAltitude('0')).toBe('invalid');
   });
 });
 

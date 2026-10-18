@@ -1,7 +1,7 @@
 // The Add bean form (D-41) as text, the way it is typed and shown, and reading it back into a bean.
 import { altitudeText, parseAltitude } from './bean';
 import { beanInputSchema, type BeanInput } from './schemas';
-import { formatNumber, toThousandths } from './units';
+import { fromThousandths, toThousandths } from './units';
 
 /** Every field as typed; an empty string is not set. Roast date is "YYYY-MM-DD". */
 export type BeanFormText = {
@@ -28,6 +28,19 @@ const PROBLEM: Record<string, string> = {
   bagWeight: 'Bag weight: write it in grams, like 250'
 };
 
+/** Schema fields that are typed in another field of the form. */
+const FIELD_OF: Record<string, string> = { altitudeMinM: 'altitude', altitudeMaxM: 'altitude' };
+
+/**
+ * Grams written the international way (D-142): "250.5", "1,000 g"; a comma only between groups of three
+ * digits. Null when it cannot be read.
+ */
+function parseGrams(typed: string): number | null {
+  const match = /^(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?\s*g?$/i.exec(typed.trim());
+  if (!match) return null;
+  return toThousandths(`${match[1].replaceAll(',', '')}${match[2] ?? ''}`);
+}
+
 /** Reads the typed form into a bean, or the problems to show above the button, in plain words. */
 export function readBeanForm(text: BeanFormText): { bean: BeanInput } | { problems: string[] } {
   const problems = new Set<string>();
@@ -37,11 +50,8 @@ export function readBeanForm(text: BeanFormText): { bean: BeanInput } | { proble
   if (altitude === 'invalid') problems.add(PROBLEM.altitude);
   let bagWeight: number | null = null;
   if (text.bagWeight.trim() !== '') {
-    try {
-      bagWeight = toThousandths(text.bagWeight.replace(',', '.'));
-    } catch {
-      problems.add(PROBLEM.bagWeight);
-    }
+    bagWeight = parseGrams(text.bagWeight);
+    if (bagWeight === null) problems.add(PROBLEM.bagWeight);
   }
 
   const parsed = beanInputSchema.safeParse({
@@ -61,7 +71,7 @@ export function readBeanForm(text: BeanFormText): { bean: BeanInput } | { proble
   if (!parsed.success)
     for (const issue of parsed.error.issues) {
       const field = String(issue.path[0]);
-      problems.add(PROBLEM[field] ?? `${field}: not valid`);
+      problems.add(PROBLEM[FIELD_OF[field] ?? field] ?? 'Something in the form is not right');
     }
   if (problems.size > 0) {
     // Shown in the order of the form.
@@ -84,7 +94,16 @@ export function beanFormText(values: BeanFormValues): BeanFormText {
     altitude: altitudeText(values.altitudeMinM, values.altitudeMaxM) ?? '',
     roastLevel: values.roastLevel ?? '',
     roastDate: values.roastDate ?? '',
-    bagWeight: grams === null ? '' : formatNumber(grams, grams % 1000 === 0 ? 0 : 1),
+    bagWeight: grams === null ? '' : gramsText(grams),
     rebuyOfId: values.rebuyOfId ?? ''
   };
+}
+
+/** "250", "250.25", "1,000": up to three decimals, none trailing (D-130, D-142). */
+function gramsText(grams: number): string {
+  const decimals = [0, 1, 2, 3].find((d) => grams % 10 ** (3 - d) === 0) ?? 3;
+  return fromThousandths(grams).toLocaleString('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
 }

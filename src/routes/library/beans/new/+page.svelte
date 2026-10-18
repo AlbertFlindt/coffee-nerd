@@ -1,6 +1,5 @@
 <script lang="ts">
   // Add bean (screen 9, D-41).
-  import { resolve } from '$app/paths';
   import BeanForm from '#lib/components/BeanForm.svelte';
   import type { PageProps } from './$types';
 
@@ -15,11 +14,8 @@
     mode="add"
     text={data.text}
     today={data.today}
-    closeHref={resolve('/library/beans')}
-    rebuy={data.rebuyName
-      ? { name: data.rebuyName, clearHref: resolve('/library/beans/new') }
-      : null}
-    choices={data.choices.map((c) => ({ ...c, href: `?rebuy=${c.id}` }))}
+    rebuy={data.rebuyName ? { name: data.rebuyName } : null}
+    choices={data.choices}
     problems={form?.problems}
   />
 {/key}

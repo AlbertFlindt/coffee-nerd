@@ -102,13 +102,15 @@ export function originLine(bean: {
  * both. Null when empty; "invalid" when it is not one or two whole metres from low to high.
  */
 export function parseAltitude(text: string): { min: number; max: number } | null | 'invalid' {
-  const cleaned = text.replace(/[,\s]|m$/gi, '');
+  const cleaned = text.replace(/\s|m$/gi, '');
   if (cleaned === '') return null;
-  const match = /^(\d{1,5})(?:[-–](\d{1,5}))?$/.exec(cleaned);
+  // D-142: commas only between groups of three digits.
+  const height = String.raw`(\d{1,3}(?:,\d{3})?|\d{1,5})`;
+  const match = new RegExp(`^${height}(?:[-–]${height})?$`).exec(cleaned);
   if (!match) return 'invalid';
-  const min = Number(match[1]);
-  const max = match[2] === undefined ? min : Number(match[2]);
-  return min <= max ? { min, max } : 'invalid';
+  const min = Number(match[1].replace(',', ''));
+  const max = match[2] === undefined ? min : Number(match[2].replace(',', ''));
+  return min > 0 && min <= max ? { min, max } : 'invalid';
 }
 
 /** "1,900–2,100 m", or "1,850 m" when both ends are the same; null when not set (D-41). */
