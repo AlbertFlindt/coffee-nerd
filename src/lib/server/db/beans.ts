@@ -109,7 +109,8 @@ export class BeanRejected extends Error {
   }
 }
 
-function timeZoneOf(db: Queryable, ownerId: string): string {
+/** Your time zone, for today's date (D-138). */
+export function timeZoneOf(db: Queryable, ownerId: string): string {
   return (
     db
       .select({ timeZone: userSettings.timeZone })

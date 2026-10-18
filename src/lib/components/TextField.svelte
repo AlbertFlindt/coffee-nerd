@@ -2,12 +2,26 @@
   // A labelled text field, as on the Add bean form (D-41): label above, value below, on a surface.
   import type { HTMLInputAttributes } from 'svelte/elements';
 
-  let { label, id, ...input }: { label: string; id: string } & HTMLInputAttributes = $props();
+  let {
+    label,
+    id,
+    hint,
+    plain = false,
+    value = $bindable(),
+    ...input
+  }: {
+    label: string;
+    id: string;
+    /** Shown at the right of the label, e.g. "Required" (D-41). */
+    hint?: string;
+    /** A value in regular weight, as for optional fields on the Add bean form. */
+    plain?: boolean;
+  } & HTMLInputAttributes = $props();
 </script>
 
 <div class="field">
-  <label class="cn-caption" for={id}>{label}</label>
-  <input {id} {...input} />
+  <label class="cn-caption label" for={id}>{label}{#if hint}<span>{hint}</span>{/if}</label>
+  <input {id} class:plain bind:value {...input} />
 </div>
 
 <style>
@@ -31,6 +45,20 @@
     font-size: 16px;
     font-weight: 600;
     min-width: 0;
+  }
+
+  .label {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  input.plain {
+    font-weight: 400;
+  }
+
+  input::placeholder {
+    color: var(--ink-muted);
+    font-weight: 400;
   }
 
   input:focus-visible {

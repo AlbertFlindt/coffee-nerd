@@ -22,6 +22,15 @@ describe('searchCountries', () => {
 
   it('D-133: matches any part of the name, ignoring case and accents', () => {
     expect(searchCountries('ethi')).toEqual([{ code: 'ET', name: 'Ethiopia' }]);
+    expect(searchCountries('kenya')).toEqual([{ code: 'KE', name: 'Kenya' }]);
     expect(searchCountries('cote').map((c) => c.code)).toContain('CI');
+  });
+
+  it('D-133: names that start with the search come first', () => {
+    expect(searchCountries('eth').map((c) => c.name)).toEqual([
+      'Ethiopia',
+      'Caribbean Netherlands',
+      'Netherlands'
+    ]);
   });
 });

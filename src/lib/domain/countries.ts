@@ -31,8 +31,14 @@ const ALL = COUNTRY_CODES.map((code) => ({ code, name: countryName(code)! })).so
   a.name.localeCompare(b.name, 'en')
 );
 
-/** Countries A to Z whose name contains the search, ignoring case and accents (D-133). */
+/**
+ * Countries whose name contains the search, ignoring case and accents (D-133): those that start with it
+ * first, each part A to Z.
+ */
 export function searchCountries(search: string): { code: string; name: string }[] {
   const wanted = fold(search.trim());
-  return wanted === '' ? ALL : ALL.filter((c) => fold(c.name).includes(wanted));
+  if (wanted === '') return ALL;
+  const matches = ALL.filter((c) => fold(c.name).includes(wanted));
+  const starts = (c: { name: string }) => fold(c.name).startsWith(wanted);
+  return [...matches.filter(starts), ...matches.filter((c) => !starts(c))];
 }

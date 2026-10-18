@@ -1,8 +1,8 @@
 <script lang="ts">
   // Beans overview (screen 7, D-37): open beans as cards with their roast age, finished beans as rows below;
   // below the header everything scrolls as one list (D-36, D-136). The Library tab opens it directly, so there is no back arrow
-  // until the Library page exists (D-124). Add bean and the bean pages come later in M5, so the button
-  // is dimmed and the beans are not links yet.
+  // until the Library page exists (D-124). The bean pages come later in M5, so the beans are not links yet.
+  import { resolve } from '$app/paths';
   import TabBar from '#lib/components/TabBar.svelte';
   import type { PageData } from './$types';
 
@@ -14,7 +14,7 @@
 
 <header>
   <h1>Beans</h1>
-  <a class="cn-btn-add add later" aria-disabled="true">
+  <a class="cn-btn-add add" href={resolve('/library/beans/new')}>
     <svg
       width="16"
       height="16"
@@ -107,10 +107,6 @@
 
   .add {
     text-decoration: none;
-  }
-
-  .later {
-    opacity: 0.4;
   }
 
   main {
