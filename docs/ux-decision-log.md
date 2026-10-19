@@ -448,7 +448,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* what shots point to is kept, as everywhere else in the app.
 - **D-172 — Built-in notes can change too.** Built-in notes can be renamed, merged and removed like your own; only your own notes can change family. Refines D-53.
   - *Why:* the vocabulary is yours to tidy; fixed families keep Insights reliable.
-- **D-173 — When two notes look alike.** The "Same tag twice?" card appears for two notes with the same name ignoring case, spaces and accents, or with one or two letters different when the names are five letters or longer. Besides "Merge", the card has a quiet "Keep both", remembered for that pair. Refines D-53.
+- **D-173 — When two notes look alike.** *(Revised 2026-10-19: see D-179.)* The "Same tag twice?" card appears for two notes with the same name ignoring case, spaces and accents, or with one or two letters different when the names are five letters or longer. Besides "Merge", the card has a quiet "Keep both", remembered for that pair. Refines D-53.
   - *Why:* catches typos without nagging about notes that are meant to be different.
 - **D-174 — Adding a note on the Tags page.** "Add tag" opens a sheet with Name and the five families as choices (Other chosen to start), then "Add tag". Refines D-53.
   - *Why:* on the Tags page you have time to place the note; the Tasting tab keeps its quick way (D-101).
@@ -460,6 +460,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* it is one meaning shown twice, and the two usually coincide.
 - **D-178 — A step value outside its range is brought into range.** When a shot copies a step value that no longer fits its step (its range was narrowed or its option removed since, D-168), the new shot starts at the nearest end of the range, or the routine's own value for a list, shown in sage as a change. Editing an earlier shot keeps the values it was brewed with. Refines D-76 and D-166.
   - *Why:* the next shot can always be saved, and history is never rewritten.
+- **D-179 — Look-alike notes start with the same letter.** The "one or two letters different" rule of D-173 applies only when both names start with the same letter (ignoring case and accents). Names that are the same ignoring case, spaces and accents still always count. Refines D-173.
+  - *Why:* typos rarely hit the first letter, while real notes like Honey and Winey, Berry and Cherry, Toasted and Roasted would otherwise be flagged; Honey and Winey are both built in.
 
 ## 11. Visual direction
 
