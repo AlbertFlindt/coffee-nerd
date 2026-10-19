@@ -143,6 +143,7 @@ export function loadShotForm(
   const gearRows = db.select().from(gear).where(eq(gear.ownerId, ownerId)).all();
   const routineRows = db.select().from(routine).where(eq(routine.ownerId, ownerId)).all();
   const routines = routinesNow(db, ownerId, routineRows);
+  const stepSettings = stepSettingsOf(db, ownerId);
   const latest = latestShotOfBean(db, ownerId, current.id);
 
   const context: PrefillContext = {
@@ -157,6 +158,7 @@ export function loadShotForm(
       gearRows.filter((g) => g.kind === 'machine').map((g) => [g.id, g.spec as MachineSpec])
     ),
     routines,
+    stepSettings,
     archivedIds: new Set(
       [...gearRows, ...routineRows].filter((r) => r.archivedAt !== null).map((r) => r.id)
     )
@@ -171,7 +173,7 @@ export function loadShotForm(
     ...gearChoices(gearRows, []),
     defaultFeatures: mySetup.features,
     gearNames: Object.fromEntries(gearRows.map((g) => [g.id, g.name])),
-    stepSettings: stepSettingsOf(db, ownerId),
+    stepSettings,
     routines: routineRows
       .filter((r) => r.archivedAt === null)
       .map((r) => ({ id: r.id, name: r.name, routine: routines[r.id] })),
@@ -393,7 +395,7 @@ function rebuyChain(db: Queryable, ownerId: string, beanId: string): PrefillCont
   return chain;
 }
 
-/** Routines as they are now (D-76), with each step's current name and unit. */
+/** Every puck prep step's setting, archived ones too (D-166, D-178). */
 function stepSettingsOf(db: Queryable, ownerId: string): Record<string, PrepStepSetting> {
   return Object.fromEntries(
     db
@@ -405,6 +407,7 @@ function stepSettingsOf(db: Queryable, ownerId: string): Record<string, PrepStep
   );
 }
 
+/** Routines as they are now (D-76), with each step's current name and unit. */
 function routinesNow(
   db: Queryable,
   ownerId: string,

@@ -465,6 +465,46 @@ describe('prefill', () => {
     });
   });
 
+  it('D-178: a copied step value outside its step’s range now starts at the nearest end; a removed option at the routine’s value', () => {
+    const WDT = '0199f3a2-0000-7000-8000-00000000e001';
+    const FILTER = '0199f3a2-0000-7000-8000-00000000e004';
+    const copied = {
+      name: 'Daily routine',
+      steps: [
+        { stepId: WDT, name: 'WDT', unit: 's', value: 30000 },
+        { stepId: FILTER, name: 'Filter', value: 'cloth' }
+      ]
+    };
+    const now = {
+      name: 'Daily routine',
+      steps: [
+        { stepId: WDT, name: 'WDT', unit: 's', value: 20000 },
+        { stepId: FILTER, name: 'Filter', value: 'paper' }
+      ]
+    };
+    const result = prefill(
+      context({
+        latestShotOfBean: {
+          recipe: recipe({ setup: { ...recipe().setup, routine: copied } }),
+          shot: { yield: 36000, time: 28000 }
+        },
+        routines: { [ROUTINE]: now },
+        stepSettings: {
+          [WDT]: { kind: 'seconds', step: 1000, min: 0, max: 25000, startsAt: 20000 },
+          [FILTER]: {
+            kind: 'choice',
+            options: [
+              { id: 'paper', label: 'Paper' },
+              { id: 'metal', label: 'Metal' }
+            ],
+            startsAt: 'paper'
+          }
+        }
+      })
+    );
+    expect(result.setup.routine?.steps.map((s) => s.value)).toEqual([25000, 'paper']);
+  });
+
   it('D-76: a step used twice keeps each copied value in order', () => {
     const WDT = '0199f3a2-0000-7000-8000-00000000e001';
     const twice = {

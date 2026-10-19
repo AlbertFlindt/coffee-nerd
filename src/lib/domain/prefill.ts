@@ -1,7 +1,7 @@
 // What a new shot starts from (data-model §4.2; D-03, D-11, D-38, D-41, D-43, D-72 to D-76, D-78).
 // Pure: the caller loads the candidates (Brew next, the bean's latest shot, the re-buy chain, My setup,
 // machines, routines, archived ids) and this function picks one and brings it up to date.
-import type { FeatureValue, MachineSpec, SetupSnapshot, Taste } from './schemas';
+import type { FeatureValue, MachineSpec, PrepStepSetting, SetupSnapshot, Taste } from './schemas';
 import type { Thousandths } from './units';
 
 export type RecipeValues = {
@@ -51,6 +51,8 @@ export type PrefillContext = {
   machines: Record<string, MachineSpec>;
   /** Routines as they are now, by id (D-76). */
   routines: Record<string, RoutineNow>;
+  /** Puck prep steps' settings as they are now, by id: a copied value is brought into range (D-178). */
+  stepSettings?: Record<string, PrepStepSetting>;
   /** Ids of archived gear and routines (D-75). */
   archivedIds: ReadonlySet<string>;
 };
@@ -155,6 +157,25 @@ function fromRecipe(
   };
 }
 
+/**
+ * D-178: a copied step value that no longer fits its step: a number moves to the nearest end of the
+ * range, a removed option falls back to the routine's own value.
+ */
+function inRange(
+  value: RoutineNow['steps'][number]['value'],
+  own: RoutineNow['steps'][number]['value'],
+  setting: PrepStepSetting | undefined
+): RoutineNow['steps'][number]['value'] {
+  if (!setting || value === null) return value;
+  if (setting.kind === 'choice')
+    return typeof value === 'string' && setting.options.some((o) => o.id === value) ? value : own;
+  if ((setting.kind === 'number' || setting.kind === 'seconds') && typeof value === 'number') {
+    if (setting.min !== undefined && value < setting.min) return setting.min;
+    if (setting.max !== undefined && value > setting.max) return setting.max;
+  }
+  return value;
+}
+
 function machineSpec(context: PrefillContext, machineId: string): MachineSpec {
   const spec = context.machines[machineId];
   if (!spec) throw new Error(`Unknown machine ${machineId}`);
@@ -181,7 +202,11 @@ function routineNow(
     name: routine.name,
     steps: routine.steps.map((step) => {
       const values = copiedValues.get(step.stepId);
-      return { ...step, value: values?.length ? values.shift()! : step.value };
+      if (!values?.length) return { ...step };
+      return {
+        ...step,
+        value: inRange(values.shift()!, step.value, context.stepSettings?.[step.stepId])
+      };
     })
   };
 }

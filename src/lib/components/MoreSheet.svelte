@@ -197,10 +197,10 @@
         <div class="group">
           {#each shot.setup.routine.steps as step, i (i)}
             {@const setting = stepSettings[step.stepId]}
-            {#if (setting?.kind === 'number' || setting?.kind === 'seconds') && typeof step.value === 'number'}
+            {#if setting?.kind === 'number' || setting?.kind === 'seconds'}
               <SetupRow
                 label={step.name}
-                value={step.value}
+                value={typeof step.value === 'number' ? step.value : undefined}
                 unit={setting.kind === 'number' ? setting.unit : 's'}
                 step={setting.step}
                 min={setting.min ?? 0}
@@ -226,7 +226,7 @@
             {:else}
               <div class="cn-row step-row">
                 <span class="cn-row__label">{step.name}</span>
-                <span class="off">No settings</span>
+                <span class="off">{setting?.kind === 'none' ? 'No settings' : '—'}</span>
               </div>
             {/if}
           {/each}
@@ -244,7 +244,8 @@
               aria-pressed={item.chosen}
               onclick={() => {
                 item.pick();
-                picking = null;
+                // From the puck prep view, a chosen routine shows its steps again (D-166).
+                picking = picking === 'routine' && shot.setup.routine ? 'prep' : null;
               }}>{item.name}</button
             >
           {/each}
@@ -654,7 +655,7 @@
   }
 
   .off {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--ink-muted);
   }
 

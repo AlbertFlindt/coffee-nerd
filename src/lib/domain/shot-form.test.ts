@@ -212,6 +212,36 @@ describe('setupChanges', () => {
     expect(setupChanges({ ...now, routineId: OTHER_BASKET }, base).steps).toEqual([]);
   });
 
+  it('D-166: a changed list step is named without a delta', () => {
+    const withFilter = (value: string): RecipeIdentity => ({
+      ...base,
+      setup: {
+        ...base.setup,
+        routine: { name: 'Daily routine', steps: [{ stepId: WDT, name: 'Filter', value }] }
+      }
+    });
+    expect(setupChanges(withFilter('metal'), withFilter('paper')).steps).toEqual([{ delta: null }]);
+  });
+
+  it('D-76, D-166: after the routine gained a step, only steps in the same place compare', () => {
+    const TAMP = '0199f3a2-0000-7000-8000-00000000e009';
+    const now: RecipeIdentity = {
+      ...base,
+      setup: {
+        ...base.setup,
+        routine: {
+          name: 'Daily routine',
+          steps: [
+            { stepId: TAMP, name: 'Tamp', unit: 'kg', value: 15000 },
+            { stepId: WDT, name: 'WDT', unit: 's', value: 25000 }
+          ]
+        }
+      }
+    };
+    expect(setupChanges(now, base).steps).toEqual([]);
+    expect(setupChanges(now, base).routine).toBe(true);
+  });
+
   it('D-81: without a last shot nothing is changed', () => {
     expect(setupChanges(base, null)).toEqual({
       features: {},
