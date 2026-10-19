@@ -4,6 +4,7 @@ import type { FeatureDefinition } from './schemas';
 import {
   coreChanges,
   matchRecipe,
+  routineParts,
   setupChanges,
   setupDetail,
   setupParts,
@@ -187,11 +188,67 @@ describe('setupChanges', () => {
       }
     };
     expect(setupChanges(now, base)).toMatchObject({ basket: true, routine: true });
-    expect(setupChanges(base, base)).toEqual({ features: {}, basket: false, routine: false });
+    expect(setupChanges(base, base)).toEqual({
+      features: {},
+      basket: false,
+      routine: false,
+      steps: []
+    });
+  });
+
+  it('D-166: a step value changed for this shot is named, with its delta', () => {
+    const now: RecipeIdentity = {
+      ...base,
+      setup: {
+        ...base.setup,
+        routine: {
+          name: 'Daily routine',
+          steps: [{ stepId: WDT, name: 'WDT', unit: 's', value: 30000 }]
+        }
+      }
+    };
+    expect(setupChanges(now, base)).toMatchObject({ routine: true, steps: [{ delta: 10000 }] });
+    // Another routine: the whole routine changed, no step deltas.
+    expect(setupChanges({ ...now, routineId: OTHER_BASKET }, base).steps).toEqual([]);
+  });
+
+  it('D-166: a changed list step is named without a delta', () => {
+    const withFilter = (value: string): RecipeIdentity => ({
+      ...base,
+      setup: {
+        ...base.setup,
+        routine: { name: 'Daily routine', steps: [{ stepId: WDT, name: 'Filter', value }] }
+      }
+    });
+    expect(setupChanges(withFilter('metal'), withFilter('paper')).steps).toEqual([{ delta: null }]);
+  });
+
+  it('D-76, D-166: after the routine gained a step, only steps in the same place compare', () => {
+    const TAMP = '0199f3a2-0000-7000-8000-00000000e009';
+    const now: RecipeIdentity = {
+      ...base,
+      setup: {
+        ...base.setup,
+        routine: {
+          name: 'Daily routine',
+          steps: [
+            { stepId: TAMP, name: 'Tamp', unit: 'kg', value: 15000 },
+            { stepId: WDT, name: 'WDT', unit: 's', value: 25000 }
+          ]
+        }
+      }
+    };
+    expect(setupChanges(now, base).steps).toEqual([]);
+    expect(setupChanges(now, base).routine).toBe(true);
   });
 
   it('D-81: without a last shot nothing is changed', () => {
-    expect(setupChanges(base, null)).toEqual({ features: {}, basket: false, routine: false });
+    expect(setupChanges(base, null)).toEqual({
+      features: {},
+      basket: false,
+      routine: false,
+      steps: []
+    });
   });
 });
 
@@ -321,5 +378,29 @@ describe('setupParts', () => {
       { key: 'low_bar_end', text: 'Low bar end off' },
       { key: PADDLE, text: 'Paddle Middle' }
     ]);
+  });
+});
+
+describe('routineParts', () => {
+  it('D-170: each step with a value, as "WDT 30 s", "Filter Metal"; steps without a value are left out', () => {
+    const routine = {
+      name: 'Daily routine',
+      steps: [
+        { stepId: WDT, name: 'WDT', unit: 's', value: 30000 },
+        { stepId: 'distributor', name: 'Distributor', value: null },
+        { stepId: 'tamp', name: 'Tamp', unit: 'kg', value: 15500 },
+        { stepId: 'filter', name: 'Filter', value: 'metal' },
+        { stepId: WDT, name: 'WDT', unit: 's', value: 10000 }
+      ]
+    };
+    const labels = (stepId: string, value: string) =>
+      stepId === 'filter' && value === 'metal' ? 'Metal' : value;
+    expect(routineParts(routine, labels)).toEqual([
+      { key: `step:${WDT}:0`, text: 'WDT 30 s' },
+      { key: 'step:tamp:0', text: 'Tamp 15.5 kg' },
+      { key: 'step:filter:0', text: 'Filter Metal' },
+      { key: `step:${WDT}:1`, text: 'WDT 10 s' }
+    ]);
+    expect(routineParts(null, labels)).toEqual([]);
   });
 });

@@ -128,6 +128,12 @@ describe('loadShotForm', () => {
     expect(form.defaultFeatures).toMatchObject({ temperature: { on: true, value: 93000 } });
   });
 
+  it('D-166: each step’s setting comes with the form, to change a step for one shot', () => {
+    const form = ready(loadShotForm(db, ids.userId));
+    expect(form.stepSettings[ids.stepIds[0]]).toMatchObject({ kind: 'seconds', step: 1000 });
+    expect(form.stepSettings[ids.stepIds[2]]).toMatchObject({ kind: 'number', unit: 'kg' });
+  });
+
   it('D-154: a basket comes with its dose range for the hint', () => {
     const form = ready(loadShotForm(db, ids.userId));
     expect(form.baskets).toEqual([

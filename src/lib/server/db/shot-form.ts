@@ -19,6 +19,7 @@ import type {
   FeatureValue,
   GrinderSpec,
   MachineSpec,
+  PrepStepSetting,
   Taste
 } from '../../domain/schemas';
 import type { KnownRecipe } from '../../domain/shot-form';
@@ -57,6 +58,8 @@ export type ShotFormData = {
   /** Baskets and routines you can pick (archived ones are left out), a basket with its dose range (D-154). */
   baskets: { id: string; name: string; doseRange?: BasketSpec['doseRange'] }[];
   routines: { id: string; name: string; routine: RoutineNow }[];
+  /** Every puck prep step's setting, archived ones too: a step's value can change for one shot (D-166). */
+  stepSettings: Record<string, PrepStepSetting>;
   /** This bean's recipes, for matching while the form changes (D-16, D-12). */
   recipes: KnownRecipe[];
   /** This bean's last shot: what the deltas and the recipe tag compare with (D-15, D-81). */
@@ -140,6 +143,7 @@ export function loadShotForm(
   const gearRows = db.select().from(gear).where(eq(gear.ownerId, ownerId)).all();
   const routineRows = db.select().from(routine).where(eq(routine.ownerId, ownerId)).all();
   const routines = routinesNow(db, ownerId, routineRows);
+  const stepSettings = stepSettingsOf(db, ownerId);
   const latest = latestShotOfBean(db, ownerId, current.id);
 
   const context: PrefillContext = {
@@ -154,6 +158,7 @@ export function loadShotForm(
       gearRows.filter((g) => g.kind === 'machine').map((g) => [g.id, g.spec as MachineSpec])
     ),
     routines,
+    stepSettings,
     archivedIds: new Set(
       [...gearRows, ...routineRows].filter((r) => r.archivedAt !== null).map((r) => r.id)
     )
@@ -168,6 +173,7 @@ export function loadShotForm(
     ...gearChoices(gearRows, []),
     defaultFeatures: mySetup.features,
     gearNames: Object.fromEntries(gearRows.map((g) => [g.id, g.name])),
+    stepSettings,
     routines: routineRows
       .filter((r) => r.archivedAt === null)
       .map((r) => ({ id: r.id, name: r.name, routine: routines[r.id] })),
@@ -244,6 +250,7 @@ export function loadEditShotForm(
     ...gearChoices(gearRows, [r.machineId, r.grinderId, r.basketId]),
     defaultFeatures: settings.defaultFeatures,
     gearNames: Object.fromEntries(gearRows.map((g) => [g.id, g.name])),
+    stepSettings: stepSettingsOf(db, ownerId),
     routines: routineRows
       .filter((x) => x.archivedAt === null || x.id === r.routineId)
       .map((x) => ({ id: x.id, name: x.name, routine: routines[x.id] })),
@@ -386,6 +393,18 @@ function rebuyChain(db: Queryable, ownerId: string, beanId: string): PrefillCont
       .get()?.rebuyOfId;
   }
   return chain;
+}
+
+/** Every puck prep step's setting, archived ones too (D-166, D-178). */
+function stepSettingsOf(db: Queryable, ownerId: string): Record<string, PrepStepSetting> {
+  return Object.fromEntries(
+    db
+      .select({ id: prepStep.id, setting: prepStep.setting })
+      .from(prepStep)
+      .where(eq(prepStep.ownerId, ownerId))
+      .all()
+      .map((s) => [s.id, s.setting])
+  );
 }
 
 /** Routines as they are now (D-76), with each step's current name and unit. */

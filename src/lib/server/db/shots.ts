@@ -170,7 +170,17 @@ export function editShot(
       if (target?.status !== 'open') throw new ShotRejected(['bean: not open']);
     }
 
-    const setup = validate(tx, ownerId, input);
+    const brewed = tx
+      .select({ routineId: recipe.routineId, setup: recipe.setup })
+      .from(recipe)
+      .where(eq(recipe.id, existing.recipeId))
+      .get()!;
+    const setup = validate(
+      tx,
+      ownerId,
+      input,
+      brewed.routineId === input.routineId ? brewed.setup.routine : null
+    );
     const tagIds = [...input.tagIds, ...addTags(tx, ownerId, input.newTagNames ?? [], now)];
     const { recipeId, newRecipe } = findOrCreateRecipe(tx, ownerId, { ...input, setup }, now);
     tx.update(shot)
@@ -247,7 +257,13 @@ function shotValues(input: ShotInput) {
  * Checks everything the shot points to and every value it carries; throws ShotRejected. Returns the
  * setup as checked, so only known fields reach the recipe snapshot (D-65).
  */
-function validate(tx: Queryable, ownerId: string, input: ShotInput): SetupSnapshot {
+function validate(
+  tx: Queryable,
+  ownerId: string,
+  input: ShotInput,
+  /** The routine of the shot being edited, as it was brewed (D-178). */
+  kept: SetupSnapshot['routine'] = null
+): SetupSnapshot {
   const problems: string[] = [];
   const wholeNumber = (value: unknown, min: number) =>
     Number.isSafeInteger(value) && (value as number) >= min;
@@ -313,8 +329,17 @@ function validate(tx: Queryable, ownerId: string, input: ShotInput): SetupSnapsh
             .map((row) => [row.id, row.setting])
     );
     const steps = routineSnapshot.steps.map(({ stepId, value }) => ({ stepId, value }));
-    for (const p of validateRoutineAgainstSteps(steps, settings))
+    // D-178: editing a shot keeps the values it was brewed with, even if a step's range changed since.
+    const brewedWith = (index: number) => {
+      const before = kept?.steps[index];
+      const step = steps[index];
+      return !!before && before.stepId === step.stepId && before.value === step.value;
+    };
+    for (const p of validateRoutineAgainstSteps(steps, settings)) {
+      if ((p.problem === 'out_of_range' || p.problem === 'not_an_option') && brewedWith(p.index))
+        continue;
       problems.push(`routine: step ${p.index + 1} ${p.problem.replaceAll('_', ' ')}`);
+    }
   }
 
   const tagIds = [...new Set(input.tagIds)];

@@ -434,7 +434,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* building a routine should not need a detour to the Puck prep page.
 - **D-165 — Setting a step's value in the builder.** Tapping a step's amber value ("20 s", "15 kg") opens a small sheet: −/+ with the step's step and range, and tap to type, for numbers and seconds; the options for a list. This is the routine's own value for the step. Refines D-51.
   - *Why:* the same controls as everywhere else, without crowding the flow.
-- **D-166 — A step's value can change for one shot.** On the shot form, tapping the puck prep row in More › Setup shows the routine's steps with their values, which can be changed for this shot. A change is a recipe change (D-51) and turns sage like any other change (D-90). Refines D-25 and D-76.
+- **D-166 — A step's value can change for one shot.** *(Revised 2026-10-19: see D-178.)* On the shot form, tapping the puck prep row in More › Setup shows the routine's steps with their values, which can be changed for this shot. A change is a recipe change (D-51) and turns sage like any other change (D-90). Refines D-25 and D-76.
   - *Why:* trying WDT 30 s instead of 20 s should not need a new routine.
 - **D-167 — Changing and removing routines.** Tapping a routine card opens it in the routine builder. A quiet "Archive" at the bottom, with a confirmation, archives it: it leaves the Puck prep page and the pickers, past shots keep its name. It is not offered for My setup's routine (D-83). A routine no shot has used can be deleted for good instead. Refines D-51 and D-148.
   - *Why:* the same pattern as gear, while a routine made by mistake can go without leaving a trace.
@@ -458,6 +458,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* archived routines are out of sight; an unused step should leave no trace.
 - **D-177 — Two "In use" chips are both cream.** When My setup's routine and the last shot's routine differ, both carry the same cream "In use" chip. Refines D-163 and the one-cream rule of the visual direction.
   - *Why:* it is one meaning shown twice, and the two usually coincide.
+- **D-178 — A step value outside its range is brought into range.** When a shot copies a step value that no longer fits its step (its range was narrowed or its option removed since, D-168), the new shot starts at the nearest end of the range, or the routine's own value for a list, shown in sage as a change. Editing an earlier shot keeps the values it was brewed with. Refines D-76 and D-166.
+  - *Why:* the next shot can always be saved, and history is never rewritten.
 
 ## 11. Visual direction
 

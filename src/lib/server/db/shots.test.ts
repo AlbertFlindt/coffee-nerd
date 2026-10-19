@@ -6,7 +6,7 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { openDatabase, type Db } from './client';
 import { newId } from './ids';
 import { insertBuiltInTags } from './built-in-tags';
-import { appState, bean, gear, recipe, shot, shotTag, tag, user } from './schema';
+import { appState, bean, gear, prepStep, recipe, shot, shotTag, tag, user } from './schema';
 import { REFERENCE, seedReferenceSetup, type SeededIds } from './seed';
 import {
   clearBrewNext,
@@ -325,6 +325,24 @@ describe('saveShot', () => {
 });
 
 describe('editShot', () => {
+  it('D-178: an earlier shot keeps the step value it was brewed with, even out of today’s range', () => {
+    const wdt30 = input({}, 1);
+    wdt30.setup.routine!.steps[0].value = 30000;
+    const { shotId } = save(wdt30);
+    db.update(prepStep)
+      .set({ setting: { kind: 'seconds', step: 1000, min: 0, max: 25000, startsAt: 20000 } })
+      .where(eq(prepStep.id, ids.stepIds[0]))
+      .run();
+    const rated = { ...wdt30, taste: { ...wdt30.taste, score: 8 } };
+    expect(() => editShot(db, ids.userId, shotId, rated, T0)).not.toThrow();
+    // A new value outside the range is still refused.
+    const moved = structuredClone(rated);
+    moved.setup.routine!.steps[0].value = 40000;
+    expect(() => editShot(db, ids.userId, shotId, moved, T0)).toThrow(ShotRejected);
+    // And a new shot with 30 s is refused too.
+    expect(() => save(input({ setup: wdt30.setup }, 2))).toThrow(ShotRejected);
+  });
+
   it('D-113: a shot can move to an open bean, not to a finished one; its own finished bean stays fine', () => {
     const { shotId } = save(input({}, 1));
     const other = newId(T0);
