@@ -63,16 +63,12 @@
 <main>
   <h2>Routines · {page.routines.length}</h2>
   {#each page.routines as r (r.id)}
-    <a
-      class="card cn-tap"
-      href={resolve('/library/puck-prep/routine/[id]', { id: r.id })}
-      aria-label={r.name}
-    >
+    <a class="card cn-tap" href={resolve('/library/puck-prep/routine/[id]', { id: r.id })}>
       <div class="card-head">
         <span class="name">{r.name}</span>
         {#if r.inUse}<span class="chip">In use</span>{/if}
       </div>
-      <div class="flow" aria-label={r.steps.join(', then ')}>
+      <div class="flow" role="img" aria-label={r.steps.join(', then ')}>
         {#each r.steps as step, i (i)}
           {#if i > 0}
             <svg

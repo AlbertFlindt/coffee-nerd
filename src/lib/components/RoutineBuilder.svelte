@@ -153,7 +153,7 @@
     <span class="line"></span>
     <button
       type="button"
-      class="add"
+      class="add cn-tap"
       aria-label="Insert a step after {after}"
       onclick={() => (sheet = { kind: 'insert', position })}>{@render plus(14, 2.6)}</button
     >
@@ -275,7 +275,7 @@
       <p class="in-use">Used in My setup · choose another default first</p>
     {:else if routine.used}
       <button class="cn-btn-quiet cn-tap" type="button" onclick={() => (sheet = 'archive')}
-        >Archive routine</button
+        >Archive</button
       >
     {:else}
       <button class="cn-btn-quiet cn-tap" type="button" onclick={() => (sheet = 'delete')}
@@ -366,7 +366,7 @@
           {#each setting.options as option (option.id)}
             <button
               type="button"
-              class="row cn-tap"
+              class="row"
               aria-pressed={(editing.value ?? setting.startsAt) === option.id}
               onclick={() => {
                 const entry = items.find((i) => i.key === key);
