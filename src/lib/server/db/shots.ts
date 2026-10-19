@@ -18,7 +18,18 @@ import {
 import type { Thousandths } from '../../domain/units';
 import type { Db, Queryable } from './client';
 import { newId } from './ids';
-import { appState, bean, gear, prepStep, recipe, routine, shot, shotTag, tag } from './schema';
+import {
+  appState,
+  bean,
+  gear,
+  prepStep,
+  recipe,
+  routine,
+  shot,
+  shotTag,
+  tag,
+  tagMerged
+} from './schema';
 
 export type ShotInput = {
   /** UUID v7; may be made on the phone (D-61). */
@@ -102,6 +113,7 @@ export function saveShot(db: Db, ownerId: string, input: ShotInput, now: number)
       };
     }
 
+    input = { ...input, tagIds: currentTags(tx, ownerId, input.tagIds) };
     const setup = validate(tx, ownerId, input);
     const tagIds = [...input.tagIds, ...addTags(tx, ownerId, input.newTagNames ?? [], now)];
     const { recipeId, newRecipe } = findOrCreateRecipe(tx, ownerId, { ...input, setup }, now);
@@ -175,6 +187,7 @@ export function editShot(
       .from(recipe)
       .where(eq(recipe.id, existing.recipeId))
       .get()!;
+    input = { ...input, tagIds: currentTags(tx, ownerId, input.tagIds) };
     const setup = validate(
       tx,
       ownerId,
@@ -407,23 +420,58 @@ const MAX_TAG_NAME = 40;
 
 /**
  * The ids of flavor notes added on the Tasting tab: an existing note with the same name (ignoring case
- * and surrounding spaces, D-53) is reused; otherwise a new note is created in "Other" (D-101).
+ * and surrounding spaces, D-53) is reused, and brought back if it was removed (D-171); otherwise a new
+ * note is created in "Other" (D-101).
  */
 function addTags(tx: Queryable, ownerId: string, names: string[], now: number): string[] {
   return names.map((raw) => {
     const name = raw.trim();
     const existing = tx
-      .select({ id: tag.id })
+      .select({ id: tag.id, archivedAt: tag.archivedAt })
       .from(tag)
       .where(and(eq(tag.ownerId, ownerId), sql`lower(${tag.name}) = lower(${name})`))
       .get();
-    if (existing) return existing.id;
+    if (existing) {
+      if (existing.archivedAt !== null)
+        tx.update(tag)
+          .set({ archivedAt: null, updatedAt: now })
+          .where(eq(tag.id, existing.id))
+          .run();
+      return existing.id;
+    }
     const id = newId(now);
     tx.insert(tag)
       .values({ id, ownerId, name, family: 'other', createdAt: now, updatedAt: now })
       .run();
     return id;
   });
+}
+
+/**
+ * D-182: the notes as they are now. A note merged since the form opened becomes the note it went into
+ * (following later merges too); one deleted since is left off.
+ */
+function currentTags(tx: Queryable, ownerId: string, ids: string[]): string[] {
+  const current = new Set<string>();
+  for (let id of ids) {
+    // A merge chain is short; the limit only guards against a loop in bad data.
+    for (let hops = 0; hops < 20; hops++) {
+      // Looked up by id alone: another account's note is kept, so that validate refuses it (D-60).
+      const found = tx.select({ id: tag.id }).from(tag).where(eq(tag.id, id)).get();
+      if (found) {
+        current.add(id);
+        break;
+      }
+      const merged = tx
+        .select({ into: tagMerged.intoTagId })
+        .from(tagMerged)
+        .where(and(eq(tagMerged.tagId, id), eq(tagMerged.ownerId, ownerId)))
+        .get();
+      if (!merged) break;
+      id = merged.into;
+    }
+  }
+  return [...current];
 }
 
 function writeTags(tx: Queryable, shotId: string, tagIds: string[]): void {

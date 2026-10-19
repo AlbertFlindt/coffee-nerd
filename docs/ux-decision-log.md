@@ -220,7 +220,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* free text cannot be used for statistics; saying so sets the right expectation and nudges users toward flavor chips for anything they want analyzed.
 - **D-97 — Flavor chips: all of them, most used first.** The Tasting tab shows every flavor note as a chip, the ones you use most first, then alphabetical. The chip area scrolls on its own when the notes do not fit (D-36). Refines D-23.
   - *Why:* every note stays one tap away, and the ones you actually taste are on top.
-- **D-101 — A note added on the Tasting tab joins "Other".** "Add your own" takes a name typed in place; the new note belongs to the family Other (D-53) and is created only when the shot is saved. Its family can be changed on the Tags page. Refines D-23.
+- **D-101 — A note added on the Tasting tab joins "Other".** *(Revised 2026-10-19: see D-181.)* "Add your own" takes a name typed in place; the new note belongs to the family Other (D-53) and is created only when the shot is saved. Its family can be changed on the Tags page. Refines D-23.
   - *Why:* choosing a family mid-shot is a detour; a shot you leave unsaved should leave no stray notes behind.
 
 ## 8. Taste and rating
@@ -425,7 +425,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* one consistent way to define anything custom — machine features and prep steps look and work alike.
 - **D-29 — Tags (flavor notes) get a home.** A place to see, rename, merge and remove flavor tags, including custom ones added from the Tasting tab.
   - *Why:* custom tags will drift (typos, duplicates); a home keeps them clean enough for Insights.
-- **D-53 — Tags page.** *(Revised 2026-10-19: see D-171 to D-174.)* Library › Tags. "Add tag" in the header, a search field, then tags as chips **grouped by flavor family** (Fruity, Sweet, Floral, Nutty & roasty, Other), each with its **usage count** ("Berry 12"); user-added tags carry a small "custom" label. **Families are fixed** (a built-in set plus "Other"); users choose a family for custom tags but cannot create or rename families. Tapping a tag opens rename / merge / remove.
+- **D-53 — Tags page.** *(Revised 2026-10-19: see D-171 to D-174, D-180, D-182.)* Library › Tags. "Add tag" in the header, a search field, then tags as chips **grouped by flavor family** (Fruity, Sweet, Floral, Nutty & roasty, Other), each with its **usage count** ("Berry 12"); user-added tags carry a small "custom" label. **Families are fixed** (a built-in set plus "Other"); users choose a family for custom tags but cannot create or rename families. Tapping a tag opens rename / merge / remove.
   - **Duplicate finder:** when two tags look alike (e.g. "Dark choclate" and "Dark chocolate"), a cream card at the top suggests merging them, with a one-tap **Merge** into the more-used tag. Merging updates every shot that used the old tag.
   - *Why:* families make 18+ tags scannable and mirror how tasters think; counts show what you actually taste; the duplicate finder keeps Insights clean without asking the user to audit their tags. Fixed families let Insights say things like "you prefer fruity coffees" reliably.
 - **D-163 — "In use" on both routines.** *(Revised 2026-10-19: see D-177.)* On the Puck prep page, the routine My setup uses and the routine the last shot used both carry "In use"; usually they are the same one. Refines D-51.
@@ -444,11 +444,11 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* a routine should never lose a step behind your back.
 - **D-170 — Recipe labels name a differing step value.** When two recipes in the Journal's recipe filter differ only in a step value, the label names it ("WDT 30 s"). Refines D-121.
   - *Why:* step values are now set per routine and per shot (D-165, D-166), so recipes can differ only there.
-- **D-171 — Removing a flavor note.** "Remove" on a note that shots have used archives it: it leaves the Tasting chips and the Tags page, and past shots still show it. A note no shot has used is deleted. Refines D-53.
+- **D-171 — Removing a flavor note.** *(Revised 2026-10-19: see D-181, D-182.)* "Remove" on a note that shots have used archives it: it leaves the Tasting chips and the Tags page, and past shots still show it. A note no shot has used is deleted. Refines D-53.
   - *Why:* what shots point to is kept, as everywhere else in the app.
 - **D-172 — Built-in notes can change too.** Built-in notes can be renamed, merged and removed like your own; only your own notes can change family. Refines D-53.
   - *Why:* the vocabulary is yours to tidy; fixed families keep Insights reliable.
-- **D-173 — When two notes look alike.** The "Same tag twice?" card appears for two notes with the same name ignoring case, spaces and accents, or with one or two letters different when the names are five letters or longer. Besides "Merge", the card has a quiet "Keep both", remembered for that pair. Refines D-53.
+- **D-173 — When two notes look alike.** *(Revised 2026-10-19: see D-179.)* The "Same tag twice?" card appears for two notes with the same name ignoring case, spaces and accents, or with one or two letters different when the names are five letters or longer. Besides "Merge", the card has a quiet "Keep both", remembered for that pair. Refines D-53.
   - *Why:* catches typos without nagging about notes that are meant to be different.
 - **D-174 — Adding a note on the Tags page.** "Add tag" opens a sheet with Name and the five families as choices (Other chosen to start), then "Add tag". Refines D-53.
   - *Why:* on the Tags page you have time to place the note; the Tasting tab keeps its quick way (D-101).
@@ -460,6 +460,14 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* it is one meaning shown twice, and the two usually coincide.
 - **D-178 — A step value outside its range is brought into range.** When a shot copies a step value that no longer fits its step (its range was narrowed or its option removed since, D-168), the new shot starts at the nearest end of the range, or the routine's own value for a list, shown in sage as a change. Editing an earlier shot keeps the values it was brewed with. Refines D-76 and D-166.
   - *Why:* the next shot can always be saved, and history is never rewritten.
+- **D-179 — Look-alike notes start with the same letter.** The "one or two letters different" rule of D-173 applies only when both names start with the same letter (ignoring case and accents). Names that are the same ignoring case, spaces and accents still always count. Refines D-173.
+  - *Why:* typos rarely hit the first letter, while real notes like Honey and Winey, Berry and Cherry, Toasted and Roasted would otherwise be flagged; Honey and Winey are both built in.
+- **D-180 — Merging from the card asks first.** "Merge" on the "Same tag twice?" card opens the same confirmation as merging from the tag sheet ("Merge into Dark chocolate?", "This cannot be undone."). Refines D-53.
+  - *Why:* a merge cannot be undone, and every other action that cannot be undone asks first.
+- **D-181 — A removed note comes back when you type it.** Typing a removed note's name, in "Add your own" on the Tasting tab or in "Add tag", brings that note back to the chips and the Tags page, with its past shots counted. Refines D-101 and D-171.
+  - *Why:* it is the same note; a second one with the same name would split its shots.
+- **D-182 — A shot keeps working when its notes were merged or deleted meanwhile.** When a shot is saved with a note that was merged since the form opened (or while it waited offline), it gets the note it was merged into; a note deleted since is left off. The shot saves. Refines D-53 and D-171.
+  - *Why:* a shot is never lost over a tidied tag list, also when it was brewed offline.
 
 ## 11. Visual direction
 
@@ -546,7 +554,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 11. ~~Setup sheet: show how a changed setup value is highlighted~~ (D-90)
 12. ~~Puck prep routine builder and New step~~ (D-51, D-52)
 13. ~~Gear list, machine detail, Edit My setup~~ (D-38, D-44, D-45, D-48, D-49)
-14. ~~Tags home~~ (D-29, D-53, D-171 to D-174)
+14. ~~Tags home~~ (D-29, D-53, D-171 to D-174, D-179 to D-182)
 15. Home: design the other three graphs (Time vs. yield, Roast age, Consistency)
 16. ~~Journal, Insights, shot detail~~ (D-54 to D-57) — still to do: more Dial-in cards (e.g. grind vs time scatter, sour/bitter vs ratio)
 17. Logo: refine the bean-with-glasses mark (app icon for the PWA home screen)

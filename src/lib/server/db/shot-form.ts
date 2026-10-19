@@ -1,7 +1,7 @@
 // Everything the shot form needs (data-model §4.1, §4.2): the prefill, the bean's recipes for matching in
 // the browser, the bean's last shot for deltas (D-15, D-81), and the choices its pickers offer. Every query
 // is scoped by the owner (D-60).
-import { and, desc, eq, lt, or, sql, type SQL } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, lt, or, sql, type SQL } from 'drizzle-orm';
 import { roastAgeDays } from '../../domain/bean';
 import { bestRecipe } from '../../domain/best-recipe';
 import type { RecipeIdentity } from '../../domain/fingerprint';
@@ -256,7 +256,7 @@ export function loadEditShotForm(
       .map((x) => ({ id: x.id, name: x.name, routine: routines[x.id] })),
     recipes: knownRecipes(db, ownerId, current.id, before),
     lastShot: previous ? { recipe: previous.recipe, ...previous.shot } : null,
-    tags: tagsByUse(db, ownerId),
+    tags: tagsByUse(db, ownerId, tagIds),
     steps: { dose: settings.doseStep, yield: settings.yieldStep, time: settings.timeStep },
     edit: {
       shotId: s.id,
@@ -471,13 +471,25 @@ function knownRecipes(
   return rows;
 }
 
-/** Flavor notes by how often you used them, then A–Z (D-97). */
-function tagsByUse(db: Queryable, ownerId: string): { id: string; name: string }[] {
+/**
+ * Flavor notes by how often you used them, then A–Z (D-97). Removed notes are left out (D-171), except
+ * those the edited shot already has (`keep`).
+ */
+function tagsByUse(
+  db: Queryable,
+  ownerId: string,
+  keep: string[] = []
+): { id: string; name: string }[] {
   return db
     .select({ id: tag.id, name: tag.name })
     .from(tag)
     .leftJoin(shotTag, eq(shotTag.tagId, tag.id))
-    .where(eq(tag.ownerId, ownerId))
+    .where(
+      and(
+        eq(tag.ownerId, ownerId),
+        keep.length > 0 ? or(isNull(tag.archivedAt), inArray(tag.id, keep)) : isNull(tag.archivedAt)
+      )
+    )
     .groupBy(tag.id)
     .orderBy(desc(sql`count(${shotTag.shotId})`), sql`lower(${tag.name})`)
     .all();

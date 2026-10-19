@@ -1,6 +1,5 @@
 <script lang="ts">
-  // Library (screen 17, D-50): Beans, Gear, Puck prep and Tags, each with two live lines. Puck prep and Tags
-  // are dimmed and do nothing until their pages exist in M7 (D-156).
+  // Library (screen 17, D-50): Beans, Gear, Puck prep and Tags, each with two live lines.
   import { resolve } from '$app/paths';
   import TabBar from '#lib/components/TabBar.svelte';
   import type { PageProps } from './$types';
@@ -103,8 +102,7 @@
     {@render text('Puck prep', library.puckPrep)}
     {@render chevron()}
   </a>
-  <!-- D-156: Tags arrives later in M7; until then its row is dimmed and does nothing. -->
-  <div class="door later">
+  <a class="door cn-tap" href={resolve('/library/tags')}>
     <span class="tile"
       ><svg
         width="24"
@@ -120,9 +118,8 @@
       ></span
     >
     {@render text('Tags', library.tags)}
-    <span class="sr">Not available yet</span>
     {@render chevron()}
-  </div>
+  </a>
 </main>
 
 <TabBar current="library" />
@@ -165,18 +162,6 @@
     background: var(--surface);
     color: var(--ink);
     text-decoration: none;
-  }
-
-  .sr {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
-  .later {
-    opacity: 0.4;
   }
 
   .tile {
