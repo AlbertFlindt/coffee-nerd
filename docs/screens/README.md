@@ -36,7 +36,7 @@ These are **reference only**: never edit them by hand. When a screen changes, it
 | 24 | Insights — Progress | `InsightsProgress` |
 | 25 | Insights — Comparisons | `InsightsCompare` |
 | 26 | Journal — Shot detail | `ShotDetail` |
-| 27 | New shot — Grinder sheet | `ShotGearSheet` |
+| 27 | New shot — Machine and grinder | `ShotGearSheet` |
 | 28 | More — Basket list | `MoreBasket` |
 | 29 | More — Setup with your own features | `MoreOwnFeatures` |
 | 30 | More — Setup › Puck prep | `MorePuckPrep` |
@@ -44,7 +44,7 @@ These are **reference only**: never edit them by hand. When a screen changes, it
 | 32 | Add bean — Country | `BeanCountry` |
 | 33 | Add bean — Re-buy picked | `BeanRebuy` |
 | 34 | Bean detail — Finished, with Undo | `BeanFinished` |
-| 35 | Bean detail — Delete bean | `BeanDelete` |
+| 35 | Edit bean — Delete bean | `BeanDelete` |
 | 36 | Gear — Add gear | `GearAdd` |
 | 37 | Gear — Before My setup | `GearFirstRun` |
 | 38 | Gear — New grinder | `GrinderNew` |
