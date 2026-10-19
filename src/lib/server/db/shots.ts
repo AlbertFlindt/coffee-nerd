@@ -407,17 +407,25 @@ const MAX_TAG_NAME = 40;
 
 /**
  * The ids of flavor notes added on the Tasting tab: an existing note with the same name (ignoring case
- * and surrounding spaces, D-53) is reused; otherwise a new note is created in "Other" (D-101).
+ * and surrounding spaces, D-53) is reused, and brought back if it was removed (D-171); otherwise a new
+ * note is created in "Other" (D-101).
  */
 function addTags(tx: Queryable, ownerId: string, names: string[], now: number): string[] {
   return names.map((raw) => {
     const name = raw.trim();
     const existing = tx
-      .select({ id: tag.id })
+      .select({ id: tag.id, archivedAt: tag.archivedAt })
       .from(tag)
       .where(and(eq(tag.ownerId, ownerId), sql`lower(${tag.name}) = lower(${name})`))
       .get();
-    if (existing) return existing.id;
+    if (existing) {
+      if (existing.archivedAt !== null)
+        tx.update(tag)
+          .set({ archivedAt: null, updatedAt: now })
+          .where(eq(tag.id, existing.id))
+          .run();
+      return existing.id;
+    }
     const id = newId(now);
     tx.insert(tag)
       .values({ id, ownerId, name, family: 'other', createdAt: now, updatedAt: now })

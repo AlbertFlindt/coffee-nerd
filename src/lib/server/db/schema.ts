@@ -228,9 +228,26 @@ export const tag = sqliteTable(
       enum: ['fruity', 'sweet', 'floral', 'nutty_roasty', 'other']
     }).notNull(),
     builtIn: integer('built_in', { mode: 'boolean' }).notNull().default(false),
+    /** Removed while shots used it (D-171): off the Tasting chips and the Tags page, kept on its shots. */
+    archivedAt: integer('archived_at'),
     ...timestamps
   },
   (t) => [uniqueIndex('tag_owner_name').on(t.ownerId, sql`lower(${t.name})`)]
+);
+
+/** Two notes the duplicate finder no longer suggests merging, after "Keep both" (D-173); lower id first. */
+export const tagPairKept = sqliteTable(
+  'tag_pair_kept',
+  {
+    ownerId: owner(),
+    tagId: text('tag_id')
+      .notNull()
+      .references(() => tag.id, { onDelete: 'cascade' }),
+    otherTagId: text('other_tag_id')
+      .notNull()
+      .references(() => tag.id, { onDelete: 'cascade' })
+  },
+  (t) => [primaryKey({ columns: [t.tagId, t.otherTagId] })]
 );
 
 export const shotTag = sqliteTable(

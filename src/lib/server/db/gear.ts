@@ -316,12 +316,16 @@ export function loadLibrary(
     .get()!.n;
   const usedRoutine = routines.find((r) => r.id === settings?.defaultRoutineId)?.name;
 
-  const tagCount = db.select({ n: count() }).from(tag).where(eq(tag.ownerId, ownerId)).get()!.n;
+  const tagCount = db
+    .select({ n: count() })
+    .from(tag)
+    .where(and(eq(tag.ownerId, ownerId), isNull(tag.archivedAt)))
+    .get()!.n;
   const mostUsed = db
     .select({ name: tag.name, n: count() })
     .from(shotTag)
     .innerJoin(tag, eq(tag.id, shotTag.tagId))
-    .where(eq(tag.ownerId, ownerId))
+    .where(and(eq(tag.ownerId, ownerId), isNull(tag.archivedAt)))
     .groupBy(tag.id)
     .orderBy(desc(count()), asc(tag.name))
     .get();
