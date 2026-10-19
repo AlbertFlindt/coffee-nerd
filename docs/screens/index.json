@@ -128,5 +128,195 @@
     "file": "ShotDetail.html",
     "png": "ShotDetail.png",
     "title": "26 \u00b7 Journal \u2014 Shot detail"
+  },
+  {
+    "file": "ShotGearSheet.html",
+    "png": "ShotGearSheet.png",
+    "title": "27 \u00b7 New shot \u2014 Grinder sheet"
+  },
+  {
+    "file": "MoreBasket.html",
+    "png": "MoreBasket.png",
+    "title": "28 \u00b7 More \u2014 Basket list"
+  },
+  {
+    "file": "MoreOwnFeatures.html",
+    "png": "MoreOwnFeatures.png",
+    "title": "29 \u00b7 More \u2014 Setup with your own features"
+  },
+  {
+    "file": "MorePuckPrep.html",
+    "png": "MorePuckPrep.png",
+    "title": "30 \u00b7 More \u2014 Setup \u203a Puck prep"
+  },
+  {
+    "file": "BeanSameAsBefore.html",
+    "png": "BeanSameAsBefore.png",
+    "title": "31 \u00b7 Add bean \u2014 Same as before"
+  },
+  {
+    "file": "BeanCountry.html",
+    "png": "BeanCountry.png",
+    "title": "32 \u00b7 Add bean \u2014 Country"
+  },
+  {
+    "file": "BeanRebuy.html",
+    "png": "BeanRebuy.png",
+    "title": "33 \u00b7 Add bean \u2014 Re-buy picked"
+  },
+  {
+    "file": "BeanFinished.html",
+    "png": "BeanFinished.png",
+    "title": "34 \u00b7 Bean detail \u2014 Finished, with Undo"
+  },
+  {
+    "file": "BeanDelete.html",
+    "png": "BeanDelete.png",
+    "title": "35 \u00b7 Bean detail \u2014 Delete bean"
+  },
+  {
+    "file": "GearAdd.html",
+    "png": "GearAdd.png",
+    "title": "36 \u00b7 Gear \u2014 Add gear"
+  },
+  {
+    "file": "GearFirstRun.html",
+    "png": "GearFirstRun.png",
+    "title": "37 \u00b7 Gear \u2014 Before My setup"
+  },
+  {
+    "file": "GrinderNew.html",
+    "png": "GrinderNew.png",
+    "title": "38 \u00b7 Gear \u2014 New grinder"
+  },
+  {
+    "file": "BasketNew.html",
+    "png": "BasketNew.png",
+    "title": "39 \u00b7 Gear \u2014 New basket"
+  },
+  {
+    "file": "GearArchive.html",
+    "png": "GearArchive.png",
+    "title": "40 \u00b7 Gear \u2014 Archive a basket"
+  },
+  {
+    "file": "FeatureList.html",
+    "png": "FeatureList.png",
+    "title": "41 \u00b7 Gear \u2014 Own feature, pick from a list"
+  },
+  {
+    "file": "FeatureEdit.html",
+    "png": "FeatureEdit.png",
+    "title": "42 \u00b7 Gear \u2014 Own feature, used by shots"
+  },
+  {
+    "file": "SetupFeatures.html",
+    "png": "SetupFeatures.png",
+    "title": "43 \u00b7 Edit My setup \u2014 Your own features"
+  },
+  {
+    "file": "SetupPicker.html",
+    "png": "SetupPicker.png",
+    "title": "44 \u00b7 Edit My setup \u2014 Machine picker"
+  },
+  {
+    "file": "SetupPickerEmpty.html",
+    "png": "SetupPickerEmpty.png",
+    "title": "45 \u00b7 Edit My setup \u2014 No machines yet"
+  },
+  {
+    "file": "SetupPressure.html",
+    "png": "SetupPressure.png",
+    "title": "46 \u00b7 Edit My setup \u2014 Pressure profile"
+  },
+  {
+    "file": "GuideMachine.html",
+    "png": "GuideMachine.png",
+    "title": "47 \u00b7 Start \u2014 Step 1 of 5, machine"
+  },
+  {
+    "file": "GuideBasket.html",
+    "png": "GuideBasket.png",
+    "title": "48 \u00b7 Start \u2014 Step 3 of 5, basket"
+  },
+  {
+    "file": "GuideSetup.html",
+    "png": "GuideSetup.png",
+    "title": "49 \u00b7 Start \u2014 Step 4 of 5, My setup"
+  },
+  {
+    "file": "PuckPrepNew.html",
+    "png": "PuckPrepNew.png",
+    "title": "50 \u00b7 Puck prep \u2014 New routines"
+  },
+  {
+    "file": "PuckPrepEmpty.html",
+    "png": "PuckPrepEmpty.png",
+    "title": "51 \u00b7 Puck prep \u2014 No routines yet"
+  },
+  {
+    "file": "StepEdit.html",
+    "png": "StepEdit.png",
+    "title": "52 \u00b7 Puck prep \u2014 Edit a step"
+  },
+  {
+    "file": "StepUsed.html",
+    "png": "StepUsed.png",
+    "title": "53 \u00b7 Puck prep \u2014 A step shots have used"
+  },
+  {
+    "file": "RoutineInsert.html",
+    "png": "RoutineInsert.png",
+    "title": "54 \u00b7 Routine builder \u2014 Insert a step"
+  },
+  {
+    "file": "RoutineValue.html",
+    "png": "RoutineValue.png",
+    "title": "55 \u00b7 Routine builder \u2014 A step\u2019s value"
+  },
+  {
+    "file": "RoutineArchive.html",
+    "png": "RoutineArchive.png",
+    "title": "56 \u00b7 Routine builder \u2014 Archive a routine"
+  },
+  {
+    "file": "TagsSearch.html",
+    "png": "TagsSearch.png",
+    "title": "57 \u00b7 Tags \u2014 Searching"
+  },
+  {
+    "file": "TagsNoMatch.html",
+    "png": "TagsNoMatch.png",
+    "title": "58 \u00b7 Tags \u2014 No match"
+  },
+  {
+    "file": "TagNew.html",
+    "png": "TagNew.png",
+    "title": "59 \u00b7 Tags \u2014 New tag"
+  },
+  {
+    "file": "TagEdit.html",
+    "png": "TagEdit.png",
+    "title": "60 \u00b7 Tags \u2014 Your own tag"
+  },
+  {
+    "file": "TagBuiltIn.html",
+    "png": "TagBuiltIn.png",
+    "title": "61 \u00b7 Tags \u2014 A built-in tag"
+  },
+  {
+    "file": "TagMergeList.html",
+    "png": "TagMergeList.png",
+    "title": "62 \u00b7 Tags \u2014 Merge into"
+  },
+  {
+    "file": "TagMergeConfirm.html",
+    "png": "TagMergeConfirm.png",
+    "title": "63 \u00b7 Tags \u2014 Merge into Caramel?"
+  },
+  {
+    "file": "TagRemove.html",
+    "png": "TagRemove.png",
+    "title": "64 \u00b7 Tags \u2014 Remove a tag"
   }
 ]

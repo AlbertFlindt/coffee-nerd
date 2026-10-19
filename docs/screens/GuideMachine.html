@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=412">
+<title>47 · Start — Step 1 of 5, machine</title>
+<!-- Exported from the Coffee Nerd UX canvas. Reference only: do not edit, re-export instead. -->
+<style>
+@font-face{font-family:'Figtree';font-weight:400;font-style:normal;font-display:block;src:url('fonts/figtree-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Figtree';font-weight:500;font-style:normal;font-display:block;src:url('fonts/figtree-latin-500-normal.woff2') format('woff2')}
+@font-face{font-family:'Figtree';font-weight:600;font-style:normal;font-display:block;src:url('fonts/figtree-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Figtree';font-weight:700;font-style:normal;font-display:block;src:url('fonts/figtree-latin-700-normal.woff2') format('woff2')}
+
+body{margin:0}
+a{color:#E7A955}a:hover{color:#F2C78C}
+button{font-family:inherit;cursor:pointer}
+input::placeholder{color:#BFAE9F;opacity:1}
+
+</style>
+</head>
+<body>
+<div style="width: 412px; height: 915px; box-sizing: border-box; background: #2E2522; color: #F5EDE3; font-family: 'Figtree', system-ui, sans-serif; font-variant-numeric: tabular-nums; display: flex; flex-direction: column">
+
+  <header style="display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; height: 60px; padding: 0 8px">
+    <a href="Equipment.dc.html" aria-label="Leave for now" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #F5EDE3">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </a>
+    <div style="display: flex; flex-direction: column; align-items: center"><h1 style="margin: 0; font-size: 20px; font-weight: 600">Machine</h1><span style="font-size: 12px; color: #BFAE9F">Step 1 of 5</span></div>
+    <span></span>
+  </header>
+
+  <main style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 4px 20px 12px; overflow: hidden">
+
+    <div style="display: flex; flex-direction: column; gap: 2px; min-height: 56px; justify-content: center; padding: 0 14px; border-radius: 14px; background: #3E322D">
+      <label for="gear-name" style="font-size: 12px; color: #BFAE9F">Name</label>
+      <input id="gear-name" placeholder="e.g. Lelit Bianca" style="border: none; padding: 0; background: transparent; color: #F5EDE3; font-family: inherit; font-size: 16px; font-weight: 600"/>
+    </div>
+
+    <fieldset style="margin: 0; padding: 0; border: none">
+      <legend style="padding: 0; margin-bottom: 6px; font-size: 13px; color: #BFAE9F">Type</legend>
+      <div role="radiogroup" aria-label="Machine type" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: #3E322D">
+        <button type="button" role="radio" aria-checked="false" style="height: 40px; border-radius: 10px; border: none; background: transparent; color: #F5EDE3; font-size: 14px; font-weight: 500">Automatic</button>
+        <button type="button" role="radio" aria-checked="true" style="height: 40px; border-radius: 10px; border: none; background: #E7A955; color: #2A1A08; font-size: 14px; font-weight: 700">Semi-auto</button>
+        <button type="button" role="radio" aria-checked="false" style="height: 40px; border-radius: 10px; border: none; background: transparent; color: #F5EDE3; font-size: 14px; font-weight: 500">Lever</button>
+        <button type="button" role="radio" aria-checked="false" style="height: 40px; border-radius: 10px; border: none; background: transparent; color: #F5EDE3; font-size: 14px; font-weight: 500">Manual</button>
+      </div>
+    </fieldset>
+
+    <div style="display: flex; flex-direction: column; gap: 2px; margin-top: 4px">
+      <h2 style="margin: 0; font-size: 15px; font-weight: 600">What it can do</h2>
+      <span style="font-size: 13px; color: #BFAE9F">Switched-on features appear on the shot form</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 2px; border-radius: 14px; overflow: hidden">
+      <div style="display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 0 14px; background: #3E322D">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Temperature</span><span style="font-size: 12px; color: #BFAE9F">°C · steps of 1</span></div>
+        <button role="switch" aria-checked="true" aria-label="Temperature" style="position: relative; width: 44px; height: 26px; flex: none; border-radius: 13px; border: none; padding: 0; background: #E7A955"><span style="position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 10px; background: #2A1A08"></span></button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 0 14px; background: #3E322D">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Flat pressure</span><span style="font-size: 12px; color: #BFAE9F">bar · steps of 0.5</span></div>
+        <button role="switch" aria-checked="true" aria-label="Flat pressure" style="position: relative; width: 44px; height: 26px; flex: none; border-radius: 13px; border: none; padding: 0; background: #E7A955"><span style="position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 10px; background: #2A1A08"></span></button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 0 14px; background: #3E322D">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Preinfusion</span><span style="font-size: 12px; color: #BFAE9F">seconds</span></div>
+        <button role="switch" aria-checked="true" aria-label="Preinfusion" style="position: relative; width: 44px; height: 26px; flex: none; border-radius: 13px; border: none; padding: 0; background: #E7A955"><span style="position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 10px; background: #2A1A08"></span></button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 0 14px; background: #3E322D">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Low bar start</span><span style="font-size: 12px; color: #BFAE9F">seconds · at bar</span></div>
+        <button role="switch" aria-checked="true" aria-label="Low bar start" style="position: relative; width: 44px; height: 26px; flex: none; border-radius: 13px; border: none; padding: 0; background: #E7A955"><span style="position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 10px; background: #2A1A08"></span></button>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 0 14px; background: #3E322D">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Low bar end</span><span style="font-size: 12px; color: #BFAE9F">seconds · at bar</span></div>
+        <button role="switch" aria-checked="true" aria-label="Low bar end" style="position: relative; width: 44px; height: 26px; flex: none; border-radius: 13px; border: none; padding: 0; background: #E7A955"><span style="position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 10px; background: #2A1A08"></span></button>
+      </div>
+      <button style="display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 14px; border: none; background: #3E322D; color: #BFAE9F; font-size: 14px; font-weight: 500; text-align: left">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add your own feature
+      </button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px; min-height: 58px; padding: 0 10px 0 14px; border-radius: 14px; background: #3E322D">
+      <span style="flex: 1; font-size: 15px; font-weight: 600">Group size</span>
+      <button aria-label="Group size smaller" style="width: 44px; height: 44px; border-radius: 10px; border: none; background: #54453D; color: #F5EDE3; font-size: 20px">−</button>
+      <span style="width: 72px; text-align: center; font-size: 18px; font-weight: 600">58<span style="font-size: 13px; font-weight: 500; color: #BFAE9F"> mm</span></span>
+      <button aria-label="Group size larger" style="width: 44px; height: 44px; border-radius: 10px; border: none; background: #54453D; color: #F5EDE3; font-size: 20px">+</button>
+    </div>
+  </main>
+
+  <footer style="padding: 8px 20px 28px">
+    <button style="width: 100%; height: 56px; border-radius: 16px; border: none; background: #E7A955; color: #2A1A08; font-size: 17px; font-weight: 700">Next</button>
+  </footer>
+</div>
+</body>
+</html>
