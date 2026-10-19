@@ -335,9 +335,12 @@
     color: var(--ink-muted);
   }
 
+  /* Screen 58: the empty result is centred, a little below the search. */
   .empty {
     margin: 0;
-    font-size: 13px;
-    color: var(--ink-muted);
+    padding-top: 48px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
   }
 </style>

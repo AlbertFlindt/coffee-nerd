@@ -261,13 +261,13 @@
     background: var(--surface);
     color: var(--ink);
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 500;
     text-align: left;
   }
 
+  /* Screen 62: the count reads at the size of the name, muted. */
   .count {
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 15px;
     color: var(--ink-muted);
   }
 
@@ -279,12 +279,24 @@
     color: var(--ink-soft);
   }
 
+  /* Screen 61: the built-in line reads as the sheet's sentence. */
   .hint {
-    color: var(--ink-muted);
+    margin: 0 2px;
+    font-size: 14px;
+    line-height: 1.45;
   }
 
+  .problem {
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* Screens 62–64: the line sits close under the title. */
   .note {
-    font-size: 15px;
+    margin: -8px 0 8px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink-soft);
   }
 
   button:disabled {

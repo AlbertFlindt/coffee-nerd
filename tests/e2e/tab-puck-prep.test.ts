@@ -68,6 +68,31 @@ test('NewStep, D-52: a new step with a number setting', async () => {
   await expect(page.getByRole('button', { name: 'RDT · sprays' })).toBeVisible();
 });
 
+test('D-52, D-152: a list step starts on the option whose circle is tapped (screen 52)', async () => {
+  await page.getByRole('button', { name: 'New step' }).click();
+  const sheet = page.getByRole('region', { name: 'New step' });
+  await sheet.getByLabel('Name').fill('Paper filter');
+  await sheet.getByRole('radio', { name: 'Pick from a list' }).click();
+  await sheet.getByLabel('Option 1', { exact: true }).fill('Bottom');
+  await sheet.getByLabel('Option 2', { exact: true }).fill('Top');
+  await expect(sheet.getByText('Tap the circle of the option it starts on')).toBeVisible();
+  await sheet.getByRole('button', { name: 'Add option' }).click();
+  await sheet.getByLabel('Option 3', { exact: true }).fill('Both');
+  await sheet.getByRole('button', { name: 'Add step' }).click();
+  await expect(sheet).toHaveCount(0);
+
+  // Edit mode: titled with its name, "Save step" and, unused, a quiet "Delete step".
+  await page.getByRole('button', { name: 'Paper filter', exact: true }).click();
+  const edit = page.getByRole('region', { name: 'Edit Paper filter' });
+  await expect(edit.getByRole('radio', { name: 'Starts at Bottom' })).toHaveAttribute(
+    'aria-checked',
+    'true'
+  );
+  await screenshot('StepEdit');
+  await edit.getByRole('button', { name: 'Delete step' }).click();
+  await expect(page.getByRole('button', { name: 'Paper filter', exact: true })).toHaveCount(0);
+});
+
 test('D-168: a step can be renamed, and deleted while no shot used it', async () => {
   await page.getByRole('button', { name: 'RDT · sprays' }).click();
   const sheet = page.getByRole('region', { name: 'Edit RDT' });
@@ -88,8 +113,10 @@ test('D-169: a step in a routine stays', async () => {
   const sheet = page.getByRole('region', { name: 'Edit Tamp' });
   await expect(sheet).toContainText('Used in Daily routine');
   await expect(sheet.getByRole('button', { name: /Delete step|Archive step/ })).toHaveCount(0);
-  // D-168: Tamp has been used by shots, so its unit stays.
-  await expect(sheet.getByLabel('Unit')).not.toBeEditable();
+  // D-168, screen 53: Tamp has been used by shots, so its kind and unit only show.
+  await expect(sheet).toContainText('Number with unit · kg');
+  await expect(sheet.getByLabel('Unit')).toHaveCount(0);
+  await expect(sheet.getByRole('radiogroup', { name: 'Setting' })).toHaveCount(0);
   await expectNoPageScroll();
   // D-175: a range the routine's 15 kg falls outside is refused, naming the routine.
   await sheet.getByLabel('Starts at').fill('5');
@@ -98,6 +125,7 @@ test('D-169: a step in a routine stays', async () => {
   await expect(sheet.getByRole('status')).toHaveText(
     'Daily routine uses 15 kg, outside this range'
   );
+  await screenshot('StepUsed');
   await page
     .getByRole('button', { name: 'Close without saving' })
     .click({ position: { x: 200, y: 20 } });
@@ -140,6 +168,7 @@ test('D-164, D-165, D-51: build a routine, set a value, reorder, and add a new s
   // D-165: the value sheet.
   await page.getByRole('button', { name: /^WDT setting, 20 s/ }).click();
   const value = page.getByRole('region', { name: 'WDT setting' });
+  await screenshot('RoutineValue');
   await value.getByRole('button', { name: 'WDT plus 1 second' }).click();
   await value.getByRole('button', { name: 'WDT plus 1 second' }).click();
   await value.getByRole('button', { name: 'Done' }).click();
@@ -165,6 +194,7 @@ test('D-164, D-165, D-51: build a routine, set a value, reorder, and add a new s
 
   // D-164: "New step" from the insert sheet goes in where + was tapped.
   await page.getByRole('button', { name: 'Insert a step after WDT' }).click();
+  await screenshot('RoutineInsert');
   await page
     .getByRole('region', { name: 'Insert a step' })
     .getByRole('button', { name: 'New step' })
@@ -180,12 +210,19 @@ test('D-164, D-165, D-51: build a routine, set a value, reorder, and add a new s
   await expect(
     page.getByRole('link', { name: /^Light roast/ }).getByLabel('Tamp, then WDT, then Paper filter')
   ).toBeVisible();
+  // Screen 50, D-163: a routine no shot used says so.
+  await expect(page.getByRole('link', { name: /^Light roast/ })).toContainText('No shots yet');
+  await screenshot('PuckPrepNew');
 });
 
 test('D-167: a routine no shot used offers Delete', async () => {
   await page.getByRole('link', { name: /^Light roast/ }).click();
   await expect(page.getByRole('button', { name: 'Delete routine' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Archive', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Delete routine' }).click();
+  await expect(page.getByRole('heading', { name: 'Delete this routine?' })).toBeVisible();
+  await screenshot('RoutineArchive');
+  await page.getByRole('button', { name: 'Keep it' }).click();
   await page.getByRole('link', { name: 'Close without saving' }).click();
 });
 
