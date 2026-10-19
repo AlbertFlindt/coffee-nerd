@@ -2,11 +2,11 @@
 import { and, asc, desc, eq, inArray, lt, or } from 'drizzle-orm';
 import { describeChange, type RecipeMatch } from '../../domain/fingerprint';
 import { recipeFilterLabel, setupDifferences, shotsThisWeek } from '../../domain/journal';
-import type { GrinderSpec, MachineSpec } from '../../domain/schemas';
-import { setupDetail, setupParts } from '../../domain/shot-form';
+import type { GrinderSpec, MachineSpec, PrepStepSetting } from '../../domain/schemas';
+import { routineParts, setupDetail, setupParts } from '../../domain/shot-form';
 import type { Thousandths } from '../../domain/units';
 import type { Queryable } from './client';
-import { bean, gear, recipe, shot, shotTag, tag, userSettings } from './schema';
+import { bean, gear, prepStep, recipe, shot, shotTag, tag, userSettings } from './schema';
 
 export type JournalFilter = { beanId?: string; recipeId?: string; unrated?: boolean };
 
@@ -99,6 +99,21 @@ export function loadJournal(
     // Two recipes with the same values say which setup values tell them apart (D-121).
     const gearRows = db.select().from(gear).where(eq(gear.ownerId, ownerId)).all();
     const gearOf = new Map(gearRows.map((g) => [g.id, g]));
+    // D-170: a step value that differs names it too; a list option by its label.
+    const settingOf = new Map(
+      db
+        .select({ id: prepStep.id, setting: prepStep.setting })
+        .from(prepStep)
+        .where(eq(prepStep.ownerId, ownerId))
+        .all()
+        .map((s) => [s.id, s.setting as PrepStepSetting])
+    );
+    const optionLabel = (stepId: string, optionId: string) => {
+      const setting = settingOf.get(stepId);
+      return setting?.kind === 'choice'
+        ? (setting.options.find((o) => o.id === optionId)?.label ?? optionId)
+        : optionId;
+    };
     const differences = setupDifferences(
       ofRecipe.map((row) => {
         const named = [
@@ -111,7 +126,11 @@ export function loadJournal(
         const machineSpec = gearOf.get(row.machineId)?.spec as MachineSpec | undefined;
         return {
           values: JSON.stringify([row.grind, row.dose, row.setup.routine?.name ?? null]),
-          setup: [...named, ...setupParts(row.setup, machineSpec?.features ?? [])]
+          setup: [
+            ...named,
+            ...setupParts(row.setup, machineSpec?.features ?? []),
+            ...routineParts(row.setup.routine, optionLabel)
+          ]
         };
       })
     );

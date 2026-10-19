@@ -188,6 +188,25 @@ describe('loadJournal', () => {
     ]);
   });
 
+  it('D-170: recipes that differ only in a step value name it', () => {
+    const longer = shotAt(T0 - 2 * DAY);
+    longer.setup.routine = {
+      ...longer.setup.routine!,
+      steps: longer.setup.routine!.steps.map((step, i) =>
+        i === 0 ? { ...step, value: 30000 } : step
+      )
+    };
+    save(longer);
+    save(shotAt(T0 - DAY));
+    const labels = loadJournal(db, ids.userId, { beanId: ids.beanId }, T0).recipes.map(
+      (r) => r.label
+    );
+    expect(labels).toEqual([
+      '1.6 · 18.0 g · Daily routine · WDT 20 s · 1 shot',
+      '1.6 · 18.0 g · Daily routine · WDT 30 s · 1 shot'
+    ]);
+  });
+
   it('D-112: a recipe filter needs its bean; without one it is ignored', () => {
     save(shotAt(T0 - DAY));
     const recipeId = loadJournal(db, ids.userId, { beanId: ids.beanId }, T0).recipes[0].id;

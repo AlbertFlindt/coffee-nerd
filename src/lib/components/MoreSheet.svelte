@@ -7,7 +7,7 @@
   import SetupRow from './SetupRow.svelte';
   import TasteSlider from './TasteSlider.svelte';
   import type { ShotState } from './shot-state';
-  import type { FeatureDefinition, FeatureValue } from '../domain/schemas';
+  import type { FeatureDefinition, FeatureValue, PrepStepSetting } from '../domain/schemas';
   import type { RoutineNow } from '../domain/prefill';
   import type { SetupChanges } from '../domain/shot-form';
 
@@ -18,6 +18,7 @@
     baskets,
     routines,
     gearNames,
+    stepSettings,
     tags,
     changes,
     onclose
@@ -28,12 +29,15 @@
     baskets: { id: string; name: string }[];
     routines: { id: string; name: string; routine: RoutineNow }[];
     gearNames: Record<string, string>;
+    /** Each puck prep step's setting, for changing a step's value for this shot (D-166). */
+    stepSettings: Record<string, PrepStepSetting>;
     tags: { id: string; name: string }[];
     changes: SetupChanges;
     onclose: () => void;
   } = $props();
 
-  let picking: 'basket' | 'routine' | null = $state(null);
+  /** A view inside the Setup tab: a picker, or the routine's steps with their values (D-166). */
+  let picking: 'basket' | 'routine' | 'prep' | null = $state(null);
   let adding = $state(false);
   let newName = $state('');
 
@@ -111,6 +115,17 @@
         ]
   );
 
+  /** D-166: a step's value for this shot only; a change turns sage like any other (D-90). */
+  function setStep(index: number, value: number | string) {
+    const routine = shot.setup.routine;
+    if (!routine) return;
+    routine.steps[index] = { ...routine.steps[index], value };
+  }
+  const stepChange = (index: number) => {
+    const change = changes.steps[index];
+    return change ? { delta: change.delta, pressureDelta: null, switched: null } : undefined;
+  };
+
   const routineName = $derived(shot.setup.routine?.name ?? 'No puck prep');
 
   function toggleTag(id: string) {
@@ -173,7 +188,53 @@
 
   {#if tab === 'setup'}
     <div class="panel setup" role="tabpanel" aria-label="Setup">
-      {#if picking}
+      {#if picking === 'prep' && shot.setup.routine}
+        <h3>Puck prep</h3>
+        <button type="button" class="link-row cn-tap" onclick={() => (picking = 'routine')}>
+          <span class="strong">Routine</span>
+          <span class="end">{routineName}{@render chevron()}</span>
+        </button>
+        <div class="group">
+          {#each shot.setup.routine.steps as step, i (i)}
+            {@const setting = stepSettings[step.stepId]}
+            {#if (setting?.kind === 'number' || setting?.kind === 'seconds') && typeof step.value === 'number'}
+              <SetupRow
+                label={step.name}
+                value={step.value}
+                unit={setting.kind === 'number' ? setting.unit : 's'}
+                step={setting.step}
+                min={setting.min ?? 0}
+                max={setting.max}
+                change={stepChange(i)}
+                onvalue={(v) => setStep(i, v)}
+              />
+            {:else if setting?.kind === 'choice'}
+              {@const options = setting.options}
+              <div class="cn-row step-row">
+                <span class="cn-row__label">{step.name}</span>
+                <button
+                  type="button"
+                  class="choice"
+                  class:changed={!!changes.steps[i]}
+                  aria-label="{step.name}, tap for the next option"
+                  onclick={() => {
+                    const at = options.findIndex((o) => o.id === step.value);
+                    setStep(i, options[(at + 1) % options.length].id);
+                  }}>{options.find((o) => o.id === step.value)?.label ?? '—'}</button
+                >
+              </div>
+            {:else}
+              <div class="cn-row step-row">
+                <span class="cn-row__label">{step.name}</span>
+                <span class="off">No settings</span>
+              </div>
+            {/if}
+          {/each}
+        </div>
+        <button type="button" class="cn-btn-quiet cn-tap" onclick={() => (picking = null)}
+          >Back to Setup</button
+        >
+      {:else if picking}
         <h3>{picking === 'basket' ? 'Basket' : 'Puck prep'}</h3>
         <div class="list">
           {#each choices as item (item.id)}
@@ -231,7 +292,11 @@
               : 'No basket'}{@render chevron()}</span
           >
         </button>
-        <button type="button" class="link-row prep cn-tap" onclick={() => (picking = 'routine')}>
+        <button
+          type="button"
+          class="link-row prep cn-tap"
+          onclick={() => (picking = shot.setup.routine ? 'prep' : 'routine')}
+        >
           <span class="prep-text">
             <span class="strong">Puck prep <span class="soft">· {routineName}</span></span>
             <span class="flow" class:changed={changes.routine}>
@@ -580,5 +645,31 @@
     textarea {
       height: 56px;
     }
+  }
+
+  .step-row {
+    border-radius: 0;
+    min-height: 56px;
+    padding-right: 14px;
+  }
+
+  .off {
+    font-size: 14px;
+    color: var(--ink-muted);
+  }
+
+  .choice {
+    height: var(--touch-min);
+    padding: 0 10px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--amber);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .choice.changed {
+    color: var(--sage);
   }
 </style>

@@ -189,12 +189,32 @@ test('D-167: a routine no shot used offers Delete', async () => {
   await page.getByRole('link', { name: 'Close without saving' }).click();
 });
 
+test('D-166: a step’s value changes for one shot, as a recipe change in sage', async () => {
+  await page.goto('/shot/new');
+  await page.getByRole('button', { name: 'More', exact: true }).click();
+  const more = page.getByRole('region', { name: 'More', exact: true });
+  await more.getByRole('button', { name: /Puck prep/ }).click();
+  await expect(more.getByRole('button', { name: /^Routine/ })).toContainText('Daily routine');
+  await expect(more).toContainText('No settings');
+  await more.getByRole('button', { name: 'WDT plus 1 s' }).click();
+  await expect(more.locator('.cn-delta', { hasText: '+1' })).toBeVisible();
+  await expect(page.locator('.cn-tag')).toContainText('New recipe');
+  await expect(page.locator('.cn-tag')).toContainText('routine');
+  await expectNoPageScroll();
+  await screenshot('ShotStepValue');
+  await more.getByRole('button', { name: 'WDT minus 1 s' }).click();
+  await expect(more.locator('.cn-delta')).toHaveCount(0);
+  await more.getByRole('button', { name: 'Back to Setup' }).click();
+  await expect(more.getByRole('button', { name: /Puck prep/ })).toBeVisible();
+});
+
 test('D-167, D-168: once a shot used it, the routine is archived, and so is its step', async () => {
   // Brew one shot with Light roast.
   await page.goto('/shot/new');
   await page.getByRole('button', { name: 'More', exact: true }).click();
   const more = page.getByRole('region', { name: 'More', exact: true });
   await more.getByRole('button', { name: /Puck prep/ }).click();
+  await more.getByRole('button', { name: /^Routine/ }).click();
   await more.getByRole('button', { name: 'Light roast' }).click();
   await page.getByRole('button', { name: 'Close More' }).click({ position: { x: 200, y: 20 } });
   await page.getByRole('button', { name: 'Save shot' }).click();

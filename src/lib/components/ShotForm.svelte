@@ -303,6 +303,7 @@
         baskets={data.baskets}
         routines={data.routines}
         gearNames={data.gearNames}
+        stepSettings={data.stepSettings}
         tags={data.tags}
         changes={setup}
         onclose={() => (sheet = null)}

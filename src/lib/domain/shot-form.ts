@@ -1,5 +1,6 @@
 // What the shot form shows about the values being entered (D-12, D-15, D-16, D-90, D-100). Pure, so it
 // runs in the browser on every change and works offline (D-61).
+import { trimmed } from './gear';
 import { describeChange, recipeFingerprint, type RecipeIdentity } from './fingerprint';
 import type { FeatureDefinition, FeatureValue, SetupSnapshot } from './schemas';
 import { decimalsFor, formatQuantity, type Thousandths } from './units';
@@ -76,21 +77,40 @@ export type FeatureChange = {
   switched: 'On' | 'Off' | null;
 };
 
+/** A routine step whose value changed since the last shot (D-166); `delta` for numbers, null for a list. */
+export type StepChange = { delta: Thousandths | null } | null;
+
 export type SetupChanges = {
   /** Only the features that changed. */
   features: Record<string, FeatureChange>;
   basket: boolean;
   routine: boolean;
+  /** Per step of this shot's routine, when it is the last shot's routine too (D-166). */
+  steps: StepChange[];
 };
 
 /** What differs on the Setup tab from the bean's last shot (D-90). */
 export function setupChanges(now: RecipeIdentity, last: RecipeIdentity | null): SetupChanges {
-  const result: SetupChanges = { features: {}, basket: false, routine: false };
+  const result: SetupChanges = { features: {}, basket: false, routine: false, steps: [] };
   if (last === null) return result;
   result.basket = now.basketId !== last.basketId;
   const stepValues = (r: RecipeIdentity) =>
     JSON.stringify((r.setup.routine?.steps ?? []).map((s) => [s.stepId, s.value]));
   result.routine = now.routineId !== last.routineId || stepValues(now) !== stepValues(last);
+  if (now.routineId !== null && now.routineId === last.routineId) {
+    const before = last.setup.routine?.steps ?? [];
+    result.steps = (now.setup.routine?.steps ?? []).map((step, i) => {
+      const old = before[i];
+      if (!old || old.stepId !== step.stepId || old.value === step.value) return null;
+      return {
+        delta:
+          typeof step.value === 'number' && typeof old.value === 'number'
+            ? step.value - old.value
+            : null
+      };
+    });
+    if (result.steps.every((c) => c === null)) result.steps = [];
+  }
 
   for (const [key, feature] of Object.entries(now.setup.features)) {
     // A feature the machine did not have at the last shot counts as switched off then (D-78, D-90).
@@ -152,6 +172,29 @@ export function setupDetail(setup: SetupSnapshot, features: readonly FeatureDefi
     .filter((part) => setup.features[part.key]?.on)
     .map((part) => part.text)
     .join(' · ');
+}
+
+/**
+ * Each routine step that has a value, as "WDT 30 s" or "Filter Metal", for telling recipes apart (D-170).
+ * `label` names a list option. A step used twice gets its own key per occurrence.
+ */
+export function routineParts(
+  routine: SetupSnapshot['routine'],
+  label: (stepId: string, optionId: string) => string
+): { key: string; text: string }[] {
+  const seen = new Map<string, number>();
+  const parts: { key: string; text: string }[] = [];
+  for (const step of routine?.steps ?? []) {
+    const n = seen.get(step.stepId) ?? 0;
+    seen.set(step.stepId, n + 1);
+    if (step.value === null) continue;
+    const value =
+      typeof step.value === 'string'
+        ? label(step.stepId, step.value)
+        : trimmed(step.value, step.unit);
+    parts.push({ key: `step:${step.stepId}:${n}`, text: `${step.name} ${value}` });
+  }
+  return parts;
 }
 
 /**

@@ -117,6 +117,8 @@ test('D-155: the basket and puck prep pickers start with leaving them out', asyn
   await expect(page.locator('.cn-tag')).toContainText('New recipe');
 
   await sheet.getByRole('button', { name: /Puck prep/ }).click();
+  // D-166: the row opens the routine's steps; "Routine" there opens the picker.
+  await sheet.getByRole('button', { name: /^Routine/ }).click();
   await expect(sheet.locator('.pick').first()).toHaveText('No puck prep');
   await expect(
     sheet.getByText(
