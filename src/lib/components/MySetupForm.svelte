@@ -9,6 +9,7 @@
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import BottomSheet from './BottomSheet.svelte';
+  import PickRow from './PickRow.svelte';
   import ChoiceRow from './ChoiceRow.svelte';
   import SetupRow from './SetupRow.svelte';
   import ValueCard from './ValueCard.svelte';
@@ -199,12 +200,12 @@
     routine: 'Puck prep'
   } as const;
 
-  /** Not designed: what shows when there is nothing to choose from yet (open items). */
+  /** What shows when there is nothing to choose from yet (screen 45). */
   const EMPTY_NOTE = {
-    machine: 'No machines yet. Add one in Library › Gear.',
-    grinder: 'No grinders yet. Add one in Library › Gear.',
-    basket: '',
-    routine: ''
+    machine: { title: 'No machines yet.', line: 'Add one in Library › Gear.' },
+    grinder: { title: 'No grinders yet.', line: 'Add one in Library › Gear.' },
+    basket: { title: '', line: '' },
+    routine: { title: '', line: '' }
   } as const;
 
   function check(): boolean {
@@ -391,11 +392,12 @@
 
     {#if picking === 'pressure'}
       <BottomSheet
+        short
         label="Pressure profile"
         closeLabel="Close pressure profile"
         onclose={() => (picking = null)}
       >
-        <h2 class="cn-type-heading sheet-title">Pressure profile</h2>
+        <h2 class="sheet-title">Pressure profile</h2>
         <div class="group">
           {#each pressure as f (f.key)}
             {#if f.key === 'flat_pressure'}
@@ -408,27 +410,33 @@
       </BottomSheet>
     {:else if picking}
       <BottomSheet
+        short
         label={PICKER_TITLE[picking]}
         closeLabel="Close {PICKER_TITLE[picking].toLowerCase()} list"
         onclose={() => (picking = null)}
       >
-        <h2 class="cn-type-heading sheet-title">{PICKER_TITLE[picking]}</h2>
-        <div class="list">
-          {#each choices as item (item.id)}
-            <button
-              type="button"
-              class="pick cn-tap"
-              aria-pressed={item.chosen}
-              onclick={() => {
-                item.pick();
-                picking = null;
-              }}>{item.name}</button
-            >
-          {/each}
-        </div>
+        <h2 class="sheet-title">{PICKER_TITLE[picking]}</h2>
         {#if choices.length === 0}
-          <p class="note">{EMPTY_NOTE[picking]}</p>
-        {:else if picking === 'routine'}
+          <!-- Screen 45: nothing to choose from yet. -->
+          <div class="empty">
+            <span class="empty-title">{EMPTY_NOTE[picking].title}</span>
+            <span class="empty-line">{EMPTY_NOTE[picking].line}</span>
+          </div>
+        {:else}
+          <div class="list">
+            {#each choices as item (item.id)}
+              <PickRow
+                label={item.name}
+                chosen={item.chosen}
+                onclick={() => {
+                  item.pick();
+                  picking = null;
+                }}
+              />
+            {/each}
+          </div>
+        {/if}
+        {#if choices.length > 0 && picking === 'routine'}
           <!-- D-155 -->
           <p class="note">
             Shots are easier to repeat with a puck prep routine. Add one in Library › Puck prep.
@@ -619,12 +627,40 @@
 
   .problem {
     margin: 0;
+    text-align: center;
     font-size: 13px;
+    line-height: 1.4;
     color: var(--ink-soft);
   }
 
   .sheet-title {
     margin: 4px 0 0;
+    font-size: 19px;
+    line-height: 24px;
+    font-weight: 700;
+  }
+
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 96px;
+    padding: 0 var(--space-5);
+    border-radius: var(--radius-md);
+    background: var(--surface-sheet-field);
+    text-align: center;
+  }
+
+  .empty-title {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .empty-line {
+    font-size: 14px;
+    color: var(--ink-muted);
   }
 
   .note {
@@ -641,21 +677,6 @@
     border-radius: var(--radius-md);
     overflow: hidden;
     flex: none;
-  }
-
-  .pick {
-    min-height: 52px;
-    padding: 0 14px;
-    border: none;
-    background: var(--surface-sheet-field);
-    color: var(--ink);
-    font-size: 15px;
-    text-align: left;
-  }
-
-  .pick[aria-pressed='true'] {
-    color: var(--amber);
-    font-weight: 700;
   }
 
   /* Edit My setup draws its value cards smaller than the shot form's (screen 13). */

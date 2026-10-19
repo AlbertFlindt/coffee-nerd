@@ -12,6 +12,11 @@
   let { data }: PageProps = $props();
   const page = $derived(data.page);
   let adding = $state(false);
+  const KINDS = [
+    ['machine', 'Machine'],
+    ['grinder', 'Grinder'],
+    ['basket', 'Basket']
+  ] as const;
 </script>
 
 <svelte:head><title>Gear · Coffee Nerd</title></svelte:head>
@@ -81,7 +86,9 @@
     <div class="setup-head">
       <div class="setup-title">
         <h2 class="setup-name">My setup</h2>
-        <span class="muted">Starting point for new beans</span>
+        <!-- Screen 37: before My setup exists, the line under the title says so. -->
+        <span class="muted">{page.mySetup ? 'Starting point for new beans' : 'Not set up yet'}</span
+        >
       </div>
       <a class="edit cn-tap" href={resolve('/library/gear/setup')}>Edit</a>
     </div>
@@ -105,8 +112,6 @@
         {#if page.mySetup.values}<span>{page.mySetup.values}</span>{/if}
         {#if page.mySetup.setup}<span>{page.mySetup.setup}</span>{/if}
       </div>
-    {:else}
-      <p class="muted none">Not set up yet</p>
     {/if}
   </section>
 
@@ -122,11 +127,52 @@
 {#if adding}
   <!-- D-147: "Add gear" asks for the kind, then opens that kind's page, empty. -->
   <BottomSheet short label="Add gear" closeLabel="Close" onclose={() => (adding = false)}>
-    <h2 class="cn-type-heading sheet-title">Add gear</h2>
+    <h2 class="sheet-title">Add gear</h2>
+    <!-- Screen 36: one row per kind, with its icon and a chevron. -->
     <form class="kinds" method="GET" action={resolve('/library/gear/new')}>
-      <button class="kind cn-tap" name="kind" value="machine">Machine</button>
-      <button class="kind cn-tap" name="kind" value="grinder">Grinder</button>
-      <button class="kind cn-tap" name="kind" value="basket">Basket</button>
+      {#each KINDS as [value, name] (value)}
+        <button class="kind cn-tap" name="kind" {value}>
+          <span class="kind-icon">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              {#if value === 'machine'}
+                <rect x="4" y="3" width="16" height="7" rx="1.5" /><path
+                  d="M8 10v3M16 10v3M7 13h10v2a5 5 0 0 1-10 0z"
+                /><path d="M5 21h14" />
+              {:else if value === 'grinder'}
+                <path d="M7 3h10l-2 6H9z" /><rect x="6" y="9" width="12" height="8" rx="2" /><path
+                  d="M9 17v4h6v-4"
+                />
+              {:else}
+                <path d="M3 9h18l-2.5 7a3 3 0 0 1-2.8 2H8.3a3 3 0 0 1-2.8-2z" /><path
+                  d="M8 12h.01M12 12h.01M16 12h.01M10 15h.01M14 15h.01"
+                />
+              {/if}
+            </svg>
+          </span>
+          <span class="kind-name">{name}</span>
+          <svg
+            class="chevron"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg
+          >
+        </button>
+      {/each}
     </form>
   </BottomSheet>
 {/if}
@@ -198,10 +244,6 @@
 
   .muted {
     font-size: 13px;
-  }
-
-  .none {
-    margin: 0;
   }
 
   .edit {
@@ -318,6 +360,9 @@
 
   .sheet-title {
     margin: 4px 0 0;
+    font-size: 19px;
+    line-height: 24px;
+    font-weight: 700;
   }
 
   .kinds {
@@ -329,7 +374,10 @@
   }
 
   .kind {
-    min-height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 64px;
     padding: 0 14px;
     border: none;
     background: var(--surface-sheet-field);
@@ -337,5 +385,21 @@
     font-size: 15px;
     font-weight: 600;
     text-align: left;
+  }
+
+  .kind-icon {
+    width: 40px;
+    height: 40px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-block);
+    background: var(--bg);
+    color: var(--ink-soft);
+  }
+
+  .kind-name {
+    flex: 1;
   }
 </style>

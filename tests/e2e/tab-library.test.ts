@@ -386,8 +386,13 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
   await page.getByRole('link', { name: 'Back to Gear' }).click();
 
   await page.getByRole('button', { name: 'Add gear' }).click();
+  // Screen 36: one row per kind.
+  await expect(page.getByRole('heading', { name: 'Add gear' })).toBeVisible();
+  await screenshot('GearAdd');
   await page.getByRole('button', { name: 'Basket' }).click();
   await expect(page.getByRole('heading', { name: 'Add basket', level: 1 })).toBeVisible();
+  // Screen 39: adding is a task with × to close.
+  await expect(page.getByRole('link', { name: 'Close without saving' })).toBeVisible();
   // D-158: a new basket starts as a precision double for 58 mm.
   await expect(page.getByRole('radio', { name: 'Precision' })).toHaveAttribute(
     'aria-checked',
@@ -396,9 +401,10 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
   await expect(page.getByRole('radio', { name: 'Double' })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('button', { name: 'Add basket' }).click();
   await expect(page.getByRole('alert')).toHaveText('Brand is required');
+  await screenshot('BasketNew');
   await page.getByLabel('Brand').fill('IMS');
-  await page.getByLabel('Size', { exact: true }).fill('20');
-  await page.getByLabel('Size', { exact: true }).blur();
+  await page.getByLabel(/^Size/).fill('20');
+  await page.getByLabel(/^Size/).blur();
   await page.getByRole('button', { name: 'Add basket' }).click();
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
   const ims = page.getByRole('link', { name: /^IMS · 20 g/ });
@@ -406,6 +412,8 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
 
   await ims.click();
   await page.getByRole('button', { name: 'Archive' }).click();
+  await expect(page.getByRole('heading', { name: 'Archive this basket?' })).toBeVisible();
+  await screenshot('GearArchive');
   await page
     .getByRole('region', { name: 'Archive this basket' })
     .getByRole('button', { name: 'Archive' })

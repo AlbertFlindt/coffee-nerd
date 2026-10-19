@@ -151,25 +151,30 @@
   {onclose}
 >
   <div class="body">
-    <h2>{editing ? feature?.label : 'Add your own feature'}</h2>
+    <div class="heading">
+      <h2>{editing ? feature?.label : 'Add your own feature'}</h2>
+      {#if editing && used}
+        <!-- D-160, D-162, screen 42: a used feature keeps its kind, unit and options. -->
+        <p class="in-use">Used by shots · {usedNote}</p>
+      {/if}
+    </div>
 
     <TextField label="Name" id="feature-name" autocomplete="off" bind:value={name} />
 
-    {#if !editing}
-      <fieldset>
-        <legend>What kind of value?</legend>
-        <div class="kinds" role="radiogroup" aria-label="Kind of value">
-          {#each KINDS as [key, label] (key)}
-            <button
-              type="button"
-              role="radio"
-              aria-checked={kind === key}
-              onclick={() => pickKind(key)}>{label}</button
-            >
-          {/each}
-        </div>
-      </fieldset>
-    {/if}
+    <!-- Screen 42: editing shows the kind, which cannot change. -->
+    <fieldset disabled={editing}>
+      <legend>What kind of value?</legend>
+      <div class="kinds" role="radiogroup" aria-label="Kind of value">
+        {#each KINDS as [key, label] (key)}
+          <button
+            type="button"
+            role="radio"
+            aria-checked={kind === key}
+            onclick={() => pickKind(key)}>{label}</button
+          >
+        {/each}
+      </div>
+    </fieldset>
 
     {#if kind === 'number' || kind === 'seconds'}
       <div class="pair">
@@ -301,9 +306,6 @@
     >
     {#if editing && !used}
       <button type="button" class="cn-btn-quiet cn-tap" onclick={ondelete}>Delete feature</button>
-    {:else if editing}
-      <!-- D-160, D-162: a used feature keeps its kind, unit and options. -->
-      <p class="in-use">Used by shots · {usedNote}</p>
     {/if}
   </div>
 </BottomSheet>
@@ -321,6 +323,12 @@
     margin: 0;
     font-size: 19px;
     font-weight: 700;
+  }
+
+  .heading {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
   fieldset {
@@ -491,19 +499,31 @@
     padding: 0 4px;
   }
 
-  .problem,
-  .in-use {
+  .problem {
     margin: 0;
+    text-align: center;
     font-size: 13px;
+    line-height: 1.4;
     color: var(--ink-soft);
   }
 
   .in-use {
-    text-align: center;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+  }
+
+  .kinds button:disabled:not([aria-checked='true']) {
     color: var(--ink-muted);
   }
 
   button:disabled {
     opacity: 0.5;
+  }
+
+  .kinds button:disabled {
+    opacity: 1;
+    cursor: default;
   }
 </style>

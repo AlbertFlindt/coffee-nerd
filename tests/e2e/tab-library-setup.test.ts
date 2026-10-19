@@ -72,6 +72,16 @@ test('EditSetup, D-45: a full-screen form that starts from My setup', async () =
   await screenshot('EditSetup');
 });
 
+test('EditSetup, screen 44: the machine picker ticks the chosen machine', async () => {
+  await page.getByRole('button', { name: /^Machine,/ }).click();
+  await expect(page.getByRole('button', { name: 'Lelit Bianca', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
+  await screenshot('SetupPicker');
+  await page.keyboard.press('Escape');
+});
+
 test('EditSetup, D-155: the basket and puck prep pickers start with "No basket" and "No puck prep"', async () => {
   await page.getByRole('button', { name: /^Basket,/ }).click();
   await expect(page.getByRole('button', { name: 'No basket', exact: true })).toBeVisible();
@@ -95,6 +105,7 @@ test('EditSetup, D-24: the pressure profile opens the phase rows', async () => {
   await page.getByRole('button', { name: /^Pressure profile/ }).click();
   await expect(page.getByRole('switch', { name: 'Preinfusion' })).toBeVisible();
   await expect(page.getByRole('switch', { name: 'Low bar start' })).toBeVisible();
+  await screenshot('SetupPressure');
   await page.keyboard.press('Escape');
 });
 

@@ -122,8 +122,10 @@
       autocomplete="off"
       bind:value={value.brand}
     />
+    <!-- Screens 39, 48: the unit sits at the right of the label. -->
     <TextField
       label="Size"
+      hint="g"
       id="basket-size"
       inputmode="decimal"
       placeholder="e.g. 18"

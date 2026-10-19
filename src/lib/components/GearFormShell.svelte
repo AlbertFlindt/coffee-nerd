@@ -36,11 +36,12 @@
   let archiving = $state(false);
 </script>
 
-<header>
+<!-- Screens 38, 39, 47, 48: adding is a task, with × and the title centred, like Add bean. -->
+<header class:adding>
   <a
     class="icon cn-tap"
     href={guide ? resolve('/') : resolve('/library/gear')}
-    aria-label={guide ? 'Leave for now' : 'Back to Gear'}
+    aria-label={guide ? 'Leave for now' : adding ? 'Close without saving' : 'Back to Gear'}
   >
     <svg
       width="22"
@@ -51,7 +52,10 @@
       stroke-width="2"
       stroke-linecap="round"
       stroke-linejoin="round"
-      aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" /></svg
+      aria-hidden="true"
+      >{#if adding}<path d="M6 6l12 12M18 6L6 18" />{:else}<path
+          d="M19 12H5M11 6l-6 6 6 6"
+        />{/if}</svg
     >
   </a>
   <div class="title">
@@ -100,10 +104,8 @@
     closeLabel="Keep the {kind}"
     onclose={() => (confirm = false)}
   >
-    <h2 class="cn-type-heading sheet-title">Archive this {kind}?</h2>
-    <p class="cn-type-body note">
-      It leaves the Gear page and the pickers. Past shots keep its name.
-    </p>
+    <h2 class="sheet-title">Archive this {kind}?</h2>
+    <p class="note">It leaves the Gear page and the pickers. Past shots keep its name.</p>
     <form class="confirm" method="POST" action="?/archive" onsubmit={() => (archiving = true)}>
       <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={archiving}
         >Archive</button
@@ -133,6 +135,16 @@
   .title {
     display: flex;
     flex-direction: column;
+  }
+
+  header.adding {
+    grid-template-columns: 48px 1fr 48px;
+    padding: 0 var(--space-2);
+  }
+
+  .adding .title {
+    align-items: center;
+    text-align: center;
   }
 
   .skip {
@@ -179,21 +191,28 @@
   .problem,
   .in-use {
     margin: 0;
+    text-align: center;
     font-size: 13px;
+    line-height: 1.4;
     color: var(--ink-soft);
   }
 
   .in-use {
-    text-align: center;
     color: var(--ink-muted);
   }
 
   .sheet-title {
     margin: 4px 0 0;
+    font-size: 19px;
+    line-height: 24px;
+    font-weight: 700;
   }
 
+  /* Screen 40: the line sits close under the question, the buttons a little further down. */
   .note {
-    margin: 0;
+    margin: -8px 0 8px;
+    font-size: 14px;
+    line-height: 1.45;
     color: var(--ink-soft);
   }
 
