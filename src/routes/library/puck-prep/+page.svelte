@@ -55,7 +55,7 @@
     >
   </a>
   <h1>Puck prep</h1>
-  <a class="cn-btn-add cn-tap-strong" href={resolve('/library/puck-prep/routine/new')}
+  <a class="cn-btn-add cn-tap-strong add" href={resolve('/library/puck-prep/routine/new')}
     >{@render plus(16)}New routine</a
   >
 </header>
@@ -89,6 +89,7 @@
       <span class="stats">{stats(r)}</span>
     </a>
   {:else}
+    <!-- Screen 51: an empty dashed frame where the routines go. -->
     <p class="empty">No routines yet.</p>
   {/each}
 
@@ -210,9 +211,13 @@
     color: var(--ink);
   }
 
+  /* Screens 18, 50: the link reads as a button, without the browser's underline. */
+  .add {
+    text-decoration: none;
+  }
+
   .stats,
-  .hint,
-  .empty {
+  .hint {
     font-size: 13px;
     color: var(--ink-muted);
   }
@@ -222,7 +227,17 @@
   }
 
   .empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
     margin: 0;
+    padding: 0 28px;
+    border-radius: var(--radius-xl);
+    border: 1.5px dashed var(--line);
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
   }
 
   .steps-head {

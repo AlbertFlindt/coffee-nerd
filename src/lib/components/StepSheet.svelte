@@ -174,7 +174,17 @@
 
       <TextField label="Name" id="step-name" autocomplete="off" bind:value={name} />
 
-      {#if !used}
+      {#if used}
+        <!-- Screen 53, D-168: once a shot used the step, its kind of setting (and unit) only shows. -->
+        <div class="fixed">
+          <span class="cn-caption">Setting</span>
+          <span class="fixed-value"
+            >{KINDS.find(([key]) => key === kind)?.[1]}{kind === 'number' && unit
+              ? ` · ${unit}`
+              : ''}</span
+          >
+        </div>
+      {:else}
         <fieldset>
           <legend>Setting</legend>
           <div class="kinds" role="radiogroup" aria-label="Setting">
@@ -191,15 +201,9 @@
       {/if}
 
       {#if kind === 'number' || kind === 'seconds'}
-        {#if kind === 'number'}
+        {#if kind === 'number' && !used}
           <div class="pair">
-            <TextField
-              label="Unit"
-              id="step-unit"
-              autocomplete="off"
-              readonly={used}
-              bind:value={unit}
-            />
+            <TextField label="Unit" id="step-unit" autocomplete="off" bind:value={unit} />
             <TextField
               label="Step"
               id="step-step"
@@ -210,7 +214,7 @@
           </div>
         {/if}
         <div class="pair">
-          {#if kind === 'seconds'}
+          {#if kind === 'seconds' || used}
             <TextField
               label="Step"
               id="step-step"
@@ -235,7 +239,9 @@
           />
         </div>
       {:else if kind === 'choice'}
-        <!-- D-152: one text row per option; at least two. The radio picks the option it starts on. -->
+        <!-- D-152: one text row per option; at least two. The radio picks the option it starts on;
+             screen 52 puts the hint above the options. -->
+        <p class="hint">Tap the circle of the option it starts on</p>
         <div class="options" role="radiogroup" aria-label="Starts at">
           {#each options as o, i (o.id)}
             <div class="option">
@@ -292,7 +298,6 @@
             >Add option
           </button>
         </div>
-        <p class="hint">Tap the circle of the option it starts on</p>
       {/if}
 
       <section class="preview" aria-label="Preview">
@@ -433,6 +438,11 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+  }
+
+  /* Screen 53: a third field in the pair (Range) takes the full width. */
+  .pair > :global(:nth-child(3)) {
+    grid-column: 1 / -1;
   }
 
   .options {
@@ -617,9 +627,25 @@
   .problem,
   .in-use,
   .hint {
-    margin: 0;
+    margin: 0 0 -6px;
     font-size: 13px;
     color: var(--ink-soft);
+  }
+
+  .fixed {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-height: 56px;
+    padding: 0 14px;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+  }
+
+  .fixed-value {
+    font-size: 16px;
+    font-weight: 600;
   }
 
   .hint,

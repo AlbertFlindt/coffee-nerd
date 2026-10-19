@@ -61,6 +61,7 @@ test('Tags, D-53, D-174: notes by family; "Add tag" asks a name and a family', a
   const sheet = await addTag('Dark choclate', 'Sweet');
   await expectNoPageScroll();
   await screenshot('TagAdd');
+  await screenshot('TagNew');
   await sheet.getByRole('button', { name: 'Add tag' }).click();
   await expect(sheet).toHaveCount(0);
   await expect(
@@ -94,11 +95,34 @@ test('D-173: "Keep both" is remembered for that pair', async () => {
   await page.reload();
   await expect(card()).toHaveCount(0);
 
-  // A note no shot used is deleted (D-171).
+  // Screens 57, 58, D-173: the search keeps matching notes; nothing found says so.
+  await page.getByLabel('Search tags').fill('car');
+  await expect(chip('Carmel')).toBeVisible();
+  await screenshot('TagsSearch');
+  await page.getByLabel('Search tags').fill('lavender');
+  await expect(page.getByText('No tags match.')).toBeVisible();
+  await screenshot('TagsNoMatch');
+  await page.getByLabel('Search tags').fill('');
+
+  // Screens 60, 62, 63, D-174: your own note's sheet and its merge steps.
   await chip('Carmel').click();
   const sheet = page.getByRole('region', { name: 'Edit Carmel' });
+  await expect(sheet.getByRole('radiogroup', { name: 'Family' })).toBeVisible();
+  await screenshot('TagEdit');
+  await sheet.getByRole('button', { name: 'Merge into another tag' }).click();
+  await expect(sheet.getByRole('heading', { name: 'Merge Carmel into' })).toBeVisible();
+  await screenshot('TagMergeList');
+  await sheet.getByRole('button', { name: /^Caramel/ }).click();
+  await expect(sheet.getByRole('heading', { name: 'Merge into Caramel?' })).toBeVisible();
+  await screenshot('TagMergeConfirm');
+  await page.keyboard.press('Escape');
+  await expect(sheet).toHaveCount(0);
+
+  // A note no shot used is deleted (D-171).
+  await chip('Carmel').click();
   await sheet.getByRole('button', { name: 'Remove tag' }).click();
   await expect(sheet.getByRole('heading', { name: 'Delete this tag?' })).toBeVisible();
+  await screenshot('TagRemove');
   await sheet.getByRole('button', { name: 'Delete tag' }).click();
   await expect(chip('Carmel')).toHaveCount(0);
 });
@@ -110,6 +134,7 @@ test('D-172: a built-in note can be renamed but keeps its family', async () => {
   await expect(sheet).toContainText('Built in · Fruity');
   await expectNoPageScroll();
   await screenshot('TagSheet');
+  await screenshot('TagBuiltIn');
   await sheet.getByLabel('Name').fill('Citrus');
   await sheet.getByRole('button', { name: 'Save tag' }).click();
   await expect(sheet.getByRole('status')).toHaveText('There is already a tag with this name');

@@ -283,8 +283,12 @@
     color: var(--ink-muted);
   }
 
+  /* Screens 62–64: the line sits close under the title. */
   .note {
-    font-size: 15px;
+    margin: -8px 0 8px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink-soft);
   }
 
   button:disabled {

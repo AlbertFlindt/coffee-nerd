@@ -7,6 +7,7 @@
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
+  import PickRow from '#lib/components/PickRow.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import ValueCard from '#lib/components/ValueCard.svelte';
   import { trimmed } from '#lib/domain/gear.ts';
@@ -294,13 +295,11 @@
     onclose={() => (sheet = null)}
   >
     {#if sheet === 'archive'}
-      <h2 class="cn-type-heading sheet-title">Archive this routine?</h2>
-      <p class="cn-type-body note">
-        It leaves the Puck prep page and the pickers. Past shots keep its name.
-      </p>
+      <h2 class="sheet-title">Archive this routine?</h2>
+      <p class="note">It leaves the Puck prep page and the pickers. Past shots keep its name.</p>
     {:else}
-      <h2 class="cn-type-heading sheet-title">Delete this routine?</h2>
-      <p class="cn-type-body note">No shot has used it. This cannot be undone.</p>
+      <h2 class="sheet-title">Delete this routine?</h2>
+      <p class="note">No shot has used it. This cannot be undone.</p>
     {/if}
     <form
       class="confirm"
@@ -319,35 +318,37 @@
 {:else if sheet !== null && sheet.kind === 'insert'}
   <!-- Read safely: closing the sheet clears it while this block is still being torn down. -->
   {@const position = sheet?.kind === 'insert' ? sheet.position : 0}
-  <BottomSheet label="Insert a step" closeLabel="Close step list" onclose={() => (sheet = null)}>
-    <h2 class="cn-type-heading sheet-title">Insert a step</h2>
+  <BottomSheet
+    short
+    label="Insert a step"
+    closeLabel="Close step list"
+    onclose={() => (sheet = null)}
+  >
+    <h2 class="sheet-title">Insert a step</h2>
     <div class="list">
       {#each steps as step (step.id)}
-        <button
-          type="button"
-          class="row cn-tap"
+        <!-- Screen 54: the shared list rows; the unit stays as the line under the name. -->
+        <PickRow
+          label={step.name}
+          sub={step.unit || undefined}
           onclick={() => {
             insertAt(position, step.id);
             sheet = null;
           }}
-        >
-          <span class="row-name"
-            >{step.name}{#if step.unit}<span class="soft">&nbsp;· {step.unit}</span>{/if}</span
-          >
-        </button>
+        />
       {/each}
-      <button
-        type="button"
-        class="row new cn-tap"
-        onclick={() => {
-          const at = position;
-          sheet = null;
-          onnewstep(at);
-        }}
-      >
-        <span class="row-name new-name">{@render plus(14, 2.6)}New step</span>
-      </button>
     </div>
+    <button
+      type="button"
+      class="new cn-tap"
+      onclick={() => {
+        const at = position;
+        sheet = null;
+        onnewstep(at);
+      }}
+    >
+      <span class="new-plus">{@render plus(16, 2.4)}</span>New step
+    </button>
   </BottomSheet>
 {:else if editing}
   {@const step = stepOf(editing)}
@@ -360,22 +361,19 @@
       closeLabel="Close"
       onclose={() => (sheet = null)}
     >
-      <h2 class="cn-type-heading sheet-title">{step.name}</h2>
+      <h2 class="sheet-title">{step.name}</h2>
       {#if setting.kind === 'choice'}
         <div class="list">
           {#each setting.options as option (option.id)}
-            <button
-              type="button"
-              class="row"
-              aria-pressed={(editing.value ?? setting.startsAt) === option.id}
+            <PickRow
+              label={option.label}
+              chosen={(editing.value ?? setting.startsAt) === option.id}
               onclick={() => {
                 const entry = items.find((i) => i.key === key);
                 if (entry) entry.value = option.id;
                 sheet = null;
               }}
-            >
-              <span class="row-name">{option.label}</span>
-            </button>
+            />
           {/each}
         </div>
       {:else}
@@ -393,7 +391,8 @@
             if (entry && v !== null) entry.value = v;
           }}
         />
-        <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (sheet = null)}
+        <!-- Screen 55: Done is the sheet's one action. -->
+        <button class="cn-btn-primary cn-tap-strong" type="button" onclick={() => (sheet = null)}
           >Done</button
         >
       {/if}
@@ -613,10 +612,16 @@
 
   .sheet-title {
     margin: 4px 0 0;
+    font-size: 19px;
+    line-height: 24px;
+    font-weight: 700;
   }
 
+  /* Screen 56: the line sits close under the question, the buttons a little further down. */
   .note {
-    margin: 0;
+    margin: -8px 0 8px;
+    font-size: 14px;
+    line-height: 1.45;
     color: var(--ink-soft);
   }
 
@@ -629,6 +634,8 @@
   .list {
     display: flex;
     flex-direction: column;
+    flex: 0 1 auto;
+    min-height: 0;
     gap: 2px;
     border-radius: var(--radius-md);
     overflow-y: auto;
@@ -639,36 +646,25 @@
     display: none;
   }
 
-  .row {
+  /* Screen 54: "New step" is a dashed row under the list, its + in amber. */
+  .new {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 56px;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    flex: none;
     padding: 0 14px;
-    border: none;
-    background: var(--surface-sheet-field);
+    border-radius: var(--radius-md);
+    border: 1.5px dashed var(--line);
+    background: transparent;
     color: var(--ink);
-    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
     text-align: left;
   }
 
-  .row-name {
-    font-size: 15px;
-    font-weight: 600;
-  }
-
-  .soft {
-    font-weight: 400;
-    color: var(--ink-muted);
-  }
-
-  .new-name {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .row[aria-pressed='true'] .row-name {
+  .new-plus {
+    display: flex;
     color: var(--amber);
   }
 </style>
