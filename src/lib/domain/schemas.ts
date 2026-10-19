@@ -169,6 +169,10 @@ export const prepStepSettingSchema = z
     choiceValue.extend({ startsAt: name })
   ])
   .refine((s) => !('min' in s) || rangeIsOrdered(s), RANGE_MESSAGE)
+  .refine((s) => s.kind !== 'choice' || s.options.length >= 2, {
+    message: 'A list needs at least two options (D-52, D-152)',
+    path: ['options']
+  })
   .refine(
     (s) =>
       s.kind === 'none' ||

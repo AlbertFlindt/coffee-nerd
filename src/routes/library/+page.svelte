@@ -79,8 +79,7 @@
     {@render text('Gear', library.gear)}
     {@render chevron()}
   </a>
-  <!-- D-156: Puck prep and Tags arrive in M7; until then their rows are dimmed and do nothing. -->
-  <div class="door later">
+  <a class="door cn-tap" href={resolve('/library/puck-prep')}>
     <span class="tile"
       ><svg
         width="24"
@@ -102,9 +101,9 @@
       ></span
     >
     {@render text('Puck prep', library.puckPrep)}
-    <span class="sr">Not available yet</span>
     {@render chevron()}
-  </div>
+  </a>
+  <!-- D-156: Tags arrives later in M7; until then its row is dimmed and does nothing. -->
   <div class="door later">
     <span class="tile"
       ><svg
