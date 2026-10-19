@@ -72,7 +72,7 @@ test('EditSetup, D-45: a full-screen form that starts from My setup', async () =
   await screenshot('EditSetup');
 });
 
-test('EditSetup, screen 44: the machine picker ticks the chosen machine', async () => {
+test('EditSetup, D-45: the machine picker ticks the chosen machine (screen 44)', async () => {
   await page.getByRole('button', { name: /^Machine,/ }).click();
   await expect(page.getByRole('button', { name: 'Lelit Bianca', exact: true })).toHaveAttribute(
     'aria-pressed',

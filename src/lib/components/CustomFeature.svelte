@@ -134,12 +134,12 @@
   // D-160, D-162: what a used feature can still change, by its kind.
   const usedNote = $derived(
     kind === 'number'
-      ? 'its unit stays; you can rename it, switch it off or change its step and range'
+      ? 'its unit stays; you can rename it, switch it off or change its step and range.'
       : kind === 'seconds'
-        ? 'you can rename it, switch it off or change its step and range'
+        ? 'you can rename it, switch it off or change its step and range.'
         : kind === 'choice'
-          ? 'you can rename it, switch it off or add options'
-          : 'you can rename it or switch it off'
+          ? 'you can rename it, switch it off or add options.'
+          : 'you can rename it or switch it off.'
   );
   const previewOption = $derived(labels.find((l) => l !== '') ?? '—');
 </script>
@@ -354,7 +354,7 @@
     height: var(--touch-min);
     border-radius: var(--radius-block);
     border: none;
-    background: var(--surface);
+    background: var(--surface-sheet-field);
     color: var(--ink);
     font-size: 14px;
     font-weight: 500;

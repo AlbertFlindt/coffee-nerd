@@ -111,8 +111,10 @@
     transition: transform 200ms ease-out;
   }
 
+  /* As tall as its content, but never above where a full sheet starts: a long list scrolls (D-36). */
   .sheet.short {
     top: auto;
+    max-height: calc(100% - 96px);
   }
 
   .sheet.dragging {

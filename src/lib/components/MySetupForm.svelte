@@ -210,7 +210,7 @@
 
   function check(): boolean {
     // D-78: temperature and flat pressure cannot be switched off, so they wait for a value; the server
-    // checks again. The wording is not designed yet (open items).
+    // checks again. Screen 49 draws one of these lines; the others are in open items.
     const found: string[] = [];
     if (!machine) found.push('Choose a machine');
     if (!grinder) found.push('Choose a grinder');
@@ -677,6 +677,18 @@
     border-radius: var(--radius-md);
     overflow: hidden;
     flex: none;
+  }
+
+  /* A long list of baskets or routines scrolls inside its sheet (D-36). */
+  .list {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .list::-webkit-scrollbar {
+    display: none;
   }
 
   /* Edit My setup draws its value cards smaller than the shot form's (screen 13). */

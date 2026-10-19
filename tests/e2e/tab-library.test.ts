@@ -403,8 +403,8 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
   await expect(page.getByRole('alert')).toHaveText('Brand is required');
   await screenshot('BasketNew');
   await page.getByLabel('Brand').fill('IMS');
-  await page.getByLabel(/^Size/).fill('20');
-  await page.getByLabel(/^Size/).blur();
+  await page.getByLabel('Size', { exact: true }).fill('20');
+  await page.getByLabel('Size', { exact: true }).blur();
   await page.getByRole('button', { name: 'Add basket' }).click();
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
   const ims = page.getByRole('link', { name: /^IMS · 20 g/ });
@@ -456,6 +456,11 @@ test('D-46, D-02: your own feature appears on More › Setup', async () => {
   await page.getByRole('switch', { name: 'Bloom pause' }).click();
   await expect(page.getByRole('button', { name: 'Bloom pause plus 1 s' })).toBeVisible();
   await expectNoPageScroll();
+  // Screen 43, D-78: a list feature switched on without an option asks for one before saving.
+  await page.getByRole('switch', { name: 'Water', exact: true }).click();
+  await page.getByRole('button', { name: 'Save setup' }).click();
+  await expect(page.getByText('Set Water first.')).toBeVisible();
+  await screenshot('SetupFeatures');
 
   // No shot used it, so it can be deleted again (D-151), leaving the reference setup as it was.
   await page.goto('/library/gear');
