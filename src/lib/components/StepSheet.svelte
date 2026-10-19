@@ -243,44 +243,47 @@
              screen 52 puts the hint above the options. -->
         <p class="hint">Tap the circle of the option it starts on</p>
         <div class="options" role="radiogroup" aria-label="Starts at">
-          {#each options as o, i (o.id)}
-            <div class="option">
-              <button
-                type="button"
-                class="start"
-                role="radio"
-                aria-checked={startId === o.id}
-                aria-label="Starts at {o.label.trim() || `option ${i + 1}`}"
-                onclick={() => (chosen = o.id)}><span class="dot"></span></button
-              >
-              <input
-                class="option-input"
-                aria-label="Option {i + 1}"
-                placeholder="Option {i + 1}"
-                autocomplete="off"
-                bind:value={o.label}
-              />
-              {#if options.length > 2 && !kept.has(o.id)}
+          <!-- Screen 52: the options are one group of rows 2 px apart, "Add option" a dashed pill. -->
+          <div class="option-list">
+            {#each options as o, i (o.id)}
+              <div class="option">
                 <button
                   type="button"
-                  class="remove cn-tap"
-                  aria-label="Remove option {o.label.trim() || i + 1}"
-                  onclick={() => (options = options.filter((x) => x.id !== o.id))}
+                  class="start"
+                  role="radio"
+                  aria-checked={startId === o.id}
+                  aria-label="Starts at {o.label.trim() || `option ${i + 1}`}"
+                  onclick={() => (chosen = o.id)}><span class="dot"></span></button
                 >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg
+                <input
+                  class="option-input"
+                  aria-label="Option {i + 1}"
+                  placeholder="Option {i + 1}"
+                  autocomplete="off"
+                  bind:value={o.label}
+                />
+                {#if options.length > 2 && !kept.has(o.id)}
+                  <button
+                    type="button"
+                    class="remove cn-tap"
+                    aria-label="Remove option {o.label.trim() || i + 1}"
+                    onclick={() => (options = options.filter((x) => x.id !== o.id))}
                   >
-                </button>
-              {/if}
-            </div>
-          {/each}
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg
+                    >
+                  </button>
+                {/if}
+              </div>
+            {/each}
+          </div>
           <button
             type="button"
             class="add cn-tap"
@@ -384,9 +387,15 @@
     min-height: 0;
   }
 
-  .push {
+  /* The space gives way first when a list step's options fill the sheet; the buttons keep their size. */
+  .body :global(.cn-btn-primary),
+  .body :global(.cn-btn-quiet) {
     flex: none;
-    height: 96px;
+  }
+
+  .push {
+    flex: 0 1 96px;
+    min-height: 0;
   }
 
   form {
@@ -448,13 +457,22 @@
   .options {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    max-height: 196px;
+    gap: 8px;
+  }
+
+  /* Three options show; more scroll inside the group, so "Add option" stays in view (D-36). */
+  .option-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: none;
+    max-height: 160px;
+    border-radius: var(--radius-md);
     overflow-y: auto;
     scrollbar-width: none;
   }
 
-  .options::-webkit-scrollbar {
+  .option-list::-webkit-scrollbar {
     display: none;
   }
 
@@ -462,14 +480,13 @@
     flex: none;
     display: flex;
     align-items: center;
-    min-height: 48px;
-    padding: 0 4px 0 0;
-    border-radius: var(--radius-md);
+    min-height: 52px;
+    padding: 0 4px 0 2px;
     background: var(--surface);
   }
 
   .option:focus-within {
-    box-shadow: 0 0 0 2px var(--amber);
+    box-shadow: inset 0 0 0 2px var(--amber);
   }
 
   .start {
@@ -484,16 +501,16 @@
   }
 
   .dot {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
     box-sizing: border-box;
     border-radius: 50%;
-    border: 2px solid var(--ink-muted);
+    border: 2px solid var(--line);
   }
 
   .start[aria-checked='true'] .dot {
     border-color: var(--amber);
-    background: radial-gradient(var(--amber) 0 4px, transparent 5px);
+    background: radial-gradient(var(--amber) 0 5px, transparent 5.5px);
   }
 
   .option-input {
@@ -530,13 +547,14 @@
 
   .add {
     flex: none;
+    align-self: flex-start;
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: 6px;
     min-height: var(--touch-min);
     padding: 0 14px;
-    border: none;
-    border-radius: var(--radius-md);
+    border: 1.5px dashed var(--line);
+    border-radius: var(--radius-pill);
     background: transparent;
     color: var(--ink-muted);
     font-size: 14px;
@@ -627,9 +645,19 @@
   .problem,
   .in-use,
   .hint {
-    margin: 0 0 -6px;
+    margin: 0;
     font-size: 13px;
     color: var(--ink-soft);
+  }
+
+  .hint {
+    margin-bottom: -6px;
+  }
+
+  /* Screen 53: the problem line is centred above Save. */
+  .problem {
+    text-align: center;
+    line-height: 1.4;
   }
 
   .fixed {
@@ -653,7 +681,13 @@
     color: var(--ink-muted);
   }
 
+  /* Screen 53: "Used in …" sits in a 44 px row under Save, like a quiet button. */
   .in-use {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--touch-min);
+    font-size: 14px;
     text-align: center;
   }
 

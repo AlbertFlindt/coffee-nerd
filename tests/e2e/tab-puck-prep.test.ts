@@ -76,9 +76,21 @@ test('D-52, D-152: a list step starts on the option whose circle is tapped (scre
   await sheet.getByLabel('Option 1', { exact: true }).fill('Bottom');
   await sheet.getByLabel('Option 2', { exact: true }).fill('Top');
   await expect(sheet.getByText('Tap the circle of the option it starts on')).toBeVisible();
-  await screenshot('StepEdit');
-  await page.keyboard.press('Escape');
+  await sheet.getByRole('button', { name: 'Add option' }).click();
+  await sheet.getByLabel('Option 3', { exact: true }).fill('Both');
+  await sheet.getByRole('button', { name: 'Add step' }).click();
   await expect(sheet).toHaveCount(0);
+
+  // Edit mode: titled with its name, "Save step" and, unused, a quiet "Delete step".
+  await page.getByRole('button', { name: 'Paper filter', exact: true }).click();
+  const edit = page.getByRole('region', { name: 'Edit Paper filter' });
+  await expect(edit.getByRole('radio', { name: 'Starts at Bottom' })).toHaveAttribute(
+    'aria-checked',
+    'true'
+  );
+  await screenshot('StepEdit');
+  await edit.getByRole('button', { name: 'Delete step' }).click();
+  await expect(page.getByRole('button', { name: 'Paper filter', exact: true })).toHaveCount(0);
 });
 
 test('D-168: a step can be renamed, and deleted while no shot used it', async () => {

@@ -58,10 +58,15 @@ test('Tags, D-53, D-174: notes by family; "Add tag" asks a name and a family', a
   await expect(fruity.getByRole('button', { name: /^Berry, \d+ shots?$/ })).toBeVisible();
   await expect(card()).toHaveCount(0);
 
+  // Screen 59: a new tag starts empty, with Other chosen.
+  await page.getByRole('button', { name: 'Add tag' }).click();
+  await expect(page.getByRole('region', { name: 'New tag' })).toBeVisible();
+  await screenshot('TagNew');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('region', { name: 'New tag' })).toHaveCount(0);
   const sheet = await addTag('Dark choclate', 'Sweet');
   await expectNoPageScroll();
   await screenshot('TagAdd');
-  await screenshot('TagNew');
   await sheet.getByRole('button', { name: 'Add tag' }).click();
   await expect(sheet).toHaveCount(0);
   await expect(

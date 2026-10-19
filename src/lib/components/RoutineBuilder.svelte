@@ -625,7 +625,9 @@
     color: var(--ink-soft);
   }
 
+  /* Screen 56: "Keep it" sits on the sheet's field colour, as in the other sheets. */
   .confirm {
+    --surface: var(--surface-sheet-field);
     display: flex;
     flex-direction: column;
     gap: var(--space-2);

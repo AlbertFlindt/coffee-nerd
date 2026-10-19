@@ -61,7 +61,8 @@
 </header>
 
 <main>
-  <h2>Routines · {page.routines.length}</h2>
+  <!-- Screen 51: without routines the heading has no count. -->
+  <h2>Routines{page.routines.length ? ` · ${page.routines.length}` : ''}</h2>
   {#each page.routines as r (r.id)}
     <a class="card cn-tap" href={resolve('/library/puck-prep/routine/[id]', { id: r.id })}>
       <div class="card-head">

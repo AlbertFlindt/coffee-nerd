@@ -102,6 +102,11 @@ test('D-157: step by step from the machine to a ready shot form; leaving halfway
   await expect(page.getByRole('region', { name: 'My setup' })).toContainText('Not set up yet');
   await expect(page.getByText('Default', { exact: true })).toHaveCount(0);
   await page.screenshot({ path: 'screenshots/GearFirstRun.png' });
+  // Screen 51, D-51, D-163: no routines yet, and the heading has no count.
+  await page.goto('/library/puck-prep');
+  await expect(page.getByText('No routines yet.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Routines', exact: true })).toBeVisible();
+  await page.screenshot({ path: 'screenshots/PuckPrepEmpty.png' });
   await page.goto('/shot/new');
   await expect(page.getByText('Step 2 of 5')).toBeVisible();
   await page.getByLabel('Name').fill('Comandante C40');
