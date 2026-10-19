@@ -12,6 +12,7 @@
   import BeanCard from './BeanCard.svelte';
   import BottomSheet from './BottomSheet.svelte';
   import MoreSheet from './MoreSheet.svelte';
+  import PickRow from './PickRow.svelte';
   import ScoreRow from './ScoreRow.svelte';
   import TasteSlider from './TasteSlider.svelte';
   import ValueCard from './ValueCard.svelte';
@@ -314,7 +315,7 @@
         closeLabel="Close bean list"
         onclose={() => (sheet = null)}
       >
-        <h2 class="cn-type-heading sheet-title">Open beans</h2>
+        <h2 class="sheet-title">Open beans</h2>
         {#if data.edit}
           <!-- D-113: editing, another bean keeps the values entered. -->
           <div class="beans">
@@ -348,32 +349,31 @@
         {/if}
       </BottomSheet>
     {:else if sheet === 'gear'}
-      <!-- D-153: another machine or grinder for this shot. The sheet is not designed yet (open items). -->
+      <!-- D-153: another machine or grinder for this shot (screen 27). -->
       <BottomSheet
+        short
         label="Choose machine and grinder"
         closeLabel="Close gear list"
         onclose={() => (sheet = null)}
       >
-        <h2 class="cn-type-heading sheet-title">Machine</h2>
-        <div class="beans">
+        <h2 class="sheet-title">Machine</h2>
+        <div class="cn-pick-list">
           {#each data.machines as m (m.id)}
-            <button
-              type="button"
-              class="bean cn-tap"
-              aria-pressed={m.id === shot.machineId}
-              onclick={() => chooseMachine(m.id)}>{m.name}</button
-            >
+            <PickRow
+              label={m.name}
+              chosen={m.id === shot.machineId}
+              onclick={() => chooseMachine(m.id)}
+            />
           {/each}
         </div>
-        <h2 class="cn-type-heading sheet-title">Grinder</h2>
-        <div class="beans">
+        <h2 class="sheet-title">Grinder</h2>
+        <div class="cn-pick-list">
           {#each data.grinders as g (g.id)}
-            <button
-              type="button"
-              class="bean cn-tap"
-              aria-pressed={g.id === shot.grinderId}
-              onclick={() => chooseGrinder(g.id)}>{g.name}</button
-            >
+            <PickRow
+              label={g.name}
+              chosen={g.id === shot.grinderId}
+              onclick={() => chooseGrinder(g.id)}
+            />
           {/each}
         </div>
       </BottomSheet>
@@ -448,8 +448,11 @@
     margin-top: var(--space-1);
   }
 
+  /* Like the confirmation sheets drawn on the canvas (screens 35, 40): the line close under the question. */
   .delete-note {
-    margin: 0;
+    margin: -8px 0 8px;
+    font-size: 14px;
+    line-height: 1.45;
     color: var(--ink-soft);
   }
 
@@ -572,10 +575,13 @@
     padding: var(--space-2) var(--space-5) var(--space-6);
   }
 
+  /* Screen 29: problem lines sit centred above Save. */
   .problem {
     margin: 0 0 var(--space-2);
-    font-size: 14px;
-    color: var(--ink);
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ink-soft);
   }
 
   .use-last {
@@ -592,6 +598,18 @@
 
   .sheet-title {
     margin: 4px 0 0;
+    font-size: 19px;
+    line-height: 24px;
+    font-weight: 700;
+  }
+
+  .cn-pick-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    flex: none;
   }
 
   .beans {

@@ -112,6 +112,9 @@ test('D-155: the basket and puck prep pickers start with leaving them out', asyn
   const sheet = page.getByRole('region', { name: 'More', exact: true });
   await sheet.getByRole('button', { name: /^Basket/ }).click();
   await expect(sheet.locator('.pick').first()).toHaveText('No basket');
+  // Screen 28: the list ends with a way back.
+  await expect(sheet.getByRole('button', { name: 'Back to Setup' })).toBeVisible();
+  await screenshot('MoreBasket');
   await sheet.getByRole('button', { name: 'No basket' }).click();
   await expect(sheet.getByRole('button', { name: /^Basket/ })).toContainText('No basket');
   await expect(page.locator('.cn-tag')).toContainText('New recipe');

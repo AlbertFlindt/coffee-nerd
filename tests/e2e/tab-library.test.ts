@@ -92,13 +92,18 @@ test('AddBean, D-141: tapping the chosen process or roast level again clears it'
 
 test('AddBean, D-133: Country opens a sheet with a search', async () => {
   await page.getByRole('button', { name: /Country, not set/ }).click();
-  await page.getByLabel('Search').fill('ken');
+  // Screen 32: countries A–Z under a rounded search field; the chosen one is ticked.
+  await expect(page.getByRole('button', { name: 'Afghanistan' })).toBeVisible();
+  await screenshot('BeanCountry');
+  await page.getByLabel('Search countries').fill('ken');
   await page.getByRole('button', { name: 'Kenya' }).click();
   await expect(page.getByRole('button', { name: /Country, Kenya/ })).toBeVisible();
 });
 
 test('AddBean, D-126, D-139: "Same as before" fills the form from an earlier bean', async () => {
   await page.getByRole('button', { name: /Same as before/ }).click();
+  await expect(page.getByRole('heading', { name: 'Same as before' })).toBeVisible();
+  await screenshot('BeanSameAsBefore');
   await page.getByRole('button', { name: /Guji Hambela/ }).click();
   await expect(page.getByText('Same as Guji Hambela')).toBeVisible();
   await expect(page.getByLabel('Name')).toHaveValue('Guji Hambela');
@@ -117,6 +122,13 @@ test('AddBean, D-126, D-139: "Same as before" fills the form from an earlier bea
   );
   // Roast date and bag weight are new (D-41).
   await expect(page.getByLabel('Bag weight')).toHaveValue('');
+  // Screen 33: a refused save keeps the re-buy and its fields.
+  await page.getByRole('button', { name: 'Add bean' }).click();
+  await expect(page.getByText('Roast date is required')).toBeVisible();
+  await expect(page.getByText('Same as Guji Hambela')).toBeVisible();
+  await expect(page.getByLabel('Name')).toHaveValue('Guji Hambela');
+  await expect(page.getByLabel('Variety')).toHaveValue('Heirloom');
+  await screenshot('BeanRebuy');
   const twoDaysAgo = await page.evaluate(() => {
     const d = new Date(Date.now() - 2 * 86_400_000);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -218,6 +230,7 @@ test('D-145: a bean without shots can be deleted; one with shots cannot', async 
   await page.goto(`/library/beans/${latest}/edit`);
   await page.getByRole('button', { name: 'Delete bean' }).click();
   await expect(page.getByRole('heading', { name: 'Delete this bean?' })).toBeVisible();
+  await screenshot('BeanDelete');
   await page.getByRole('button', { name: 'Keep it' }).click();
   await expect(page.getByRole('heading', { name: 'Delete this bean?' })).toBeHidden();
   await page.getByRole('button', { name: 'Delete bean' }).click();
@@ -271,6 +284,7 @@ test('D-125: a recipe opens the Journal filtered to it', async () => {
 test('D-40, D-127: finish by hand, Undo, finish again and Reopen', async () => {
   await page.getByRole('button', { name: 'Mark as finished' }).click();
   await expect(page.getByRole('status')).toContainText('Guji Hambela is finished');
+  await screenshot('BeanFinished');
   await expect(page.getByRole('region', { name: 'About this bean' })).toContainText('Finished');
   await page.getByRole('status').getByRole('button', { name: 'Undo' }).click();
   await expect(page.getByRole('button', { name: 'Mark as finished' })).toBeVisible();
@@ -406,6 +420,12 @@ test('D-46, D-02: your own feature appears on More › Setup', async () => {
   await sheet.getByLabel('Name').fill('Bloom pause');
   await sheet.getByRole('radio', { name: 'Seconds' }).click();
   await sheet.getByRole('button', { name: 'Add feature' }).click();
+  await page.getByRole('button', { name: 'Add your own feature' }).click();
+  await sheet.getByLabel('Name').fill('Water');
+  await sheet.getByRole('radio', { name: 'Pick from a list' }).click();
+  await sheet.getByLabel('Option 1').fill('Third wave');
+  await sheet.getByLabel('Option 2').fill('Tap');
+  await sheet.getByRole('button', { name: 'Add feature' }).click();
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
 
@@ -413,6 +433,11 @@ test('D-46, D-02: your own feature appears on More › Setup', async () => {
   await page.getByRole('button', { name: 'More', exact: true }).click();
   const more = page.getByRole('region', { name: 'More', exact: true });
   await expect(more.getByRole('switch', { name: 'Bloom pause' })).toBeVisible();
+  // Screen 29, D-78: a list feature switched on without an option asks for one before saving.
+  await more.getByRole('switch', { name: 'Water' }).click();
+  await page.getByRole('button', { name: 'Save shot' }).click();
+  await expect(page.getByText('Set Water first.')).toBeVisible();
+  await screenshot('MoreOwnFeatures');
 
   // D-161: Edit My setup shows it too, so a new bean can start with it.
   await page.goto('/library/gear/setup');
@@ -427,8 +452,11 @@ test('D-46, D-02: your own feature appears on More › Setup', async () => {
   await page.getByRole('link', { name: /^Lelit Bianca/ }).click();
   await page.getByRole('button', { name: 'Edit Bloom pause' }).click();
   await page.getByRole('button', { name: 'Delete feature' }).click();
+  await page.getByRole('button', { name: 'Edit Water' }).click();
+  await page.getByRole('button', { name: 'Delete feature' }).click();
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('link', { name: /^Lelit Bianca/ })).not.toContainText('Bloom');
+  await expect(page.getByRole('link', { name: /^Lelit Bianca/ })).not.toContainText('Water');
 });
 
 test('D-45, D-38: a new bean’s first shot starts from the edited My setup', async () => {

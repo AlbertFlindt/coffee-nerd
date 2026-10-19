@@ -201,7 +201,7 @@ test('D-166: a step’s value changes for one shot, as a recipe change in sage',
   await expect(page.locator('.cn-tag')).toContainText('New recipe');
   await expect(page.locator('.cn-tag')).toContainText('routine');
   await expectNoPageScroll();
-  await screenshot('ShotStepValue');
+  await screenshot('MorePuckPrep');
   await more.getByRole('button', { name: 'WDT minus 1 s' }).click();
   await expect(more.locator('.cn-delta')).toHaveCount(0);
   await more.getByRole('button', { name: 'Back to Setup' }).click();

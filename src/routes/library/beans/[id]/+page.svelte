@@ -126,7 +126,7 @@
 
   <footer>
     {#if form?.finished}
-      <!-- D-127: the message is not designed yet; it reuses Home's (docs/open-items.md). -->
+      <!-- D-127: the message with Undo, screen 34. -->
       <div class="cn-card message" role="status">
         <span>{bean.name} is finished</span>
         <form method="POST" action="?/reopen" use:enhance>
@@ -435,13 +435,17 @@
     padding: var(--space-3) 0 var(--space-4);
   }
 
+  /* Screen 34: the message card above Reopen, with Undo. */
   .message {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
-    font-size: 14px;
+    min-height: 52px;
+    padding: 0 var(--space-2) 0 var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
   }
 
   .undo {
