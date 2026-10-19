@@ -294,14 +294,13 @@ test('D-129: Brew next on a finished bean reopens it', async () => {
   await first.getByRole('button', { name: 'Brewing next. Tap to undo' }).click();
 });
 
-test('Library, D-50, D-156: four doors; Tags waits for the end of M7', async () => {
+test('Library, D-50: four doors', async () => {
   await page.goto('/library');
   await expect(page.getByText('The nerdy basement')).toBeVisible();
   await expect(page.getByRole('link', { name: /^Beans .*open/ })).toBeVisible();
   await expect(page.getByRole('link', { name: /^Gear .*items/ })).toBeVisible();
   await expect(page.getByRole('link', { name: /^Puck prep .*routine/ })).toBeVisible();
-  await expect(page.getByRole('link', { name: /^Tags/ })).toHaveCount(0);
-  await expect(page.locator('.door', { hasText: 'Tags' })).toContainText('Not available yet');
+  await expect(page.getByRole('link', { name: /^Tags .*flavor notes/ })).toBeVisible();
   await expectNoPageScroll();
   await screenshot('Library');
 });

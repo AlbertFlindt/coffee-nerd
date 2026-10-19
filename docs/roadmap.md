@@ -63,10 +63,10 @@ Built in three pull requests: the Library and gear pages (D-147 to D-150, D-156,
 
 **Done when:** screenshots match `Library`, `Equipment`, `GearDetail`, `GrinderDetail`, `BasketDetail`, `CustomFeature` and `EditSetup`; end-to-end tests: add and archive gear; add a custom feature and see it on More › Setup; edit My setup and a new bean's first shot starts from it; a new account is guided from sign-up to its first shot.
 
-## M7 — Puck prep and Tags ◐  (screens 18–21)
+## M7 — Puck prep and Tags ☑  (screens 18–21)
 Routines overview, routine builder (drag, insert), New step, Tags page with families, merge and duplicate finder.
 
-Built in four pull requests: the Puck prep page and steps (D-163, D-168, D-169), the routine builder (D-164, D-165, D-167), step values on the shot form and in recipe labels (D-166, D-170), then the Tags page (D-171 to D-174).
+Built in four pull requests: the Puck prep page and steps (D-163, D-168, D-169), the routine builder (D-164, D-165, D-167), step values on the shot form and in recipe labels (D-166, D-170), then the Tags page (D-171 to D-174, D-179).
 
 **Done when:** screenshots match `PuckPrep`, `NewStep`, `RoutineBuilder` and `Tags`; end-to-end tests: add, change and remove a step; build, reorder and archive a routine; change a step's value for one shot and see it as a recipe change; merge a duplicate flavor note and remove one that shots used.
 

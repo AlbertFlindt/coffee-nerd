@@ -548,7 +548,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 11. ~~Setup sheet: show how a changed setup value is highlighted~~ (D-90)
 12. ~~Puck prep routine builder and New step~~ (D-51, D-52)
 13. ~~Gear list, machine detail, Edit My setup~~ (D-38, D-44, D-45, D-48, D-49)
-14. ~~Tags home~~ (D-29, D-53, D-171 to D-174)
+14. ~~Tags home~~ (D-29, D-53, D-171 to D-174, D-179)
 15. Home: design the other three graphs (Time vs. yield, Roast age, Consistency)
 16. ~~Journal, Insights, shot detail~~ (D-54 to D-57) — still to do: more Dial-in cards (e.g. grind vs time scatter, sour/bitter vs ratio)
 17. Logo: refine the bean-with-glasses mark (app icon for the PWA home screen)
