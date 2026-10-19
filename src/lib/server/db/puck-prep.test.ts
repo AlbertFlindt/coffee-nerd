@@ -6,7 +6,19 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import type { PrepStepSetting } from '../../domain/schemas';
 import { openDatabase, type Db } from './client';
 import { newId } from './ids';
-import { addStep, loadPuckPrep, removeStep, saveStep, StepRejected } from './puck-prep';
+import {
+  addRoutine,
+  addStep,
+  archiveRoutine,
+  deleteRoutine,
+  loadPuckPrep,
+  loadRoutine,
+  removeStep,
+  RoutineRejected,
+  saveRoutine,
+  saveStep,
+  StepRejected
+} from './puck-prep';
 import { prepStep, routine, userSettings } from './schema';
 import { seedReferenceSetup, type SeededIds } from './seed';
 import { loadShotForm } from './shot-form';
@@ -344,5 +356,101 @@ describe('removeStep', () => {
 
   it('D-60: not another user’s step', () => {
     expect(removeStep(db, 'someone-else', ids.stepIds[0], T0)).toBeNull();
+  });
+});
+
+describe('routines (D-51, D-167)', () => {
+  const steps = () => [
+    { stepId: ids.stepIds[0], value: 25000 },
+    { stepId: ids.stepIds[2], value: 15000 }
+  ];
+
+  it('D-51: a new routine is saved with its steps in order', () => {
+    const id = addRoutine(db, ids.userId, { name: ' Light roast ', steps: steps() }, T0);
+    expect(loadRoutine(db, ids.userId, id)).toMatchObject({
+      name: 'Light roast',
+      steps: steps(),
+      inMySetup: false,
+      used: false
+    });
+    expect(loadPuckPrep(db, ids.userId).routines.map((r) => r.name)).toEqual([
+      'Daily routine',
+      'Light roast'
+    ]);
+  });
+
+  it('D-51: a name, at least one step and fitting values are required', () => {
+    expect(() => addRoutine(db, ids.userId, { name: ' ', steps: steps() }, T0)).toThrow(
+      new RoutineRejected(['name: required'])
+    );
+    expect(() => addRoutine(db, ids.userId, { name: 'Empty', steps: [] }, T0)).toThrow(
+      new RoutineRejected(['steps: none'])
+    );
+    expect(() =>
+      addRoutine(
+        db,
+        ids.userId,
+        { name: 'Odd', steps: [{ stepId: ids.stepIds[1], value: 3000 }] },
+        T0
+      )
+    ).toThrow(RoutineRejected);
+  });
+
+  it('D-164: the same step may appear twice', () => {
+    const twice = [...steps(), { stepId: ids.stepIds[0], value: 10000 }];
+    const id = addRoutine(db, ids.userId, { name: 'Two WDT', steps: twice }, T0);
+    expect(loadRoutine(db, ids.userId, id)?.steps).toEqual(twice);
+  });
+
+  it('D-60, D-148: only your own steps that are not archived', () => {
+    db.update(prepStep).set({ archivedAt: T0 }).where(eq(prepStep.id, ids.stepIds[3])).run();
+    expect(() =>
+      addRoutine(
+        db,
+        ids.userId,
+        { name: 'X', steps: [{ stepId: ids.stepIds[3], value: null }] },
+        T0
+      )
+    ).toThrow(new RoutineRejected(['steps: not found']));
+    expect(() => addRoutine(db, 'someone-else', { name: 'X', steps: steps() }, T0)).toThrow(
+      new RoutineRejected(['steps: not found'])
+    );
+  });
+
+  it('D-51, D-65: saving a routine changes it for future shots', () => {
+    saveRoutine(db, ids.userId, ids.routineId, { name: 'Morning', steps: steps() }, T0);
+    expect(loadRoutine(db, ids.userId, ids.routineId)).toMatchObject({
+      name: 'Morning',
+      steps: steps(),
+      inMySetup: true
+    });
+    expect(() =>
+      saveRoutine(db, 'someone-else', ids.routineId, { name: 'X', steps: steps() }, T0)
+    ).toThrow(new RoutineRejected(['routine: not found']));
+  });
+
+  it('D-167, D-83: My setup’s routine is neither archived nor deleted', () => {
+    expect(archiveRoutine(db, ids.userId, ids.routineId, T0)).toBe('in_my_setup');
+    expect(deleteRoutine(db, ids.userId, ids.routineId)).toBe('in_my_setup');
+  });
+
+  it('D-167: a routine no shot used can be deleted; one a shot used is archived instead', () => {
+    const unused = addRoutine(db, ids.userId, { name: 'Unused', steps: steps() }, T0);
+    expect(deleteRoutine(db, ids.userId, unused)).toBe('deleted');
+    expect(loadRoutine(db, ids.userId, unused)).toBeNull();
+
+    const light = addRoutine(db, ids.userId, { name: 'Light roast', steps: steps() }, T0);
+    brew(1, null, light);
+    expect(loadRoutine(db, ids.userId, light)?.used).toBe(true);
+    expect(deleteRoutine(db, ids.userId, light)).toBe('used');
+    expect(archiveRoutine(db, ids.userId, light, T0)).toBe('archived');
+    expect(loadRoutine(db, ids.userId, light)).toBeNull();
+    expect(loadPuckPrep(db, ids.userId).routines.map((r) => r.name)).toEqual(['Daily routine']);
+  });
+
+  it('D-60: not another user’s routine', () => {
+    expect(loadRoutine(db, 'someone-else', ids.routineId)).toBeNull();
+    expect(archiveRoutine(db, 'someone-else', ids.routineId, T0)).toBeNull();
+    expect(deleteRoutine(db, 'someone-else', ids.routineId)).toBeNull();
   });
 });

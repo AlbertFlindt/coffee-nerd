@@ -1,12 +1,14 @@
 // Library › Puck prep (D-51, D-52): your routines and the steps they are built from. Every query is scoped
 // by the owner (D-60). A step a shot used keeps what its recorded values mean (D-168); a step in a routine
 // stays (D-169).
-import { and, desc, eq, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   prepStepSettingSchema,
+  routineStepsSchema,
   validateRoutineAgainstSteps,
   type PrepStepSetting,
-  type RoutineProblem
+  type RoutineProblem,
+  type RoutineSteps
 } from '../../domain/schemas';
 import { trimmed } from '../../domain/gear';
 import type { Db, Queryable } from './client';
@@ -263,5 +265,149 @@ export function removeStep(
         .run();
     tx.delete(prepStep).where(where).run();
   });
+  return 'deleted';
+}
+
+// --- routines (D-51, D-164, D-165, D-167) ---
+
+export type RoutineInput = { name: string; steps: RoutineSteps };
+
+export type RoutineItem = {
+  id: string;
+  name: string;
+  steps: RoutineSteps;
+  /** My setup uses it: it is neither archived nor deleted (D-83). */
+  inMySetup: boolean;
+  /** A shot used it: it is archived, not deleted (D-167). */
+  used: boolean;
+};
+
+/** What was wrong, as paths ("name: required", "steps: none"); the page turns them into words. */
+export class RoutineRejected extends Error {
+  constructor(readonly problems: string[]) {
+    super(`Routine rejected: ${problems.join('; ')}`);
+    this.name = 'RoutineRejected';
+  }
+}
+
+function defaultRoutineOf(db: Queryable, ownerId: string): string | null {
+  return (
+    db
+      .select({ id: userSettings.defaultRoutineId })
+      .from(userSettings)
+      .where(eq(userSettings.userId, ownerId))
+      .get()?.id ?? null
+  );
+}
+
+function routineUsed(db: Queryable, ownerId: string, id: string): boolean {
+  return !!db
+    .select({ id: recipe.id })
+    .from(recipe)
+    .where(and(eq(recipe.ownerId, ownerId), eq(recipe.routineId, id)))
+    .get();
+}
+
+/** A routine for the builder, or null when it is not yours or archived. */
+export function loadRoutine(db: Queryable, ownerId: string, id: string): RoutineItem | null {
+  const row = db
+    .select()
+    .from(routine)
+    .where(and(eq(routine.id, id), eq(routine.ownerId, ownerId), isNull(routine.archivedAt)))
+    .get();
+  if (!row) return null;
+  return {
+    id: row.id,
+    name: row.name,
+    steps: row.steps,
+    inMySetup: defaultRoutineOf(db, ownerId) === row.id,
+    used: routineUsed(db, ownerId, row.id)
+  };
+}
+
+/** The routine as typed, checked: a name, at least one of your steps, values that fit (D-51, D-165). */
+function checkedRoutine(db: Queryable, ownerId: string, input: RoutineInput): RoutineInput {
+  const name = typeof input.name === 'string' ? input.name.trim() : '';
+  const parsed = routineStepsSchema.safeParse(input.steps);
+  const problems: string[] = [];
+  if (!name) problems.push('name: required');
+  if (!parsed.success) throw new RoutineRejected([...problems, 'steps: invalid']);
+  const steps = parsed.data;
+  if (steps.length === 0) problems.push('steps: none');
+  if (problems.length > 0) throw new RoutineRejected(problems);
+  const ids = [...new Set(steps.map((s) => s.stepId))];
+  const settings = Object.fromEntries(
+    db
+      .select({ id: prepStep.id, setting: prepStep.setting })
+      .from(prepStep)
+      .where(
+        and(inArray(prepStep.id, ids), eq(prepStep.ownerId, ownerId), isNull(prepStep.archivedAt))
+      )
+      .all()
+      .map((s) => [s.id, s.setting])
+  );
+  if (Object.keys(settings).length !== ids.length) throw new RoutineRejected(['steps: not found']);
+  const found = validateRoutineAgainstSteps(steps, settings);
+  if (found.length > 0)
+    throw new RoutineRejected(found.map((p) => `steps.${p.index}: ${p.problem}`));
+  return { name, steps };
+}
+
+/** New routine (D-51). */
+export function addRoutine(db: Db, ownerId: string, input: RoutineInput, now: number): string {
+  const r = checkedRoutine(db, ownerId, input);
+  const id = newId(now);
+  db.insert(routine)
+    .values({ id, ownerId, ...r, createdAt: now, updatedAt: now })
+    .run();
+  return id;
+}
+
+/** Saves the builder (D-51). Shots keep the routine as it was in their recipe (D-65, D-76). */
+export function saveRoutine(
+  db: Db,
+  ownerId: string,
+  id: string,
+  input: RoutineInput,
+  now: number
+): void {
+  if (!loadRoutine(db, ownerId, id)) throw new RoutineRejected(['routine: not found']);
+  const r = checkedRoutine(db, ownerId, input);
+  db.update(routine)
+    .set({ ...r, updatedAt: now })
+    .where(and(eq(routine.id, id), eq(routine.ownerId, ownerId)))
+    .run();
+}
+
+/** Archives a routine (D-167): not My setup's (D-83). Null when it is not yours. */
+export function archiveRoutine(
+  db: Db,
+  ownerId: string,
+  id: string,
+  now: number
+): 'archived' | 'in_my_setup' | null {
+  const item = loadRoutine(db, ownerId, id);
+  if (!item) return null;
+  if (item.inMySetup) return 'in_my_setup';
+  db.update(routine)
+    .set({ archivedAt: now, updatedAt: now })
+    .where(and(eq(routine.id, id), eq(routine.ownerId, ownerId)))
+    .run();
+  return 'archived';
+}
+
+/** Deletes a routine no shot used (D-167); not My setup's (D-83). Null when it is not yours. */
+export function deleteRoutine(
+  db: Db,
+  ownerId: string,
+  id: string
+): 'deleted' | 'used' | 'in_my_setup' | null {
+  const item = loadRoutine(db, ownerId, id);
+  if (!item) return null;
+  if (item.inMySetup) return 'in_my_setup';
+  if (item.used) return 'used';
+  db.delete(routine)
+    .where(and(eq(routine.id, id), eq(routine.ownerId, ownerId)))
+    .run();
   return 'deleted';
 }

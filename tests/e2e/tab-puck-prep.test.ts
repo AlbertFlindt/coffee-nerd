@@ -40,7 +40,7 @@ test('PuckPrep, D-51, D-163: routines with their flow, "In use", and your steps'
   await page.goto('/library');
   await page.getByRole('link', { name: /^Puck prep/ }).click();
   await expect(page.getByRole('heading', { name: 'Puck prep', level: 1 })).toBeVisible();
-  const daily = page.getByRole('region', { name: 'Daily routine' });
+  const daily = page.getByRole('link', { name: 'Daily routine' });
   await expect(daily).toContainText('In use');
   await expect(
     daily.getByLabel('WDT, then Distributor, then Tamp, then Puck screen')
