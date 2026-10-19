@@ -4,6 +4,7 @@
   // flavor notes and notes (D-23, D-27, D-97, D-101); all start empty (D-11).
   import BottomSheet from './BottomSheet.svelte';
   import ChoiceRow from './ChoiceRow.svelte';
+  import PickRow from './PickRow.svelte';
   import SetupRow from './SetupRow.svelte';
   import TasteSlider from './TasteSlider.svelte';
   import type { ShotState } from './shot-state';
@@ -231,6 +232,7 @@
             {/if}
           {/each}
         </div>
+        <div class="spacer"></div>
         <button type="button" class="cn-btn-quiet cn-tap" onclick={() => (picking = null)}
           >Back to Setup</button
         >
@@ -238,16 +240,15 @@
         <h3>{picking === 'basket' ? 'Basket' : 'Puck prep'}</h3>
         <div class="list">
           {#each choices as item (item.id)}
-            <button
-              type="button"
-              class="pick cn-tap"
-              aria-pressed={item.chosen}
+            <PickRow
+              label={item.name}
+              chosen={item.chosen}
               onclick={() => {
                 item.pick();
                 // From the puck prep view, a chosen routine shows its steps again (D-166).
                 picking = picking === 'routine' && shot.setup.routine ? 'prep' : null;
-              }}>{item.name}</button
-            >
+              }}
+            />
           {/each}
         </div>
         {#if picking === 'routine'}
@@ -255,6 +256,12 @@
             Shots are easier to repeat with a puck prep routine. Add one in Library › Puck prep.
           </p>
         {/if}
+        <!-- Screen 28: the list ends with a way back to Setup, at the foot of the sheet (the routine
+             list too, which screen 28 does not draw; docs/open-items.md). -->
+        <div class="spacer"></div>
+        <button type="button" class="cn-btn-quiet cn-tap" onclick={() => (picking = null)}
+          >Back to Setup</button
+        >
       {:else}
         {#if temperature}
           <div class="single">
@@ -538,24 +545,14 @@
   .list {
     display: flex;
     flex-direction: column;
+    flex: none;
     gap: 2px;
     border-radius: var(--radius-md);
     overflow: hidden;
   }
 
-  .pick {
-    min-height: 52px;
-    padding: 0 14px;
-    border: none;
-    background: var(--surface-sheet-field);
-    color: var(--ink);
-    font-size: 15px;
-    text-align: left;
-  }
-
-  .pick[aria-pressed='true'] {
-    color: var(--amber);
-    font-weight: 700;
+  .spacer {
+    flex: 1;
   }
 
   .tasting {
@@ -659,15 +656,16 @@
     color: var(--ink-muted);
   }
 
+  /* Screens 29 and 30: the option sits in a pill on the page colour, so it reads as tappable. */
   .choice {
     height: var(--touch-min);
-    padding: 0 10px;
+    padding: 0 12px;
     border: none;
     border-radius: var(--radius-pill);
-    background: transparent;
+    background: var(--bg);
     color: var(--amber);
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .choice.changed {

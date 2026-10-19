@@ -5,7 +5,9 @@
   import { untrack } from 'svelte';
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
+  import { page } from '$app/state';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
+  import PickRow from '#lib/components/PickRow.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import { PROCESS_LABEL, roastDateText, type Process } from '#lib/domain/bean.ts';
   import type { BeanFormText } from '#lib/domain/bean-form.ts';
@@ -53,6 +55,12 @@
     ['medium', 'Medium'],
     ['dark', 'Dark']
   ] as const;
+  // The action keeps the page's query (?rebuy=, ?guide=): with another query, a refused save would load
+  // the page again and start the form over, losing what was typed (D-139).
+  const saveAction = $derived.by(() => {
+    const query = page.url.searchParams.toString();
+    return `?${query ? `${query}&` : ''}/save`;
+  });
   const roast = $derived(values.roastDate ? roastDateText(values.roastDate, today) : null);
 </script>
 
@@ -84,13 +92,7 @@
   <span></span>
 </header>
 
-<form
-  id="bean-form"
-  class="fields"
-  method="POST"
-  action={guide ? '?guide=1&/save' : '?/save'}
-  use:enhance
->
+<form id="bean-form" class="fields" method="POST" action={saveAction} use:enhance>
   {#if mode === 'add'}
     <div class="rebuy">
       <button type="button" class="rebuy-open cn-tap" onclick={() => (sheet = 'rebuy')}>
@@ -305,7 +307,7 @@
 
 {#if sheet === 'rebuy'}
   <BottomSheet label="Same as before" closeLabel="Close bean list" onclose={() => (sheet = null)}>
-    <h2 class="cn-type-heading sheet-title">Same as before</h2>
+    <h2 class="sheet-title">Same as before</h2>
     <!-- D-126: picking a bean opens the form filled from it (?rebuy=), like the shot form's bean list. -->
     <form
       class="list"
@@ -315,10 +317,13 @@
     >
       {#if guide}<input type="hidden" name="guide" value="1" />{/if}
       {#each choices as choice (choice.id)}
-        <button type="submit" name="rebuy" value={choice.id} class="row cn-tap">
-          <span class="row-name">{choice.name}</span>
-          {#if choice.origin}<span class="soft">{choice.origin}</span>{/if}
-        </button>
+        <PickRow
+          type="submit"
+          name="rebuy"
+          value={choice.id}
+          label={choice.name}
+          sub={choice.origin}
+        />
       {:else}
         <p class="soft">No beans yet</p>
       {/each}
@@ -332,7 +337,7 @@
     closeLabel="Keep the bean"
     onclose={() => (sheet = null)}
   >
-    <h2 class="cn-type-heading sheet-title">Delete this bean?</h2>
+    <h2 class="sheet-title">Delete this bean?</h2>
     <p class="cn-type-body note">It has no shots yet. This cannot be undone.</p>
     <form class="confirm" method="POST" action="?/delete" onsubmit={() => (deleting = true)}>
       <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={deleting}
@@ -349,28 +354,39 @@
     closeLabel="Close country list"
     onclose={() => (sheet = null)}
   >
-    <h2 class="cn-type-heading sheet-title">Country</h2>
-    <TextField
-      label="Search"
-      id="country-search"
-      plain
-      autocomplete="off"
-      enterkeyhint="search"
-      bind:value={search}
-    />
+    <h2 class="sheet-title">Country</h2>
+    <!-- Screen 32: a rounded search field, then the countries A–Z (D-133). -->
+    <div class="search">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg
+      >
+      <input
+        id="country-search"
+        type="search"
+        aria-label="Search countries"
+        placeholder="Search countries"
+        autocomplete="off"
+        enterkeyhint="search"
+        bind:value={search}
+      />
+    </div>
     <div class="list">
       {#each searchCountries(search) as country (country.code)}
-        <button
-          type="button"
-          class="row cn-tap"
-          aria-pressed={values.countryCode === country.code}
+        <PickRow
+          label={country.name}
+          chosen={values.countryCode === country.code}
           onclick={() => {
             values.countryCode = values.countryCode === country.code ? '' : country.code;
             sheet = null;
           }}
-        >
-          <span class="row-name">{country.name}</span>
-        </button>
+        />
       {/each}
     </div>
   </BottomSheet>
@@ -572,16 +588,62 @@
 
   .problem {
     margin: 0;
+    text-align: center;
     font-size: 13px;
+    line-height: 1.4;
     color: var(--ink-soft);
   }
 
   .sheet-title {
     margin: 4px 0 0;
+    font-size: 19px;
+    line-height: 24px;
+    font-weight: 700;
   }
 
+  .search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    flex: none;
+    padding: 0 14px;
+    border-radius: 24px;
+    background: var(--surface-sheet-field);
+    color: var(--ink-muted);
+  }
+
+  .search:focus-within {
+    outline: 2px solid var(--amber);
+  }
+
+  .search input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    padding: 0;
+    background: transparent;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 16px;
+    outline: none;
+    appearance: none;
+  }
+
+  .search input::placeholder {
+    color: var(--ink-muted);
+    opacity: 1;
+  }
+
+  .search input::-webkit-search-cancel-button {
+    appearance: none;
+  }
+
+  /* Screen 35: the line sits close under the question, the buttons a little further down. */
   .note {
-    margin: 0;
+    margin: -8px 0 8px;
+    font-size: 14px;
+    line-height: 1.45;
     color: var(--ink-soft);
   }
 
@@ -597,32 +659,5 @@
     gap: 2px;
     border-radius: var(--radius-md);
     overflow-y: auto;
-  }
-
-  .row {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2px;
-    min-height: 56px;
-    padding: 0 14px;
-    border: none;
-    background: var(--surface-sheet-field);
-    color: var(--ink);
-    text-align: left;
-    text-decoration: none;
-  }
-
-  .row-name {
-    font-size: 15px;
-    font-weight: 600;
-  }
-
-  .row .soft {
-    font-size: 13px;
-  }
-
-  .row[aria-pressed='true'] .row-name {
-    color: var(--amber);
   }
 </style>

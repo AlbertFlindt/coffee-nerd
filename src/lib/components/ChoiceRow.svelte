@@ -48,7 +48,7 @@
   .row {
     border-radius: 0;
     min-height: 56px;
-    padding-right: 14px;
+    padding-right: 10px;
   }
 
   .muted {
@@ -57,18 +57,20 @@
   }
 
   .off {
+    padding-right: 4px;
     font-size: 14px;
     color: var(--ink-muted);
   }
 
+  /* Screens 29 and 30: the option sits in a pill on the page colour, so it reads as tappable. */
   .choice {
     height: var(--touch-min);
-    padding: 0 10px;
+    padding: 0 12px;
     border: none;
     border-radius: var(--radius-pill);
-    background: transparent;
+    background: var(--bg);
     color: var(--amber);
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
   }
 </style>
