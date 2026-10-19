@@ -1,8 +1,8 @@
 <script lang="ts">
   // Puck prep (screen 18, D-51): your routines as cards (name, "In use" for My setup's and the last shot's
   // routine, D-163, the steps as a mini flow, shots and average score), then your steps as chips with
-  // their unit and "New step" (D-52). A step chip opens the step sheet (D-168). The routine builder comes
-  // with the next pull request, so "New routine" and the cards wait. Only the page area scrolls (D-36).
+  // their unit and "New step" (D-52). A step chip opens the step sheet (D-168); a card or "New routine"
+  // opens the routine builder (D-167). Only the page area scrolls (D-36).
   import { resolve } from '$app/paths';
   import StepSheet from '#lib/components/StepSheet.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
@@ -55,21 +55,20 @@
     >
   </a>
   <h1>Puck prep</h1>
-  <!-- The routine builder (screen 19) comes with the next pull request. -->
-  <span class="cn-btn-add later"
-    >{@render plus(16)}New routine<span class="sr">, not available yet</span></span
+  <a class="cn-btn-add cn-tap-strong" href={resolve('/library/puck-prep/routine/new')}
+    >{@render plus(16)}New routine</a
   >
 </header>
 
 <main>
   <h2>Routines · {page.routines.length}</h2>
   {#each page.routines as r (r.id)}
-    <section class="card" aria-label={r.name}>
+    <a class="card cn-tap" href={resolve('/library/puck-prep/routine/[id]', { id: r.id })}>
       <div class="card-head">
         <span class="name">{r.name}</span>
         {#if r.inUse}<span class="chip">In use</span>{/if}
       </div>
-      <div class="flow" aria-label={r.steps.join(', then ')}>
+      <div class="flow" role="img" aria-label={r.steps.join(', then ')}>
         {#each r.steps as step, i (i)}
           {#if i > 0}
             <svg
@@ -88,7 +87,7 @@
         {/each}
       </div>
       <span class="stats">{stats(r)}</span>
-    </section>
+    </a>
   {:else}
     <p class="empty">No routines yet.</p>
   {/each}
@@ -144,18 +143,6 @@
     color: var(--ink);
   }
 
-  .later {
-    opacity: 0.4;
-  }
-
-  .sr {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
   main {
     flex: 1;
     min-height: 0;
@@ -181,6 +168,8 @@
     padding: var(--space-4);
     border-radius: var(--radius-xl);
     background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
   }
 
   .card-head {
