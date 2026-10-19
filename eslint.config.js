@@ -34,6 +34,20 @@ export default defineConfig(
     }
   },
   {
+    // The app is often opened over plain http://<server>:3000, where the browser has no crypto.randomUUID.
+    files: ['src/**/*.svelte', 'src/**/*.ts'],
+    ignores: ['src/lib/server/**', 'src/**/*.test.ts'],
+    rules: {
+      'no-restricted-properties': [
+        'error',
+        {
+          property: 'randomUUID',
+          message: 'Missing on plain HTTP. Use randomId() from #lib/domain/id.ts.'
+        }
+      ]
+    }
+  },
+  {
     // Override or add rule settings here, such as:
     // 'svelte/button-has-type': 'error'
     rules: {}
