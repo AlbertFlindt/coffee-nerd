@@ -2,7 +2,13 @@
 // by the owner (D-60). A step a shot used keeps what its recorded values mean (D-168); a step in a routine
 // stays (D-169).
 import { and, desc, eq, isNull, sql } from 'drizzle-orm';
-import { prepStepSettingSchema, type PrepStepSetting } from '../../domain/schemas';
+import {
+  prepStepSettingSchema,
+  validateRoutineAgainstSteps,
+  type PrepStepSetting,
+  type RoutineProblem
+} from '../../domain/schemas';
+import { trimmed } from '../../domain/gear';
 import type { Db, Queryable } from './client';
 import { newId } from './ids';
 import { prepStep, recipe, routine, shot, userSettings } from './schema';
@@ -158,7 +164,50 @@ function keepsMeaning(before: PrepStepSetting, after: PrepStepSetting): boolean 
   return true;
 }
 
-/** Saves a step's sheet (D-168). */
+/** A routine value in words, with the step's unit: "15 kg", "20 s", or the option's label. */
+function valueText(setting: PrepStepSetting, value: number | string | undefined): string {
+  if (typeof value === 'string')
+    return setting.kind === 'choice'
+      ? (setting.options.find((o) => o.id === value)?.label ?? value)
+      : value;
+  if (value === undefined) return '';
+  const unit = setting.kind === 'number' ? setting.unit : setting.kind === 'seconds' ? 's' : '';
+  return trimmed(value, unit || undefined);
+}
+
+/**
+ * D-175: the routines (not archived) that hold this step and would no longer fit its new setting, each
+ * as a "routine: …" problem in words.
+ */
+function routineClashes(
+  db: Queryable,
+  ownerId: string,
+  id: string,
+  before: PrepStepSetting,
+  after: PrepStepSetting
+): string[] {
+  const holders = db
+    .select({ name: routine.name, steps: routine.steps })
+    .from(routine)
+    .where(and(eq(routine.ownerId, ownerId), isNull(routine.archivedAt)))
+    .all()
+    .filter((r) => r.steps.some((s) => s.stepId === id));
+  const words = (name: string, p: RoutineProblem) =>
+    p.problem === 'out_of_range'
+      ? `routine: ${name} uses ${valueText(after, p.value)}, outside this range`
+      : p.problem === 'not_an_option'
+        ? `routine: ${name} uses ${valueText(before, p.value)}, which this list no longer has`
+        : `routine: ${name} uses this step with its current setting; change the routine first`;
+  const problems: string[] = [];
+  for (const r of holders) {
+    const own = r.steps.filter((s) => s.stepId === id);
+    const found = validateRoutineAgainstSteps(own, { [id]: after });
+    if (found.length > 0) problems.push(words(r.name, found[0]));
+  }
+  return problems;
+}
+
+/** Saves a step's sheet (D-168, D-175). */
 export function saveStep(db: Db, ownerId: string, id: string, input: StepInput, now: number): void {
   const existing = db
     .select()
@@ -169,6 +218,8 @@ export function saveStep(db: Db, ownerId: string, id: string, input: StepInput, 
   const step = checked(input);
   if (usedStepIds(db, ownerId).has(id) && !keepsMeaning(existing.setting, step.setting))
     throw new StepRejected(['setting: used']);
+  const broken = routineClashes(db, ownerId, id, existing.setting, step.setting);
+  if (broken.length > 0) throw new StepRejected(broken);
   db.update(prepStep)
     .set({ ...step, updatedAt: now })
     .where(and(eq(prepStep.id, id), eq(prepStep.ownerId, ownerId)))
@@ -176,8 +227,8 @@ export function saveStep(db: Db, ownerId: string, id: string, input: StepInput, 
 }
 
 /**
- * Removes a step (D-168, D-169): refused while a routine (not archived) contains it; archived when a shot
- * used it or an archived routine still holds it; otherwise deleted. Null when it is not yours.
+ * Removes a step (D-168, D-169, D-176): refused while a routine (not archived) contains it; archived when a
+ * shot used it; otherwise deleted, also from archived routines. Null when it is not yours.
  */
 export function removeStep(
   db: Db,
@@ -192,17 +243,25 @@ export function removeStep(
     .get();
   if (!existing) return null;
   const holders = db
-    .select({ steps: routine.steps, archivedAt: routine.archivedAt })
+    .select({ id: routine.id, steps: routine.steps, archivedAt: routine.archivedAt })
     .from(routine)
     .where(eq(routine.ownerId, ownerId))
     .all()
     .filter((r) => r.steps.some((s) => s.stepId === id));
   if (holders.some((r) => r.archivedAt === null)) return 'in_routine';
   const where = and(eq(prepStep.id, id), eq(prepStep.ownerId, ownerId));
-  if (holders.length > 0 || usedStepIds(db, ownerId).has(id)) {
+  if (usedStepIds(db, ownerId).has(id)) {
     db.update(prepStep).set({ archivedAt: now, updatedAt: now }).where(where).run();
     return 'archived';
   }
-  db.delete(prepStep).where(where).run();
+  // D-176: unused, so it goes, also from the archived routines that still hold it.
+  db.transaction((tx) => {
+    for (const r of holders)
+      tx.update(routine)
+        .set({ steps: r.steps.filter((s) => s.stepId !== id), updatedAt: now })
+        .where(and(eq(routine.id, r.id), eq(routine.ownerId, ownerId)))
+        .run();
+    tx.delete(prepStep).where(where).run();
+  });
   return 'deleted';
 }

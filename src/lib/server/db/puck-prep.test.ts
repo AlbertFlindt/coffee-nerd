@@ -228,6 +228,65 @@ describe('addStep and saveStep', () => {
     ).toThrow(new StepRejected(['setting: used']));
   });
 
+  it('D-175: a change that would break a routine is refused, naming the routine', () => {
+    const tamp = ids.stepIds[2];
+    const setting = { kind: 'number', unit: 'kg', step: 500, startsAt: 5000 } as const;
+    expect(() =>
+      saveStep(
+        db,
+        ids.userId,
+        tamp,
+        { name: 'Tamp', setting: { ...setting, min: 0, max: 10000 } },
+        T0
+      )
+    ).toThrow(new StepRejected(['routine: Daily routine uses 15 kg, outside this range']));
+    expect(() =>
+      saveStep(db, ids.userId, tamp, { name: 'Tamp', setting: { kind: 'none' } }, T0)
+    ).toThrow(
+      new StepRejected([
+        'routine: Daily routine uses this step with its current setting; change the routine first'
+      ])
+    );
+    // A range that still fits is fine.
+    saveStep(
+      db,
+      ids.userId,
+      tamp,
+      { name: 'Tamp', setting: { ...setting, min: 0, max: 30000 } },
+      T0
+    );
+  });
+
+  it('D-175: removing a list option a routine uses is refused', () => {
+    const list: PrepStepSetting = {
+      kind: 'choice',
+      options: [
+        { id: 'paper', label: 'Paper' },
+        { id: 'metal', label: 'Metal' }
+      ],
+      startsAt: 'paper'
+    };
+    const id = addStep(db, ids.userId, { name: 'Filter', setting: list }, T0);
+    db.update(routine)
+      .set({ steps: [{ stepId: id, value: 'metal' }] })
+      .where(eq(routine.id, ids.routineId))
+      .run();
+    expect(() =>
+      saveStep(
+        db,
+        ids.userId,
+        id,
+        {
+          name: 'Filter',
+          setting: { ...list, options: [list.options[0], { id: 'cloth', label: 'Cloth' }] }
+        },
+        T0
+      )
+    ).toThrow(
+      new StepRejected(['routine: Daily routine uses Metal, which this list no longer has'])
+    );
+  });
+
   it('D-60: not another user’s step', () => {
     expect(() =>
       saveStep(db, 'someone-else', ids.stepIds[0], { name: 'X', setting: { kind: 'none' } }, T0)
@@ -240,6 +299,29 @@ describe('removeStep', () => {
     const id = addStep(db, ids.userId, { name: 'RDT', setting: sprays }, T0);
     expect(removeStep(db, ids.userId, id, T0)).toBe('deleted');
     expect(db.select().from(prepStep).where(eq(prepStep.id, id)).get()).toBeUndefined();
+  });
+
+  it('D-176: an unused step is deleted, and taken out of an archived routine that holds it', () => {
+    const id = addStep(db, ids.userId, { name: 'RDT', setting: sprays }, T0);
+    const old = newId(T0);
+    db.insert(routine)
+      .values({
+        id: old,
+        ownerId: ids.userId,
+        name: 'Old routine',
+        steps: [
+          { stepId: id, value: 2000 },
+          { stepId: ids.stepIds[1], value: null }
+        ],
+        archivedAt: T0,
+        createdAt: T0,
+        updatedAt: T0
+      })
+      .run();
+    expect(removeStep(db, ids.userId, id, T0)).toBe('deleted');
+    expect(db.select().from(routine).where(eq(routine.id, old)).get()?.steps).toEqual([
+      { stepId: ids.stepIds[1], value: null }
+    ]);
   });
 
   it('D-169: a step a routine contains stays', () => {

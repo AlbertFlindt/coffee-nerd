@@ -33,9 +33,12 @@ const PROBLEM: [RegExp, string][] = [
 function words(problems: string[]): string[] {
   return [
     ...new Set(
-      problems.map(
-        (p) =>
-          PROBLEM.find(([pattern]) => pattern.test(p))?.[1] ?? 'Something on this page is not right'
+      problems.map((p) =>
+        // D-175: a routine the change would break comes already in words.
+        p.startsWith('routine: ')
+          ? p.slice('routine: '.length)
+          : (PROBLEM.find(([pattern]) => pattern.test(p))?.[1] ??
+            'Something on this page is not right')
       )
     )
   ];

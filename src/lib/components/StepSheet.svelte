@@ -136,20 +136,28 @@
   });
 
   let pending = $state(false);
+  let serverProblems: string[] = $state(untrack(() => problems));
   const submit = () => {
     pending = true;
+    serverProblems = [];
     return async ({
       result,
       update
     }: {
-      result: { type: string };
+      result: { type: string; data?: Record<string, unknown> };
       update: (options?: { reset?: boolean }) => Promise<void>;
     }) => {
       pending = false;
       if (result.type === 'success' || result.type === 'redirect') {
         onclose();
         await update();
-      } else await update({ reset: false });
+        return;
+      }
+      // What the server refused belongs to this sheet only, not to the next one opened.
+      const refused = result.type === 'failure' ? result.data?.problems : undefined;
+      serverProblems = Array.isArray(refused)
+        ? refused.map(String)
+        : ['Something on this page is not right'];
     };
   };
 </script>
@@ -330,7 +338,7 @@
 
       <!-- As drawn (screen 20): space between the preview and the button. -->
       <div class="push"></div>
-      {#each [problem ? [problem] : problems] as lines (lines)}
+      {#each [problem ? [problem] : serverProblems] as lines (lines)}
         {#each lines as line (line)}<p class="problem" role="status">{line}</p>{/each}
       {/each}
 

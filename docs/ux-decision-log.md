@@ -428,7 +428,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 - **D-53 — Tags page.** *(Revised 2026-10-19: see D-171 to D-174.)* Library › Tags. "Add tag" in the header, a search field, then tags as chips **grouped by flavor family** (Fruity, Sweet, Floral, Nutty & roasty, Other), each with its **usage count** ("Berry 12"); user-added tags carry a small "custom" label. **Families are fixed** (a built-in set plus "Other"); users choose a family for custom tags but cannot create or rename families. Tapping a tag opens rename / merge / remove.
   - **Duplicate finder:** when two tags look alike (e.g. "Dark choclate" and "Dark chocolate"), a cream card at the top suggests merging them, with a one-tap **Merge** into the more-used tag. Merging updates every shot that used the old tag.
   - *Why:* families make 18+ tags scannable and mirror how tasters think; counts show what you actually taste; the duplicate finder keeps Insights clean without asking the user to audit their tags. Fixed families let Insights say things like "you prefer fruity coffees" reliably.
-- **D-163 — "In use" on both routines.** On the Puck prep page, the routine My setup uses and the routine the last shot used both carry "In use"; usually they are the same one. Refines D-51.
+- **D-163 — "In use" on both routines.** *(Revised 2026-10-19: see D-177.)* On the Puck prep page, the routine My setup uses and the routine the last shot used both carry "In use"; usually they are the same one. Refines D-51.
   - *Why:* both are routines you would not want to change or archive by surprise.
 - **D-164 — Inserting a step picks from your steps.** The small + between two steps in the routine builder opens a sheet with your steps; the same step may appear more than once in a routine. "New step" at the bottom of the sheet makes one on the spot. Refines D-51.
   - *Why:* building a routine should not need a detour to the Puck prep page.
@@ -438,7 +438,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* trying WDT 30 s instead of 20 s should not need a new routine.
 - **D-167 — Changing and removing routines.** Tapping a routine card opens it in the routine builder. A quiet "Archive" at the bottom, with a confirmation, archives it: it leaves the Puck prep page and the pickers, past shots keep its name. It is not offered for My setup's routine (D-83). A routine no shot has used can be deleted for good instead. Refines D-51 and D-148.
   - *Why:* the same pattern as gear, while a routine made by mistake can go without leaving a trace.
-- **D-168 — Changing and removing steps.** Tapping a step chip on the Puck prep page opens the step sheet (D-52). Its name, step, range and starting value can always change. Once a shot has used it, its kind of setting, its unit and its list options stay, and it is archived instead of deleted; a step no shot has used can be deleted. Refines D-52, as D-160 to D-162 do for machine features.
+- **D-168 — Changing and removing steps.** *(Revised 2026-10-19: see D-175, D-176.)* Tapping a step chip on the Puck prep page opens the step sheet (D-52). Its name, step, range and starting value can always change. Once a shot has used it, its kind of setting, its unit and its list options stay, and it is archived instead of deleted; a step no shot has used can be deleted. Refines D-52, as D-160 to D-162 do for machine features.
   - *Why:* one rule for everything custom; the values shots recorded keep their meaning.
 - **D-169 — A step in a routine stays.** A step that a routine (not archived) contains cannot be archived or deleted; its sheet says "Used in Daily routine" instead. Refines D-168.
   - *Why:* a routine should never lose a step behind your back.
@@ -452,6 +452,12 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* catches typos without nagging about notes that are meant to be different.
 - **D-174 — Adding a note on the Tags page.** "Add tag" opens a sheet with Name and the five families as choices (Other chosen to start), then "Add tag". Refines D-53.
   - *Why:* on the Tags page you have time to place the note; the Tasting tab keeps its quick way (D-101).
+- **D-175 — A step change that breaks a routine is refused.** Saving a step is refused when a routine (not archived) that holds it would no longer fit: a value outside the new range, a changed kind of setting, or a removed list option it uses. The sheet names the routine: "Daily routine uses 15 kg, outside this range". You change the routine first or choose a wider range. Refines D-168 and D-169.
+  - *Why:* a routine whose values no longer fit would make every shot with it fail to save.
+- **D-176 — An unused step is deleted, also from archived routines.** "Delete step" on a step no shot used deletes it and takes it out of any archived routine that still holds it. Refines D-168.
+  - *Why:* archived routines are out of sight; an unused step should leave no trace.
+- **D-177 — Two "In use" chips are both cream.** When My setup's routine and the last shot's routine differ, both carry the same cream "In use" chip. Refines D-163 and the one-cream rule of the visual direction.
+  - *Why:* it is one meaning shown twice, and the two usually coincide.
 
 ## 11. Visual direction
 

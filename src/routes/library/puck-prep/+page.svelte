@@ -10,7 +10,7 @@
   import type { RoutineCard } from '#lib/server/db/puck-prep.ts';
   import type { PageProps } from './$types';
 
-  let { data, form }: PageProps = $props();
+  let { data }: PageProps = $props();
   const page = $derived(data.page);
   /** The step sheet: null closed, 'new' to add, or the id of the step being changed. */
   let sheet: 'new' | string | null = $state(null);
@@ -112,10 +112,10 @@
 <TabBar current="library" />
 
 {#if sheet === 'new'}
-  <StepSheet problems={form?.problems} onclose={() => (sheet = null)} />
+  <StepSheet onclose={() => (sheet = null)} />
 {:else if editing}
   {#key editing.id}
-    <StepSheet step={editing} problems={form?.problems} onclose={() => (sheet = null)} />
+    <StepSheet step={editing} onclose={() => (sheet = null)} />
   {/key}
 {/if}
 

@@ -90,6 +90,14 @@ test('D-169: a step in a routine stays', async () => {
   await expect(sheet.getByRole('button', { name: /Delete step|Archive step/ })).toHaveCount(0);
   // D-168: Tamp has been used by shots, so its unit stays.
   await expect(sheet.getByLabel('Unit')).not.toBeEditable();
+  await expectNoPageScroll();
+  // D-175: a range the routine's 15 kg falls outside is refused, naming the routine.
+  await sheet.getByLabel('Starts at').fill('5');
+  await sheet.getByLabel('Range').fill('0–10');
+  await sheet.getByRole('button', { name: 'Save step' }).click();
+  await expect(sheet.getByRole('status')).toHaveText(
+    'Daily routine uses 15 kg, outside this range'
+  );
   await page
     .getByRole('button', { name: 'Close without saving' })
     .click({ position: { x: 200, y: 20 } });
