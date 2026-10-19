@@ -97,12 +97,20 @@ test('D-157: step by step from the machine to a ready shot form; leaving halfway
 
   await expect(page.getByRole('heading', { name: 'Add grinder', level: 1 })).toBeVisible();
   await expect(page.getByText('Step 2 of 5')).toBeVisible();
+  // Screen 37: the Gear page before My setup exists, without Default chips (D-149).
+  await page.goto('/library/gear');
+  await expect(page.getByRole('region', { name: 'My setup' })).toContainText('Not set up yet');
+  await expect(page.getByText('Default', { exact: true })).toHaveCount(0);
+  await page.screenshot({ path: 'screenshots/GearFirstRun.png' });
+  await page.goto('/shot/new');
+  await expect(page.getByText('Step 2 of 5')).toBeVisible();
   await page.getByLabel('Name').fill('Comandante C40');
   await page.getByRole('button', { name: 'Next' }).click();
 
   await expect(page.getByRole('heading', { name: 'Add basket', level: 1 })).toBeVisible();
   await expect(page.getByText('Step 3 of 5')).toBeVisible();
   await expectNoPageScroll(page);
+  await page.screenshot({ path: 'screenshots/GuideBasket.png' });
   // Leaving halfway is fine: "+" comes back to the basket.
   await page.getByRole('link', { name: 'Leave for now' }).click();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();

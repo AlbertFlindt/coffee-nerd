@@ -41,6 +41,9 @@ test('D-153: the gear line switches the grinder for this shot; the grind control
   await page.goto('/library/gear');
   await page.getByRole('button', { name: 'Add gear' }).click();
   await page.getByRole('button', { name: 'Grinder' }).click();
+  // Screen 38, D-147: adding is a task with × to close.
+  await expect(page.getByRole('link', { name: 'Close without saving' })).toBeVisible();
+  await screenshot('GrinderNew');
   await page.getByLabel('Name').fill('Comandante C40');
   await page.getByLabel('Step interval').fill('1');
   await page.getByLabel('Step interval').blur();

@@ -386,8 +386,13 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
   await page.getByRole('link', { name: 'Back to Gear' }).click();
 
   await page.getByRole('button', { name: 'Add gear' }).click();
+  // Screen 36: one row per kind.
+  await expect(page.getByRole('heading', { name: 'Add gear' })).toBeVisible();
+  await screenshot('GearAdd');
   await page.getByRole('button', { name: 'Basket' }).click();
   await expect(page.getByRole('heading', { name: 'Add basket', level: 1 })).toBeVisible();
+  // Screen 39: adding is a task with × to close.
+  await expect(page.getByRole('link', { name: 'Close without saving' })).toBeVisible();
   // D-158: a new basket starts as a precision double for 58 mm.
   await expect(page.getByRole('radio', { name: 'Precision' })).toHaveAttribute(
     'aria-checked',
@@ -396,6 +401,7 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
   await expect(page.getByRole('radio', { name: 'Double' })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('button', { name: 'Add basket' }).click();
   await expect(page.getByRole('alert')).toHaveText('Brand is required');
+  await screenshot('BasketNew');
   await page.getByLabel('Brand').fill('IMS');
   await page.getByLabel('Size', { exact: true }).fill('20');
   await page.getByLabel('Size', { exact: true }).blur();
@@ -406,6 +412,8 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
 
   await ims.click();
   await page.getByRole('button', { name: 'Archive' }).click();
+  await expect(page.getByRole('heading', { name: 'Archive this basket?' })).toBeVisible();
+  await screenshot('GearArchive');
   await page
     .getByRole('region', { name: 'Archive this basket' })
     .getByRole('button', { name: 'Archive' })
@@ -448,6 +456,11 @@ test('D-46, D-02: your own feature appears on More › Setup', async () => {
   await page.getByRole('switch', { name: 'Bloom pause' }).click();
   await expect(page.getByRole('button', { name: 'Bloom pause plus 1 s' })).toBeVisible();
   await expectNoPageScroll();
+  // Screen 43, D-78: a list feature switched on without an option asks for one before saving.
+  await page.getByRole('switch', { name: 'Water', exact: true }).click();
+  await page.getByRole('button', { name: 'Save setup' }).click();
+  await expect(page.getByText('Set Water first.')).toBeVisible();
+  await screenshot('SetupFeatures');
 
   // No shot used it, so it can be deleted again (D-151), leaving the reference setup as it was.
   await page.goto('/library/gear');

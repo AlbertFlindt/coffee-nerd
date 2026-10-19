@@ -83,6 +83,8 @@ test('CustomFeature, D-152: a list needs at least two options', async () => {
   const add = sheet.getByRole('button', { name: 'Add feature' });
   await expect(add).toBeDisabled();
   await sheet.getByLabel('Option 1').fill('Soft');
+  await expect(sheet.getByText('Give at least two options a name')).toBeVisible();
+  await screenshot('FeatureList');
   await sheet.getByLabel('Option 2').fill('Hard');
   await expect(add).toBeEnabled();
   await sheet.getByRole('button', { name: 'Add option' }).click();
