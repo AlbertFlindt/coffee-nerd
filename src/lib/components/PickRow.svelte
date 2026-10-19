@@ -1,13 +1,13 @@
 <script lang="ts">
   // One choice in a sheet's list (screens 27, 28, 31, 32): its name, an optional line under it, and for
-  // the chosen one bold text with an amber check. Rows sit 2 px apart in a rounded group (`.cn-pick-list`
-  // in the parent), never with dividers (D-18).
+  // the chosen one bold text with an amber check. Rows sit 2 px apart in a rounded group (a `.pick-list`
+  // in the parent), never with dividers (D-18). Without `chosen` it is a plain action, not a toggle.
   import type { HTMLButtonAttributes } from 'svelte/elements';
 
   let {
     label,
     sub,
-    chosen = false,
+    chosen,
     ...button
   }: { label: string; sub?: string; chosen?: boolean } & HTMLButtonAttributes = $props();
 </script>

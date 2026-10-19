@@ -357,7 +357,7 @@
         onclose={() => (sheet = null)}
       >
         <h2 class="sheet-title">Machine</h2>
-        <div class="cn-pick-list">
+        <div class="pick-list">
           {#each data.machines as m (m.id)}
             <PickRow
               label={m.name}
@@ -367,7 +367,7 @@
           {/each}
         </div>
         <h2 class="sheet-title">Grinder</h2>
-        <div class="cn-pick-list">
+        <div class="pick-list">
           {#each data.grinders as g (g.id)}
             <PickRow
               label={g.name}
@@ -603,7 +603,7 @@
     font-weight: 700;
   }
 
-  .cn-pick-list {
+  .pick-list {
     display: flex;
     flex-direction: column;
     gap: 2px;

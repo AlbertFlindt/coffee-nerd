@@ -5,6 +5,7 @@
   import { untrack } from 'svelte';
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
+  import { page } from '$app/state';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import PickRow from '#lib/components/PickRow.svelte';
   import TextField from '#lib/components/TextField.svelte';
@@ -54,10 +55,12 @@
     ['medium', 'Medium'],
     ['dark', 'Dark']
   ] as const;
-  // The action keeps the page's query: without ?rebuy= a refused save would reload the form empty.
-  const saveAction = $derived(
-    `?${mode === 'add' && values.rebuyOfId ? `rebuy=${values.rebuyOfId}&` : ''}${guide ? 'guide=1&' : ''}/save`
-  );
+  // The action keeps the page's query (?rebuy=, ?guide=): with another query, a refused save would load
+  // the page again and start the form over, losing what was typed (D-139).
+  const saveAction = $derived.by(() => {
+    const query = page.url.searchParams.toString();
+    return `?${query ? `${query}&` : ''}/save`;
+  });
   const roast = $derived(values.roastDate ? roastDateText(values.roastDate, today) : null);
 </script>
 
@@ -304,7 +307,7 @@
 
 {#if sheet === 'rebuy'}
   <BottomSheet label="Same as before" closeLabel="Close bean list" onclose={() => (sheet = null)}>
-    <h2 class="cn-type-heading sheet-title">Same as before</h2>
+    <h2 class="sheet-title">Same as before</h2>
     <!-- D-126: picking a bean opens the form filled from it (?rebuy=), like the shot form's bean list. -->
     <form
       class="list"
@@ -334,7 +337,7 @@
     closeLabel="Keep the bean"
     onclose={() => (sheet = null)}
   >
-    <h2 class="cn-type-heading sheet-title">Delete this bean?</h2>
+    <h2 class="sheet-title">Delete this bean?</h2>
     <p class="cn-type-body note">It has no shots yet. This cannot be undone.</p>
     <form class="confirm" method="POST" action="?/delete" onsubmit={() => (deleting = true)}>
       <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={deleting}
@@ -351,7 +354,7 @@
     closeLabel="Close country list"
     onclose={() => (sheet = null)}
   >
-    <h2 class="cn-type-heading sheet-title">Country</h2>
+    <h2 class="sheet-title">Country</h2>
     <!-- Screen 32: a rounded search field, then the countries A–Z (D-133). -->
     <div class="search">
       <svg

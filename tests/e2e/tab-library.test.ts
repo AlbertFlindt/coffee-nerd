@@ -122,13 +122,15 @@ test('AddBean, D-126, D-139: "Same as before" fills the form from an earlier bea
   );
   // Roast date and bag weight are new (D-41).
   await expect(page.getByLabel('Bag weight')).toHaveValue('');
-  // Screen 33: a refused save keeps the re-buy and its fields.
+  // Screen 33, D-139: a refused save keeps the re-buy and what was typed.
+  await page.getByLabel('Region').fill('Guji Hambela');
   await page.getByRole('button', { name: 'Add bean' }).click();
   await expect(page.getByText('Roast date is required')).toBeVisible();
   await expect(page.getByText('Same as Guji Hambela')).toBeVisible();
-  await expect(page.getByLabel('Name')).toHaveValue('Guji Hambela');
+  await expect(page.getByLabel('Region')).toHaveValue('Guji Hambela');
   await expect(page.getByLabel('Variety')).toHaveValue('Heirloom');
   await screenshot('BeanRebuy');
+  await page.getByLabel('Region').fill('Guji');
   const twoDaysAgo = await page.evaluate(() => {
     const d = new Date(Date.now() - 2 * 86_400_000);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;

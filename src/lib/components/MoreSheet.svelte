@@ -256,7 +256,8 @@
             Shots are easier to repeat with a puck prep routine. Add one in Library › Puck prep.
           </p>
         {/if}
-        <!-- Screen 28: the list ends with a way back, at the foot of the sheet. -->
+        <!-- Screen 28: the list ends with a way back to Setup, at the foot of the sheet (the routine
+             list too, which screen 28 does not draw; docs/open-items.md). -->
         <div class="spacer"></div>
         <button type="button" class="cn-btn-quiet cn-tap" onclick={() => (picking = null)}
           >Back to Setup</button
@@ -544,6 +545,7 @@
   .list {
     display: flex;
     flex-direction: column;
+    flex: none;
     gap: 2px;
     border-radius: var(--radius-md);
     overflow: hidden;

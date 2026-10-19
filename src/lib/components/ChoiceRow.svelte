@@ -48,7 +48,7 @@
   .row {
     border-radius: 0;
     min-height: 56px;
-    padding-right: 14px;
+    padding-right: 10px;
   }
 
   .muted {
@@ -57,6 +57,7 @@
   }
 
   .off {
+    padding-right: 4px;
     font-size: 14px;
     color: var(--ink-muted);
   }
