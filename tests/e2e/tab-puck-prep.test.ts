@@ -103,3 +103,86 @@ test('D-169: a step in a routine stays', async () => {
     .click({ position: { x: 200, y: 20 } });
   await expect(sheet).toHaveCount(0);
 });
+
+test('RoutineBuilder, D-51, D-167: a routine opens in the builder; My setup’s stays', async () => {
+  await page.getByRole('link', { name: 'Daily routine' }).click();
+  await expect(page.getByRole('heading', { name: 'Routine', level: 1 })).toBeVisible();
+  await expect(page.getByLabel('Name')).toHaveValue('Daily routine');
+  const flow = page.getByRole('list', { name: 'Steps, top to bottom' });
+  await expect(flow).toContainText('Dose in basket');
+  await expect(
+    page.getByRole('button', { name: /^WDT setting, \d+ s\. Tap to change$/ })
+  ).toBeVisible();
+  await expect(page.getByText('Used in My setup · choose another default first')).toBeVisible();
+  await expectNoPageScroll();
+  await screenshot('RoutineBuilder');
+  await page.getByRole('link', { name: 'Close without saving' }).click();
+  await expect(page.getByRole('heading', { name: 'Puck prep', level: 1 })).toBeVisible();
+});
+
+test('D-164, D-165, D-51: build a routine, set a value, reorder, and add a new step on the way', async () => {
+  await page.getByRole('link', { name: 'New routine' }).click();
+  await page.getByLabel('Name').fill('Light roast');
+  await page.getByRole('button', { name: 'Insert a step after Dose in basket' }).click();
+  await page
+    .getByRole('region', { name: 'Insert a step' })
+    .getByRole('button', { name: /^WDT/ })
+    .click();
+  await page.getByRole('button', { name: 'Insert a step after WDT' }).click();
+  await page
+    .getByRole('region', { name: 'Insert a step' })
+    .getByRole('button', { name: /^Tamp/ })
+    .click();
+
+  // D-165: the value sheet.
+  await page.getByRole('button', { name: /^WDT setting, 20 s/ }).click();
+  const value = page.getByRole('region', { name: 'WDT setting' });
+  await value.getByRole('button', { name: 'WDT plus 1 second' }).click();
+  await value.getByRole('button', { name: 'WDT plus 1 second' }).click();
+  await value.getByRole('button', { name: 'Done' }).click();
+  await expect(page.getByRole('button', { name: /^WDT setting, 22 s/ })).toBeVisible();
+
+  // D-51: reorder with the keyboard on the handle.
+  await page.getByRole('button', { name: 'Drag to move Tamp' }).focus();
+  await page.keyboard.press('ArrowUp');
+  const order = await page
+    .getByRole('button', { name: /^Drag to move/ })
+    .evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
+  expect(order).toEqual(['Drag to move Tamp', 'Drag to move WDT']);
+
+  // D-164: "New step" from the insert sheet goes in where + was tapped.
+  await page.getByRole('button', { name: 'Insert a step after WDT' }).click();
+  await page
+    .getByRole('region', { name: 'Insert a step' })
+    .getByRole('button', { name: 'New step' })
+    .click();
+  const sheet = page.getByRole('region', { name: 'New step' });
+  await sheet.getByLabel('Name').fill('Paper filter');
+  await sheet.getByRole('radio', { name: 'No setting' }).click();
+  await sheet.getByRole('button', { name: 'Add step' }).click();
+  await expect(page.getByRole('button', { name: 'Drag to move Paper filter' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Save routine' }).click();
+  await expect(page.getByRole('heading', { name: 'Puck prep', level: 1 })).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Light roast' }).getByLabel('Tamp, then WDT, then Paper filter')
+  ).toBeVisible();
+});
+
+test('D-167, D-176: a routine no shot used is deleted; its unused step too', async () => {
+  await page.getByRole('link', { name: 'Light roast' }).click();
+  await page.getByRole('button', { name: 'Delete routine' }).click();
+  await page
+    .getByRole('region', { name: 'Delete this routine' })
+    .getByRole('button', { name: 'Delete routine' })
+    .click();
+  await expect(page.getByRole('heading', { name: 'Puck prep', level: 1 })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Light roast' })).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Paper filter' }).click();
+  await page
+    .getByRole('region', { name: 'Edit Paper filter' })
+    .getByRole('button', { name: 'Delete step' })
+    .click();
+  await expect(page.getByRole('button', { name: 'Paper filter' })).toHaveCount(0);
+});
