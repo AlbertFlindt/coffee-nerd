@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { duplicatePairs, keptKey, looksAlike } from './tags';
+import { duplicatePairs, keptKey, looksAlike, matchesSearch } from './tags';
 
 describe('looksAlike', () => {
   it('D-173: the same name ignoring case, spaces and accents', () => {
@@ -31,7 +31,7 @@ describe('looksAlike', () => {
     expect(looksAlike('Plum', 'Plums')).toBe(false);
   });
 
-  it('a note does not look like itself by id, only by name', () => {
+  it('D-173: a note is compared by name only', () => {
     expect(looksAlike('Berry', 'Berry')).toBe(true);
   });
 });
@@ -49,7 +49,7 @@ describe('duplicatePairs', () => {
     expect(duplicatePairs(swapped, new Set())).toEqual([{ keep: tags[0], merge: tags[2] }]);
   });
 
-  it('on equal use, the note listed first is kept', () => {
+  it('D-53: on equal use, the note listed first is kept (open item: not decided)', () => {
     const even = [
       { id: 'x', name: 'Caramel', count: 1 },
       { id: 'y', name: 'Carmel', count: 1 }
@@ -61,8 +61,17 @@ describe('duplicatePairs', () => {
     expect(duplicatePairs(tags, new Set([keptKey('c', 'a')]))).toEqual([]);
   });
 
-  it('keptKey puts the lower id first', () => {
+  it('D-173: keptKey puts the lower id first, as tag_pair_kept stores it', () => {
     expect(keptKey('c', 'a')).toBe(keptKey('a', 'c'));
     expect(keptKey('c', 'a')).toBe('a c');
+  });
+});
+
+describe('matchesSearch', () => {
+  it('D-53: the name contains the search, ignoring case, accents and surrounding spaces', () => {
+    expect(matchesSearch('Dark chocolate', ' CHOC ')).toBe(true);
+    expect(matchesSearch('Crème brûlée', 'creme')).toBe(true);
+    expect(matchesSearch('Berry', 'cherry')).toBe(false);
+    expect(matchesSearch('Berry', '')).toBe(true);
   });
 });

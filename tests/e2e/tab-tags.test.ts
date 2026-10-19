@@ -70,12 +70,17 @@ test('Tags, D-53, D-174: notes by family; "Add tag" asks a name and a family', a
   ).toBeVisible();
 });
 
-test('D-53, D-173: the "Same tag twice?" card merges into the more used note', async () => {
+test('D-53, D-173, D-180: the "Same tag twice?" card merges into the more used note', async () => {
   await expect(card()).toContainText('Same tag twice?');
   await expect(card()).toContainText('"Dark choclate" (0 shots) looks like "Dark chocolate"');
   await expectNoPageScroll();
   await screenshot('Tags');
   await card().getByRole('button', { name: 'Merge Dark choclate into Dark chocolate' }).click();
+  // D-180: it asks first.
+  const confirm = page.getByRole('region', { name: 'Edit Dark choclate' });
+  await expect(confirm.getByRole('heading', { name: 'Merge into Dark chocolate?' })).toBeVisible();
+  await expect(confirm).toContainText('This cannot be undone.');
+  await confirm.getByRole('button', { name: 'Merge' }).click();
   await expect(card()).toHaveCount(0);
   await expect(chip('Dark choclate')).toHaveCount(0);
   await expect(chip('Dark chocolate')).toBeVisible();

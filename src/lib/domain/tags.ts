@@ -1,8 +1,21 @@
 // Flavor notes (D-53): the duplicate finder of the Tags page (D-173).
 
+/** Lower case, without accents. */
+function plain(s: string): string {
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
 /** A name as the duplicate finder compares it: lower case, without spaces and accents. */
 function bare(name: string): string {
-  return name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '').toLowerCase();
+  return plain(name).replace(/\s+/g, '');
+}
+
+/** The Tags page search: the name contains the typed text, ignoring case and accents. */
+export function matchesSearch(name: string, query: string): boolean {
+  return plain(name).includes(plain(query.trim()));
 }
 
 /** How many letters must be added, removed or swapped to turn `a` into `b` (Levenshtein distance). */

@@ -113,7 +113,7 @@ describe('addTag', () => {
     expect(named('Funky')).toMatchObject({ id, family: 'other', custom: true });
   });
 
-  it('refuses an empty, too long or taken name', () => {
+  it('D-174: refuses an empty, too long or taken name', () => {
     const problems = (name: string) => {
       try {
         addTag(db, ids.userId, { name, family: 'other' }, T0);
@@ -128,7 +128,7 @@ describe('addTag', () => {
     expect(problems('berry')).toEqual(['name: taken']);
   });
 
-  it('D-171: a removed note comes back when added again', () => {
+  it('D-181: a removed note comes back when added again', () => {
     const funky = addTag(db, ids.userId, { name: 'Funky', family: 'other' }, T0);
     brew(1, [funky]);
     removeTag(db, ids.userId, funky, T0 + 2 * 60_000);
@@ -155,7 +155,7 @@ describe('saveTag', () => {
     expect(named('Funky').family).toBe('fruity');
   });
 
-  it('refuses a name another note has, but not a change of case', () => {
+  it('D-53: refuses a name another note has, but not a change of case', () => {
     const berry = named('Berry').id;
     expect(() =>
       saveTag(db, ids.userId, berry, { name: 'citrus', family: 'fruity' }, T0)
@@ -164,7 +164,7 @@ describe('saveTag', () => {
     expect(named('BERRY').id).toBe(berry);
   });
 
-  it('is scoped by owner', () => {
+  it('D-60: is scoped by owner', () => {
     expect(
       saveTag(db, 'someone-else', named('Berry').id, { name: 'X', family: 'fruity' }, T0)
     ).toBe(false);
@@ -184,10 +184,29 @@ describe('mergeTag', () => {
     expect(all().some((t) => t.name === 'Carmel')).toBe(false);
   });
 
-  it('refuses merging a note into itself or into another owner’s note', () => {
+  it('D-53: refuses merging a note into itself or into a missing note', () => {
     const berry = named('Berry').id;
     expect(mergeTag(db, ids.userId, berry, berry)).toBe(false);
     expect(mergeTag(db, ids.userId, berry, 'missing')).toBe(false);
+  });
+});
+
+describe('D-182: a shot saved with notes changed since', () => {
+  it('D-182: a merged note becomes the note it went into, also after a second merge', () => {
+    const caramel = named('Caramel').id;
+    const honey = named('Honey').id;
+    const carmel = addTag(db, ids.userId, { name: 'Carmel', family: 'sweet' }, T0);
+    mergeTag(db, ids.userId, carmel, caramel);
+    expect(shotTags(brew(1, [carmel, caramel]))).toEqual([caramel]);
+    mergeTag(db, ids.userId, caramel, honey);
+    expect(shotTags(brew(2, [carmel]))).toEqual([honey]);
+  });
+
+  it('D-182: a deleted note is left off and the shot saves', () => {
+    const berry = named('Berry').id;
+    const honey = named('Honey').id;
+    removeTag(db, ids.userId, berry, T0);
+    expect(shotTags(brew(1, [berry, honey]))).toEqual([honey]);
   });
 });
 
@@ -213,13 +232,24 @@ describe('removeTag', () => {
     expect(loadLibrary(db, ids.userId, T0).tags[0]).toBe('14 flavor notes');
   });
 
-  it('D-171: typing a removed note on the Tasting tab brings it back', () => {
+  it('D-181: typing a removed note on the Tasting tab brings it back', () => {
     const berry = named('Berry').id;
     brew(1, [berry]);
     removeTag(db, ids.userId, berry, T0 + 2 * 60_000);
     const shotId = brew(3, [], ['berry']);
     expect(shotTags(shotId)).toEqual([berry]);
     expect(named('Berry').count).toBe(2);
+  });
+});
+
+describe('D-60: owner scoping', () => {
+  it('D-60: another account sees none of your notes and cannot remove or merge them', () => {
+    const berry = named('Berry').id;
+    expect(loadTags(db, 'someone-else').total).toBe(0);
+    expect(removeTag(db, 'someone-else', berry, T0)).toBeNull();
+    expect(mergeTag(db, 'someone-else', berry, named('Honey').id)).toBe(false);
+    expect(keepBoth(db, 'someone-else', berry, named('Honey').id)).toBe(false);
+    expect(named('Berry').id).toBe(berry);
   });
 });
 
@@ -232,7 +262,7 @@ describe('keepBoth', () => {
     expect(keepBoth(db, ids.userId, named('Caramel').id, carmel)).toBe(true);
   });
 
-  it('refuses notes that are not yours', () => {
+  it('D-173: refuses notes that are not yours', () => {
     expect(keepBoth(db, ids.userId, named('Caramel').id, 'missing')).toBe(false);
   });
 });

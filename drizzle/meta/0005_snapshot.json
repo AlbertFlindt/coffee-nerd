@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b5701699-5f74-43c2-bfc7-cb233f629398",
+  "id": "ae0e01c0-46f7-4fa4-9982-399fc48dd27a",
   "prevId": "8ae7b353-9d21-40f1-a9c4-dd84d986ed02",
   "tables": {
     "app_state": {
@@ -1133,6 +1133,51 @@
         "tag_owner_id_user_id_fk": {
           "name": "tag_owner_id_user_id_fk",
           "tableFrom": "tag",
+          "tableTo": "user",
+          "columnsFrom": [
+            "owner_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "tag_merged": {
+      "name": "tag_merged",
+      "columns": {
+        "tag_id": {
+          "name": "tag_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "into_tag_id": {
+          "name": "into_tag_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "tag_merged_owner_id_user_id_fk": {
+          "name": "tag_merged_owner_id_user_id_fk",
+          "tableFrom": "tag_merged",
           "tableTo": "user",
           "columnsFrom": [
             "owner_id"

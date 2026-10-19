@@ -1,3 +1,10 @@
+CREATE TABLE `tag_merged` (
+	`tag_id` text PRIMARY KEY NOT NULL,
+	`owner_id` text NOT NULL,
+	`into_tag_id` text NOT NULL,
+	FOREIGN KEY (`owner_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
 CREATE TABLE `tag_pair_kept` (
 	`owner_id` text NOT NULL,
 	`tag_id` text NOT NULL,

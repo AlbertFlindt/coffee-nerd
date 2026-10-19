@@ -4,7 +4,7 @@ import { and, asc, count, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { duplicatePairs, FAMILIES, keptKey, type Family } from '../../domain/tags';
 import type { Db, Queryable } from './client';
 import { newId } from './ids';
-import { shotTag, tag, tagPairKept } from './schema';
+import { shotTag, tag, tagMerged, tagPairKept } from './schema';
 
 export type TagItem = {
   id: string;
@@ -147,6 +147,8 @@ export function mergeTag(db: Db, ownerId: string, fromId: string, intoId: string
     );
     tx.delete(shotTag).where(eq(shotTag.tagId, fromId)).run();
     tx.delete(tag).where(eq(tag.id, fromId)).run();
+    // D-182: a shot saved later with the old note gets this one.
+    tx.insert(tagMerged).values({ tagId: fromId, ownerId, intoTagId: intoId }).run();
   });
   return true;
 }

@@ -250,6 +250,16 @@ export const tagPairKept = sqliteTable(
   (t) => [primaryKey({ columns: [t.tagId, t.otherTagId] })]
 );
 
+/**
+ * A note merged into another (D-53): kept so a shot saved later with the old id gets the note it went
+ * into (D-182). No foreign key: the merged note is gone, and the kept one may be merged in turn.
+ */
+export const tagMerged = sqliteTable('tag_merged', {
+  tagId: text('tag_id').primaryKey(),
+  ownerId: owner(),
+  intoTagId: text('into_tag_id').notNull()
+});
+
 export const shotTag = sqliteTable(
   'shot_tag',
   {

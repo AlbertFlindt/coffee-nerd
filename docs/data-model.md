@@ -201,8 +201,9 @@ A routine is a straight line, so an ordered list matches it exactly. Editing a r
 **Never stored, always calculated:** ratio (yield ÷ the recipe's dose), roast age at the time (brew date minus roast date).
 
 ### `tag` and `shot_tag` (D-29, D-53)
-`tag`: `id`, `owner_id`, `shared`, `archived_at`, `name`, `family` (`fruity` · `sweet` · `floral` · `nutty_roasty` · `other`, a fixed list in code), `built_in`. Names are unique per owner, ignoring case. A removed note that shots used is archived; one no shot used is deleted (D-171).
+`tag`: `id`, `owner_id`, `shared`, `archived_at`, `name`, `family` (`fruity` · `sweet` · `floral` · `nutty_roasty` · `other`, a fixed list in code), `built_in`. Names are unique per owner, ignoring case. A removed note that shots used is archived; one no shot used is deleted (D-171). Typing an archived note's name brings it back (D-181).
 `tag_pair_kept`: `owner_id`, `tag_id`, `other_tag_id` (the lower id first): two notes the duplicate finder no longer suggests merging, after "Keep both" (D-173).
+`tag_merged`: `tag_id` (primary key), `owner_id`, `into_tag_id`: a note merged into another, which is deleted. A shot saved later with the old id (an open form, a shot waiting offline) gets the note it went into, following merges in turn; a note deleted since is left off the shot (D-182). No foreign keys to `tag`.
 `shot_tag`: `shot_id` + `tag_id`.
 These are real tables rather than JSON on purpose: usage counts are one query, and merging two tags is one update (D-53).
 

@@ -1,11 +1,12 @@
 <script lang="ts">
-  // Tags (screen 21, D-53): "Add tag", a search field, the cream "Same tag twice?" card with Merge and a
-  // quiet "Keep both" (D-173), then your notes as chips by family with their count and "custom" for the
+  // Tags (screen 21, D-53): "Add tag", a search field, the cream "Same tag twice?" card with Merge (it asks
+  // first, D-180) and a quiet "Keep both" (D-173), then your notes as chips by family with their count and "custom" for the
   // ones you added. A chip opens the tag sheet. Only the chip area scrolls (D-36).
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import TabBar from '#lib/components/TabBar.svelte';
   import TagSheet from '#lib/components/TagSheet.svelte';
+  import { matchesSearch } from '#lib/domain/tags.ts';
   import type { TagItem } from '#lib/server/db/tags.ts';
   import type { PageProps } from './$types';
 
@@ -18,13 +19,14 @@
   let sheet: 'new' | string | null = $state(null);
   const editing = $derived(everyNote.find((t) => t.id === sheet));
 
+  /** The "Same tag twice?" card's merge, waiting for its confirmation (D-180). */
+  let merging = $state(false);
   let search = $state('');
-  const bare = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const shown = $derived(
     page.families
       .map((f) => ({
         ...f,
-        tags: f.tags.filter((t) => bare(t.name).includes(bare(search.trim())))
+        tags: f.tags.filter((t) => matchesSearch(t.name, search))
       }))
       .filter((f) => f.tags.length > 0)
   );
@@ -100,15 +102,12 @@
           <button type="submit" class="keep cn-tap">Keep both</button>
         </form>
       </div>
-      <form method="POST" action="?/merge" use:enhance>
-        <input type="hidden" name="id" value={duplicate.merge.id} />
-        <input type="hidden" name="into" value={duplicate.keep.id} />
-        <button
-          type="submit"
-          class="merge cn-tap"
-          aria-label="Merge {duplicate.merge.name} into {duplicate.keep.name}">Merge</button
-        >
-      </form>
+      <button
+        type="button"
+        class="merge cn-tap"
+        aria-label="Merge {duplicate.merge.name} into {duplicate.keep.name}"
+        onclick={() => (merging = true)}>Merge</button
+      >
     </section>
   {/if}
 
@@ -138,7 +137,12 @@
 
 <TabBar current="library" />
 
-{#if sheet === 'new'}
+{#if merging && duplicate}
+  <!-- D-180: the card's Merge asks first, as the sheet does. -->
+  {#key duplicate.merge.id}
+    <TagSheet tag={duplicate.merge} into={duplicate.keep} onclose={() => (merging = false)} />
+  {/key}
+{:else if sheet === 'new'}
   <TagSheet onclose={() => (sheet = null)} />
 {:else if editing}
   {#key editing.id}

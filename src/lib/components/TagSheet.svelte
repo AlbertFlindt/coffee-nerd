@@ -1,7 +1,8 @@
 <script lang="ts">
   // The tag sheet on the Tags page (D-53, no design yet): "Add tag" asks a name and one of the five
   // families, Other to start (D-174). Tapping a note opens it: rename it, change the family of your own
-  // notes (D-172), merge it into another note, or remove it (D-171), each with a confirmation.
+  // notes (D-172), merge it into another note, or remove it (D-171), each with a confirmation. The
+  // "Same tag twice?" card opens it on the merge confirmation (D-180).
   import { enhance } from '$app/forms';
   import { untrack } from 'svelte';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
@@ -12,12 +13,15 @@
   let {
     tag,
     others = [],
+    into,
     onclose
   }: {
     /** The note being changed; without one the sheet adds a note. */
     tag?: TagItem;
     /** The notes it can be merged into. */
     others?: TagItem[];
+    /** Opens straight on merging into this note, as the "Same tag twice?" card does (D-180). */
+    into?: TagItem;
     onclose: () => void;
   } = $props();
 
@@ -29,7 +33,7 @@
   let name = $state(untrack(() => tag?.name ?? ''));
   let family: Family = $state(untrack(() => tag?.family ?? 'other'));
   /** What the sheet shows: the form, the list to merge into, or a confirmation. */
-  let view: 'form' | 'merge' | 'remove' | TagItem = $state('form');
+  let view: 'form' | 'merge' | 'remove' | TagItem = $state(untrack(() => into ?? 'form'));
 
   const problem = $derived(name.trim() === '' ? 'Name is required' : null);
   const familyLabel = $derived(FAMILIES.find((f) => f.family === family)?.label);
@@ -157,8 +161,10 @@
         <input type="hidden" name="id" value={tag?.id} />
         <input type="hidden" name="into" value={view.id} />
         <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={pending}>Merge</button>
-        <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (view = 'merge')}
-          >Back</button
+        <button
+          class="cn-btn-secondary cn-tap"
+          type="button"
+          onclick={() => (into ? onclose() : (view = 'merge'))}>Back</button
         >
       </form>
     {/if}

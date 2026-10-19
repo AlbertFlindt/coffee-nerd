@@ -18,7 +18,18 @@ import {
 import type { Thousandths } from '../../domain/units';
 import type { Db, Queryable } from './client';
 import { newId } from './ids';
-import { appState, bean, gear, prepStep, recipe, routine, shot, shotTag, tag } from './schema';
+import {
+  appState,
+  bean,
+  gear,
+  prepStep,
+  recipe,
+  routine,
+  shot,
+  shotTag,
+  tag,
+  tagMerged
+} from './schema';
 
 export type ShotInput = {
   /** UUID v7; may be made on the phone (D-61). */
@@ -102,6 +113,7 @@ export function saveShot(db: Db, ownerId: string, input: ShotInput, now: number)
       };
     }
 
+    input = { ...input, tagIds: currentTags(tx, ownerId, input.tagIds) };
     const setup = validate(tx, ownerId, input);
     const tagIds = [...input.tagIds, ...addTags(tx, ownerId, input.newTagNames ?? [], now)];
     const { recipeId, newRecipe } = findOrCreateRecipe(tx, ownerId, { ...input, setup }, now);
@@ -175,6 +187,7 @@ export function editShot(
       .from(recipe)
       .where(eq(recipe.id, existing.recipeId))
       .get()!;
+    input = { ...input, tagIds: currentTags(tx, ownerId, input.tagIds) };
     const setup = validate(
       tx,
       ownerId,
@@ -432,6 +445,33 @@ function addTags(tx: Queryable, ownerId: string, names: string[], now: number): 
       .run();
     return id;
   });
+}
+
+/**
+ * D-182: the notes as they are now. A note merged since the form opened becomes the note it went into
+ * (following later merges too); one deleted since is left off.
+ */
+function currentTags(tx: Queryable, ownerId: string, ids: string[]): string[] {
+  const current = new Set<string>();
+  for (let id of ids) {
+    // A merge chain is short; the limit only guards against a loop in bad data.
+    for (let hops = 0; hops < 20; hops++) {
+      // Looked up by id alone: another account's note is kept, so that validate refuses it (D-60).
+      const found = tx.select({ id: tag.id }).from(tag).where(eq(tag.id, id)).get();
+      if (found) {
+        current.add(id);
+        break;
+      }
+      const merged = tx
+        .select({ into: tagMerged.intoTagId })
+        .from(tagMerged)
+        .where(and(eq(tagMerged.tagId, id), eq(tagMerged.ownerId, ownerId)))
+        .get();
+      if (!merged) break;
+      id = merged.into;
+    }
+  }
+  return [...current];
 }
 
 function writeTags(tx: Queryable, shotId: string, tagIds: string[]): void {
