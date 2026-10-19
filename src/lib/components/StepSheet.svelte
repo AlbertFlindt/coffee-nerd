@@ -7,6 +7,7 @@
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import { readQuantity, readRange } from '#lib/domain/gear.ts';
+  import { randomId } from '#lib/domain/id.ts';
   import type { PrepStepSetting } from '#lib/domain/schemas.ts';
   import { decimalsFor, formatNumber } from '#lib/domain/units.ts';
   import type { StepItem } from '#lib/server/db/puck-prep.ts';
@@ -37,7 +38,7 @@
   const routines = untrack(() => step?.routines ?? []);
   const start = untrack(() => step?.setting);
 
-  const option = (label = '') => ({ id: `option-${crypto.randomUUID()}`, label });
+  const option = (label = '') => ({ id: `option-${randomId()}`, label });
   const text = (v: number, s: number) => formatNumber(v, decimalsFor(v, s));
 
   let name = $state(untrack(() => step?.name ?? ''));

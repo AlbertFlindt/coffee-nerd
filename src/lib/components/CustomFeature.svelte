@@ -8,6 +8,7 @@
   import SetupRow from '#lib/components/SetupRow.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import { readQuantity, readRange } from '#lib/domain/gear.ts';
+  import { randomId } from '#lib/domain/id.ts';
   import type { FeatureDefinition } from '#lib/domain/schemas.ts';
   import { decimalsFor, formatNumber } from '#lib/domain/units.ts';
 
@@ -46,7 +47,7 @@
       ? start.kind
       : 'seconds';
 
-  const option = (label = '') => ({ id: `option-${crypto.randomUUID()}`, label });
+  const option = (label = '') => ({ id: `option-${randomId()}`, label });
   const text = (v: number, step: number) => formatNumber(v, decimalsFor(v, step));
 
   let name = $state(untrack(() => feature?.label ?? ''));
@@ -97,7 +98,7 @@
   function definition(): FeatureDefinition {
     const base = {
       // Stable forever; the label can be renamed freely (D-65).
-      key: feature?.key ?? `custom-${crypto.randomUUID()}`,
+      key: feature?.key ?? `custom-${randomId()}`,
       label: name.trim(),
       builtIn: false,
       enabled: feature?.enabled ?? true,
