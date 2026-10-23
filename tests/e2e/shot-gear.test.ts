@@ -76,7 +76,9 @@ test('D-153: switching the machine brings its own features; values both have sta
   await page.goto('/library/gear');
   await page.getByRole('button', { name: 'Add gear' }).click();
   await page.getByRole('button', { name: 'Machine' }).click();
-  // D-158: a new machine has temperature and flat pressure, no phases.
+  // D-158: a new machine has temperature and flat pressure, no phases. D-184: no low bar phases at all.
+  await expect(page.getByRole('switch', { name: 'Preinfusion' })).toBeVisible();
+  await expect(page.getByRole('switch', { name: /Low bar/ })).toHaveCount(0);
   await page.getByLabel('Name').fill('Gaggia Classic');
   await page.getByRole('button', { name: 'Add machine' }).click();
   await expect(page.getByRole('link', { name: /^Gaggia Classic/ })).toBeVisible();
@@ -91,8 +93,8 @@ test('D-153: switching the machine brings its own features; values both have sta
   await expect(page.locator('.card')).toContainText('Gaggia Classic · Timemore 064S');
   await expect(page.locator('.card')).not.toContainText('Preinfusion');
   await expect(page.locator('.card')).toContainText('93 °C');
-  await page.getByRole('button', { name: 'More', exact: true }).click();
-  const more = page.getByRole('region', { name: 'More', exact: true });
+  await page.getByRole('button', { name: 'Setup', exact: true }).click();
+  const more = page.getByRole('region', { name: 'Setup', exact: true });
   await expect(more.getByRole('switch', { name: 'Preinfusion' })).toHaveCount(0);
   await expect(more.getByText('Flat')).toBeVisible();
 });
@@ -111,8 +113,8 @@ test('D-154: a dose outside the basket’s range shows a gentle hint, never a bl
 
 test('D-155: the basket and puck prep pickers start with leaving them out', async () => {
   await page.goto('/shot/new');
-  await page.getByRole('button', { name: 'More', exact: true }).click();
-  const sheet = page.getByRole('region', { name: 'More', exact: true });
+  await page.getByRole('button', { name: 'Setup', exact: true }).click();
+  const sheet = page.getByRole('region', { name: 'Setup', exact: true });
   await sheet.getByRole('button', { name: /^Basket/ }).click();
   await expect(sheet.locator('.pick').first()).toHaveText('No basket');
   // Screen 28: the list ends with a way back.

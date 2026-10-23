@@ -1,6 +1,7 @@
 <script lang="ts">
-  // The shot form (D-14): bean card, the four core values, ratio, balance, score, More, Save. The recipe
-  // tag, deltas and earlier score are worked out in the browser on every change (data-model §4.1).
+  // The shot form (D-14): bean card, the four core values, ratio, score, Setup and Tasting side by side
+  // (D-189, D-190), Save. The recipe tag, deltas and earlier score are worked out in the browser on every
+  // change (data-model §4.1).
   // With `data.edit` it edits a saved shot (D-57, D-113): "Save changes", back to the shot, and the bean
   // card moves the shot to another bean while keeping the values.
   import { enhance } from '$app/forms';
@@ -14,7 +15,6 @@
   import MoreSheet from './MoreSheet.svelte';
   import PickRow from './PickRow.svelte';
   import ScoreRow from './ScoreRow.svelte';
-  import TasteSlider from './TasteSlider.svelte';
   import ValueCard from './ValueCard.svelte';
   import type { ShotState } from './shot-state';
   import { recipeTagText, type RecipeIdentity } from '../domain/fingerprint';
@@ -72,8 +72,7 @@
       reset: false
     });
   }
-  let sheet: 'more' | 'bean' | 'gear' | 'delete' | null = $state(null);
-  let tab: 'setup' | 'tasting' = $state('setup');
+  let sheet: 'setup' | 'tasting' | 'bean' | 'gear' | 'delete' | null = $state(null);
   let saving = $state(false);
   let deleting = $state(false);
   let localProblems: string[] = $state([]);
@@ -258,17 +257,8 @@
       </div>
       {#if doseHint}<p class="dose-hint">{doseHint}</p>{/if}
 
+      <!-- D-190: balance lives in the Tasting sheet; the form keeps the score. -->
       <section class="taste" aria-label="Taste">
-        <TasteSlider
-          scale="balance"
-          title="Balance"
-          ariaLabel="Balance, sour to bitter"
-          ends={['Sour', 'Balanced', 'Bitter']}
-          min={-10}
-          max={10}
-          value={shot.taste.balance}
-          onchange={(v) => (shot.taste.balance = v)}
-        />
         <ScoreRow
           value={shot.taste.score}
           previous={match.kind === 'reused' ? match.lastScore : null}
@@ -276,30 +266,35 @@
         />
       </section>
 
-      <button
-        type="button"
-        class="more cn-tap"
-        aria-expanded={sheet === 'more'}
-        onclick={() => (sheet = 'more')}
-      >
-        More
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg
-        >
-      </button>
+      <!-- D-189: Setup and Tasting side by side, each opening its own sheet. -->
+      <div class="sheets">
+        {#each [['setup', 'Setup'], ['tasting', 'Tasting']] as const as [key, label] (key)}
+          <button
+            type="button"
+            class="more cn-tap"
+            aria-expanded={sheet === key}
+            onclick={() => (sheet = key)}
+          >
+            {label}
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg
+            >
+          </button>
+        {/each}
+      </div>
     </main>
 
-    {#if sheet === 'more'}
+    {#if sheet === 'setup' || sheet === 'tasting'}
       <MoreSheet
         bind:shot
-        bind:tab
+        tab={sheet}
         features={machine.features}
         baskets={data.baskets}
         routines={data.routines}
@@ -550,6 +545,12 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
+  }
+
+  .sheets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
   }
 
   .more {

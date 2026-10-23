@@ -344,16 +344,17 @@ test('GearDetail, D-44: switching a feature off changes what the machine can do'
   await expect(page.getByRole('button', { name: 'Archive' })).toHaveCount(0);
   await expectNoPageScroll();
   await screenshot('GearDetail');
-  await page.getByRole('switch', { name: 'Low bar end' }).click();
+  // A low bar phase switched off would leave the machine for good (D-184), so this uses Preinfusion.
+  await page.getByRole('switch', { name: 'Preinfusion' }).click();
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
   await expect(page.getByRole('link', { name: /^Lelit Bianca/ })).toContainText(
-    'Semi-auto · Preinfusion, low bar start'
+    'Semi-auto · Low bar start, low bar end'
   );
-  await expect(page.getByRole('link', { name: /^Lelit Bianca/ })).not.toContainText('low bar end');
+  await expect(page.getByRole('link', { name: /^Lelit Bianca/ })).not.toContainText('Preinfusion');
   // Switch it back, so the reference setup stays as it was.
   await page.getByRole('link', { name: /^Lelit Bianca/ }).click();
-  await page.getByRole('switch', { name: 'Low bar end' }).click();
+  await page.getByRole('switch', { name: 'Preinfusion' }).click();
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
 });
@@ -440,8 +441,8 @@ test('D-46, D-02: your own feature appears on More › Setup', async () => {
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
 
   await page.goto('/shot/new');
-  await page.getByRole('button', { name: 'More', exact: true }).click();
-  const more = page.getByRole('region', { name: 'More', exact: true });
+  await page.getByRole('button', { name: 'Setup', exact: true }).click();
+  const more = page.getByRole('region', { name: 'Setup', exact: true });
   await expect(more.getByRole('switch', { name: 'Bloom pause' })).toBeVisible();
   // Screen 29, D-78: a list feature switched on without an option asks for one before saving.
   await more.getByRole('switch', { name: 'Water' }).click();
