@@ -1,7 +1,7 @@
 // Everything the shot form needs (data-model §4.1, §4.2): the prefill, the bean's recipes for matching in
 // the browser, the bean's last shot for deltas (D-15, D-81), and the choices its pickers offer. Every query
 // is scoped by the owner (D-60).
-import { and, desc, eq, inArray, isNull, lt, or, sql, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, lt, or, sql, type SQL } from 'drizzle-orm';
 import { roastAgeDays } from '../../domain/bean';
 import { bestRecipe } from '../../domain/best-recipe';
 import type { RecipeIdentity } from '../../domain/fingerprint';
@@ -240,6 +240,7 @@ export function loadEditShotForm(
     prefill: {
       ...toValues(r),
       beanId: current.id,
+      dose: s.dose, // D-186: the dose it was brewed with
       yield: s.yield,
       time: s.time,
       source: 'last_shot',
@@ -325,7 +326,7 @@ function brewedBefore(before?: ShotMoment): SQL | undefined {
 function latestShotOfRecipe(db: Queryable, ownerId: string, recipeId: string): ShotResult | null {
   return (
     db
-      .select({ yield: shot.yield, time: shot.time })
+      .select({ dose: shot.dose, yield: shot.yield, time: shot.time })
       .from(shot)
       .where(and(eq(shot.recipeId, recipeId), eq(shot.ownerId, ownerId)))
       .orderBy(...newestShot)
@@ -340,13 +341,17 @@ function latestShotOfBean(
   before?: ShotMoment
 ): { recipe: RecipeValues; shot: ShotResult } | null {
   const row = db
-    .select({ recipe, yield: shot.yield, time: shot.time })
+    .select({ recipe, dose: shot.dose, yield: shot.yield, time: shot.time })
     .from(shot)
     .innerJoin(recipe, eq(shot.recipeId, recipe.id))
     .where(and(eq(recipe.beanId, beanId), eq(shot.ownerId, ownerId), brewedBefore(before)))
     .orderBy(...newestShot)
     .get();
-  return row ? { recipe: toValues(row.recipe), shot: { yield: row.yield, time: row.time } } : null;
+  // D-186: the shot's own dose beside its recipe's: the next shot starts from it, while the recipe tag
+  // compares recipes.
+  return row
+    ? { recipe: toValues(row.recipe), shot: { dose: row.dose, yield: row.yield, time: row.time } }
+    : null;
 }
 
 /** Earlier bags of a re-buy, nearest first (D-73, D-74), with their best recipe (D-66) and latest shot. */
@@ -459,6 +464,8 @@ function knownRecipes(
       id: recipe.id,
       machineId: recipe.machineId,
       fingerprint: recipe.fingerprint,
+      dose: recipe.dose,
+      lastBrewedAt: sql<number | null>`max(${shot.brewedAt})`,
       shotCount: sql<number>`count(${shot.id})`,
       lastScore: sql<number | null>`(
         select s.score from shot s where s.recipe_id = ${recipe.id} and s.score is not null ${earlier}
@@ -468,6 +475,8 @@ function knownRecipes(
     .leftJoin(shot, and(eq(shot.recipeId, recipe.id), brewedBefore(before)))
     .where(and(eq(recipe.beanId, beanId), eq(recipe.ownerId, ownerId)))
     .groupBy(recipe.id)
+    // The order the server matches in, so a tie between two doses goes the same way (D-186).
+    .orderBy(asc(recipe.createdAt), asc(recipe.id))
     .all();
   return rows;
 }

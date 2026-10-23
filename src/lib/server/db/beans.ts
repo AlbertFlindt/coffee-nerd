@@ -60,7 +60,7 @@ export function loadBeans(db: Queryable, ownerId: string, now: number): Beans {
     .select({
       recipeId: shot.recipeId,
       beanId: recipe.beanId,
-      dose: recipe.dose,
+      dose: shot.dose,
       score: shot.score,
       brewedAt: shot.brewedAt
     })

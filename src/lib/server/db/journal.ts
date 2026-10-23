@@ -66,7 +66,9 @@ export function loadJournal(
       beanId: recipe.beanId,
       beanName: bean.name,
       grind: recipe.grind,
-      dose: recipe.dose,
+      // D-186: a shot shows the dose it was brewed with; recipe labels show the recipe's.
+      dose: shot.dose,
+      recipeDose: recipe.dose,
       setup: recipe.setup,
       machineId: recipe.machineId,
       grinderId: recipe.grinderId,
@@ -125,7 +127,7 @@ export function loadJournal(
         );
         const machineSpec = gearOf.get(row.machineId)?.spec as MachineSpec | undefined;
         return {
-          values: JSON.stringify([row.grind, row.dose, row.setup.routine?.name ?? null]),
+          values: JSON.stringify([row.grind, row.recipeDose, row.setup.routine?.name ?? null]),
           setup: [
             ...named,
             ...setupParts(row.setup, machineSpec?.features ?? []),
@@ -138,7 +140,7 @@ export function loadJournal(
       const label = recipeFilterLabel(
         {
           grind: row.grind,
-          dose: row.dose,
+          dose: row.recipeDose,
           routine: row.setup.routine?.name ?? null,
           shotCount: ofBean.filter((r) => r.recipeId === row.recipeId).length,
           differences: differences[i]
@@ -271,7 +273,7 @@ export function loadShotDetail(db: Queryable, ownerId: string, shotId: string): 
         : { kind: 'reused', shotCount: earlier },
     grind: r.grind,
     grindStep: (grinder.spec as GrinderSpec).dial.step,
-    dose: r.dose,
+    dose: s.dose,
     yield: s.yield,
     time: s.time,
     taste: {

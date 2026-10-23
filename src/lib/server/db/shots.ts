@@ -1,10 +1,11 @@
 // Saving and editing shots (data-model §4.1). Each call is one transaction: validate, recompute the
 // fingerprint on the server, find or create the recipe, write the shot, clear Brew next, finish the bean
 // when the bag runs out. Every query is scoped by the owner (D-60).
-import { and, count, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, count, eq, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { shouldAutoFinish } from '../../domain/bean';
 import { recipeFingerprint } from '../../domain/fingerprint';
+import { closestDose } from '../../domain/shot-form';
 import {
   machineSpecSchema,
   setupSnapshotSchema,
@@ -261,6 +262,7 @@ function shotValues(input: ShotInput) {
   const { score, balance, body, sweetness, aftertaste } = input.taste;
   return {
     brewedAt: input.brewedAt,
+    dose: input.dose,
     yield: input.yield,
     time: input.time,
     score,
@@ -379,7 +381,10 @@ function validate(
   return setup.data;
 }
 
-/** The recipe with this fingerprint for this bean and machine, or a new one (D-16, D-63). */
+/**
+ * The recipe with this fingerprint for this bean and machine and a dose within 0.2 g, the closest winning,
+ * or a new one (D-16, D-63, D-186).
+ */
 function findOrCreateRecipe(
   tx: Queryable,
   ownerId: string,
@@ -387,18 +392,28 @@ function findOrCreateRecipe(
   now: number
 ): { recipeId: string; newRecipe: boolean } {
   const fingerprint = recipeFingerprint(input);
-  const found = tx
-    .select({ id: recipe.id })
-    .from(recipe)
-    .where(
-      and(
-        eq(recipe.ownerId, ownerId),
-        eq(recipe.beanId, input.beanId),
-        eq(recipe.machineId, input.machineId),
-        eq(recipe.fingerprint, fingerprint)
+  const found = closestDose(
+    input.dose,
+    tx
+      .select({
+        id: recipe.id,
+        dose: recipe.dose,
+        lastBrewedAt: sql<number | null>`max(${shot.brewedAt})`
+      })
+      .from(recipe)
+      .leftJoin(shot, eq(shot.recipeId, recipe.id))
+      .where(
+        and(
+          eq(recipe.ownerId, ownerId),
+          eq(recipe.beanId, input.beanId),
+          eq(recipe.machineId, input.machineId),
+          eq(recipe.fingerprint, fingerprint)
+        )
       )
-    )
-    .get();
+      .groupBy(recipe.id)
+      .orderBy(asc(recipe.createdAt), asc(recipe.id))
+      .all()
+  );
   if (found) return { recipeId: found.id, newRecipe: false };
 
   const recipeId = newId(now);
@@ -513,7 +528,7 @@ function finishBeanIfUsedUp(
   if (!row || row.status !== 'open' || row.bagWeight === null) return false;
 
   const earlier = tx
-    .select({ dose: recipe.dose })
+    .select({ dose: shot.dose })
     .from(shot)
     .innerJoin(recipe, eq(shot.recipeId, recipe.id))
     .where(

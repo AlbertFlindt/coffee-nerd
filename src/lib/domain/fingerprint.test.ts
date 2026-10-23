@@ -3,6 +3,7 @@ import {
   describeChange,
   recipeFingerprint,
   recipeTagText,
+  sameDose,
   type RecipeIdentity
 } from './fingerprint';
 
@@ -128,13 +129,12 @@ describe('recipeFingerprint', () => {
     expect(recipeFingerprint(swappedSteps)).not.toBe(recipeFingerprint(base));
   });
 
-  it('D-63: grinder, basket, routine, dose and step values are each part of the recipe', () => {
+  it('D-63, D-186: grinder, basket, routine and step values are each part of the recipe', () => {
     const fingerprints = new Set([
       recipeFingerprint(base),
       recipeFingerprint({ ...base, grinderId: OTHER_GRINDER }),
       recipeFingerprint({ ...base, basketId: null }),
       recipeFingerprint({ ...base, routineId: null, setup: { ...base.setup, routine: null } }),
-      recipeFingerprint({ ...base, dose: 18500 }),
       recipeFingerprint({
         ...base,
         setup: {
@@ -146,7 +146,14 @@ describe('recipeFingerprint', () => {
         }
       })
     ]);
-    expect(fingerprints.size).toBe(6);
+    expect(fingerprints.size).toBe(5);
+  });
+
+  it('D-186: the dose is left out; recipes are told apart by a dose more than 0.2 g away', () => {
+    expect(recipeFingerprint({ ...base, dose: 18500 })).toBe(recipeFingerprint(base));
+    expect(sameDose(18000, 18200)).toBe(true);
+    expect(sameDose(18000, 17800)).toBe(true);
+    expect(sameDose(18000, 18300)).toBe(false);
   });
 
   it('D-63: an empty field and a missing field give the same fingerprint', () => {
@@ -183,6 +190,11 @@ describe('recipeFingerprint', () => {
 describe('describeChange', () => {
   it('D-16: names what changed since the last shot’s recipe', () => {
     expect(describeChange({ ...base, grind: 1500 }, base)).toEqual(['grind']);
+  });
+
+  it('D-186: a dose within 0.2 g is not named as a change; one further away is', () => {
+    expect(describeChange({ ...base, grind: 1500, dose: 18100 }, base)).toEqual(['grind']);
+    expect(describeChange({ ...base, dose: 18300 }, base)).toEqual(['dose']);
   });
 
   it('D-16, D-71: lists changes in a fixed order: grind, dose, gear, routine, then features', () => {

@@ -1,7 +1,7 @@
 // What the shot form shows about the values being entered (D-12, D-15, D-16, D-90, D-100). Pure, so it
 // runs in the browser on every change and works offline (D-61).
 import { trimmed } from './gear';
-import { describeChange, recipeFingerprint, type RecipeIdentity } from './fingerprint';
+import { describeChange, recipeFingerprint, sameDose, type RecipeIdentity } from './fingerprint';
 import type { FeatureDefinition, FeatureValue, SetupSnapshot } from './schemas';
 import { decimalsFor, formatQuantity, type Thousandths } from './units';
 
@@ -10,6 +10,10 @@ export type KnownRecipe = {
   id: string;
   machineId: string;
   fingerprint: string;
+  /** The recipe's dose; a form dose within 0.2 g of it is this recipe (D-186). */
+  dose: Thousandths;
+  /** When its latest shot was brewed: equally close doses go to the most recent (D-186). */
+  lastBrewedAt?: number | null;
   shotCount: number;
   /** Score of the recipe's latest rated shot (D-12); null when none is rated. */
   lastScore: number | null;
@@ -21,7 +25,7 @@ export type FormMatch =
 
 /**
  * The recipe these values make (D-16): an earlier recipe of this bean on this machine with the same
- * fingerprint, or a new one whose changes are named against the bean's last shot (D-71, D-77, D-81). A
+ * fingerprint and a dose within 0.2 g, the closest dose winning (D-186), or a new one whose changes are named against the bean's last shot (D-71, D-77, D-81). A
  * recipe without shots (kept only by its Brew next mark) has not been brewed, so it counts as new (D-104).
  */
 export function matchRecipe(
@@ -30,10 +34,12 @@ export function matchRecipe(
   lastShotRecipe: RecipeIdentity | null
 ): FormMatch {
   const fingerprint = recipeFingerprint(form);
-  const found = recipes.find(
-    (r) => r.machineId === form.machineId && r.fingerprint === fingerprint && r.shotCount > 0
+  // Chosen among all of them, as the server does; one without shots is then still new (D-104).
+  const found = closestDose(
+    form.dose,
+    recipes.filter((r) => r.machineId === form.machineId && r.fingerprint === fingerprint)
   );
-  if (found)
+  if (found && found.shotCount > 0)
     return {
       kind: 'reused',
       recipeId: found.id,
@@ -41,6 +47,28 @@ export function matchRecipe(
       lastScore: found.lastScore
     };
   return { kind: 'new', changes: lastShotRecipe ? describeChange(form, lastShotRecipe) : [] };
+}
+
+/**
+ * Of recipes with the same fingerprint, the one whose dose is within reach and closest; equally close,
+ * the one brewed most recently, then the first given (D-186).
+ */
+export function closestDose<T extends { dose: Thousandths; lastBrewedAt?: number | null }>(
+  dose: Thousandths,
+  recipes: readonly T[]
+): T | undefined {
+  let best: T | undefined;
+  for (const r of recipes) {
+    if (!sameDose(r.dose, dose)) continue;
+    const distance = Math.abs(r.dose - dose);
+    const bestDistance = best ? Math.abs(best.dose - dose) : Infinity;
+    if (
+      distance < bestDistance ||
+      (distance === bestDistance && (r.lastBrewedAt ?? -1) > (best!.lastBrewedAt ?? -1))
+    )
+      best = r;
+  }
+  return best;
 }
 
 export type CoreValues = {

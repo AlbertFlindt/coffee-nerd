@@ -152,8 +152,18 @@ test('M3 acceptance, D-16: going back to the first grind says "Recipe reused"', 
   await save();
 });
 
-test('Rated, D-15: changed results and a score', async () => {
+test('Rated, D-15, D-186: changed results and a score; 0.1 g more is the same recipe', async () => {
   await page.getByRole('link', { name: 'New shot' }).click();
+  await expect(recipeTag()).toHaveText('Recipe reused 3x');
+  // D-186: a dose within 0.2 g keeps the recipe; 0.3 g away is a new one.
+  const dosePlus = card('Dose').getByRole('button', { name: 'Dose plus 0.1 gram' });
+  const doseMinus = card('Dose').getByRole('button', { name: 'Dose minus 0.1 gram' });
+  await dosePlus.click();
+  await expect(recipeTag()).toHaveText('Recipe reused 3x');
+  await dosePlus.click();
+  await dosePlus.click();
+  await expect(recipeTag()).toHaveText('New recipe · dose changed');
+  for (let i = 0; i < 3; i++) await doseMinus.click();
   await expect(recipeTag()).toHaveText('Recipe reused 3x');
   await typeValue('Yield', '38.5');
   await typeValue('Time', '25.5');

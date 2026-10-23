@@ -373,6 +373,23 @@ describe('prefill', () => {
     });
   });
 
+  it('D-186: a shot started from a recipe takes the dose of its last shot', () => {
+    const fromLast = prefill(
+      context({
+        latestShotOfBean: { recipe: recipe(), shot: { dose: 18100, yield: 36000, time: 28000 } }
+      })
+    );
+    expect(fromLast.dose).toBe(18100);
+    const fromMark = prefill(
+      context({
+        brewNext: { recipe: recipe(), latestShot: { dose: 17900, yield: 36000, time: 28000 } }
+      })
+    );
+    expect(fromMark.dose).toBe(17900);
+    const unbrewed = prefill(context({ brewNext: { recipe: recipe(), latestShot: null } }));
+    expect(unbrewed.dose).toBe(recipe().dose);
+  });
+
   it('D-75: an archived grinder or basket is swapped for My setup’s; the rest is copied', () => {
     const result = prefill(
       context({

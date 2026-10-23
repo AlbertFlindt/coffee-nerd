@@ -76,6 +76,37 @@ function addBean(values: Partial<typeof bean.$inferInsert> = {}): string {
 }
 
 describe('loadShotForm', () => {
+  it('D-186: the next shot starts from the last shot’s own dose, and that recipe is reused', () => {
+    save({}, 1);
+    const saved = save(
+      { dose: (ready(loadShotForm(db, ids.userId)).prefill.dose as number) + 100 },
+      2
+    );
+    const form = ready(loadShotForm(db, ids.userId));
+    expect(form.prefill.dose).toBe(form.lastShot!.dose);
+    expect(form.prefill.dose % 1000).toBe(100);
+    expect(
+      form.recipes.find((r) => r.id === (saved.status === 'saved' && saved.recipeId))
+    ).toMatchObject({
+      shotCount: 2
+    });
+  });
+
+  it('D-186: the last shot is compared by its recipe’s dose; its own dose is kept beside it', () => {
+    save({ dose: 18000 }, 1);
+    save({ dose: 18200 }, 2);
+    const form = ready(loadShotForm(db, ids.userId));
+    expect(form.lastShot).toMatchObject({ recipe: { dose: 18000 }, dose: 18200 });
+    expect(form.prefill.dose).toBe(18200);
+  });
+
+  it('D-186: editing a shot starts from the dose it was brewed with', () => {
+    const first = save({ dose: 18100 }, 1);
+    if (first.status !== 'saved') throw new Error('not saved');
+    const shotId = db.select({ id: shot.id }).from(shot).get()!.id;
+    expect(loadEditShotForm(db, ids.userId, shotId)!.prefill.dose).toBe(18100);
+  });
+
   it('D-38, D-72, D-77: a bean’s first shot starts from My setup, with an empty time', () => {
     const form = ready(loadShotForm(db, ids.userId));
     expect(form.prefill).toMatchObject({

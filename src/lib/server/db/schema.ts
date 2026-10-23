@@ -190,12 +190,15 @@ export const recipe = sqliteTable(
     basketId: text('basket_id').references(() => gear.id),
     routineId: text('routine_id').references(() => routine.id),
     grind: integer('grind').notNull(),
+    /** The recipe's dose; a shot within 0.2 g of it is this recipe (D-186). */
     dose: integer('dose').notNull(),
     setup: text('setup', { mode: 'json' }).$type<SetupSnapshot>().notNull(),
     fingerprint: text('fingerprint').notNull(),
     ...timestamps
   },
-  (t) => [uniqueIndex('recipe_identity').on(t.ownerId, t.beanId, t.machineId, t.fingerprint)]
+  (t) => [
+    uniqueIndex('recipe_identity_dose').on(t.ownerId, t.beanId, t.machineId, t.fingerprint, t.dose)
+  ]
 );
 
 /** What you got (D-13). Taste is null when not rated or not set, never 0 (D-11). */
@@ -208,6 +211,8 @@ export const shot = sqliteTable(
       .notNull()
       .references(() => recipe.id),
     brewedAt: integer('brewed_at').notNull(),
+    /** The exact dose brewed, for ratio and grams used; its recipe's dose is within 0.2 g (D-186). */
+    dose: integer('dose').notNull().default(0),
     yield: integer('yield'), // empty = not set; a shot may be saved without it (D-82, D-91)
     time: integer('time'), // empty = not set; a shot may be saved without it (D-72, D-91)
     score: integer('score'),

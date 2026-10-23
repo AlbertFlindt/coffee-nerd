@@ -53,6 +53,7 @@ const known = (recipe: RecipeIdentity, extra: Partial<KnownRecipe> = {}): KnownR
   id: 'r1',
   machineId: recipe.machineId,
   fingerprint: recipeFingerprint(recipe),
+  dose: recipe.dose,
   shotCount: 2,
   lastScore: 8,
   ...extra
@@ -69,6 +70,49 @@ describe('matchRecipe', () => {
     const at15 = { ...base, grind: 1500 };
     const match = matchRecipe(base, [known(base), known(at15, { id: 'r2' })], at15);
     expect(match).toMatchObject({ kind: 'reused', recipeId: 'r1' });
+  });
+
+  it('D-186: a dose within 0.2 g reuses the recipe; further away is a new recipe', () => {
+    expect(matchRecipe({ ...base, dose: 18100 }, [known(base)], base)).toMatchObject({
+      kind: 'reused',
+      recipeId: 'r1'
+    });
+    expect(matchRecipe({ ...base, dose: 17800 }, [known(base)], base).kind).toBe('reused');
+    expect(matchRecipe({ ...base, dose: 18300 }, [known(base)], base)).toEqual({
+      kind: 'new',
+      changes: ['dose']
+    });
+  });
+
+  it('D-186: when two recipes are within reach, the closest dose wins', () => {
+    const at183 = { ...base, dose: 18300 };
+    const match = matchRecipe(
+      { ...base, dose: 18200 },
+      [known(base), known(at183, { id: 'r2' })],
+      base
+    );
+    expect(match).toMatchObject({ kind: 'reused', recipeId: 'r2' });
+  });
+
+  it('D-186: equally close doses go to the recipe brewed most recently', () => {
+    const at184 = { ...base, dose: 18400 };
+    const match = matchRecipe(
+      { ...base, dose: 18200 },
+      [known(base, { lastBrewedAt: 2 }), known(at184, { id: 'r2', lastBrewedAt: 5 })],
+      base
+    );
+    expect(match).toMatchObject({ kind: 'reused', recipeId: 'r2' });
+  });
+
+  it('D-186, D-104: the closest recipe is chosen among all, so one without shots makes it new', () => {
+    // The server saves on the closest recipe (18.3 g, kept only by Brew next), so the form says new.
+    const at183 = { ...base, dose: 18300 };
+    const match = matchRecipe(
+      { ...base, dose: 18200 },
+      [known(base), known(at183, { id: 'r0', shotCount: 0 })],
+      base
+    );
+    expect(match.kind).toBe('new');
   });
 
   it('D-12: a reused recipe without a rated shot has no earlier score', () => {

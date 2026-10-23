@@ -16,11 +16,20 @@ export type RecipeIdentity = {
   setup: SetupSnapshot;
 };
 
+/** A dose this close to a recipe's dose is that recipe's dose (D-186): 0.2 g. */
+export const DOSE_REACH: Thousandths = 200;
+
+/** True when two doses count as the same recipe (D-186). */
+export function sameDose(a: Thousandths, b: Thousandths): boolean {
+  return Math.abs(a - b) <= DOSE_REACH;
+}
+
 /**
- * SHA-256 of a canonical list of grinder, basket, routine, grind, dose, each feature's key with its
+ * SHA-256 of a canonical list of grinder, basket, routine, grind, each feature's key with its
  * on/value/pressure/choice (sorted by key), and each routine step's id and value in order. Labels, units
  * and names are left out (D-65); a switched-off feature counts only as "off". Bean and machine are the
- * matching scope and are not included (D-16). Changing what goes in here changes recipe identity.
+ * matching scope and are not included (D-16). The dose is left out too: a recipe is its fingerprint plus a
+ * dose, matched within 0.2 g (D-186). Changing what goes in here changes recipe identity.
  */
 export function recipeFingerprint(recipe: RecipeIdentity): string {
   const features = Object.keys(recipe.setup.features)
@@ -31,7 +40,6 @@ export function recipeFingerprint(recipe: RecipeIdentity): string {
     ['basket', recipe.basketId],
     ['routine', recipe.routineId],
     ['grind', recipe.grind],
-    ['dose', recipe.dose],
     ['features', features],
     ['steps', stepIdentity(recipe)]
   ];
@@ -54,7 +62,7 @@ function stepIdentity(recipe: RecipeIdentity): unknown[] {
 export function describeChange(current: RecipeIdentity, last: RecipeIdentity): string[] {
   const changes: string[] = [];
   if (current.grind !== last.grind) changes.push('grind');
-  if (current.dose !== last.dose) changes.push('dose');
+  if (!sameDose(current.dose, last.dose)) changes.push('dose');
   if (current.machineId !== last.machineId) changes.push('machine');
   if (current.grinderId !== last.grinderId) changes.push('grinder');
   if (current.basketId !== last.basketId) changes.push('basket');

@@ -160,11 +160,11 @@ A routine is a straight line, so an ordered list matches it exactly. Editing a r
 | `method` | `espresso` |
 | `bean_id`, `machine_id` | the matching scope (D-16) |
 | `grinder_id`, `basket_id`, `routine_id` | basket and routine can be empty (e.g. a bean-to-cup machine) |
-| `grind`, `dose` | |
+| `grind`, `dose` | the dose of the recipe's first shot; shots within 0.2 g of it belong to it (D-186) |
 | `setup` | JSON snapshot (below) |
-| `fingerprint` | a hash of everything that makes the recipe what it is |
+| `fingerprint` | a hash of everything that makes the recipe what it is, except the dose (D-186) |
 
-**Unique:** `owner_id` + `bean_id` + `machine_id` + `fingerprint`. The database itself guarantees one recipe per identical setup.
+**Unique:** `owner_id` + `bean_id` + `machine_id` + `fingerprint` + `dose`. The database guarantees one recipe per identical setup and dose; matching keeps doses of one setup more than 0.2 g apart (§4.1).
 
 **Setup snapshot:**
 ```json
@@ -185,7 +185,7 @@ A routine is a straight line, so an ordered list matches it exactly. Editing a r
 }
 ```
 
-**Fingerprint** = SHA-256 of a canonical (sorted, fixed-format) list of: grinder, basket, routine, grind, dose, every feature's `key` with its `on`/`value`/`pressure`/`choice`, and every routine step's `stepId` and `value` in order. **Labels, units and names are left out**, so renaming a feature or step never creates a new recipe. A switched-off feature counts only as "off", whatever value it had.
+**Fingerprint** = SHA-256 of a canonical (sorted, fixed-format) list of: grinder, basket, routine, grind, every feature's `key` with its `on`/`value`/`pressure`/`choice`, and every routine step's `stepId` and `value` in order. **Labels, units and names are left out**, so renaming a feature or step never creates a new recipe. A switched-off feature counts only as "off", whatever value it had. The dose is left out: it is matched within 0.2 g instead (D-186, §4.1).
 
 ### `shot` (D-08 to D-11, D-13, D-23)
 | Column | Notes |
@@ -193,13 +193,14 @@ A routine is a straight line, so an ordered list matches it exactly. Editing a r
 | `id` | UUID version 7, may be made on the phone (offline queue) |
 | `owner_id`, `recipe_id` | |
 | `brewed_at` | |
+| `dose` | the exact dose brewed, for the ratio and grams left; within 0.2 g of its recipe's dose (D-186) |
 | `yield`, `time` | the result |
 | `score` | 1–10 whole numbers; empty = "not rated" (D-09, D-11) |
 | `balance` | −10 (sour) … 0 (balanced) … +10 (bitter); whole numbers; empty = not set (D-67) |
 | `body`, `sweetness`, `aftertaste` | 0–10; whole numbers; empty = not set (D-23, D-67) |
 | `notes` | free text, never used by Insights (D-27) |
 
-**Never stored, always calculated:** ratio (yield ÷ the recipe's dose), roast age at the time (brew date minus roast date).
+**Never stored, always calculated:** ratio (yield ÷ the shot's dose), roast age at the time (brew date minus roast date).
 
 ### `tag` and `shot_tag` (D-29, D-53)
 `tag`: `id`, `owner_id`, `shared`, `archived_at`, `name`, `family` (`fruity` · `sweet` · `floral` · `nutty_roasty` · `other`, a fixed list in code), `built_in`. Names are unique per owner, ignoring case. A removed note that shots used is archived; one no shot used is deleted (D-171). Typing an archived note's name brings it back (D-181).
@@ -215,7 +216,7 @@ These are real tables rather than JSON on purpose: usage counts are one query, a
 ### 4.1 Recipe matching (D-16)
 1. While you edit the shot form, a shared function `recipeFingerprint(form)` runs in the browser.
 2. It looks the fingerprint up among this bean's recipes on this machine (cached on the phone, so it also works offline).
-   **D-186 (not built yet):** the dose leaves the fingerprint; a recipe matches when the fingerprint is equal and its dose is within 0.2 g (200 thousandths) of the form's, the closest dose winning. The shot stores its own exact dose for its ratio. Existing shots are matched again once, by a migration.
+   **Dose (D-186):** a recipe matches when the fingerprint is equal and its dose is within 0.2 g (200 thousandths) of the form's; the closest dose wins, and on a tie the recipe brewed most recently (then the one made first). A new recipe takes the shot's dose. The shot stores its own exact dose. Databases from before D-186 are matched again once when the server starts (`PRAGMA user_version` 1): in order of creation, a recipe within 0.2 g of an earlier one with the same new fingerprint gives it its shots and Brew next mark and is deleted.
 3. **Found** → "Recipe reused N×" (N = the recipe's shot count). The faint previous-score marker (D-12) is the score of that recipe's latest rated shot.
 4. **Not found** → "New recipe · grind changed": the form is compared field by field with the recipe of **this bean's last shot** (D-81) to name what changed (grind, dose, machine, grinder, basket, routine, or a feature by its label); with several changes, the first two are named and the rest counted (D-71), in the order grind, dose, machine, grinder, basket, routine, features; with nothing to name, just "New recipe" (D-77).
 5. **On save** the server recomputes the fingerprint itself (it never trusts the browser's), then finds or creates the recipe and saves the shot, in one transaction. Flavor notes added on the Tasting tab are created in that transaction too, in the family Other, or matched to an existing note ignoring case (D-101).
