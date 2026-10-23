@@ -395,8 +395,13 @@ function findOrCreateRecipe(
   const found = closestDose(
     input.dose,
     tx
-      .select({ id: recipe.id, dose: recipe.dose })
+      .select({
+        id: recipe.id,
+        dose: recipe.dose,
+        lastBrewedAt: sql<number | null>`max(${shot.brewedAt})`
+      })
       .from(recipe)
+      .leftJoin(shot, eq(shot.recipeId, recipe.id))
       .where(
         and(
           eq(recipe.ownerId, ownerId),
@@ -405,6 +410,7 @@ function findOrCreateRecipe(
           eq(recipe.fingerprint, fingerprint)
         )
       )
+      .groupBy(recipe.id)
       .orderBy(asc(recipe.createdAt), asc(recipe.id))
       .all()
   );

@@ -94,13 +94,19 @@
     coreChanges(
       shot,
       last
-        ? { grind: last.recipe.grind, dose: last.recipe.dose, yield: last.yield, time: last.time }
+        ? {
+            grind: last.recipe.grind,
+            // D-186: compared with the dose the last shot was brewed with.
+            dose: last.dose ?? last.recipe.dose,
+            yield: last.yield,
+            time: last.time
+          }
         : null
     )
   );
   const setup = $derived(setupChanges(identity, last?.recipe ?? null));
   const ratio = $derived(formatRatio(shot.yield, shot.dose));
-  const lastRatio = $derived(last ? formatRatio(last.yield, last.recipe.dose) : null);
+  const lastRatio = $derived(last ? formatRatio(last.yield, last.dose ?? last.recipe.dose) : null);
   // D-153: the machine and grinder can be switched for this shot; features and grind control follow.
   const machine = $derived(data.machines.find((m) => m.id === shot.machineId) ?? data.machines[0]);
   const grinder = $derived(data.grinders.find((g) => g.id === shot.grinderId) ?? data.grinders[0]);

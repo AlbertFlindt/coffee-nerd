@@ -326,7 +326,7 @@ function brewedBefore(before?: ShotMoment): SQL | undefined {
 function latestShotOfRecipe(db: Queryable, ownerId: string, recipeId: string): ShotResult | null {
   return (
     db
-      .select({ yield: shot.yield, time: shot.time })
+      .select({ dose: shot.dose, yield: shot.yield, time: shot.time })
       .from(shot)
       .where(and(eq(shot.recipeId, recipeId), eq(shot.ownerId, ownerId)))
       .orderBy(...newestShot)
@@ -347,12 +347,10 @@ function latestShotOfBean(
     .where(and(eq(recipe.beanId, beanId), eq(shot.ownerId, ownerId), brewedBefore(before)))
     .orderBy(...newestShot)
     .get();
-  // D-186: the shot's own dose, so the next shot starts from it and changes compare with it.
+  // D-186: the shot's own dose beside its recipe's: the next shot starts from it, while the recipe tag
+  // compares recipes.
   return row
-    ? {
-        recipe: { ...toValues(row.recipe), dose: row.dose },
-        shot: { yield: row.yield, time: row.time }
-      }
+    ? { recipe: toValues(row.recipe), shot: { dose: row.dose, yield: row.yield, time: row.time } }
     : null;
 }
 
@@ -467,6 +465,7 @@ function knownRecipes(
       machineId: recipe.machineId,
       fingerprint: recipe.fingerprint,
       dose: recipe.dose,
+      lastBrewedAt: sql<number | null>`max(${shot.brewedAt})`,
       shotCount: sql<number>`count(${shot.id})`,
       lastScore: sql<number | null>`(
         select s.score from shot s where s.recipe_id = ${recipe.id} and s.score is not null ${earlier}

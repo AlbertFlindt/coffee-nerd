@@ -12,6 +12,8 @@ export type KnownRecipe = {
   fingerprint: string;
   /** The recipe's dose; a form dose within 0.2 g of it is this recipe (D-186). */
   dose: Thousandths;
+  /** When its latest shot was brewed: equally close doses go to the most recent (D-186). */
+  lastBrewedAt?: number | null;
   shotCount: number;
   /** Score of the recipe's latest rated shot (D-12); null when none is rated. */
   lastScore: number | null;
@@ -32,13 +34,12 @@ export function matchRecipe(
   lastShotRecipe: RecipeIdentity | null
 ): FormMatch {
   const fingerprint = recipeFingerprint(form);
+  // Chosen among all of them, as the server does; one without shots is then still new (D-104).
   const found = closestDose(
     form.dose,
-    recipes.filter(
-      (r) => r.machineId === form.machineId && r.fingerprint === fingerprint && r.shotCount > 0
-    )
+    recipes.filter((r) => r.machineId === form.machineId && r.fingerprint === fingerprint)
   );
-  if (found)
+  if (found && found.shotCount > 0)
     return {
       kind: 'reused',
       recipeId: found.id,
@@ -48,15 +49,25 @@ export function matchRecipe(
   return { kind: 'new', changes: lastShotRecipe ? describeChange(form, lastShotRecipe) : [] };
 }
 
-/** Of recipes with the same fingerprint, the one whose dose is within reach and closest (D-186). */
-export function closestDose<T extends { dose: Thousandths }>(
+/**
+ * Of recipes with the same fingerprint, the one whose dose is within reach and closest; equally close,
+ * the one brewed most recently, then the first given (D-186).
+ */
+export function closestDose<T extends { dose: Thousandths; lastBrewedAt?: number | null }>(
   dose: Thousandths,
   recipes: readonly T[]
 ): T | undefined {
   let best: T | undefined;
-  for (const r of recipes)
-    if (sameDose(r.dose, dose) && (!best || Math.abs(r.dose - dose) < Math.abs(best.dose - dose)))
+  for (const r of recipes) {
+    if (!sameDose(r.dose, dose)) continue;
+    const distance = Math.abs(r.dose - dose);
+    const bestDistance = best ? Math.abs(best.dose - dose) : Infinity;
+    if (
+      distance < bestDistance ||
+      (distance === bestDistance && (r.lastBrewedAt ?? -1) > (best!.lastBrewedAt ?? -1))
+    )
       best = r;
+  }
   return best;
 }
 

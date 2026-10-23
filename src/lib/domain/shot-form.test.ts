@@ -94,6 +94,27 @@ describe('matchRecipe', () => {
     expect(match).toMatchObject({ kind: 'reused', recipeId: 'r2' });
   });
 
+  it('D-186: equally close doses go to the recipe brewed most recently', () => {
+    const at184 = { ...base, dose: 18400 };
+    const match = matchRecipe(
+      { ...base, dose: 18200 },
+      [known(base, { lastBrewedAt: 2 }), known(at184, { id: 'r2', lastBrewedAt: 5 })],
+      base
+    );
+    expect(match).toMatchObject({ kind: 'reused', recipeId: 'r2' });
+  });
+
+  it('D-186, D-104: the closest recipe is chosen among all, so one without shots makes it new', () => {
+    // The server saves on the closest recipe (18.3 g, kept only by Brew next), so the form says new.
+    const at183 = { ...base, dose: 18300 };
+    const match = matchRecipe(
+      { ...base, dose: 18200 },
+      [known(base), known(at183, { id: 'r0', shotCount: 0 })],
+      base
+    );
+    expect(match.kind).toBe('new');
+  });
+
   it('D-12: a reused recipe without a rated shot has no earlier score', () => {
     const match = matchRecipe(base, [known(base, { lastScore: null })], base);
     expect(match).toMatchObject({ kind: 'reused', lastScore: null });

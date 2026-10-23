@@ -15,7 +15,12 @@ export type RecipeValues = {
   setup: SetupSnapshot;
 };
 
-export type ShotResult = { yield: Thousandths | null; time: Thousandths | null };
+export type ShotResult = {
+  /** The shot's own dose (D-186); without it the recipe's dose is used. */
+  dose?: Thousandths;
+  yield: Thousandths | null;
+  time: Thousandths | null;
+};
 
 /** A routine as it is now, in the shape of a setup snapshot: name, steps with names, units and values. */
 export type RoutineNow = NonNullable<SetupSnapshot['routine']>;
@@ -146,7 +151,7 @@ function fromRecipe(
     basketId: current(recipe.basketId, mySetup.basketId),
     routineId,
     grind: recipe.grind,
-    dose: recipe.dose,
+    dose: shot?.dose ?? recipe.dose, // D-186: the dose of its last shot
     yield: shot?.yield ?? null,
     time: shot?.time ?? null,
     setup: {
