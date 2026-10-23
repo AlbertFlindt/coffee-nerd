@@ -4,6 +4,7 @@
   // ones you added. A chip opens the tag sheet. Only the chip area scrolls (D-36).
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
+  import ArchivedLink from '#lib/components/ArchivedLink.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
   import TagSheet from '#lib/components/TagSheet.svelte';
   import { matchesSearch } from '#lib/domain/tags.ts';
@@ -132,6 +133,7 @@
     {:else}
       <p class="empty">{page.total === 0 ? 'No tags yet.' : 'No tags match.'}</p>
     {/each}
+    <ArchivedLink area="tags" count={data.archived} />
   </div>
 </main>
 

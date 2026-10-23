@@ -485,7 +485,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* a range is two numbers; the full keyboard is a detour.
 - **D-187 — A new routine asks to be used.** Saving a new routine in the routine builder asks "Use it for new shots?". Yes makes it My setup's routine, so the next shot starts with it, also on a bean with shots or a re-buy; a recipe marked Brew next keeps its own routine (confirmed 2026-10-23). No saves it as it is. Refines D-51 and D-38.
   - *Why:* a routine made and then forgotten on the shot form records nothing; puck prep matters for repeating a shot.
-- **D-188 — Archived items have a list and can come back.** Gear, Puck prep and Tags each end with a quiet "Archived" row that opens a list of what was archived there (gear; routines and steps; flavor notes). Each item can be restored, which puts it back in its list and pickers. Revises D-148, D-167 and D-171.
+- **D-188 — Archived items have a list and can come back.** Gear, Puck prep and Tags each end with a quiet "Archived" row that opens a list of what was archived there (gear; routines and steps; flavor notes). Each item can be restored, which puts it back in its list and pickers. A restored routine brings back the archived steps it holds. When a routine no longer fits its steps (a range narrowed or a step deleted while it was archived), it is restored with its values brought into range and opens in the routine builder to check and save (confirmed 2026-10-23). Revises D-148, D-167 and D-171.
   - *Why:* archived things vanished without a trace; a way back makes archiving safe to use.
 
 ## 11. Visual direction

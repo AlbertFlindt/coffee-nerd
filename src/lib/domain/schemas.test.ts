@@ -10,6 +10,7 @@ import {
   routineStepsSchema,
   setupSnapshotSchema,
   tasteSchema,
+  fitRoutine,
   validateRoutineAgainstSteps,
   validateSetupAgainstMachine,
   valueDefinitionSchema,
@@ -519,5 +520,50 @@ describe('beanInputSchema', () => {
     expect(beanInputSchema.safeParse({ ...bean, countryCode: 'XX' }).success).toBe(false);
     expect(beanInputSchema.safeParse({ ...bean, altitudeMinM: 2200 }).success).toBe(false);
     expect(beanInputSchema.safeParse({ ...bean, bagWeight: 0 }).success).toBe(false);
+  });
+});
+
+describe('fitRoutine', () => {
+  const WDT = '0199f3a2-0000-7000-8000-000000000001';
+  const DISTRIBUTOR = '0199f3a2-0000-7000-8000-000000000002';
+  const RDT = '0199f3a2-0000-7000-8000-000000000003';
+  const GONE = '0199f3a2-0000-7000-8000-000000000004';
+  const settings: Record<string, PrepStepSetting> = {
+    [WDT]: { kind: 'seconds', step: 1000, min: 0, max: 30000, startsAt: 20000 },
+    [DISTRIBUTOR]: { kind: 'none' },
+    [RDT]: {
+      kind: 'choice',
+      options: [
+        { id: 'one', label: 'One spray' },
+        { id: 'two', label: 'Two sprays' }
+      ],
+      startsAt: 'one'
+    }
+  };
+
+  it('D-188, D-178: a restored routine is brought into range; deleted steps leave it', () => {
+    const fitted = fitRoutine(
+      [
+        { stepId: WDT, value: 45000 },
+        { stepId: DISTRIBUTOR, value: null },
+        { stepId: RDT, value: 'three' },
+        { stepId: GONE, value: 5000 }
+      ],
+      settings
+    );
+    expect(fitted).toEqual({
+      steps: [
+        { stepId: WDT, value: 30000 },
+        { stepId: DISTRIBUTOR, value: null },
+        { stepId: RDT, value: 'one' }
+      ],
+      changed: true
+    });
+    expect(validateRoutineAgainstSteps(fitted.steps, settings)).toEqual([]);
+  });
+
+  it('D-188: a routine that still fits is unchanged', () => {
+    const steps = [{ stepId: WDT, value: 20000 }];
+    expect(fitRoutine(steps, settings)).toEqual({ steps, changed: false });
   });
 });

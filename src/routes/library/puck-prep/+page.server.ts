@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getDb } from '#lib/server/db/connection.ts';
+import { archivedCount } from '#lib/server/db/archived.ts';
 import { loadPuckPrep, useForNewShots } from '#lib/server/db/puck-prep.ts';
 import { addStepAction, removeStepAction, saveStepAction } from '#lib/server/puck-prep-form.ts';
 import type { Actions, PageServerLoad } from './$types';
@@ -8,7 +9,11 @@ import type { Actions, PageServerLoad } from './$types';
 // and removes a step (D-168, D-169).
 export const load: PageServerLoad = ({ locals }) => {
   if (!locals.user) error(401);
-  return { page: loadPuckPrep(getDb(), locals.user.id) };
+  const db = getDb();
+  return {
+    page: loadPuckPrep(db, locals.user.id),
+    archived: archivedCount(db, locals.user.id, 'puck-prep')
+  };
 };
 
 export const actions: Actions = {

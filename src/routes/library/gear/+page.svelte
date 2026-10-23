@@ -4,6 +4,7 @@
   // Only the list scrolls (D-36). "Edit" opens Edit My setup (screen 13, D-45), the only place the default
   // is chosen (D-149).
   import { resolve } from '$app/paths';
+  import ArchivedLink from '#lib/components/ArchivedLink.svelte';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
   import type { GearRow } from '#lib/server/db/gear.ts';
@@ -119,6 +120,7 @@
     {@render group('Machines', page.machines)}
     {@render group('Grinders', page.grinders)}
     {@render group('Baskets', page.baskets)}
+    <ArchivedLink area="gear" count={data.archived} />
   </div>
 </main>
 

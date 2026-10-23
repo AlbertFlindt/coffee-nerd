@@ -284,4 +284,19 @@ test('D-167, D-168: once a shot used it, the routine is archived, and so is its 
     .getByRole('button', { name: 'Archive step' })
     .click();
   await expect(page.getByRole('button', { name: 'Paper filter' })).toHaveCount(0);
+
+  // D-188: both are listed under Archived; a step can be restored on its own.
+  await page.getByRole('link', { name: 'Archived · 2' }).click();
+  await expect(page.getByRole('main')).toContainText('Light roast');
+  await expect(page.getByRole('main')).toContainText('Paper filter');
+  await screenshot('PuckPrepArchived');
+  await page.getByRole('button', { name: 'Restore Paper filter' }).click();
+  await expect(page.getByRole('button', { name: 'Restore Paper filter' })).toHaveCount(0);
+  await page.getByRole('link', { name: 'Back to Puck prep' }).click();
+  await page.getByRole('button', { name: 'Paper filter' }).click();
+  await page
+    .getByRole('region', { name: 'Edit Paper filter' })
+    .getByRole('button', { name: 'Archive step' })
+    .click();
+  await expect(page.getByRole('button', { name: 'Paper filter' })).toHaveCount(0);
 });

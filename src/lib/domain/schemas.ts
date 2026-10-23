@@ -349,6 +349,37 @@ export function validateRoutineAgainstSteps(
   return problems;
 }
 
+/**
+ * A routine brought back to fit its steps as they are now (D-188, as D-178 does for a shot): a number moves
+ * to the nearest end of the range, a value of the wrong kind or a removed option becomes the step's
+ * starting value, and a step that no longer exists leaves the routine. `changed` says whether anything did.
+ */
+export function fitRoutine(
+  steps: RoutineSteps,
+  settings: Readonly<Record<string, PrepStepSetting>>
+): { steps: RoutineSteps; changed: boolean } {
+  const fitted = steps.flatMap(({ stepId, value }): RoutineSteps => {
+    const setting = settings[stepId];
+    if (!setting) return [];
+    if (setting.kind === 'none') return [{ stepId, value: null }];
+    if (setting.kind === 'choice')
+      return [
+        {
+          stepId,
+          value:
+            typeof value === 'string' && setting.options.some((o) => o.id === value)
+              ? value
+              : setting.startsAt
+        }
+      ];
+    if (typeof value !== 'number') return [{ stepId, value: setting.startsAt }];
+    const low = setting.min ?? value;
+    const high = setting.max ?? value;
+    return [{ stepId, value: Math.min(high, Math.max(low, value)) }];
+  });
+  return { steps: fitted, changed: JSON.stringify(fitted) !== JSON.stringify(steps) };
+}
+
 // --- a shot's taste (D-09, D-11, D-23, D-67): null means not rated / not set, never 0 ---
 
 const scale = (min: number, max: number) => z.number().int().min(min).max(max).nullable();

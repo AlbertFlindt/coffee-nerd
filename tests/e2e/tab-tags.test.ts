@@ -181,4 +181,18 @@ test('D-171: a note a shot used is removed from the page and the chips, and stay
   await page.goto('/journal');
   await page.getByRole('main').getByRole('link').first().click();
   await expect(page.getByRole('list', { name: 'Flavor notes' })).toContainText('Funky');
+
+  // D-188: the removed note is listed under Archived and comes back with Restore.
+  await page.goto('/library/tags');
+  await page.getByRole('link', { name: /^Archived · \d+/ }).click();
+  await expect(page.getByRole('main')).toContainText('Funky');
+  await screenshot('TagsArchived');
+  await page.getByRole('button', { name: 'Restore Funky' }).click();
+  await page.getByRole('link', { name: 'Back to Tags' }).click();
+  await expect(chip('Funky')).toBeVisible();
+  await chip('Funky').click();
+  const again = page.getByRole('region', { name: 'Edit Funky' });
+  await again.getByRole('button', { name: 'Remove tag' }).click();
+  await again.getByRole('button', { name: 'Remove tag' }).click();
+  await expect(chip('Funky')).toHaveCount(0);
 });
