@@ -3,7 +3,6 @@
   // temperature, pressure profile, basket, puck prep (D-22, D-24, D-25), changes since the last shot in
   // sage (D-90). Tasting: balance, body, sweetness, aftertaste (D-190), flavor notes that fold away
   // (D-191) and notes (D-23, D-27, D-97, D-101); all start empty (D-11). Tasting scrolls as a whole.
-  import { onMount } from 'svelte';
   import BottomSheet from './BottomSheet.svelte';
   import ChoiceRow from './ChoiceRow.svelte';
   import PickRow from './PickRow.svelte';
@@ -47,14 +46,15 @@
   // D-191: whether Flavor notes is folded is remembered on this phone. Storage can be missing or blocked
   // (a private window): it then starts open and is simply not remembered.
   const FOLDED_KEY = 'coffee-nerd:flavor-notes-folded';
-  let folded = $state(false);
-  onMount(() => {
+  // The sheet only opens after a tap in the browser, so storage is read at once and it never jumps.
+  function readFolded(): boolean {
     try {
-      folded = localStorage.getItem(FOLDED_KEY) === 'true';
+      return localStorage.getItem(FOLDED_KEY) === 'true';
     } catch {
-      // not remembered
+      return false;
     }
-  });
+  }
+  let folded = $state(readFolded());
   function toggleFolded() {
     folded = !folded;
     try {

@@ -52,13 +52,15 @@ test('PuckPrep, D-51, D-163: routines with their flow, "In use", and your steps'
   await screenshot('PuckPrep');
 });
 
-test('NewStep, D-52: a new step with a number setting', async () => {
+test('NewStep, D-52, D-185: a new step with a number setting', async () => {
   await page.getByRole('button', { name: 'New step' }).click();
   const sheet = page.getByRole('region', { name: 'New step' });
   await sheet.getByLabel('Name').fill('RDT');
   await sheet.getByRole('radio', { name: 'Number with unit' }).click();
   await sheet.getByLabel('Unit').fill('sprays');
   await sheet.getByLabel('Starts at').fill('2');
+  // D-185: Range opens the number keypad.
+  await expect(sheet.getByLabel('Range')).toHaveAttribute('inputmode', 'decimal');
   await expect(sheet.getByRole('region', { name: 'Preview' })).toContainText('RDT');
   await expect(sheet.getByRole('region', { name: 'Preview' })).toContainText('2 sprays');
   await expectNoPageScroll();

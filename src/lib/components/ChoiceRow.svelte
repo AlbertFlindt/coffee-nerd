@@ -1,6 +1,6 @@
 <script lang="ts">
   // A feature of your own that is on/off or "Pick from a list" (D-46), as a setup row: its switch, its
-  // name, and "On"/"Off" or the chosen option, which moves to the next option on tap. Used on More › Setup
+  // name, and "On"/"Off" or the chosen option, which moves to the next option on tap. Used on the Setup sheet
   // and in Edit My setup (D-161). Numbers and seconds use SetupRow.
   import type { FeatureDefinition, FeatureValue } from '../domain/schemas';
 

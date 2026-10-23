@@ -87,6 +87,7 @@ Every table also has `created_at` and `updated_at`. Decimal quantities are in th
 | `brew_next_recipe_id` | D-43. One column, so there can only ever be one mark |
 | `home_graph` | last chosen graph on Home (D-32) |
 | `basket_step_skipped` | D-157. The step-by-step start's basket step was skipped, so it is not asked again |
+| `next_routine_id` | D-187. Set by "Use it for new shots"; the next shot starts with this routine. Cleared by the next saved shot, and by saving My setup with another routine. No foreign key; ignored when archived or gone |
 
 Kept apart from settings because it changes with almost every visit.
 
@@ -227,13 +228,13 @@ In this order:
 3. **Otherwise, the bean is a re-buy** ("Same as before", D-41, D-73) → follow the chain of earlier bags back to the nearest one with shots; its best recipe, with yield and time from that recipe's latest shot (without rated shots: its latest shot, D-74), as a new recipe for this bag. Its scores are not carried over.
 4. **Otherwise** → My setup defaults, with the current bean. Time starts empty (D-72). A yield or time with nothing to copy starts empty; −/+ count from 0 (D-80, D-82).
 
-Taste always starts empty (D-11). Features switched on since the copied shot start from My setup if it has a value, otherwise switched off (a feature without an off switch starts on with an empty value, D-78). Features since switched off on the machine are left out. Archived gear or an archived routine is replaced by My setup's (D-75). The routine starts as it is now: current steps, copied values where a step is still there, the routine's values for new steps (D-76).
+Taste always starts empty (D-11). Features switched on since the copied shot start from My setup if it has a value, otherwise switched off (a feature without an off switch starts on with an empty value, D-78). Features since switched off on the machine are left out. Archived gear or an archived routine is replaced by My setup's (D-75). A routine chosen with "Use it for new shots" (`app_state.next_routine_id`, D-187) replaces the copied routine in steps 2 and 3, not for Brew next. The routine starts as it is now: current steps, copied values where a step is still there, the routine's values for new steps (D-76).
 
 ### 4.3 Best recipe (D-66)
 Among a bean's recipes, the highest average score among those with at least 3 rated shots. If none has 3 yet, the highest single score. Ties: more rated shots, then most recent. Calculated, never stored.
 
 ### 4.4 Brew next (D-43)
-`app_state.brew_next_recipe_id`. Saving a shot clears it in the same transaction, and makes the shot's bean `current_bean_id` (D-32). Tapping the button again or "Use last shot recipe" also clears it. Whenever the mark is cleared or moves, a recipe that only the mark kept (no shots) is removed (§4.1, step 6). On a finished bean, marking a recipe reopens the bean (D-129).
+`app_state.brew_next_recipe_id`. Saving a shot clears it (and `next_routine_id`, D-187) in the same transaction, and makes the shot's bean `current_bean_id` (D-32). Tapping the button again or "Use last shot recipe" also clears it. Whenever the mark is cleared or moves, a recipe that only the mark kept (no shots) is removed (§4.1, step 6). On a finished bean, marking a recipe reopens the bean (D-129).
 
 ### 4.5 Custom features and step settings (D-46, D-51, D-52)
 Definitions live on the gear (`spec.features`) and on the step (`setting`); values live in the recipe's setup snapshot under the feature `key` or the `stepId`. One set of schemas checks all of them, in the browser and on the server.

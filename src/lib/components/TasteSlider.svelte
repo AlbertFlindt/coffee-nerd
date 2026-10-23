@@ -23,7 +23,7 @@
     min: number;
     max: number;
     onchange: (value: number | null) => void;
-    /** h3 inside the More sheet, which also says "Not set" while empty (MoreTasting); h2 on the form. */
+    /** h3 in the Tasting sheet, which also says "Not set" while empty (MoreTasting); h2 on a page. */
     heading?: 'h2' | 'h3';
   } = $props();
 

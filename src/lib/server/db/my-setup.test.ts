@@ -15,7 +15,7 @@ import {
   type MySetupInput,
   type MySetupFormData
 } from './my-setup';
-import { gear, routine, user, userSettings } from './schema';
+import { appState, gear, routine, user, userSettings } from './schema';
 import { seedReferenceSetup, type SeededIds } from './seed';
 import { loadShotForm } from './shot-form';
 
@@ -321,6 +321,20 @@ describe('saveMySetup', () => {
     const form = loadShotForm(db, ids.userId);
     if (form.state !== 'ready') throw new Error('Expected a ready form');
     expect(Object.keys(form.prefill.setup.features)).toEqual(['flat_pressure']);
+  });
+
+  it('D-187: changing My setup’s routine drops the routine chosen for the next shot', () => {
+    db.update(appState)
+      .set({ nextRoutineId: ids.routineId })
+      .where(eq(appState.userId, ids.userId))
+      .run();
+    // Saving with the same routine keeps it.
+    saveMySetup(db, ids.userId, current(), T0);
+    const next = () =>
+      db.select().from(appState).where(eq(appState.userId, ids.userId)).get()?.nextRoutineId;
+    expect(next()).toBe(ids.routineId);
+    saveMySetup(db, ids.userId, { ...current(), routineId: null }, T0);
+    expect(next()).toBeNull();
   });
 
   it('D-155: no basket and no puck prep', () => {

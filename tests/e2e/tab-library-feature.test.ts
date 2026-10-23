@@ -43,7 +43,7 @@ async function openMachine() {
   await expect(page.getByRole('heading', { name: 'Machine', level: 1 })).toBeVisible();
 }
 
-test('CustomFeature, D-46: a new feature is added from the machine page', async () => {
+test('CustomFeature, D-46, D-185: a new feature is added from the machine page', async () => {
   await openMachine();
   await page.getByRole('button', { name: 'Add your own feature' }).click();
   const sheet = page.getByRole('region', { name: 'Add your own feature' });
@@ -56,9 +56,11 @@ test('CustomFeature, D-46: a new feature is added from the machine page', async 
   ]);
   await sheet.getByLabel('Name').fill('Bloom pause');
   await sheet.getByRole('radio', { name: 'Seconds' }).click();
+  // D-185: Range opens the number keypad.
+  await expect(sheet.getByLabel('Range')).toHaveAttribute('inputmode', 'decimal');
   await sheet.getByLabel('Step').fill('1');
   const preview = sheet.getByRole('region', { name: 'Preview' });
-  await expect(preview).toContainText('Shot form › More › Setup');
+  await expect(preview).toContainText('Shot form › Setup');
   await expect(preview).toContainText('Bloom pause');
   await expect(preview).toContainText('Part of the recipe: changing it starts a new recipe');
   await expectNoPageScroll();

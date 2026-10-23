@@ -2,7 +2,13 @@
 // (D-50). Every query is scoped by the owner (D-60).
 import { and, asc, count, desc, eq, isNull } from 'drizzle-orm';
 import { roastAgeDays } from '../../domain/bean';
-import { basketName, basketSummary, grinderSummary, machineSummary } from '../../domain/gear';
+import {
+  basketName,
+  basketSummary,
+  grinderSummary,
+  machineSummary,
+  withoutRetiredPhases
+} from '../../domain/gear';
 import {
   gearSchema,
   type BasketSpec,
@@ -243,7 +249,12 @@ function assertUsedFeaturesKept(db: Queryable, ownerId: string, id: string, spec
 /** Saves a gear page (D-44, D-48, D-49). The kind never changes; archived gear is not saved (D-148). */
 export function saveGear(db: Db, ownerId: string, id: string, input: GearInput, now: number): void {
   const item = checked(input);
-  if (item.kind === 'machine') assertUsedFeaturesKept(db, ownerId, id, item.spec as MachineSpec);
+  if (item.kind === 'machine') {
+    assertUsedFeaturesKept(db, ownerId, id, item.spec as MachineSpec);
+    // D-184: a low bar phase switched off leaves the machine.
+    const spec = item.spec as MachineSpec;
+    item.spec = { ...spec, features: withoutRetiredPhases(spec.features) };
+  }
   const result = db
     .update(gear)
     .set({ name: item.name, spec: item.spec, updatedAt: now })

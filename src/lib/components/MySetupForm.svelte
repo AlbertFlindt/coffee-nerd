@@ -1,8 +1,8 @@
 <script lang="ts">
   // Edit My setup (screen 13, D-45): the starting point for new beans. Gear in a 2×2 grid of pickers, the
   // default values as −/+ cards (steps from your settings and the grinder, D-07, D-89), the ratio, and the
-  // pressure profile as one row that opens the same phase rows as More › Setup (D-24), then your own
-  // features as their More › Setup rows (D-161). What shows follows the chosen machine's switched-on
+  // pressure profile as one row that opens the same phase rows as the Setup sheet (D-24), then your own
+  // features as their the Setup sheet rows (D-161). What shows follows the chosen machine's switched-on
   // features and the grinder's dial. One Save at the bottom; it fits the screen (D-36). Basket and puck prep may be none (D-155). As step 4 of the step-by-step start (D-157) it
   // says so under the title and its button is "Next".
   import { untrack } from 'svelte';
@@ -86,7 +86,7 @@
   const present = $derived((machine?.features ?? []).filter((f) => features[f.key]));
   const temperature = $derived(present.find((f) => f.key === 'temperature'));
   const pressure = $derived(present.filter((f) => PHASES.includes(f.key)));
-  // D-161: your own features have a default here too, as the same rows as More › Setup.
+  // D-161: your own features have a default here too, as the same rows as the Setup sheet.
   const custom = $derived(present.filter((f) => !f.builtIn));
   const ratio = $derived(formatRatio(yieldAmount, dose));
   const dial = $derived(grinder?.dial);
