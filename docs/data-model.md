@@ -130,7 +130,7 @@ One table for all Gear, because Gear is one concept (D-39, D-68). A future kind 
 |---|---|
 | `key` | stable ID that never changes: `temperature`, `flat_pressure`, `preinfusion`, `low_bar_start`, `low_bar_end`, or `custom-<uuid>` |
 | `label` | what the UI shows; can be renamed freely |
-| `builtIn` | true for the five above |
+| `builtIn` | true for the five above. Since D-184 new machines offer only `temperature`, `flat_pressure` and `preinfusion`; `low_bar_start` and `low_bar_end` stay on a machine that has them switched on |
 | `enabled` | the switch in "What it can do" (D-44) |
 | `switchable` | whether it has an on/off switch per shot: true for phases and custom features, false for temperature and flat pressure |
 | `value` | a value definition (below) |
@@ -214,6 +214,7 @@ These are real tables rather than JSON on purpose: usage counts are one query, a
 ### 4.1 Recipe matching (D-16)
 1. While you edit the shot form, a shared function `recipeFingerprint(form)` runs in the browser.
 2. It looks the fingerprint up among this bean's recipes on this machine (cached on the phone, so it also works offline).
+   **D-186 (not built yet):** the dose leaves the fingerprint; a recipe matches when the fingerprint is equal and its dose is within 0.2 g (200 thousandths) of the form's, the closest dose winning. The shot stores its own exact dose for its ratio. Existing shots are matched again once, by a migration.
 3. **Found** → "Recipe reused N×" (N = the recipe's shot count). The faint previous-score marker (D-12) is the score of that recipe's latest rated shot.
 4. **Not found** → "New recipe · grind changed": the form is compared field by field with the recipe of **this bean's last shot** (D-81) to name what changed (grind, dose, machine, grinder, basket, routine, or a feature by its label); with several changes, the first two are named and the rest counted (D-71), in the order grind, dose, machine, grinder, basket, routine, features; with nothing to name, just "New recipe" (D-77).
 5. **On save** the server recomputes the fingerprint itself (it never trusts the browser's), then finds or creates the recipe and saves the shot, in one transaction. Flavor notes added on the Tasting tab are created in that transaction too, in the family Other, or matched to an existing note ignoring case (D-101).

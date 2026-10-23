@@ -8,7 +8,7 @@ Everything that is unanswered, not designed yet, or deliberately left for later,
 
 The decision log keeps the history of product topics; this file is the working list.
 
-Last updated: 2026-10-19
+Last updated: 2026-10-23
 
 ---
 
@@ -51,6 +51,7 @@ Last updated: 2026-10-19
 | Screens 50–64 differ from the decisions or the app in four places, kept as built: screen 55 draws −/+ without their step ("1 kg"), which D-07 requires, so the value sheet keeps the value card; screen 54 leaves out each step's unit under its name, which the list keeps; screen 58 leaves out the "Same tag twice?" card while searching, which stays (D-173); screen 59 shows "Add tag" ready with an empty name, while the app shows "Name is required" and waits; screens 52 and 53 leave out the step's Preview, which the sheet keeps; screen 52 names the circle "Starts on Bottom" for screen readers, the app "Starts at Bottom"; screen 62's merge list fills a full-height sheet, the app's is as tall as its list (up to 360 px) with Back under it. The canvas should follow the app on each | When the canvas designs them | D-07, D-164, D-165, D-173, D-174, D-183 |
 | A new seconds step puts Range on its own full-width row (like screen 53), which no screen draws for that kind; the insert list on the routine builder scrolls when there are more steps than fit, with "New step" kept under it, which no test checks yet | When the canvas designs them | D-36, D-52, D-164 |
 | Not drawn on screens 27–64, so they stay as built: the shot form's dose hint line ("VST · 18 g holds 17.0–19.0 g") and the gear line's tap area (D-155); the step-by-step start's grinder step (Step 2 of 5) and its "+" case for finished beans (D-157); Edit bean (D-130); the routine picker's line "Shots are easier to repeat with a puck prep routine. Add one in Library › Puck prep."; a list step's sage option on More › Setup › Puck prep (D-166); "Not set" for a machine's group or a basket's diameter (only the grinder's burr size is drawn, screen 38); "… is open again" (D-129); "No beans yet" in Same as before; a long bean name cut with "…" in the bean page header; "Puck prep · No puck prep" on the Setup tab (D-155); keeping the grind when switching the grinder, with "Grind must be within the grinder’s range" (D-153); "Back to Setup" under the routine list on More › Setup, which goes back to Setup, not to the puck prep view (built like the basket list on screen 28); "Keep both" on the duplicate card is drawn on screen 57 only, while screen 21 and the sheets drawn over it (59–64) still leave it out (D-173). New wording on the screens that no decision fixes: the name placeholders "e.g. Niche Zero", "e.g. Lelit Bianca" and "e.g. Blackcurrant" | When the canvas designs them | D-155, D-157, D-130, D-166, D-183 |
+| Owner feedback of 2026-10-23, not drawn on any screen yet: the shot form with "Setup" and "Tasting" side by side instead of More (D-189); the Tasting sheet with Balance first and a folding Flavor notes header (D-190, D-191); the "Use it for new shots?" question after saving a new routine (D-187); the "Archived" rows and lists on Gear, Puck prep and Tags (D-188) | When the canvas designs them (D-183) | D-187 to D-191 |
 
 ## 3. Product topics not decided yet
 
@@ -71,6 +72,7 @@ Last updated: 2026-10-19
 |---|---|---|
 | The seeded end-to-end files share one database and run in name order (`shot-*`, then `tab-*`), each leaving the reference setup as it found it; a file cannot run alone after an earlier one fails | Any time | M6 tests |
 | The rows in More › Setup and in the pressure profile sheet have −/+ only, no tap to type: from empty, flat pressure needs 18 taps to reach 9.0 bar (D-78). Tap to type on these rows would help, mostly on the first My setup | M10 or when the canvas designs it | D-78, D-24 |
+| Still to build from the owner feedback of 2026-10-23, one pull request each after the current one: a dose within 0.2 g as the same recipe, with the shot keeping its own dose and existing shots matched again (D-186); the Archived lists with Restore (D-188) | Next pull requests | D-186, D-188 |
 | A routine whose only recipe has no shots and is kept by its Brew next mark (data-model §4.1) counts as used, so it is archived rather than deleted (D-167 says "no shot has used it") | When Brew next on routines matters | D-167, D-43 |
 | `main` is not protected: GitHub does not enforce the "Require pull request" ruleset on a private repository without a Team plan. The push-guard hook and the review step are the safeguard. | When the repository goes public | Roadmap M0, D-62 |
 | Playwright is pinned to 1.56.1 and CI to `ubuntu-24.04`, to match the browser in the development environment. Upgrade both together. | Any time | PR #1 |
