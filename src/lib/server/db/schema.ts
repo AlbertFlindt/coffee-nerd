@@ -92,6 +92,11 @@ export const appState = sqliteTable('app_state', {
   homeGraph: text('home_graph'),
   /** The step-by-step start's basket step was skipped (D-157), so it is not asked again. */
   basketStepSkipped: integer('basket_step_skipped', { mode: 'boolean' }).notNull().default(false),
+  /**
+   * A routine just chosen for new shots (D-187): the next shot starts with it; saving a shot clears it.
+   * No foreign key, so deleting the routine never fails on it; prefill ignores one that is gone.
+   */
+  nextRoutineId: text('next_routine_id'),
   ...timestamps
 });
 

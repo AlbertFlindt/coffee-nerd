@@ -6,7 +6,7 @@
   import CustomFeature from '#lib/components/CustomFeature.svelte';
   import GearFormShell from '#lib/components/GearFormShell.svelte';
   import TextField from '#lib/components/TextField.svelte';
-  import { NEW_GEAR, trimmed } from '#lib/domain/gear.ts';
+  import { NEW_GEAR, trimmed, withoutRetiredPhases } from '#lib/domain/gear.ts';
   import type { FeatureDefinition, MachineSpec } from '#lib/domain/schemas.ts';
   import { applyStep, decimalsForStep, formatQuantity } from '#lib/domain/units.ts';
 
@@ -31,7 +31,14 @@
 
   const adding = untrack(() => initialSpec === undefined);
   let name = $state(untrack(() => initialName));
-  let spec: MachineSpec = $state(untrack(() => initialSpec ?? NEW_GEAR.machine()));
+  // D-184: a low bar phase this machine has switched off is no longer offered.
+  let spec: MachineSpec = $state(
+    untrack(() =>
+      initialSpec
+        ? { ...initialSpec, features: withoutRetiredPhases(initialSpec.features) }
+        : NEW_GEAR.machine()
+    )
+  );
 
   const TYPES = [
     ['automatic', 'Automatic'],

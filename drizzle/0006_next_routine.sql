@@ -1,0 +1,1 @@
+ALTER TABLE `app_state` ADD `next_routine_id` text;

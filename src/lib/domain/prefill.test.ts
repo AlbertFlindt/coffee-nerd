@@ -429,6 +429,52 @@ describe('prefill', () => {
     expect(result.setup.routine).toEqual(routineSnapshot);
   });
 
+  it('D-187: a routine just chosen for new shots replaces the copied one, as it is now', () => {
+    const result = prefill(
+      context({
+        latestShotOfBean: { recipe: recipe(), shot: { yield: 36000, time: 28000 } },
+        nextRoutineId: OTHER_ROUTINE
+      })
+    );
+    expect(result.routineId).toBe(OTHER_ROUTINE);
+    expect(result.setup.routine).toEqual(otherRoutine);
+    expect(result).toMatchObject({ source: 'last_shot', grind: recipe().grind });
+  });
+
+  it('D-187: a re-buy starts with the routine just chosen for new shots too', () => {
+    const result = prefill(
+      context({
+        rebuyChain: [
+          {
+            beanId: 'bean-old',
+            best: null,
+            latest: { recipe: recipe(), shot: { yield: 36000, time: 28000 } }
+          }
+        ],
+        nextRoutineId: OTHER_ROUTINE
+      })
+    );
+    expect(result.routineId).toBe(OTHER_ROUTINE);
+  });
+
+  it('D-187: Brew next keeps its own routine, and an archived chosen routine is ignored', () => {
+    const marked = prefill(
+      context({
+        brewNext: { recipe: recipe(), latestShot: null },
+        nextRoutineId: OTHER_ROUTINE
+      })
+    );
+    expect(marked.routineId).toBe(ROUTINE);
+    const archived = prefill(
+      context({
+        latestShotOfBean: { recipe: recipe(), shot: { yield: 36000, time: 28000 } },
+        nextRoutineId: OTHER_ROUTINE,
+        archivedIds: new Set([OTHER_ROUTINE])
+      })
+    );
+    expect(archived.routineId).toBe(ROUTINE);
+  });
+
   it('D-76: a routine edited since starts as it is now, keeping copied values for steps still there', () => {
     const WDT = '0199f3a2-0000-7000-8000-00000000e001';
     const TAMP = '0199f3a2-0000-7000-8000-00000000e002';

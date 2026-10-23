@@ -161,7 +161,8 @@ export function loadShotForm(
     stepSettings,
     archivedIds: new Set(
       [...gearRows, ...routineRows].filter((r) => r.archivedAt !== null).map((r) => r.id)
-    )
+    ),
+    nextRoutineId: state?.nextRoutineId ?? null
   };
   const start = prefill(context);
 

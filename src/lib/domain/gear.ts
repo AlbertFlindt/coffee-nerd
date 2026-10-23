@@ -65,7 +65,13 @@ export function fitsMachines(
   return fits.length > 0 ? `Fits ${fits.join(', ')}` : 'Fits none of your machines';
 }
 
-/** The five built-in machine features (D-44, data-model §3), with their switch in "What it can do". */
+/** Low bar start and end are no longer offered; a machine keeps one only while it is switched on (D-184). */
+const RETIRED_PHASES: readonly string[] = ['low_bar_start', 'low_bar_end'];
+
+/**
+ * The built-in machine features (D-44, data-model §3), with their switch in "What it can do":
+ * temperature, flat pressure and preinfusion, plus a low bar phase only when it is switched on (D-184).
+ */
 export function builtInFeatures(
   enabled: Partial<Record<string, boolean>> = {}
 ): FeatureDefinition[] {
@@ -79,7 +85,7 @@ export function builtInFeatures(
       ? { kind: 'phase', step: 1000, pressure: { step: 500, min: 0, max: 12000 } }
       : { kind: 'phase', step: 1000 }
   });
-  return [
+  return withoutRetiredPhases([
     {
       key: 'temperature',
       label: 'Temperature',
@@ -99,7 +105,12 @@ export function builtInFeatures(
     phase('preinfusion', 'Preinfusion', false),
     phase('low_bar_start', 'Low bar start', true),
     phase('low_bar_end', 'Low bar end', true)
-  ];
+  ]);
+}
+
+/** A machine's features without the low bar phases it has switched off (D-184). */
+export function withoutRetiredPhases(features: FeatureDefinition[]): FeatureDefinition[] {
+  return features.filter((f) => !RETIRED_PHASES.includes(f.key) || f.enabled);
 }
 
 /** What new gear starts with (D-158). */

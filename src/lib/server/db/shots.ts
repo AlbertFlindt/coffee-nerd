@@ -128,10 +128,16 @@ export function saveShot(db: Db, ownerId: string, input: ShotInput, now: number)
       })
       .run();
     writeTags(tx, input.id, tagIds);
-    // D-43: the mark is used up by the shot it started. D-32: Home follows the bean you last brewed.
+    // D-43: the mark is used up by the shot it started, as is a routine just chosen for new shots
+    // (D-187). D-32: Home follows the bean you last brewed.
     const marked = markedRecipe(tx, ownerId);
     tx.update(appState)
-      .set({ brewNextRecipeId: null, currentBeanId: input.beanId, updatedAt: now })
+      .set({
+        brewNextRecipeId: null,
+        nextRoutineId: null,
+        currentBeanId: input.beanId,
+        updatedAt: now
+      })
       .where(eq(appState.userId, ownerId))
       .run();
     if (marked) removeIfUnused(tx, ownerId, marked);

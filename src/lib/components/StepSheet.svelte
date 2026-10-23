@@ -234,6 +234,7 @@
           <TextField
             label="Range"
             id="step-range"
+            inputmode="decimal"
             autocomplete="off"
             placeholder="Optional · e.g. 0–5"
             bind:value={rangeText}

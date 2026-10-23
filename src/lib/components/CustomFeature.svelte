@@ -201,6 +201,7 @@
           <TextField
             label="Range"
             id="feature-range"
+            inputmode="decimal"
             plain
             autocomplete="off"
             placeholder="Optional · e.g. 0–30 s"
@@ -212,6 +213,7 @@
         <TextField
           label="Range"
           id="feature-range"
+          inputmode="decimal"
           plain
           autocomplete="off"
           placeholder="Optional · e.g. 0–30 {unitLabel || 'ml'}"

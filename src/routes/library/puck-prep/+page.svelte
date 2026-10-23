@@ -3,7 +3,10 @@
   // routine, D-163, the steps as a mini flow, shots and average score), then your steps as chips with
   // their unit and "New step" (D-52). A step chip opens the step sheet (D-168); a card or "New routine"
   // opens the routine builder (D-167). Only the page area scrolls (D-36).
+  import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
+  import { page as current } from '$app/state';
+  import BottomSheet from '#lib/components/BottomSheet.svelte';
   import StepSheet from '#lib/components/StepSheet.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
   import { formatNumber } from '#lib/domain/units.ts';
@@ -15,6 +18,13 @@
   /** The step sheet: null closed, 'new' to add, or the id of the step being changed. */
   let sheet: 'new' | string | null = $state(null);
   const editing = $derived(page.steps.find((s) => s.id === sheet));
+
+  // D-187: a routine just saved asks to be used for new shots (`?ask=<id>`), unless My setup uses it.
+  const asking = $derived(
+    page.routines.find((r) => r.id === current.url.searchParams.get('ask') && !r.inMySetup)
+  );
+  let answering = $state(false);
+  const notNow = () => goto(resolve('/library/puck-prep'), { replaceState: true });
 
   function stats(r: RoutineCard): string {
     if (r.shots === 0) return 'No shots yet';
@@ -118,9 +128,49 @@
   {#key editing.id}
     <StepSheet step={editing} onclose={() => (sheet = null)} />
   {/key}
+{:else if asking}
+  <BottomSheet short label="Use it for new shots" closeLabel="Not now" onclose={notNow}>
+    <h2 class="sheet-title">Use it for new shots?</h2>
+    <p class="note">
+      {asking.name} becomes My setup’s routine, and your next shot starts with it.
+    </p>
+    <form
+      class="confirm"
+      method="POST"
+      action="?/useForNewShots"
+      onsubmit={() => (answering = true)}
+    >
+      <input type="hidden" name="id" value={asking.id} />
+      <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={answering}
+        >Use it for new shots</button
+      >
+      <button class="cn-btn-secondary cn-tap" type="button" onclick={notNow}>Not now</button>
+    </form>
+  </BottomSheet>
 {/if}
 
 <style>
+  .sheet-title {
+    margin: 4px 0 0;
+    font-size: 19px;
+    line-height: 24px;
+    font-weight: 700;
+  }
+
+  .note {
+    margin: -8px 0 8px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+  }
+
+  .confirm {
+    --surface: var(--surface-sheet-field);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
   header {
     display: grid;
     grid-template-columns: 48px 1fr auto;

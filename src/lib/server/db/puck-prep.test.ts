@@ -17,7 +17,8 @@ import {
   RoutineRejected,
   saveRoutine,
   saveStep,
-  StepRejected
+  StepRejected,
+  useForNewShots
 } from './puck-prep';
 import { prepStep, routine, userSettings } from './schema';
 import { seedReferenceSetup, type SeededIds } from './seed';
@@ -452,5 +453,37 @@ describe('routines (D-51, D-167)', () => {
     expect(loadRoutine(db, 'someone-else', ids.routineId)).toBeNull();
     expect(archiveRoutine(db, 'someone-else', ids.routineId, T0)).toBeNull();
     expect(deleteRoutine(db, 'someone-else', ids.routineId)).toBeNull();
+  });
+});
+
+describe('useForNewShots (D-187)', () => {
+  it('D-187: Yes makes the routine My setup’s, and the next shot starts with it once', () => {
+    brew(0, 7);
+    const id = lightRoast();
+    expect(useForNewShots(db, ids.userId, id, T0 + 60_000)).toBe(true);
+    const settings = db
+      .select()
+      .from(userSettings)
+      .where(eq(userSettings.userId, ids.userId))
+      .get();
+    expect(settings?.defaultRoutineId).toBe(id);
+
+    const form = loadShotForm(db, ids.userId);
+    if (form.state !== 'ready') throw new Error('Expected a ready form');
+    expect(form.prefill.routineId).toBe(id);
+    expect(form.prefill.setup.routine?.name).toBe('Light roast');
+
+    // Used up by that shot: the shot after copies the last shot again.
+    brew(2, 7, ids.routineId);
+    const after = loadShotForm(db, ids.userId);
+    if (after.state !== 'ready') throw new Error('Expected a ready form');
+    expect(after.prefill.routineId).toBe(ids.routineId);
+  });
+
+  it('D-187: not for an archived routine or someone else’s', () => {
+    const id = lightRoast();
+    expect(useForNewShots(db, 'someone-else', id, T0)).toBe(false);
+    archiveRoutine(db, ids.userId, id, T0);
+    expect(useForNewShots(db, ids.userId, id, T0)).toBe(false);
   });
 });

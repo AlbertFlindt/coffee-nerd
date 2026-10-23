@@ -13,7 +13,7 @@ import {
 import { trimmed } from '../../domain/gear';
 import type { Db, Queryable } from './client';
 import { newId } from './ids';
-import { prepStep, recipe, routine, shot, userSettings } from './schema';
+import { appState, prepStep, recipe, routine, shot, userSettings } from './schema';
 
 export type RoutineCard = {
   id: string;
@@ -22,6 +22,8 @@ export type RoutineCard = {
   steps: string[];
   /** My setup's routine or the last shot's (D-163). */
   inUse: boolean;
+  /** My setup's routine: it is not asked about for new shots (D-187). */
+  inMySetup: boolean;
   shots: number;
   /** Average over the rated shots; null when none is rated. */
   averageScore: number | null;
@@ -119,6 +121,7 @@ export function loadPuckPrep(db: Queryable, ownerId: string): PuckPrepPage {
         name: r.name,
         steps: r.steps.map((s) => allSteps.get(s.stepId) ?? ''),
         inUse: inUse.has(r.id),
+        inMySetup: settings?.defaultRoutineId === r.id,
         shots: ofRoutine.length,
         averageScore: rated.length ? rated.reduce((a, b) => a + b, 0) / rated.length : null
       };
@@ -394,6 +397,30 @@ export function archiveRoutine(
     .where(and(eq(routine.id, id), eq(routine.ownerId, ownerId)))
     .run();
   return 'archived';
+}
+
+/**
+ * "Use it for new shots?" answered yes (D-187): the routine becomes My setup's, and the next shot starts
+ * with it. False when it is not yours or is archived.
+ */
+export function useForNewShots(db: Db, ownerId: string, id: string, now: number): boolean {
+  const found = db
+    .select({ id: routine.id })
+    .from(routine)
+    .where(and(eq(routine.id, id), eq(routine.ownerId, ownerId), isNull(routine.archivedAt)))
+    .get();
+  if (!found) return false;
+  db.transaction((tx) => {
+    tx.update(userSettings)
+      .set({ defaultRoutineId: id, updatedAt: now })
+      .where(eq(userSettings.userId, ownerId))
+      .run();
+    tx.update(appState)
+      .set({ nextRoutineId: id, updatedAt: now })
+      .where(eq(appState.userId, ownerId))
+      .run();
+  });
+  return true;
 }
 
 /** Deletes a routine no shot used (D-167); not My setup's (D-83). Null when it is not yours. */

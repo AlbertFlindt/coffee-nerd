@@ -1,6 +1,6 @@
-import { error } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { getDb } from '#lib/server/db/connection.ts';
-import { loadPuckPrep } from '#lib/server/db/puck-prep.ts';
+import { loadPuckPrep, useForNewShots } from '#lib/server/db/puck-prep.ts';
 import { addStepAction, removeStepAction, saveStepAction } from '#lib/server/puck-prep-form.ts';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -23,5 +23,12 @@ export const actions: Actions = {
   removeStep: ({ locals, request }) => {
     if (!locals.user) error(401);
     return removeStepAction(getDb(), locals.user.id, request);
+  },
+  // D-187: "Use it for new shots?" answered yes.
+  useForNewShots: async ({ locals, request }) => {
+    if (!locals.user) error(401);
+    const id = String((await request.formData()).get('id') ?? '');
+    if (!useForNewShots(getDb(), locals.user.id, id, Date.now())) return fail(404);
+    redirect(303, '/library/puck-prep');
   }
 };
