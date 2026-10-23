@@ -421,6 +421,25 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
     .click();
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
   await expect(page.getByRole('link', { name: /^IMS/ })).toHaveCount(0);
+
+  // D-188: the Archived row lists it, and Restore brings it back.
+  await page.getByRole('link', { name: /^Archived · \d+/ }).click();
+  await expect(page.getByRole('heading', { name: 'Archived', level: 1 })).toBeVisible();
+  await expect(page.getByRole('main')).toContainText('IMS · 20 g');
+  await expectNoPageScroll();
+  await screenshot('GearArchived');
+  await page.getByRole('button', { name: 'Restore IMS · 20 g' }).click();
+  await expect(page.getByRole('button', { name: 'Restore IMS · 20 g' })).toHaveCount(0);
+  await page.getByRole('link', { name: 'Back to Gear' }).click();
+  await expect(page.getByRole('link', { name: /^IMS · 20 g/ })).toBeVisible();
+  // Archived again, so the reference setup stays as it was.
+  await page.getByRole('link', { name: /^IMS · 20 g/ }).click();
+  await page.getByRole('button', { name: 'Archive' }).click();
+  await page
+    .getByRole('region', { name: 'Archive this basket' })
+    .getByRole('button', { name: 'Archive' })
+    .click();
+  await expect(page.getByRole('link', { name: /^IMS/ })).toHaveCount(0);
 });
 
 test('D-46, D-02: your own feature appears on More › Setup', async () => {

@@ -77,7 +77,7 @@ function defaultsOf(settings: ReturnType<typeof settingsOf>): Set<string> {
   );
 }
 
-function summaryOf(kind: Kind, spec: unknown): string {
+export function summaryOf(kind: Kind, spec: unknown): string {
   if (kind === 'machine') return machineSummary(spec as MachineSpec);
   if (kind === 'grinder') return grinderSummary(spec as GrinderSpec);
   return basketSummary(spec as BasketSpec);

@@ -6,6 +6,7 @@
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page as current } from '$app/state';
+  import ArchivedLink from '#lib/components/ArchivedLink.svelte';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import StepSheet from '#lib/components/StepSheet.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
@@ -118,6 +119,7 @@
       {@render plus(14)}New step
     </button>
   </div>
+  <ArchivedLink area="puck-prep" count={data.archived} />
 </main>
 
 <TabBar current="library" />

@@ -1,4 +1,5 @@
 import { error, fail } from '@sveltejs/kit';
+import { archivedCount } from '#lib/server/db/archived.ts';
 import { getDb } from '#lib/server/db/connection.ts';
 import {
   addTag,
@@ -17,7 +18,11 @@ import type { Actions, PageServerLoad } from './$types';
 // (D-174) and the tag sheet: rename, family for your own notes, merge into another, remove (D-171, D-172).
 export const load: PageServerLoad = ({ locals }) => {
   if (!locals.user) error(401);
-  return { page: loadTags(getDb(), locals.user.id) };
+  const db = getDb();
+  return {
+    page: loadTags(db, locals.user.id),
+    archived: archivedCount(db, locals.user.id, 'tags')
+  };
 };
 
 const GENERAL = 'Something on this page is not right';
