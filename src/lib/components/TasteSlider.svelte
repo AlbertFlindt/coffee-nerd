@@ -17,7 +17,7 @@
     scale: TasteScale;
     title: string;
     ariaLabel: string;
-    /** Words under the track: two ends, or three with the middle (balance). */
+    /** Words under the track: two ends, or three with the middle and a centre mark (D-192). */
     ends: string[];
     value: number | null;
     min: number;
@@ -103,7 +103,7 @@
       <div class="handle cn-slider-handle--empty" style:left="50%"></div>
     {/if}
   </div>
-  <div class="ends cn-label">
+  <div class="ends cn-label" class:three={ends.length === 3}>
     {#each ends as end (end)}<span>{end}</span>{/each}
   </div>
 </div>
@@ -235,6 +235,16 @@
     display: flex;
     justify-content: space-between;
     margin-top: -8px;
+  }
+
+  /* D-192: the middle word sits under the centre mark, whatever the width of the end words. */
+  .ends.three {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .ends.three > :last-child {
+    text-align: right;
   }
 
   /* D-36: tighter around the track on shorter screens; the track keeps its 44 px. */

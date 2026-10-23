@@ -200,10 +200,18 @@ test('MoreSetup, D-21, D-24, D-90, D-189: the Setup sheet; a changed value turns
   await expect(sheet).toBeHidden();
 });
 
-test('MoreTasting, D-23, D-96, D-97, D-101, D-190: the Tasting sheet, balance first', async () => {
+test('MoreTasting, D-23, D-96, D-97, D-101, D-190, D-192: the Tasting sheet, balance first', async () => {
   await page.getByRole('button', { name: 'Tasting', exact: true }).click();
   const sheet = page.getByRole('region', { name: 'Tasting', exact: true });
   await expect(sheet.getByRole('slider').first()).toHaveAccessibleName('Balance, sour to bitter');
+  // D-192: every slider has balance's centre mark and a middle word.
+  await expect(sheet.locator('.middle')).toHaveCount(4);
+  await expect(sheet.locator('.ends')).toHaveText([
+    'SourBalancedBitter',
+    'LightMediumHeavy',
+    'LowMediumHigh',
+    'ShortMediumLong'
+  ]);
   await expect(sheet.getByRole('slider', { name: 'Aftertaste, short to long' })).toHaveAttribute(
     'aria-valuetext',
     'Not set'

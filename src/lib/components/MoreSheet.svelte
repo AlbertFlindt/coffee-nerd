@@ -349,7 +349,7 @@
           scale="body"
           title="Body"
           ariaLabel="Body, light to heavy"
-          ends={['Light', 'Heavy']}
+          ends={['Light', 'Medium', 'Heavy']}
           heading="h3"
           min={0}
           max={10}
@@ -360,7 +360,7 @@
           scale="sweetness"
           title="Sweetness"
           ariaLabel="Sweetness, low to high"
-          ends={['Low', 'High']}
+          ends={['Low', 'Medium', 'High']}
           heading="h3"
           min={0}
           max={10}
@@ -371,7 +371,7 @@
           scale="aftertaste"
           title="Aftertaste"
           ariaLabel="Aftertaste, short to long"
-          ends={['Short', 'Long']}
+          ends={['Short', 'Medium', 'Long']}
           heading="h3"
           min={0}
           max={10}

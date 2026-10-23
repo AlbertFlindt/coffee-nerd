@@ -213,7 +213,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* matches how the Bianca is actually used (flat, plus any combination of preinfusion, low bar start and low bar end) and replaces a pick-one profile list. Seconds are what you set most; bar is still recorded without a second full control.
 - **D-25 — Puck prep points to a saved routine.** *(Revised 2026-10-19: see D-155, D-166.)* The Setup tab shows the chosen routine's name and its steps in order (e.g. "Daily routine: WDT → Distributor → Tamp → Puck screen"); tapping opens a picker of routines. Routines are built in Library (D-26).
   - *Why:* puck prep varies a lot between baristas; referencing a routine keeps the shot form short while still recording exactly what was done.
-- **D-23 — Tasting tab:** *(Revised 2026-10-17: see D-96, D-97, D-101, D-106; 2026-10-23: see D-190, D-191.)* body (light ↔ heavy), sweetness (low ↔ high), aftertaste (short ↔ long) as sliders with the same gesture as balance; flavor notes as chips from a short coffee flavor list plus "Add your own" (custom notes become chips); free-text notes.
+- **D-23 — Tasting tab:** *(Revised 2026-10-17: see D-96, D-97, D-101, D-106; 2026-10-23: see D-190 to D-192.)* body (light ↔ heavy), sweetness (low ↔ high), aftertaste (short ↔ long) as sliders with the same gesture as balance; flavor notes as chips from a short coffee flavor list plus "Add your own" (custom notes become chips); free-text notes.
   - Tasting follows D-11: everything starts empty, never copied from the last shot.
   - *Why:* sliders match the balance control; chips give structured data that Insights can use later.
 - **D-27 — Free-text notes are labelled as personal.** The notes field carries the hint "Just for you · not used in Insights".
@@ -248,6 +248,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* a mistaken tap must not force a score onto the shot; clearing keeps the data honest.
 - **D-190 — Balance moves into Tasting.** The sour ↔ bitter balance slider leaves the shot form and becomes the first slider in the Tasting sheet, above body, sweetness and aftertaste, working as before (D-96, D-98, D-106). The shot form keeps the score. Every taste slider works like balance; this is the pattern for sliders in the app. Revises D-08 and D-14.
   - *Why:* the form gets more room for what you set at the machine; balance is tasted together with the rest.
+- **D-192 — Every slider has a centre mark and a middle word.** Body, sweetness and aftertaste get balance's look: a mark in the middle of the track, and three words under it, the middle one "Medium" (Light · Medium · Heavy, Low · Medium · High, Short · Medium · Long), matching the word shown at 5 (D-96). Balance's slider is the design for every slider in the app. Refines D-23, D-96 and D-190.
+  - *Why:* the owner found balance's slider clearest; one look for every slider.
 
 ## 9. Data model concept: Recipe vs. Result
 
