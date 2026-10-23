@@ -1,7 +1,7 @@
 // Edit My setup (screen 13, D-45): the form's current values and choices, and saving them. My setup is the
 // only place the default gear is chosen (D-149). Every chosen id must be one of this owner's items that is
 // not archived (D-60, D-148); anything else is refused and nothing is saved.
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, isNotNull, isNull, ne } from 'drizzle-orm';
 import { z } from 'zod';
 import { reconcileFeatures } from '../../domain/prefill';
 import {
@@ -14,7 +14,7 @@ import {
 } from '../../domain/schemas';
 import type { Thousandths } from '../../domain/units';
 import type { Db, Queryable } from './client';
-import { gear, routine, userSettings } from './schema';
+import { appState, gear, routine, userSettings } from './schema';
 
 export type MySetupFormData = {
   /** What My setup has now; machine and grinder (and dose, grind) are null on an account that never chose. */
@@ -209,6 +209,18 @@ export function saveMySetup(db: Db, ownerId: string, input: unknown, now: number
       defaultFeatures: { ...others, ...features },
       updatedAt: now
     };
+    // D-187: a routine chosen for the next shot gives way to another routine chosen here.
+    tx.update(appState)
+      .set({ nextRoutineId: null, updatedAt: now })
+      .where(
+        and(
+          eq(appState.userId, ownerId),
+          v.routineId === null
+            ? isNotNull(appState.nextRoutineId)
+            : ne(appState.nextRoutineId, v.routineId)
+        )
+      )
+      .run();
     if (stored) tx.update(userSettings).set(values).where(eq(userSettings.userId, ownerId)).run();
     else
       tx.insert(userSettings)

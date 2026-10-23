@@ -1,6 +1,6 @@
 <script lang="ts">
   // "Add your own feature" (screen 14, D-46): a bottom sheet on the machine page. Name, what kind of value,
-  // the fields that kind needs, a preview of the row as More › Setup shows it, then the button. Opened on a
+  // the fields that kind needs, a preview of the row as the Setup sheet shows it, then the button. Opened on a
   // feature of your own it edits that one (D-151): rename and re-step always, delete only while no shot
   // has used it. The machine page saves the machine; this sheet only hands back the feature.
   import { untrack } from 'svelte';
@@ -201,6 +201,7 @@
           <TextField
             label="Range"
             id="feature-range"
+            inputmode="decimal"
             plain
             autocomplete="off"
             placeholder="Optional · e.g. 0–30 s"
@@ -212,6 +213,7 @@
         <TextField
           label="Range"
           id="feature-range"
+          inputmode="decimal"
           plain
           autocomplete="off"
           placeholder="Optional · e.g. 0–30 {unitLabel || 'ml'}"
@@ -269,7 +271,7 @@
     <section class="preview" aria-label="Preview">
       <div class="preview-head">
         <h3>Preview</h3>
-        <span>Shot form › More › Setup</span>
+        <span>Shot form › Setup</span>
       </div>
       <div class="cn-preview frame" aria-hidden="true" inert>
         {#if kind === 'number' || kind === 'seconds'}

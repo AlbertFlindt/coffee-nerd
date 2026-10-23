@@ -18,7 +18,8 @@ export const actions: Actions = {
     if (!input) return fail(400, { problems: [GENERAL] });
     const done = attempt(() => addRoutine(getDb(), ownerId, input, Date.now()));
     if (!('result' in done)) return done;
-    redirect(303, '/library/puck-prep');
+    // D-187: the Puck prep page asks whether to use it for new shots.
+    redirect(303, `/library/puck-prep?ask=${done.result}`);
   },
   // D-164: "New step" from the insert sheet.
   addStep: ({ locals, request }) => {

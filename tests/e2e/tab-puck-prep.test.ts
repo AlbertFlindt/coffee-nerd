@@ -52,13 +52,15 @@ test('PuckPrep, D-51, D-163: routines with their flow, "In use", and your steps'
   await screenshot('PuckPrep');
 });
 
-test('NewStep, D-52: a new step with a number setting', async () => {
+test('NewStep, D-52, D-185: a new step with a number setting', async () => {
   await page.getByRole('button', { name: 'New step' }).click();
   const sheet = page.getByRole('region', { name: 'New step' });
   await sheet.getByLabel('Name').fill('RDT');
   await sheet.getByRole('radio', { name: 'Number with unit' }).click();
   await sheet.getByLabel('Unit').fill('sprays');
   await sheet.getByLabel('Starts at').fill('2');
+  // D-185: Range opens the number keypad.
+  await expect(sheet.getByLabel('Range')).toHaveAttribute('inputmode', 'decimal');
   await expect(sheet.getByRole('region', { name: 'Preview' })).toContainText('RDT');
   await expect(sheet.getByRole('region', { name: 'Preview' })).toContainText('2 sprays');
   await expectNoPageScroll();
@@ -207,6 +209,14 @@ test('D-164, D-165, D-51: build a routine, set a value, reorder, and add a new s
 
   await page.getByRole('button', { name: 'Save routine' }).click();
   await expect(page.getByRole('heading', { name: 'Puck prep', level: 1 })).toBeVisible();
+  // D-187: a new routine asks to be used for new shots; "Not now" keeps My setup's routine.
+  const ask = page.getByRole('region', { name: 'Use it for new shots' });
+  await expect(ask.getByRole('heading', { name: 'Use it for new shots?' })).toBeVisible();
+  await expect(ask).toContainText('Light roast becomes My setup’s routine');
+  await screenshot('RoutineAsk');
+  await ask.getByRole('button', { name: 'Not now' }).click();
+  await expect(ask).toBeHidden();
+  await expect(page).toHaveURL(/\/library\/puck-prep$/);
   await expect(
     page.getByRole('link', { name: /^Light roast/ }).getByLabel('Tamp, then WDT, then Paper filter')
   ).toBeVisible();
@@ -228,8 +238,8 @@ test('D-167: a routine no shot used offers Delete', async () => {
 
 test('D-166: a step’s value changes for one shot, as a recipe change in sage', async () => {
   await page.goto('/shot/new');
-  await page.getByRole('button', { name: 'More', exact: true }).click();
-  const more = page.getByRole('region', { name: 'More', exact: true });
+  await page.getByRole('button', { name: 'Setup', exact: true }).click();
+  const more = page.getByRole('region', { name: 'Setup', exact: true });
   await more.getByRole('button', { name: /Puck prep/ }).click();
   await expect(more.getByRole('button', { name: /^Routine/ })).toContainText('Daily routine');
   await expect(more).toContainText('No settings');
@@ -248,12 +258,12 @@ test('D-166: a step’s value changes for one shot, as a recipe change in sage',
 test('D-167, D-168: once a shot used it, the routine is archived, and so is its step', async () => {
   // Brew one shot with Light roast.
   await page.goto('/shot/new');
-  await page.getByRole('button', { name: 'More', exact: true }).click();
-  const more = page.getByRole('region', { name: 'More', exact: true });
+  await page.getByRole('button', { name: 'Setup', exact: true }).click();
+  const more = page.getByRole('region', { name: 'Setup', exact: true });
   await more.getByRole('button', { name: /Puck prep/ }).click();
   await more.getByRole('button', { name: /^Routine/ }).click();
   await more.getByRole('button', { name: 'Light roast' }).click();
-  await page.getByRole('button', { name: 'Close More' }).click({ position: { x: 200, y: 20 } });
+  await page.getByRole('button', { name: 'Close Setup' }).click({ position: { x: 200, y: 20 } });
   await page.getByRole('button', { name: 'Save shot' }).click();
   await expect(page.getByRole('status')).toContainText('Shot saved');
 

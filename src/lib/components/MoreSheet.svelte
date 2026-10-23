@@ -1,7 +1,8 @@
 <script lang="ts">
-  // More (D-21): a bottom sheet with two tabs. Setup: temperature, pressure profile, basket, puck prep
-  // (D-22, D-24, D-25), changes since the last shot in sage (D-90). Tasting: body, sweetness, aftertaste,
-  // flavor notes and notes (D-23, D-27, D-97, D-101); all start empty (D-11).
+  // The Setup or the Tasting sheet, each opened by its own button on the shot form (D-21, D-189). Setup:
+  // temperature, pressure profile, basket, puck prep (D-22, D-24, D-25), changes since the last shot in
+  // sage (D-90). Tasting: balance, body, sweetness, aftertaste (D-190), flavor notes that fold away
+  // (D-191) and notes (D-23, D-27, D-97, D-101); all start empty (D-11). Tasting scrolls as a whole.
   import BottomSheet from './BottomSheet.svelte';
   import ChoiceRow from './ChoiceRow.svelte';
   import PickRow from './PickRow.svelte';
@@ -14,7 +15,7 @@
 
   let {
     shot = $bindable(),
-    tab = $bindable(),
+    tab,
     features,
     baskets,
     routines,
@@ -41,6 +42,27 @@
   let picking: 'basket' | 'routine' | 'prep' | null = $state(null);
   let adding = $state(false);
   let newName = $state('');
+
+  // D-191: whether Flavor notes is folded is remembered on this phone. Storage can be missing or blocked
+  // (a private window): it then starts open and is simply not remembered.
+  const FOLDED_KEY = 'coffee-nerd:flavor-notes-folded';
+  // The sheet only opens after a tap in the browser, so storage is read at once and it never jumps.
+  function readFolded(): boolean {
+    try {
+      return localStorage.getItem(FOLDED_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  }
+  let folded = $state(readFolded());
+  function toggleFolded() {
+    folded = !folded;
+    try {
+      localStorage.setItem(FOLDED_KEY, String(folded));
+    } catch {
+      // not remembered
+    }
+  }
 
   const PHASES = ['flat_pressure', 'preinfusion', 'low_bar_start', 'low_bar_end'];
   const present = $derived(features.filter((f) => shot.setup.features[f.key]));
@@ -174,21 +196,13 @@
   >
 {/snippet}
 
-<BottomSheet label="More" closeLabel="Close More" {onclose}>
-  <div class="cn-seg cn-tabs tabs" role="tablist" aria-label="More sections">
-    <button type="button" role="tab" aria-selected={tab === 'setup'} onclick={() => (tab = 'setup')}
-      >Setup</button
-    >
-    <button
-      type="button"
-      role="tab"
-      aria-selected={tab === 'tasting'}
-      onclick={() => (tab = 'tasting')}>Tasting</button
-    >
-  </div>
-
+<BottomSheet
+  label={tab === 'setup' ? 'Setup' : 'Tasting'}
+  closeLabel={tab === 'setup' ? 'Close Setup' : 'Close Tasting'}
+  {onclose}
+>
   {#if tab === 'setup'}
-    <div class="panel setup" role="tabpanel" aria-label="Setup">
+    <div class="panel setup">
       {#if picking === 'prep' && shot.setup.routine}
         <h3>Puck prep</h3>
         <button type="button" class="link-row cn-tap" onclick={() => (picking = 'routine')}>
@@ -318,13 +332,24 @@
       {/if}
     </div>
   {:else}
-    <div class="panel tasting" role="tabpanel" aria-label="Tasting">
+    <div class="panel tasting">
       <div class="sliders">
+        <TasteSlider
+          scale="balance"
+          title="Balance"
+          ariaLabel="Balance, sour to bitter"
+          ends={['Sour', 'Balanced', 'Bitter']}
+          heading="h3"
+          min={-10}
+          max={10}
+          value={shot.taste.balance}
+          onchange={(v) => (shot.taste.balance = v)}
+        />
         <TasteSlider
           scale="body"
           title="Body"
           ariaLabel="Body, light to heavy"
-          ends={['Light', 'Heavy']}
+          ends={['Light', 'Medium', 'Heavy']}
           heading="h3"
           min={0}
           max={10}
@@ -335,7 +360,7 @@
           scale="sweetness"
           title="Sweetness"
           ariaLabel="Sweetness, low to high"
-          ends={['Low', 'High']}
+          ends={['Low', 'Medium', 'High']}
           heading="h3"
           min={0}
           max={10}
@@ -346,7 +371,7 @@
           scale="aftertaste"
           title="Aftertaste"
           ariaLabel="Aftertaste, short to long"
-          ends={['Short', 'Long']}
+          ends={['Short', 'Medium', 'Long']}
           heading="h3"
           min={0}
           max={10}
@@ -355,64 +380,90 @@
         />
       </div>
       <div class="notes-block flavor">
-        <h3>Flavor notes</h3>
-        <div class="chips" role="group" aria-label="Flavor notes">
-          {#each tags as t (t.id)}
-            <button
-              type="button"
-              class="cn-chip chip"
-              aria-pressed={shot.tagIds.includes(t.id)}
-              onclick={() => toggleTag(t.id)}>{t.name}</button
+        <h3>
+          <button
+            type="button"
+            class="fold cn-tap"
+            aria-expanded={!folded}
+            aria-controls="flavor-notes"
+            onclick={toggleFolded}
+          >
+            Flavor notes
+            {#if folded && shot.tagIds.length + shot.newTagNames.length > 0}
+              <span class="soft">· {shot.tagIds.length + shot.newTagNames.length} chosen</span>
+            {/if}
+            <svg
+              class:open={!folded}
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg
             >
-          {/each}
-          {#each shot.newTagNames as name (name)}
-            <button
-              type="button"
-              class="cn-chip chip"
-              aria-pressed="true"
-              onclick={() => (shot.newTagNames = shot.newTagNames.filter((n) => n !== name))}
-              >{name}</button
-            >
-          {/each}
-        </div>
-        <!-- Outside the scrolling chips, so it is always in reach (D-97, D-101). -->
-        <div class="add">
-          {#if adding}
-            <!-- svelte-ignore a11y_autofocus -->
-            <input
-              class="cn-chip chip new"
-              aria-label="New flavor note"
-              placeholder="Flavor note"
-              maxlength="40"
-              autofocus
-              bind:value={newName}
-              onblur={addOwn}
-              onkeydown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  addOwn();
-                }
-              }}
-            />
-          {:else}
-            <button
-              type="button"
-              class="cn-chip cn-chip--add cn-tap"
-              onclick={() => (adding = true)}
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.4"
-                stroke-linecap="round"
-                aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg
+          </button>
+        </h3>
+        <div id="flavor-notes" class="flavor-body" hidden={folded}>
+          <div class="chips" role="group" aria-label="Flavor notes">
+            {#each tags as t (t.id)}
+              <button
+                type="button"
+                class="cn-chip chip"
+                aria-pressed={shot.tagIds.includes(t.id)}
+                onclick={() => toggleTag(t.id)}>{t.name}</button
               >
-              Add your own
-            </button>
-          {/if}
+            {/each}
+            {#each shot.newTagNames as name (name)}
+              <button
+                type="button"
+                class="cn-chip chip"
+                aria-pressed="true"
+                onclick={() => (shot.newTagNames = shot.newTagNames.filter((n) => n !== name))}
+                >{name}</button
+              >
+            {/each}
+          </div>
+          <!-- Outside the scrolling chips, so it is always in reach (D-97, D-101). -->
+          <div class="add">
+            {#if adding}
+              <!-- svelte-ignore a11y_autofocus -->
+              <input
+                class="cn-chip chip new"
+                aria-label="New flavor note"
+                placeholder="Flavor note"
+                maxlength="40"
+                autofocus
+                bind:value={newName}
+                onblur={addOwn}
+                onkeydown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addOwn();
+                  }
+                }}
+              />
+            {:else}
+              <button
+                type="button"
+                class="cn-chip cn-chip--add cn-tap"
+                onclick={() => (adding = true)}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.4"
+                  stroke-linecap="round"
+                  aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg
+                >
+                Add your own
+              </button>
+            {/if}
+          </div>
         </div>
       </div>
       <div class="notes-block">
@@ -432,22 +483,6 @@
 </BottomSheet>
 
 <style>
-  .tabs {
-    flex: none;
-    background: var(--bg);
-  }
-
-  .tabs button {
-    height: 44px;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--ink-muted);
-  }
-
-  .tabs button[aria-selected='true'] {
-    color: var(--on-cream);
-  }
-
   .panel {
     flex: 1;
     min-height: 0;
@@ -557,7 +592,7 @@
 
   .tasting {
     gap: var(--space-4);
-    /* Last resort on very short screens: the tab scrolls inside the sheet (D-36). */
+    /* D-191: the whole sheet scrolls when it does not fit, so the flavor notes get their room. */
     overflow-y: auto;
     --taste-rail: var(--bg);
     --taste-behind: var(--surface-sheet);
@@ -576,9 +611,39 @@
     gap: var(--space-2);
   }
 
-  .flavor {
-    flex: 1;
-    min-height: 0;
+  .flavor-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .flavor-body[hidden] {
+    display: none;
+  }
+
+  .fold {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    min-height: var(--touch-min);
+    margin: -10px 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+  }
+
+  .fold svg {
+    margin-left: auto;
+    color: var(--ink-muted);
+    transform: rotate(-90deg);
+  }
+
+  .fold svg.open {
+    transform: none;
   }
 
   .chips {
@@ -586,9 +651,6 @@
     flex-wrap: wrap;
     align-content: flex-start;
     gap: var(--space-2);
-    overflow-y: auto;
-    /* At least one row of notes stays in view (D-97). */
-    min-height: 40px;
   }
 
   .add {

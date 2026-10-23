@@ -55,6 +55,8 @@ export type PrefillContext = {
   stepSettings?: Record<string, PrepStepSetting>;
   /** Ids of archived gear and routines (D-75). */
   archivedIds: ReadonlySet<string>;
+  /** A routine just chosen for new shots (D-187): the next shot starts with it, unless it is Brew next. */
+  nextRoutineId?: string | null;
 };
 
 export type PrefillSource = 'brew_next' | 'last_shot' | 'rebuy' | 'my_setup';
@@ -124,11 +126,16 @@ function fromRecipe(
   beanId: string
 ): Prefill {
   const { mySetup, archivedIds } = context;
-  // D-75: an archived item is swapped for My setup's; everything else is copied.
+  // D-75: an archived item is swapped for My setup's; everything else is copied. D-187: a routine just
+  // chosen for new shots replaces the copied one.
   const current = <T extends string | null>(id: T, fallback: T): T =>
     id !== null && archivedIds.has(id) ? fallback : id;
   const machineId = current(recipe.machineId, mySetup.machineId);
-  const routineId = current(recipe.routineId, mySetup.routineId);
+  const next = context.nextRoutineId ?? null;
+  const routineId =
+    source !== 'brew_next' && next !== null && !archivedIds.has(next) && next in context.routines
+      ? next
+      : current(recipe.routineId, mySetup.routineId);
   const routineSwapped = routineId !== recipe.routineId;
 
   return {

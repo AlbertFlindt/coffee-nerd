@@ -155,15 +155,14 @@ test('D-172: a built-in note can be renamed but keeps its family', async () => {
 });
 
 test('D-171: a note a shot used is removed from the page and the chips, and stays on its shot', async () => {
-  // Brew a shot with a new note, added on the Tasting tab (D-101).
+  // Brew a shot with a new note, added in the Tasting sheet (D-101).
   await page.goto('/shot/new');
-  await page.getByRole('button', { name: 'More', exact: true }).click();
-  const more = page.getByRole('region', { name: 'More', exact: true });
-  await more.getByRole('tab', { name: 'Tasting' }).click();
+  await page.getByRole('button', { name: 'Tasting', exact: true }).click();
+  const more = page.getByRole('region', { name: 'Tasting', exact: true });
   await more.getByRole('button', { name: 'Add your own' }).click();
   await more.getByRole('textbox', { name: 'New flavor note' }).fill('Funky');
   await more.getByRole('textbox', { name: 'New flavor note' }).press('Enter');
-  await page.getByRole('button', { name: 'Close More' }).click({ position: { x: 200, y: 20 } });
+  await page.getByRole('button', { name: 'Close Tasting' }).click({ position: { x: 200, y: 20 } });
   await page.getByRole('button', { name: 'Save shot' }).click();
   await expect(page.getByRole('status')).toContainText('Shot saved');
 
@@ -176,8 +175,7 @@ test('D-171: a note a shot used is removed from the page and the chips, and stay
   await expect(chip('Funky')).toHaveCount(0);
 
   await page.goto('/shot/new');
-  await page.getByRole('button', { name: 'More', exact: true }).click();
-  await more.getByRole('tab', { name: 'Tasting' }).click();
+  await page.getByRole('button', { name: 'Tasting', exact: true }).click();
   await expect(more.getByRole('button', { name: 'Funky' })).toHaveCount(0);
 
   await page.goto('/journal');

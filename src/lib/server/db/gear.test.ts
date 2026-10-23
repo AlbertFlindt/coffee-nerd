@@ -136,6 +136,26 @@ describe('addGear and saveGear', () => {
     ).toThrow(GearRejected);
   });
 
+  it('D-184: a low bar phase saved switched off leaves the machine; one switched on stays', () => {
+    const item = loadGear(db, ids.userId, ids.machineId)!;
+    const spec = item.spec as MachineSpec;
+    const features = spec.features.map((f) =>
+      f.key === 'low_bar_end' ? { ...f, enabled: false } : f
+    );
+    saveGear(
+      db,
+      ids.userId,
+      ids.machineId,
+      { kind: 'machine', name: item.name, spec: { ...spec, features } },
+      T0
+    );
+    const keys = (loadGear(db, ids.userId, ids.machineId)!.spec as MachineSpec).features.map(
+      (f) => f.key
+    );
+    expect(keys).toContain('low_bar_start');
+    expect(keys).not.toContain('low_bar_end');
+  });
+
   it('D-60: not another user’s gear, and not changing its kind', () => {
     expect(loadGear(db, 'someone-else', ids.machineId)).toBeNull();
     expect(() =>

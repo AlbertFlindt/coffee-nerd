@@ -2,13 +2,15 @@ import { describe, expect, it } from 'vitest';
 import {
   basketName,
   basketSummary,
+  builtInFeatures,
   fitsMachines,
   grinderSummary,
   machineSummary,
   NEW_GEAR,
   readQuantity,
   readRange,
-  trimmed
+  trimmed,
+  withoutRetiredPhases
 } from './gear';
 import { basketSpecSchema, grinderSpecSchema, machineSpecSchema } from './schemas';
 import type { FeatureDefinition } from './schemas';
@@ -90,6 +92,49 @@ describe('fitsMachines', () => {
     expect(fitsMachines(58000, machines)).toBe('Fits Lelit Bianca');
     expect(fitsMachines(51000, machines)).toBe('Fits none of your machines');
     expect(fitsMachines(undefined, machines)).toBeNull();
+  });
+});
+
+describe('builtInFeatures', () => {
+  it('D-184: a machine offers temperature, flat pressure and preinfusion, not the low bar phases', () => {
+    expect(builtInFeatures().map((f) => f.key)).toEqual([
+      'temperature',
+      'flat_pressure',
+      'preinfusion'
+    ]);
+    expect(NEW_GEAR.machine().features.map((f) => f.key)).toEqual([
+      'temperature',
+      'flat_pressure',
+      'preinfusion'
+    ]);
+  });
+
+  it('D-184: a low bar phase that is switched on stays, with its pressure', () => {
+    const features = builtInFeatures({ low_bar_start: true });
+    expect(features.map((f) => f.key)).toEqual([
+      'temperature',
+      'flat_pressure',
+      'preinfusion',
+      'low_bar_start'
+    ]);
+    expect(machineSpecSchema.safeParse({ ...NEW_GEAR.machine(), features }).success).toBe(true);
+    expect(features[3].value).toMatchObject({ kind: 'phase', pressure: { step: 500 } });
+  });
+});
+
+describe('withoutRetiredPhases', () => {
+  it('D-184: low bar phases leave a machine once they are switched off; everything else stays', () => {
+    const features = [
+      feature('preinfusion', 'Preinfusion', false),
+      feature('low_bar_start', 'Low bar start', true),
+      feature('low_bar_end', 'Low bar end', false),
+      feature('custom-1', 'Paddle', false)
+    ];
+    expect(withoutRetiredPhases(features).map((f) => f.key)).toEqual([
+      'preinfusion',
+      'low_bar_start',
+      'custom-1'
+    ]);
   });
 });
 

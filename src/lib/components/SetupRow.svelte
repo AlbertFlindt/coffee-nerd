@@ -1,5 +1,5 @@
 <script lang="ts">
-  // One standing-setup row in More › Setup (RowStepper, D-22, D-24): an optional switch, the label, −/+
+  // One standing-setup row in the Setup sheet (RowStepper, D-22, D-24): an optional switch, the label, −/+
   // and the value. A phase that is on shows its pressure as a small tappable amber value (D-24); a
   // switched-off row collapses to one quiet line. Changed since the last shot: sage value and a delta
   // pill, or an "On"/"Off" pill (D-90).

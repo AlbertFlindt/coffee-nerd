@@ -2,7 +2,7 @@
 
 Status: living document. Each decision records **what** was decided and **why**, so later design and code can be checked against it. Technical decisions start at section 13.
 
-Last updated: 2026-10-19
+Last updated: 2026-10-23
 
 ---
 
@@ -169,7 +169,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
     - *Why:* you see exactly what one tap does, and it doubles as a quiet unit label on every card.
 - **D-89 — Dose, yield and time steps are your settings.** The −/+ steps for dose, yield and time are stored per user and default to 0.1 g, 0.1 g and 1 s (D-07); the shot form and Edit My setup both use them (Edit My setup's 0.5 g yield step in the design is replaced). They are changed in Settings once it exists (roadmap M11). The grind step stays on the grinder (D-48). Refines D-07.
   - *Why:* scales and habits differ between home baristas; the defaults match a 0.1 g scale and the reference setup.
-- **D-14 — Shot form layout.** *(Revised 2026-10-17: see D-94, D-95, D-107.)* Full-screen page opened from "+". Top to bottom: bean card (bean, machine, grinder, standing-setup summary, recipe tag) → 2×2 grid of core values (grind, dose, yield, time), each a card with large value and −/+ steppers → calculated ratio → balance slider → score row → More → full-width Save.
+- **D-14 — Shot form layout.** *(Revised 2026-10-17: see D-94, D-95, D-107; 2026-10-23: see D-189, D-190.)* Full-screen page opened from "+". Top to bottom: bean card (bean, machine, grinder, standing-setup summary, recipe tag) → 2×2 grid of core values (grind, dose, yield, time), each a card with large value and −/+ steppers → calculated ratio → balance slider → score row → More → full-width Save.
   - *Why:* the grid keeps all four core values visible at once with large touch targets; one primary action at the bottom suits one-handed use. A row-based "instrument" layout was tried and felt cluttered.
 - **D-15 — Changes vs. last shot shown as a delta.** A changed value is colored (see D-19) with a small delta pill (e.g. "+2.5"). No "was X" text.
   - *Why:* the delta is the information the barista acts on; extra text added clutter.
@@ -198,7 +198,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 ### More (bottom sheet)
 
-- **D-21 — More opens as a bottom sheet with two tabs: Setup and Tasting.** *(Revised 2026-10-17: see D-108.)* The sheet covers the form but **stops above the Save button**, which stays visible and active. Tapping outside the sheet (the dimmed form) closes it.
+- **D-21 — More opens as a bottom sheet with two tabs: Setup and Tasting.** *(Revised 2026-10-17: see D-108; 2026-10-23: see D-189.)* The sheet covers the form but **stops above the Save button**, which stays visible and active. Tapping outside the sheet (the dimmed form) closes it.
   - *Why:* the user can save from anywhere without closing the sheet first; tap-outside-to-close is the expected sheet behavior on phones.
 - **D-108 — Sheets slide, and can be dragged down to close.** A bottom sheet slides up when it opens and down when it closes, and the dimmed screen behind it fades. Dragging the handle (or the top of the sheet) down closes it; a short drag springs back. Tapping outside still closes it (D-21). Without motion when the phone asks for reduced motion. Refines D-21.
   - *Why:* the handle invites a drag on every phone; a sheet that ignores it feels stuck.
@@ -208,24 +208,28 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* one way to show "changed since last shot" everywhere (D-19), so the sheet reads like the form.
 - **D-102 — Sage wins on a changed pressure, basket or puck prep.** A changed phase pressure turns its "at 2.0 bar" value sage, with a sage delta pill, even though it is tappable. A changed basket or puck prep routine shows its name in sage, without a pill, since there is no number to show. Refines D-90.
   - *Why:* sage always means "changed since last shot" (D-19), so a change is never hidden by another color's job.
-- **D-24 — Pressure profile = a base pressure plus phases you switch on or off.** The base is "Flat" (main extraction pressure, in bar). Phases offered by the machine (for the Lelit Bianca: preinfusion, low bar start, low bar end) each have an on/off switch and can be combined freely. A phase that is off collapses to one quiet line. A phase that is on shows its **duration in seconds as the main value** (with −/+) and its **pressure in bar as a small tappable value** underneath (e.g. "at 2.0 bar").
+- **D-24 — Pressure profile = a base pressure plus phases you switch on or off.** *(Revised 2026-10-23: see D-184.)* The base is "Flat" (main extraction pressure, in bar). Phases offered by the machine (for the Lelit Bianca: preinfusion, low bar start, low bar end) each have an on/off switch and can be combined freely. A phase that is off collapses to one quiet line. A phase that is on shows its **duration in seconds as the main value** (with −/+) and its **pressure in bar as a small tappable value** underneath (e.g. "at 2.0 bar").
   - Which phases exist, and whether they have a pressure, comes from the machine's capability profile (D-02).
   - *Why:* matches how the Bianca is actually used (flat, plus any combination of preinfusion, low bar start and low bar end) and replaces a pick-one profile list. Seconds are what you set most; bar is still recorded without a second full control.
 - **D-25 — Puck prep points to a saved routine.** *(Revised 2026-10-19: see D-155, D-166.)* The Setup tab shows the chosen routine's name and its steps in order (e.g. "Daily routine: WDT → Distributor → Tamp → Puck screen"); tapping opens a picker of routines. Routines are built in Library (D-26).
   - *Why:* puck prep varies a lot between baristas; referencing a routine keeps the shot form short while still recording exactly what was done.
-- **D-23 — Tasting tab:** *(Revised 2026-10-17: see D-96, D-97, D-101, D-106.)* body (light ↔ heavy), sweetness (low ↔ high), aftertaste (short ↔ long) as sliders with the same gesture as balance; flavor notes as chips from a short coffee flavor list plus "Add your own" (custom notes become chips); free-text notes.
+- **D-23 — Tasting tab:** *(Revised 2026-10-17: see D-96, D-97, D-101, D-106; 2026-10-23: see D-190 to D-192.)* body (light ↔ heavy), sweetness (low ↔ high), aftertaste (short ↔ long) as sliders with the same gesture as balance; flavor notes as chips from a short coffee flavor list plus "Add your own" (custom notes become chips); free-text notes.
   - Tasting follows D-11: everything starts empty, never copied from the last shot.
   - *Why:* sliders match the balance control; chips give structured data that Insights can use later.
 - **D-27 — Free-text notes are labelled as personal.** The notes field carries the hint "Just for you · not used in Insights".
   - *Why:* free text cannot be used for statistics; saying so sets the right expectation and nudges users toward flavor chips for anything they want analyzed.
-- **D-97 — Flavor chips: all of them, most used first.** The Tasting tab shows every flavor note as a chip, the ones you use most first, then alphabetical. The chip area scrolls on its own when the notes do not fit (D-36). Refines D-23.
+- **D-97 — Flavor chips: all of them, most used first.** *(Revised 2026-10-23: see D-191.)* The Tasting tab shows every flavor note as a chip, the ones you use most first, then alphabetical. The chip area scrolls on its own when the notes do not fit (D-36). Refines D-23.
   - *Why:* every note stays one tap away, and the ones you actually taste are on top.
 - **D-101 — A note added on the Tasting tab joins "Other".** *(Revised 2026-10-19: see D-181.)* "Add your own" takes a name typed in place; the new note belongs to the family Other (D-53) and is created only when the shot is saved. Its family can be changed on the Tags page. Refines D-23.
   - *Why:* choosing a family mid-shot is a detour; a shot you leave unsaved should leave no stray notes behind.
+- **D-189 — Setup and Tasting are two buttons.** The shot form's "More" button is replaced by two half-width buttons side by side, "Setup" and "Tasting", where More was. Each opens its own bottom sheet, without tabs; both still stop above Save and close like any sheet (D-21, D-108). Revises D-14 and D-21.
+  - *Why:* in use, setup and tasting are separate moments (before and after the shot); one tap straight to each beats a sheet with tabs.
+- **D-191 — The Tasting sheet scrolls as a whole, and flavor notes fold away.** The whole Tasting sheet scrolls when it does not fit, instead of only the chip area. The Flavor notes section has a header that folds and unfolds it; the app remembers on this phone whether it was left folded or open, for every shot. Revises D-97 and, for this sheet, D-36.
+  - *Why:* the chip area was too small to use; folding keeps the sheet short for those who skip notes.
 
 ## 8. Taste and rating
 
-- **D-08 — Default taste input: balance slider + overall score.** A **sour ↔ balanced ↔ bitter** slider, followed by an overall score. Full tasting (body, sweetness, aftertaste, flavor notes) under More (D-23).
+- **D-08 — Default taste input: balance slider + overall score.** *(Revised 2026-10-23: see D-190.)* A **sour ↔ balanced ↔ bitter** slider, followed by an overall score. Full tasting (body, sweetness, aftertaste, flavor notes) under More (D-23).
   - *Why:* balance is espresso's shared language and enables dial-in hints (e.g. "sour and fast → grind finer").
 - **D-09 — Score: 1–10, whole numbers only.**
   - *Why:* 1–5 is too coarse to show improvement; 0–100 is false precision at home. Hard to change once data exists.
@@ -242,10 +246,14 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* a bare track gave no hint that it can be used; a dashed outline says "nothing set yet" without suggesting a value.
 - **D-98 — A score or taste value can be cleared.** Tapping the selected score again clears it, so the shot stays "not rated" (D-11). A taste slider that is set shows "Clear" next to its value. Refines D-10 and D-11.
   - *Why:* a mistaken tap must not force a score onto the shot; clearing keeps the data honest.
+- **D-190 — Balance moves into Tasting.** The sour ↔ bitter balance slider leaves the shot form and becomes the first slider in the Tasting sheet, above body, sweetness and aftertaste, working as before (D-96, D-98, D-106). The shot form keeps the score. Every taste slider works like balance; this is the pattern for sliders in the app. Revises D-08 and D-14.
+  - *Why:* the form gets more room for what you set at the machine; balance is tasted together with the rest.
+- **D-192 — Every slider has a centre mark and a middle word.** Body, sweetness and aftertaste get balance's look: a mark in the middle of the track, and three words under it, the middle one "Medium" (Light · Medium · Heavy, Low · Medium · High, Short · Medium · Long), matching the word shown at 5 (D-96). Balance's slider is the design for every slider in the app. Refines D-23, D-96 and D-190.
+  - *Why:* the owner found balance's slider clearest; one look for every slider.
 
 ## 9. Data model concept: Recipe vs. Result
 
-- **D-13 — Recipe = intent; Result = outcome.**
+- **D-13 — Recipe = intent; Result = outcome.** *(Revised 2026-10-23: see D-186.)*
 
 | | Contains |
 |---|---|
@@ -256,6 +264,9 @@ Users never pick a persona. Personas are used to check that each screen works fo
 - Changing any recipe element (e.g. turning off preinfusion) is a **new idea/experiment**, with no score reference.
 - *Why:* two consecutive shots naturally vary in outcome; comparison is only meaningful for identical intent.
 - Enables: consistency insights (variance of results within one recipe ≈ puck-prep repeatability), clearer experiments, bean-aging detection.
+
+- **D-186 — A dose within 0.2 g is the same recipe.** When everything else in a recipe is the same, a dose up to 0.2 g away from the recipe's dose counts as that recipe: 18.1 g or 17.9 g reuses the 18.0 g recipe ("Recipe reused"). When more than one recipe is within reach, the closest dose wins. The shot keeps the exact dose it was brewed with, for its ratio and its detail. Existing shots are matched again once under this rule. Revises D-13 and D-16.
+  - *Why:* beans weigh out a tenth over or under; that is not a new idea, and splitting such shots into recipes hid their history.
 
 ## 10. Library (Beans, Gear, Puck prep, Tags)
 
@@ -345,7 +356,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* a mistaken bag should not stay in the list, but shot history is never lost (D-60, data-model §1).
 - **D-147 — Adding gear.** *(Revised 2026-10-18: see D-158.)* "Add gear" on the Gear page opens a small sheet: Machine, Grinder, Basket. Picking one opens that kind's detail page empty, titled "Add machine" (or grinder, basket), with "Add machine" as its button. Refines D-38.
   - *Why:* one button in the header as drawn, and each kind keeps its own page.
-- **D-148 — Archiving gear.** A gear page ends with a quiet "Archive" button (D-145's pattern) and a confirmation. Archived gear leaves the Gear list and every picker; past shots keep showing its name. An item My setup uses offers no Archive and says "Used in My setup · choose another default first" (D-83). There is no list of archived gear yet. Refines D-38 and D-83.
+- **D-148 — Archiving gear.** *(Revised 2026-10-23: see D-188.)* A gear page ends with a quiet "Archive" button (D-145's pattern) and a confirmation. Archived gear leaves the Gear list and every picker; past shots keep showing its name. An item My setup uses offers no Archive and says "Used in My setup · choose another default first" (D-83). There is no list of archived gear yet. Refines D-38 and D-83.
   - *Why:* gear that shots point to is archived, never deleted (data-model §1), and a quiet button keeps it out of the way.
 - **D-149 — The default is chosen in My setup only.** The "Default" chip shows what My setup uses; it is changed in Edit My setup's pickers, not on the gear pages. Refines D-38.
   - *Why:* one place decides what new beans start from.
@@ -381,7 +392,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - **Gear list** grouped by type (Machines, Grinders, Baskets, later Other). Each row shows a short capability summary (e.g. "Semi-auto · Preinfusion, low bar start, low bar end"; "Stepless · steps of 0.1"); the default item carries a "Default" chip. Tapping a row opens the item, where its capability profile (D-02) and step sizes (D-07) are set.
   - "Add gear" sits in the header.
   - *Why:* one place answers "what do I brew with and what do new shots start from"; per-item details stay one tap away for tinkering.
-- **D-44 — Gear detail (machine): capabilities are set by hand.** *(Revised 2026-10-17: see D-79.)* Opens from a row on the Gear page. Name, **type** (Automatic, Semi-auto, Lever, Manual) and a **"What it can do"** list of switches — for the Lelit Bianca: Temperature (°C, steps of 1), Flat pressure (bar, steps of 0.5), Preinfusion (s), Low bar start (s at bar), Low bar end (s at bar) — plus **"Add your own feature"** for anything unusual, and group size. Switched-on features are exactly what the shot form shows (D-02). Full-width Save.
+- **D-44 — Gear detail (machine): capabilities are set by hand.** *(Revised 2026-10-17: see D-79; 2026-10-23: see D-184.)* Opens from a row on the Gear page. Name, **type** (Automatic, Semi-auto, Lever, Manual) and a **"What it can do"** list of switches — for the Lelit Bianca: Temperature (°C, steps of 1), Flat pressure (bar, steps of 0.5), Preinfusion (s), Low bar start (s at bar), Low bar end (s at bar) — plus **"Add your own feature"** for anything unusual, and group size. Switched-on features are exactly what the shot form shows (D-02). Full-width Save.
   - No built-in model catalog: the user sets everything. Type only labels the machine; it does not switch features on or off.
   - Grinders get the same pattern (dial type: stepped/stepless, step size, range) — to be drawn.
   - *Why:* a hand-set profile works for any machine, including modified or rare ones, and keeps the app free of a catalog to maintain.
@@ -413,14 +424,14 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* one familiar form for "what new beans start from"; reusing the shot form's controls means nothing new to learn.
 - **D-26 — Puck prep routines as flowcharts.** A Puck prep overview where the user creates **steps** (individual prep methods, e.g. WDT, distributor, tamp, puck screen, RDT, or anything custom) and links them into one or more **routines** shown as flowcharts. The shot form references a routine (D-25).
   - *Why:* covers any prep style, however unusual, without a fixed list; coffee nerds will enjoy building and seeing the flow.
-- **D-51 — Puck prep: overview and routine builder.** *(Revised 2026-10-19: see D-76, D-163 to D-167.)* Refines D-26.
+- **D-51 — Puck prep: overview and routine builder.** *(Revised 2026-10-19: see D-76, D-163 to D-167; 2026-10-23: see D-187.)* Refines D-26.
   - **Routines are a straight line**, top to bottom — no branches. Reorder by dragging, insert between any two steps.
   - **Steps can carry optional settings** (e.g. WDT 20 s, Tamp 15 kg, RDT 2 sprays). The values are recorded with each shot, so Insights can compare them.
   - **Overview** (Library › Puck prep): "New routine" in the header. **Routines** as cards: name, "In use" chip on the routine My setup / the last shot uses, the steps as a mini flow (WDT → Distributor → Tamp → Puck screen), and "23 shots · average score 7.4" — so routines can be compared at a glance. Below, **Your steps**: the step library as chips with their setting unit ("WDT · seconds"), plus a dashed "New step".
   - **Routine builder** (full-screen, Save at the bottom): name, then a vertical flowchart between two caps, **"Dose in basket"** and **"Lock in and brew"**. Each step is a row with a drag handle, its name, its setting as a tappable amber value (or "No settings"), and remove. Between steps, a line with a small **+** to insert a step there.
   - Changing the routine on a shot, or a step's setting, is a **recipe change** (D-13).
   - *Why:* a straight line matches how puck prep is actually done and fits a phone; the start/end caps make it read as a flow, not a list; per-step settings and per-routine averages turn prep into something you can learn from.
-- **D-52 — New step.** *(Revised 2026-10-19: see D-168, D-169.)* "New step" on the Puck prep overview opens a bottom sheet (same pattern as "Add your own feature", D-46): **Name**; **Setting** — No setting, Number with unit, Seconds, Pick from a list; then the fields that kind needs — **Unit** and **Step**, **Starts at** (the value it gets when added to a routine) and optional **Range**; a framed **Preview** of the step's row in the routine builder; **Add step**.
+- **D-52 — New step.** *(Revised 2026-10-19: see D-168, D-169; 2026-10-23: see D-185.)* "New step" on the Puck prep overview opens a bottom sheet (same pattern as "Add your own feature", D-46): **Name**; **Setting** — No setting, Number with unit, Seconds, Pick from a list; then the fields that kind needs — **Unit** and **Step**, **Starts at** (the value it gets when added to a routine) and optional **Range**; a framed **Preview** of the step's row in the routine builder; **Add step**.
   - Routine cards keep a simple **average score across all shots** for now; fair comparisons (same bean, same recipe otherwise) belong in Insights.
   - *Why:* one consistent way to define anything custom — machine features and prep steps look and work alike.
 - **D-29 — Tags (flavor notes) get a home.** A place to see, rename, merge and remove flavor tags, including custom ones added from the Tasting tab.
@@ -436,7 +447,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the same controls as everywhere else, without crowding the flow.
 - **D-166 — A step's value can change for one shot.** *(Revised 2026-10-19: see D-178.)* On the shot form, tapping the puck prep row in More › Setup shows the routine's steps with their values, which can be changed for this shot. A change is a recipe change (D-51) and turns sage like any other change (D-90). Refines D-25 and D-76.
   - *Why:* trying WDT 30 s instead of 20 s should not need a new routine.
-- **D-167 — Changing and removing routines.** Tapping a routine card opens it in the routine builder. A quiet "Archive" at the bottom, with a confirmation, archives it: it leaves the Puck prep page and the pickers, past shots keep its name. It is not offered for My setup's routine (D-83). A routine no shot has used can be deleted for good instead. Refines D-51 and D-148.
+- **D-167 — Changing and removing routines.** *(Revised 2026-10-23: see D-188.)* Tapping a routine card opens it in the routine builder. A quiet "Archive" at the bottom, with a confirmation, archives it: it leaves the Puck prep page and the pickers, past shots keep its name. It is not offered for My setup's routine (D-83). A routine no shot has used can be deleted for good instead. Refines D-51 and D-148.
   - *Why:* the same pattern as gear, while a routine made by mistake can go without leaving a trace.
 - **D-168 — Changing and removing steps.** *(Revised 2026-10-19: see D-175, D-176.)* Tapping a step chip on the Puck prep page opens the step sheet (D-52). Its name, step, range and starting value can always change. Once a shot has used it, its kind of setting, its unit and its list options stay, and it is archived instead of deleted; a step no shot has used can be deleted. Refines D-52, as D-160 to D-162 do for machine features.
   - *Why:* one rule for everything custom; the values shots recorded keep their meaning.
@@ -444,7 +455,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* a routine should never lose a step behind your back.
 - **D-170 — Recipe labels name a differing step value.** When two recipes in the Journal's recipe filter differ only in a step value, the label names it ("WDT 30 s"). Refines D-121.
   - *Why:* step values are now set per routine and per shot (D-165, D-166), so recipes can differ only there.
-- **D-171 — Removing a flavor note.** *(Revised 2026-10-19: see D-181, D-182.)* "Remove" on a note that shots have used archives it: it leaves the Tasting chips and the Tags page, and past shots still show it. A note no shot has used is deleted. Refines D-53.
+- **D-171 — Removing a flavor note.** *(Revised 2026-10-19: see D-181, D-182; 2026-10-23: see D-188.)* "Remove" on a note that shots have used archives it: it leaves the Tasting chips and the Tags page, and past shots still show it. A note no shot has used is deleted. Refines D-53.
   - *Why:* what shots point to is kept, as everywhere else in the app.
 - **D-172 — Built-in notes can change too.** Built-in notes can be renamed, merged and removed like your own; only your own notes can change family. Refines D-53.
   - *Why:* the vocabulary is yours to tidy; fixed families keep Insights reliable.
@@ -468,6 +479,14 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* it is the same note; a second one with the same name would split its shots.
 - **D-182 — A shot keeps working when its notes were merged or deleted meanwhile.** When a shot is saved with a note that was merged since the form opened (or while it waited offline), it gets the note it was merged into; a note deleted since is left off. The shot saves. Refines D-53 and D-171.
   - *Why:* a shot is never lost over a tidied tag list, also when it was brewed offline.
+- **D-184 — Low bar start and low bar end are no longer built in.** A machine's "What it can do" list keeps Temperature, Flat pressure and Preinfusion built in; Low bar start and Low bar end leave it, also for new machines. A machine that has either switched on keeps it as it is, with its seconds and pressure, so past shots and recipes do not change. Once switched off and saved, it leaves the machine and cannot be switched on again there. Anyone else adds such a phase with "Add your own feature", as Seconds (without a pressure). Revises D-24 and D-44.
+  - *Why:* few machines have these phases; as built-ins they showed on every new machine and could not be removed.
+- **D-185 — Range fields open the number keypad.** The Range field on New step and on Add your own feature opens the phone's number keypad, like Step and Starts at, not the full keyboard. Refines D-46 and D-52.
+  - *Why:* a range is two numbers; the full keyboard is a detour.
+- **D-187 — A new routine asks to be used.** Saving a new routine in the routine builder asks "Use it for new shots?". Yes makes it My setup's routine, so the next shot starts with it, also on a bean with shots or a re-buy; a recipe marked Brew next keeps its own routine (confirmed 2026-10-23). No saves it as it is. Refines D-51 and D-38.
+  - *Why:* a routine made and then forgotten on the shot form records nothing; puck prep matters for repeating a shot.
+- **D-188 — Archived items have a list and can come back.** Gear, Puck prep and Tags each end with a quiet "Archived" row that opens a list of what was archived there (gear; routines and steps; flavor notes). Each item can be restored, which puts it back in its list and pickers. Revises D-148, D-167 and D-171.
+  - *Why:* archived things vanished without a trace; a way back makes archiving safe to use.
 
 ## 11. Visual direction
 
