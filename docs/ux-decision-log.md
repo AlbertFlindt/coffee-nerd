@@ -481,7 +481,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* few machines have these phases; as built-ins they showed on every new machine and could not be removed.
 - **D-185 — Range fields open the number keypad.** The Range field on New step and on Add your own feature opens the phone's number keypad, like Step and Starts at, not the full keyboard. Refines D-46 and D-52.
   - *Why:* a range is two numbers; the full keyboard is a detour.
-- **D-187 — A new routine asks to be used.** Saving a new routine in the routine builder asks "Use it for new shots?". Yes makes it My setup's routine, so the next shot starts with it; No saves it as it is. Refines D-51 and D-38.
+- **D-187 — A new routine asks to be used.** Saving a new routine in the routine builder asks "Use it for new shots?". Yes makes it My setup's routine, so the next shot starts with it, also on a bean with shots or a re-buy; a recipe marked Brew next keeps its own routine (confirmed 2026-10-23). No saves it as it is. Refines D-51 and D-38.
   - *Why:* a routine made and then forgotten on the shot form records nothing; puck prep matters for repeating a shot.
 - **D-188 — Archived items have a list and can come back.** Gear, Puck prep and Tags each end with a quiet "Archived" row that opens a list of what was archived there (gear; routines and steps; flavor notes). Each item can be restored, which puts it back in its list and pickers. Revises D-148, D-167 and D-171.
   - *Why:* archived things vanished without a trace; a way back makes archiving safe to use.
