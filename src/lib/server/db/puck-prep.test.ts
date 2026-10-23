@@ -93,6 +93,7 @@ describe('loadPuckPrep', () => {
         name: 'Daily routine',
         steps: ['WDT', 'Distributor', 'Tamp', 'Puck screen'],
         inUse: true,
+        inMySetup: true,
         shots: 0,
         averageScore: null
       }
