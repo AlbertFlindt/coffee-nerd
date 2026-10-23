@@ -53,6 +53,7 @@ const known = (recipe: RecipeIdentity, extra: Partial<KnownRecipe> = {}): KnownR
   id: 'r1',
   machineId: recipe.machineId,
   fingerprint: recipeFingerprint(recipe),
+  dose: recipe.dose,
   shotCount: 2,
   lastScore: 8,
   ...extra
@@ -69,6 +70,28 @@ describe('matchRecipe', () => {
     const at15 = { ...base, grind: 1500 };
     const match = matchRecipe(base, [known(base), known(at15, { id: 'r2' })], at15);
     expect(match).toMatchObject({ kind: 'reused', recipeId: 'r1' });
+  });
+
+  it('D-186: a dose within 0.2 g reuses the recipe; further away is a new recipe', () => {
+    expect(matchRecipe({ ...base, dose: 18100 }, [known(base)], base)).toMatchObject({
+      kind: 'reused',
+      recipeId: 'r1'
+    });
+    expect(matchRecipe({ ...base, dose: 17800 }, [known(base)], base).kind).toBe('reused');
+    expect(matchRecipe({ ...base, dose: 18300 }, [known(base)], base)).toEqual({
+      kind: 'new',
+      changes: ['dose']
+    });
+  });
+
+  it('D-186: when two recipes are within reach, the closest dose wins', () => {
+    const at183 = { ...base, dose: 18300 };
+    const match = matchRecipe(
+      { ...base, dose: 18200 },
+      [known(base), known(at183, { id: 'r2' })],
+      base
+    );
+    expect(match).toMatchObject({ kind: 'reused', recipeId: 'r2' });
   });
 
   it('D-12: a reused recipe without a rated shot has no earlier score', () => {

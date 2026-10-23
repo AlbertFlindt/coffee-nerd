@@ -71,6 +71,31 @@ const save = (shotInput: ShotInput, now = shotInput.brewedAt) =>
 const recipeCount = () => db.select().from(recipe).all().length;
 
 describe('saveShot', () => {
+  it('D-186: a dose within 0.2 g reuses the recipe; the shot keeps its own dose', () => {
+    const first = save(input({}, 1));
+    const second = save(input({ dose: 18100 }, 2));
+    expect(second).toMatchObject({ recipeId: first.recipeId, newRecipe: false });
+    const third = save(input({ dose: 18300 }, 3));
+    expect(third).toMatchObject({ newRecipe: true });
+    // 18.2 g is within reach of both 18.0 g and 18.3 g: the closest wins.
+    const fourth = save(input({ dose: 18200 }, 4));
+    expect(fourth.status === 'saved' && fourth.recipeId).toBe(third.recipeId);
+    const doses = db
+      .select({ dose: shot.dose })
+      .from(shot)
+      .orderBy(shot.brewedAt)
+      .all()
+      .map((r) => r.dose);
+    expect(doses).toEqual([18000, 18100, 18300, 18200]);
+    expect(
+      db
+        .select({ dose: recipe.dose })
+        .from(recipe)
+        .all()
+        .map((r) => r.dose)
+    ).toEqual([18000, 18300]);
+  });
+
   it('D-63: the first shot creates its recipe; the same values reuse it', () => {
     const first = save(input({}, 1));
     expect(first).toMatchObject({ status: 'saved', recipeShotCount: 1, newRecipe: true });

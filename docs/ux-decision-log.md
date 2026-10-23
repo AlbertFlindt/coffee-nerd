@@ -265,7 +265,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 - *Why:* two consecutive shots naturally vary in outcome; comparison is only meaningful for identical intent.
 - Enables: consistency insights (variance of results within one recipe ≈ puck-prep repeatability), clearer experiments, bean-aging detection.
 
-- **D-186 — A dose within 0.2 g is the same recipe.** When everything else in a recipe is the same, a dose up to 0.2 g away from the recipe's dose counts as that recipe: 18.1 g or 17.9 g reuses the 18.0 g recipe ("Recipe reused"). When more than one recipe is within reach, the closest dose wins. The shot keeps the exact dose it was brewed with, for its ratio and its detail. Existing shots are matched again once under this rule. Revises D-13 and D-16.
+- **D-186 — A dose within 0.2 g is the same recipe.** When everything else in a recipe is the same, a dose up to 0.2 g away from the recipe's dose counts as that recipe: 18.1 g or 17.9 g reuses the 18.0 g recipe ("Recipe reused"). When more than one recipe is within reach, the closest dose wins. The shot keeps the exact dose it was brewed with, for its ratio and its detail, and the next shot starts from that dose (as with yield and time). A dose within 0.2 g is not a change: the recipe tag never names it. Existing shots are matched again once under this rule. Revises D-13, D-16 and D-71.
   - *Why:* beans weigh out a tenth over or under; that is not a new idea, and splitting such shots into recipes hid their history.
 
 ## 10. Library (Beans, Gear, Puck prep, Tags)
