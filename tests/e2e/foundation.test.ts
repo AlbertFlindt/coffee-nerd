@@ -102,6 +102,10 @@ test('D-157: step by step from the machine to a ready shot form; leaving halfway
   await expect(page.getByRole('region', { name: 'My setup' })).toContainText('Not set up yet');
   await expect(page.getByText('Default', { exact: true })).toHaveCount(0);
   await page.screenshot({ path: 'screenshots/GearFirstRun.png' });
+  // D-188: with nothing archived there is no Archived row, and its page says so.
+  await expect(page.getByRole('link', { name: /^Archived/ })).toHaveCount(0);
+  await page.goto('/library/gear/archived');
+  await expect(page.getByText('Nothing archived.')).toBeVisible();
   // Screen 51, D-51, D-163: no routines yet, and the heading has no count.
   await page.goto('/library/puck-prep');
   await expect(page.getByText('No routines yet.')).toBeVisible();

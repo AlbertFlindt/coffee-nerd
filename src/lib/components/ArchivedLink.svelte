@@ -15,7 +15,7 @@
 </script>
 
 {#if count > 0}
-  <a class="archived cn-tap" {href}>
+  <a class="archived cn-btn-quiet cn-tap" {href}>
     Archived · {count}
     <svg
       width="16"
@@ -31,18 +31,14 @@
 {/if}
 
 <style>
+  /* The quiet button (D-145's pattern), with a chevron. */
   .archived {
     flex: none;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--space-1);
-    min-height: var(--touch-min);
     margin-top: var(--space-2);
-    border-radius: var(--radius-md);
-    color: var(--ink-muted);
-    font-size: 14px;
-    font-weight: 600;
     text-decoration: none;
   }
 </style>

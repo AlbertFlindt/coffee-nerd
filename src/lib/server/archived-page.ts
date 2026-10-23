@@ -1,5 +1,5 @@
 // The Archived pages' load and Restore action (D-188), shared by Gear, Puck prep and Tags.
-import { error, fail, type RequestEvent } from '@sveltejs/kit';
+import { error, fail, redirect, type RequestEvent } from '@sveltejs/kit';
 import {
   loadArchived,
   restoreArchived,
@@ -27,8 +27,12 @@ export function restoreAction(area: ArchiveArea) {
     const form = await request.formData();
     const kind = String(form.get('kind') ?? '') as ArchivedKind;
     const id = String(form.get('id') ?? '');
-    if (!KINDS[area].includes(kind)) return fail(400);
-    if (!restoreArchived(getDb(), locals.user.id, kind, id, Date.now())) return fail(404);
+    const result = KINDS[area].includes(kind)
+      ? restoreArchived(getDb(), locals.user.id, kind, id, Date.now())
+      : null;
+    if (!result) return fail(404, { id, problem: 'This could not be restored. Try again.' });
+    // D-188: a routine that no longer fit its steps opens in the builder, brought into range.
+    if (result === 'fix') redirect(303, `/library/puck-prep/routine/${id}`);
     return null;
   };
 }

@@ -5,7 +5,16 @@
   import { resolve } from '$app/paths';
   import type { ArchiveArea, ArchivedGroup } from '#lib/server/db/archived.ts';
 
-  let { area, groups }: { area: ArchiveArea; groups: ArchivedGroup[] } = $props();
+  let {
+    area,
+    groups,
+    problem = null
+  }: {
+    area: ArchiveArea;
+    groups: ArchivedGroup[];
+    /** A restore that failed: the row and what to say under it. */
+    problem?: { id: string; problem: string } | null;
+  } = $props();
   const back = $derived(
     {
       gear: resolve('/library/gear'),
@@ -67,6 +76,7 @@
             >
           </form>
         </div>
+        {#if problem?.id === item.id}<p class="problem" role="alert">{problem.problem}</p>{/if}
       {/each}
     </div>
   {:else}
@@ -162,6 +172,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .problem {
+    margin: 0;
+    padding: var(--space-2) var(--space-4);
+    background: var(--surface);
+    font-size: 13px;
+    color: var(--ink-muted);
   }
 
   .restore {

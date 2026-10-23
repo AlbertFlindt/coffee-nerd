@@ -1,7 +1,8 @@
 // What was archived, and Restore (D-188). Gear, Puck prep and Tags each end with an "Archived" row that opens
 // a list of what was archived there: gear; routines and steps; flavor notes. Restore puts an item back in its
 // list and pickers. Past shots kept pointing to it all along (data-model §1).
-import { and, asc, count, eq, inArray, isNotNull } from 'drizzle-orm';
+import { and, asc, count, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
+import { fitRoutine } from '../../domain/schemas';
 import { FAMILIES } from '../../domain/tags';
 import type { Db, Queryable } from './client';
 import { summaryOf } from './gear';
@@ -104,8 +105,9 @@ export function archivedCount(db: Queryable, ownerId: string, area: ArchiveArea)
 }
 
 /**
- * Restores an archived item (D-188). A routine brings back the archived steps it holds, since a step in a
- * routine stays (D-169). False when it is not yours or not archived.
+ * Restores an archived item (D-188): `restored`, or `fix` for a routine that no longer fit its steps and was
+ * brought into range (or lost its steps), so it opens in the routine builder. A routine brings back the
+ * archived steps it holds, since a step in a routine stays (D-169). Null when it is not yours or not archived.
  */
 export function restoreArchived(
   db: Db,
@@ -113,7 +115,7 @@ export function restoreArchived(
   kind: ArchivedKind,
   id: string,
   now: number
-): boolean {
+): 'restored' | 'fix' | null {
   const table = { gear, routine, step: prepStep, tag }[kind];
   const back = { archivedAt: null, updatedAt: now };
   return db.transaction((tx) => {
@@ -122,20 +124,35 @@ export function restoreArchived(
       .set(back)
       .where(and(eq(table.id, id), eq(table.ownerId, ownerId), isNotNull(table.archivedAt)))
       .run();
-    if (done.changes === 0) return false;
-    if (kind === 'routine') {
-      const steps = tx
-        .select({ steps: routine.steps })
-        .from(routine)
+    if (done.changes === 0) return null;
+    if (kind !== 'routine') return 'restored';
+
+    const { steps } = tx
+      .select({ steps: routine.steps })
+      .from(routine)
+      .where(eq(routine.id, id))
+      .get()!;
+    const stepIds = [...new Set(steps.map((s) => s.stepId))];
+    if (stepIds.length > 0)
+      tx.update(prepStep)
+        .set(back)
+        .where(and(eq(prepStep.ownerId, ownerId), inArray(prepStep.id, stepIds)))
+        .run();
+    // While archived, its steps could change or go (D-175 and D-176 guard only routines in use).
+    const settings = Object.fromEntries(
+      tx
+        .select({ id: prepStep.id, setting: prepStep.setting })
+        .from(prepStep)
+        .where(and(eq(prepStep.ownerId, ownerId), isNull(prepStep.archivedAt)))
+        .all()
+        .map((s) => [s.id, s.setting])
+    );
+    const fitted = fitRoutine(steps, settings);
+    if (fitted.changed)
+      tx.update(routine)
+        .set({ steps: fitted.steps, updatedAt: now })
         .where(eq(routine.id, id))
-        .get()!;
-      const stepIds = steps.steps.map((s) => s.stepId);
-      if (stepIds.length > 0)
-        tx.update(prepStep)
-          .set(back)
-          .where(and(eq(prepStep.ownerId, ownerId), inArray(prepStep.id, stepIds)))
-          .run();
-    }
-    return true;
+        .run();
+    return fitted.changed || fitted.steps.length === 0 ? 'fix' : 'restored';
   });
 }

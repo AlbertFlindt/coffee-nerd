@@ -43,16 +43,16 @@ describe('archived gear (D-188)', () => {
         items: [{ kind: 'gear', id, name: 'IMS · 20 g', detail: expect.any(String) }]
       }
     ]);
-    expect(restoreArchived(db, ids.userId, 'gear', id, T0)).toBe(true);
+    expect(restoreArchived(db, ids.userId, 'gear', id, T0)).toBe('restored');
     expect(loadGearPage(db, ids.userId).baskets.map((b) => b.id)).toContain(id);
     expect(archivedCount(db, ids.userId, 'gear')).toBe(0);
   });
 
   it('D-60: not someone else’s, and not an item that is not archived', () => {
     const id = addGear(db, ids.userId, basket, T0);
-    expect(restoreArchived(db, ids.userId, 'gear', id, T0)).toBe(false);
+    expect(restoreArchived(db, ids.userId, 'gear', id, T0)).toBe(null);
     archiveGear(db, ids.userId, id, T0);
-    expect(restoreArchived(db, 'someone-else', 'gear', id, T0)).toBe(false);
+    expect(restoreArchived(db, 'someone-else', 'gear', id, T0)).toBe(null);
     expect(loadArchived(db, 'someone-else', 'gear')).toEqual([]);
   });
 });
@@ -97,7 +97,7 @@ describe('archived puck prep (D-188)', () => {
     ]);
     expect(archivedCount(db, ids.userId, 'puck-prep')).toBe(2);
 
-    expect(restoreArchived(db, ids.userId, 'routine', routineId, T0)).toBe(true);
+    expect(restoreArchived(db, ids.userId, 'routine', routineId, T0)).toBe('restored');
     const page = loadPuckPrep(db, ids.userId);
     expect(page.routines.map((r) => r.name)).toContain('Light roast');
     expect(page.steps.map((s) => s.name)).toContain('Paper filter');
@@ -106,10 +106,50 @@ describe('archived puck prep (D-188)', () => {
 
   it('D-188: a step is restored on its own', () => {
     db.update(prepStep).set({ archivedAt: T0 }).where(eq(prepStep.id, ids.stepIds[3])).run();
-    expect(restoreArchived(db, ids.userId, 'step', ids.stepIds[3], T0)).toBe(true);
+    expect(restoreArchived(db, ids.userId, 'step', ids.stepIds[3], T0)).toBe('restored');
     expect(
       db.select().from(prepStep).where(eq(prepStep.id, ids.stepIds[3])).get()?.archivedAt
     ).toBeNull();
+  });
+});
+
+describe('a restored routine that no longer fits (D-188)', () => {
+  function archivedRoutine(steps: { stepId: string; value: number | string | null }[]): string {
+    const id = newId(T0 + 5);
+    db.insert(routine)
+      .values({
+        id,
+        ownerId: ids.userId,
+        name: 'Old routine',
+        steps,
+        archivedAt: T0,
+        createdAt: T0,
+        updatedAt: T0
+      })
+      .run();
+    return id;
+  }
+
+  it('D-188, D-175: a value outside a step’s narrowed range is brought into range; it opens to fix', () => {
+    const id = archivedRoutine([{ stepId: ids.stepIds[0], value: 20000 }]);
+    // WDT's range narrowed while the routine was archived.
+    const wdt = db.select().from(prepStep).where(eq(prepStep.id, ids.stepIds[0])).get()!;
+    db.update(prepStep)
+      .set({
+        setting: { ...wdt.setting, min: 0, max: 10000, startsAt: 5000 } as typeof wdt.setting
+      })
+      .where(eq(prepStep.id, ids.stepIds[0]))
+      .run();
+    expect(restoreArchived(db, ids.userId, 'routine', id, T0)).toBe('fix');
+    expect(db.select().from(routine).where(eq(routine.id, id)).get()?.steps).toEqual([
+      { stepId: ids.stepIds[0], value: 10000 }
+    ]);
+  });
+
+  it('D-188, D-176: a routine whose steps were all deleted comes back empty, to fix', () => {
+    const id = archivedRoutine([]);
+    expect(restoreArchived(db, ids.userId, 'routine', id, T0)).toBe('fix');
+    expect(db.select().from(routine).where(eq(routine.id, id)).get()?.archivedAt).toBeNull();
   });
 });
 
@@ -123,7 +163,7 @@ describe('archived flavor notes (D-188)', () => {
         items: [{ kind: 'tag', id: berry.id, name: 'Berry', detail: 'Fruity' }]
       }
     ]);
-    expect(restoreArchived(db, ids.userId, 'tag', berry.id, T0)).toBe(true);
+    expect(restoreArchived(db, ids.userId, 'tag', berry.id, T0)).toBe('restored');
     const names = loadTags(db, ids.userId).families.flatMap((f) => f.tags.map((t) => t.name));
     expect(names).toContain('Berry');
   });
