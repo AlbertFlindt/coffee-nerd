@@ -157,7 +157,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* these six are designed; the others would be built without a design and can be added without new code paths.
 - **D-203 — How much data a card needs.** *(Revised 2026-10-25: see D-211, D-212.)* Score by process and by origin: 2 groups with 5 rated shots each. Weekly average score: 4 weeks with 2 rated shots each. Bell curve: 10 shots with a time on the recipe. Routines: 2 routines with 5 shots each. Most consistent beans: 2 beans with 5 rated shots each on recipes brewed more than once. Below that, the card says what is missing (D-55). A group with fewer than 10 shots is named in the basis line as one to treat with care, as screen 25 does. Refines D-55 and D-56.
   - *Why:* five shots is the least that gives a spread worth showing; the care line keeps small groups honest without hiding them.
-- **D-204 — Comparing routines holds everything else equal.** *(Revised 2026-10-25: see D-210.)* The routine card compares shots of the same bean whose recipes are equal apart from the routine: same machine, grinder, grind, dose (within 0.2 g, D-186), basket and setup. Each routine's spread is measured within those groups. The routine is part of a recipe (D-65), so screen 25's "Same bean, same recipe" reads as this. Refines D-55 and D-56.
+- **D-204 — Comparing routines holds everything else equal.** *(Revised 2026-10-25: see D-210, D-215.)* The routine card compares shots of the same bean whose recipes are equal apart from the routine: same machine, grinder, grind, dose (within 0.2 g, D-186), basket and setup. Each routine's spread is measured within those groups. The routine is part of a recipe (D-65), so screen 25's "Same bean, same recipe" reads as this. Refines D-55 and D-56.
   - *Why:* this is D-55's "everything else equal"; with the bean alone, grind changes would mix into a routine's spread.
 - **D-205 — The bell curve uses the best recipe of the bean on Home.** *(Revised 2026-10-25: see D-213.)* The shot-time card draws the best recipe (D-66) of the bean on Home (D-195). When that recipe has too few shots with a time (D-203), the card says what it needs. Refines D-56.
   - *Why:* it answers "is the recipe I'm brewing under control?", the question Dial-in is for.
@@ -179,6 +179,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the card stays in place and tells you how to fill it, as Home's cards do (D-198).
 - **D-214 — Which number "no clear difference" compares.** Score by process compares medians, score by origin compares averages, both within 0.5 points. The routine and most consistent beans cards compare σ, within 0.2 s or 0.2 points. The weekly line and the bell curve have no "top two", so the rule does not apply to them. Refines D-206.
   - *Why:* each card is judged by the number its chart shows; a σ gap of 0.5 would hide real differences in steadiness.
+- **D-215 — Comparable doses join the closest recipe.** When the routine card groups recipes equal apart from the routine (D-204), doses "within 0.2 g" are not transitive, so recipes are taken from the most brewed down (the first brewed on a tie) and each joins the closest one within 0.2 g; one with none in reach starts its own group. Refines D-204.
+  - *Why:* a shot already picks the closest recipe this way (D-186), so the two never disagree.
 
 ## 7. Shot form (espresso)
 

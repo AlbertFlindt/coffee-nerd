@@ -190,7 +190,7 @@ describe('runQuery', () => {
     expect(new Set(recipesApartFromRoutine(facts).values()).size).toBe(6);
   });
 
-  it('D-204, D-186: a dose joins the closest anchor within 0.2 g, taken from the most brewed', () => {
+  it('D-215: a dose joins the closest anchor within 0.2 g, taken from the most brewed', () => {
     const facts = [
       fact({ recipeId: 'most', recipeDose: 18000, recipeShots: 9 }),
       fact({ recipeId: 'next', recipeDose: 18300, recipeShots: 5 }),
@@ -202,7 +202,7 @@ describe('runQuery', () => {
     expect(keys.get('between')).toBe(keys.get('next'));
   });
 
-  it('D-204: on equal shot counts the first brewed recipe anchors', () => {
+  it('D-215: on equal shot counts the first brewed recipe anchors', () => {
     const facts = [
       fact({ recipeId: 'zz-first', recipeDose: 18000, recipeShots: 2 }),
       fact({ recipeId: 'aa-second', recipeDose: 18200, recipeShots: 2 }),
@@ -213,7 +213,7 @@ describe('runQuery', () => {
     expect(keys.get('aa-third')).not.toBe(keys.get('zz-first'));
   });
 
-  it('D-204, D-186: doses join the most-brewed recipe within 0.2 g, which is not transitive', () => {
+  it('D-215, D-186: doses join the most-brewed recipe within 0.2 g, which is not transitive', () => {
     const facts = [
       fact({ recipeId: 'a', recipeDose: 18200, recipeShots: 3 }),
       fact({ recipeId: 'b', recipeDose: 18000, recipeShots: 9 }),

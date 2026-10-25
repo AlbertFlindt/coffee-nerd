@@ -92,7 +92,7 @@ function heldKeyFor(hold: HoldConstant, facts: readonly ShotFact[]): (fact: Shot
  * Groups recipes that are equal apart from the routine (D-204): same bean, machine, grinder, grind,
  * basket and setup, and a dose within 0.2 g (D-186). "Within 0.2 g" is not transitive, so recipes are
  * taken from the most brewed down (the first brewed first on a tie), and each joins the closest anchor
- * within reach, as D-186 matches a dose to the closest recipe; one with none starts its own. Returns each
+ * within reach (D-215), as D-186 matches a dose to the closest recipe; one with none starts its own. Returns each
  * recipe's group key.
  */
 export function recipesApartFromRoutine(facts: readonly ShotFact[]): Map<string, string> {

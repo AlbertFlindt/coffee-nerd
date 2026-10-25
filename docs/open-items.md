@@ -16,7 +16,7 @@ Last updated: 2026-10-25
 
 | Question | Needed by | Source |
 |---|---|---|
-| Routine comparisons (D-204) group recipes by dose "within 0.2 g", which is not transitive. Built as: recipes from the most brewed down, each joining the closest one within reach (as D-186 picks the closest recipe), the first brewed on a tie. To confirm | M9 | D-204, D-186 |
+| *(none open)* | | |
 
 ## 2. Screens and states not designed yet
 
