@@ -189,13 +189,18 @@
     <!-- D-193: Dial-in progress is the only graph for now, so there is no chip row above it. -->
     <section class="graph" aria-label="Dial-in progress">
       {#if home.graph}
-        <span class="muted small">Score per shot · last {home.graph.points.length} shots</span>
+        <span class="muted small">Score per shot · last {home.graph.points.length} rated shots</span
+        >
         <DialInGraph graph={home.graph} />
       {:else}
         <span class="muted small">Score per shot</span>
         <!-- D-196, D-198: not designed yet (docs/open-items.md). -->
         <p class="muted">
-          {last === null ? 'No shots yet' : 'Rate 2 shots to see your progress here.'}
+          {last === null
+            ? 'No shots yet'
+            : home.ratedShots === 1
+              ? 'Rate 1 more shot to see your progress here.'
+              : 'Rate 2 shots to see your progress here.'}
         </p>
       {/if}
     </section>

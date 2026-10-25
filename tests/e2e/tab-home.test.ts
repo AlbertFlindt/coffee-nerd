@@ -77,7 +77,7 @@ test('Home, D-32, D-34: banner, bean pill, last shot, quick numbers and best rec
   await expect(best()).toContainText(/Reused \d+x|Tried once/);
   // D-196: the score of the last rated shots, oldest first, as the only graph (D-193).
   const graph = page.getByRole('region', { name: 'Dial-in progress' });
-  await expect(graph).toContainText(/Score per shot · last \d+ shots/);
+  await expect(graph).toContainText(/Score per shot · last \d+ rated shots/);
   await expect(graph.getByRole('img', { name: /^Score per shot, oldest first: / })).toBeVisible();
   await expect(graph).toContainText('Last shot');
   await expect(graph).toContainText('New recipe');
@@ -101,6 +101,11 @@ test('D-196: with more rated shots, recipe changes are marked on the graph', asy
     await page.reload();
     const graph = page.getByRole('region', { name: 'Dial-in progress' });
     await expect(graph.getByRole('img', { name: /a new recipe at shot \d+/ })).toBeVisible();
+    // D-56: tapping a point shows its score.
+    const point = graph.getByRole('button', { name: /^Shot \d+ of \d+, score \d+$/ }).last();
+    const score = (await point.getAttribute('aria-label'))!.match(/score (\d+)$/)![1];
+    await point.click();
+    await expect(graph.getByText(`Score ${score}`, { exact: true })).toBeVisible();
     await expectNoPageScroll();
     await screenshot('HomeDialIn');
   } finally {

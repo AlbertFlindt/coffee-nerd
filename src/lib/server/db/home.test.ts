@@ -171,8 +171,9 @@ describe('loadHome', () => {
   });
 
   it('D-196: with fewer than 2 rated shots there is no graph', () => {
+    save(shotAt(T0 - 2 * DAY, { taste: taste(null) }));
     save(shotAt(T0 - DAY, { taste: taste(6) }));
-    expect(ready().graph).toBeNull();
+    expect(ready()).toMatchObject({ graph: null, ratedShots: 1 });
   });
 
   it('D-35: grams left when the bean has a bag weight', () => {

@@ -2,11 +2,14 @@
   // Dial-in progress on Home (screen 6, D-196): the score of the bean's last 12 rated shots, oldest on the
   // left, the last shot as the larger point, and a cherry dashed line where a new recipe starts (D-19:
   // cherry is recipe history, amber your scores). The graph fills the height Home leaves it (D-32, D-36).
+  // Tapping a point shows its exact score (D-56: every chart gets a tap tooltip).
   import type { DialInGraph } from '../domain/home';
 
   let { graph }: { graph: DialInGraph } = $props();
 
   let width = $state(0);
+  let chosen: number | null = $state(null);
+  const choose = (i: number) => (chosen = chosen === i ? null : i);
   let height = $state(0);
 
   // Room for the score labels on the left and the two captions under the plot, as on screen 6.
@@ -55,7 +58,35 @@
           <circle class="dot" cx={x(i)} cy={y(p.score)} r="3.5" />
         {/if}
       {/each}
-      <text class="caption" x={LEFT} y={height - 4}>{graph.points.length} shots ago</text>
+      {#each graph.points as p, i (i)}
+        <circle
+          class="hit"
+          cx={x(i)}
+          cy={y(p.score)}
+          r="16"
+          role="button"
+          tabindex="0"
+          aria-label="Shot {i + 1} of {graph.points.length}, score {p.score}"
+          aria-pressed={chosen === i}
+          onclick={() => choose(i)}
+          onkeydown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              choose(i);
+            }
+          }}
+        />
+      {/each}
+      {#if chosen !== null}
+        {@const p = graph.points[chosen]}
+        {@const tipX = Math.min(Math.max(x(chosen), LEFT + 30), width - RIGHT - 30)}
+        {@const tipY = Math.max(y(p.score) - 30, 2)}
+        <g class="tip" aria-hidden="true">
+          <rect x={tipX - 30} y={tipY - 2} width="60" height="22" rx="6" />
+          <text x={tipX} y={tipY + 13} text-anchor="middle">Score {p.score}</text>
+        </g>
+      {/if}
+      <text class="caption" x={LEFT} y={height - 4}>{graph.points.length} rated shots ago</text>
       <text class="caption" x={width - RIGHT} y={height - 4} text-anchor="end">Last shot</text>
     </svg>
   {/if}
@@ -106,6 +137,27 @@
     fill: var(--amber);
     stroke: var(--surface);
     stroke-width: 2;
+  }
+
+  .hit {
+    fill: transparent;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .hit:focus-visible {
+    stroke: var(--ink-muted);
+    stroke-width: 1.5;
+  }
+
+  .tip rect {
+    fill: var(--control);
+  }
+
+  .tip text {
+    fill: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
   }
 
   .legend {

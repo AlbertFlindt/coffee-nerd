@@ -54,6 +54,8 @@ export type Home =
       best: { score: string; title: string; detail: string } | null;
       /** Dial-in progress (D-196); null with fewer than 2 rated shots. */
       graph: DialInGraph | null;
+      /** How many of this bean's shots are rated, for what the graph still needs (D-196). */
+      ratedShots: number;
       timeZone: string;
     };
 
@@ -149,6 +151,7 @@ export function loadHome(db: Queryable, ownerId: string, now: number): Home {
     week: thisWeek(shots, now, timeZone),
     best: bestOf(db, ownerId, current.id, shots, steps),
     graph: dialInProgress(shots),
+    ratedShots: shots.filter((s) => s.score !== null).length,
     timeZone
   };
 }
