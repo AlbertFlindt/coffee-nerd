@@ -75,8 +75,54 @@ test('Home, D-32, D-34: banner, bean pill, last shot, quick numbers and best rec
   await expect(best()).toContainText(/^Best recipe for this bean\s*\d+(\.\d)? \/ 10/);
   await expect(best()).toContainText(/Grind \d\.\d · \d+\.\d g/);
   await expect(best()).toContainText(/Reused \d+x|Tried once/);
+  // D-196: the score of the last rated shots, oldest first, as the only graph (D-193).
+  const graph = page.getByRole('region', { name: 'Dial-in progress' });
+  await expect(graph).toContainText(/Score per shot · last \d+ rated shots/);
+  await expect(graph.getByRole('img', { name: /^Score per shot, oldest first: / })).toBeVisible();
+  await expect(graph).toContainText('Last shot');
+  await expect(graph).toContainText('New recipe');
+  await expect(page.getByRole('tab')).toHaveCount(0);
   await expectNoPageScroll();
   await screenshot('Home');
+});
+
+test('D-196: with more rated shots, recipe changes are marked on the graph', async () => {
+  // Rate the bean's unrated shots for this test only; the shot-* files brewed several recipes.
+  const db = new Database(DATABASE);
+  const unrated = db
+    .prepare(
+      `select s.id from shot s join recipe r on r.id = s.recipe_id join bean b on b.id = r.bean_id
+       where b.name = 'Guji Hambela' and s.score is null`
+    )
+    .all() as { id: string }[];
+  db.close();
+  unrated.forEach(({ id }, i) => sql('update shot set score = ? where id = ?', 5 + (i % 4), id));
+  try {
+    await page.reload();
+    const graph = page.getByRole('region', { name: 'Dial-in progress' });
+    await expect(graph.getByRole('img', { name: /a new recipe at shot \d+/ })).toBeVisible();
+    // D-56: tapping a point shows its score.
+    const point = graph.getByRole('button', { name: /^Shot \d+ of \d+, score \d+$/ }).last();
+    const score = (await point.getAttribute('aria-label'))!.match(/score (\d+)$/)![1];
+    await point.click();
+    await expect(graph.getByText(`Score ${score}`, { exact: true })).toBeVisible();
+    await expectNoPageScroll();
+    await screenshot('HomeDialIn');
+  } finally {
+    for (const { id } of unrated) sql('update shot set score = null where id = ?', id);
+  }
+});
+
+test('D-36: on a shorter screen the graph gives up height, and Home still fits', async () => {
+  await page.setViewportSize({ width: 412, height: 780 });
+  try {
+    await expect(
+      page.getByRole('region', { name: 'Dial-in progress' }).getByRole('img')
+    ).toBeVisible();
+    await expectNoPageScroll();
+  } finally {
+    await page.setViewportSize({ width: 412, height: 915 });
+  }
 });
 
 test('D-197: the last shot opens its detail, and Back returns to Home', async () => {
@@ -139,6 +185,9 @@ test('D-195: switching the bean on Home changes every card and the bean "+" star
     await expect(numbers()).toContainText(/Bean freshness\s*5 days/);
     await expect(numbers()).toContainText(/This week\s*0 shots\s*No shots yet/);
     await expect(best()).toContainText('No shots yet');
+    await expect(page.getByRole('region', { name: 'Dial-in progress' })).toContainText(
+      'No shots yet'
+    );
     await expectNoPageScroll();
     await screenshot('HomeNoShots');
 
