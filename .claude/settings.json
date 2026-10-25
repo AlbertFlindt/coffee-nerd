@@ -13,11 +13,7 @@
       "Bash(git pull *)",
       "Bash(git switch *)",
       "Bash(git add *)",
-      "Bash(git commit *)",
-      "Bash(gh pr view *)",
-      "Bash(gh pr checks *)",
-      "Bash(gh pr create *)",
-      "Bash(gh run view *)"
+      "Bash(git commit *)"
     ],
     "deny": [
       "Read(./.env)",
@@ -30,6 +26,17 @@
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start.mjs",
+            "timeout": 600
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
