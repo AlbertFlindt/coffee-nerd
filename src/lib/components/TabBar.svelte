@@ -1,10 +1,10 @@
 <script lang="ts">
   // The tab bar on tab screens (D-30): Home · Journal · + · Library · Insights. The amber + is the only way
-  // to add a shot (D-31). Library opens the Library page (D-156); Insights is dimmed and does nothing until
-  // its page exists (D-114). From the Journal, "+" says so, and Save and Back return there (D-200).
+  // to add a shot (D-31). Library opens the Library page (D-156), Insights the Insights page (D-55). From
+  // the Journal, "+" says so, and Save and Back return there (D-200).
   import { resolve } from '$app/paths';
 
-  let { current }: { current: 'home' | 'journal' | 'library' } = $props();
+  let { current }: { current: 'home' | 'journal' | 'library' | 'insights' } = $props();
 </script>
 
 <nav class="cn-tabbar bar" aria-label="Main">
@@ -67,7 +67,7 @@
       ><path d="M4 20V5a1 1 0 0 1 1-1h3v16M10 20V4h4v16M16 20l2.5-15.5 3.5.6L19.5 20.5" /></svg
     >Library</a
   >
-  <a class="later" aria-disabled="true">
+  <a href={resolve('/insights')} aria-current={current === 'insights' ? 'page' : undefined}>
     <svg
       width="22"
       height="22"
@@ -91,11 +91,5 @@
   .bar a {
     min-height: var(--touch-min);
     justify-content: center;
-  }
-
-  /* D-114: not built yet; shown so the bar keeps its final shape. */
-  .later {
-    opacity: 0.4;
-    cursor: default;
   }
 </style>
