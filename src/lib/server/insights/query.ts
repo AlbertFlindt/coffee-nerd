@@ -26,6 +26,7 @@ export type InsightQuery = {
     /** Only shots on recipes brewed more than once (D-203). */
     reusedRecipesOnly?: boolean;
     beanId?: string;
+    recipeId?: string;
   };
   holdConstant?: HoldConstant;
 };
@@ -37,6 +38,8 @@ export type QueryGroup = {
   values: number[];
   /** With `holdConstant`: the same values split by what was held constant, for pooled σ (D-211). */
   held: number[][];
+  /** What each of `held` holds constant, in the same order, to match strata across groups (D-204). */
+  heldKeys: string[];
 };
 
 /** Runs a query over facts (oldest first). Groups come in the order their first shot was brewed. */
@@ -55,6 +58,7 @@ export function runQuery(
     if (filters.ratedOnly && fact.score === null) continue;
     if (filters.reusedRecipesOnly && fact.recipeShots < 2) continue;
     if (filters.beanId !== undefined && fact.beanId !== filters.beanId) continue;
+    if (filters.recipeId !== undefined && fact.recipeId !== filters.recipeId) continue;
     const value = measure.value(fact);
     if (value === null) continue;
     const group = groupOf(fact);
@@ -62,7 +66,7 @@ export function runQuery(
 
     let entry = groups.get(group.key);
     if (!entry) {
-      entry = { ...group, values: [], held: [], strata: new Map() };
+      entry = { ...group, values: [], held: [], heldKeys: [], strata: new Map() };
       groups.set(group.key, entry);
     }
     entry.values.push(value);
@@ -75,7 +79,8 @@ export function runQuery(
   }
   return [...groups.values()].map(({ strata, ...group }) => ({
     ...group,
-    held: [...strata.values()]
+    held: [...strata.values()],
+    heldKeys: [...strata.keys()]
   }));
 }
 

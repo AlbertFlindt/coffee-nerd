@@ -39,7 +39,7 @@ const BEANS: readonly HistoryBean[] = [
     shots: 18,
     rated: 9,
     score: 7.8,
-    spread: 0.6
+    spread: 1.5
   },
   {
     name: 'Sidama Bensa',
@@ -49,7 +49,7 @@ const BEANS: readonly HistoryBean[] = [
     shots: 15,
     rated: 7,
     score: 7.3,
-    spread: 0.6
+    spread: 0.9
   },
   {
     name: 'Kiambu AA',
@@ -59,7 +59,7 @@ const BEANS: readonly HistoryBean[] = [
     shots: 26,
     rated: 14,
     score: 7.3,
-    spread: 1
+    spread: 1.3
   },
   {
     name: 'Nyeri Karatina',
@@ -69,7 +69,7 @@ const BEANS: readonly HistoryBean[] = [
     shots: 16,
     rated: 8,
     score: 8,
-    spread: 1
+    spread: 1.3
   },
   {
     name: 'Huila',
@@ -79,7 +79,7 @@ const BEANS: readonly HistoryBean[] = [
     shots: 25,
     rated: 13,
     score: 6.6,
-    spread: 1
+    spread: 1.3
   },
   {
     name: 'Nariño',
@@ -89,7 +89,7 @@ const BEANS: readonly HistoryBean[] = [
     shots: 12,
     rated: 5,
     score: 6.8,
-    spread: 1
+    spread: 1.3
   },
   {
     name: 'Cerrado',
@@ -99,7 +99,7 @@ const BEANS: readonly HistoryBean[] = [
     shots: 12,
     rated: 5,
     score: 7,
-    spread: 1
+    spread: 1.3
   },
   {
     name: 'Mogiana',
@@ -109,11 +109,11 @@ const BEANS: readonly HistoryBean[] = [
     shots: 20,
     rated: 10,
     score: 6.2,
-    spread: 1
+    spread: 1.3
   }
 ];
 /** The reference bean: the most shots, the last ones, and the recipes Dial-in and Comparisons need. */
-const GUJI = { shots: 70, rated: 25, score: 8.2, spread: 0.6 };
+const GUJI = { shots: 70, rated: 25, score: 8.2, spread: 0.3 };
 
 /** mulberry32: a small seeded generator, so the history is the same every time. */
 function generator(seed: number) {
@@ -225,9 +225,9 @@ export function seedShotHistory(db: Db, ids: SeededIds, now: number): void {
     left.shots -= 1;
     if (rated) left.rated -= 1;
 
-    // Over the weeks scores rise 1.7 points and steady (screen 24); finer grinds run slower.
+    // Over the weeks scores rise 1.4 points and steady (screen 24); finer grinds run slower.
     const progress = i / order.length;
-    const typical = (b?.score ?? GUJI.score) - 0.85 + 1.7 * progress;
+    const typical = (b?.score ?? GUJI.score) - 0.9 + 1.4 * progress;
     const score = Math.min(
       10,
       Math.max(

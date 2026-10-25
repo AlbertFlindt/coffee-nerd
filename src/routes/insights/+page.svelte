@@ -11,8 +11,6 @@
   const insights = $derived(data.insights);
   let topic: Topic = $state('like');
   const cards = $derived(insights.cards.filter((c) => c.topic === topic));
-  // A topic whose cards are not built yet is dimmed and does nothing, as the Insights tab was (D-114).
-  const built = $derived(new Set(insights.cards.map((c) => c.topic)));
 </script>
 
 <header>
@@ -31,13 +29,9 @@
       type="button"
       role="tab"
       class="cn-chip topic"
-      class:later={!built.has(t.id)}
       aria-selected={topic === t.id}
       aria-controls="insight-cards"
-      aria-disabled={!built.has(t.id)}
-      onclick={() => {
-        if (built.has(t.id)) topic = t.id;
-      }}>{t.label}</button
+      onclick={() => (topic = t.id)}>{t.label}</button
     >
   {/each}
 </div>
@@ -83,11 +77,6 @@
     padding: 0 13px;
     font-weight: 500;
     white-space: nowrap;
-  }
-
-  .later {
-    opacity: 0.4;
-    cursor: default;
   }
 
   main {

@@ -92,7 +92,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - **Not enough data:** a card only appears when it has enough shots behind it; otherwise it says what's missing (e.g. "Rate 5 more washed shots to compare").
   - *Why:* nerds want the numbers, but a sentence first makes the point instantly; showing the basis keeps the app honest about small samples.
 
-- **D-56 — Insights speak statistics.** *(Revised 2026-10-25: see D-201 to D-205, D-207, D-211, D-212.)* Refines D-55. Cards use real statistical charts, each with a one-sentence finding and its basis:
+- **D-56 — Insights speak statistics.** *(Revised 2026-10-25: see D-201 to D-205, D-207, D-211, D-212, D-216.)* Refines D-55. Cards use real statistical charts, each with a one-sentence finding and its basis:
   - **What I like:** **box plots** of score by process (box = middle 50 %, amber line = median, whiskers = range, n per group); **mean ± 1 σ** dot-and-whisker by origin.
   - **Progress:** **line chart** of weekly average score with a **± 1 σ band**, so you see both "better" (line rises) and "steadier" (band narrows).
   - **Dial-in:** a **bell curve** — histogram of shot time on one recipe with the fitted normal curve, mean line (μ) and the ± 1 σ zone ("2 in 3 shots land between 26.5 and 29.3 s").
@@ -181,6 +181,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* each card is judged by the number its chart shows; a σ gap of 0.5 would hide real differences in steadiness.
 - **D-215 — Comparable doses join the closest recipe.** When the routine card groups recipes equal apart from the routine (D-204), doses "within 0.2 g" are not transitive, so recipes are taken from the most brewed down (the first brewed on a tie) and each joins the closest one within 0.2 g; one with none in reach starts its own group. Refines D-204.
   - *Why:* a shot already picks the closest recipe this way (D-186), so the two never disagree.
+- **D-216 — The clear winner is amber, whatever the measure.** On an Insights chart the clear winner (the top row) is amber whether it shows score, shot time or spread, as screen 25 draws the steadier routine's shot-time row. With no clear winner (D-214) no row is amber. Other rows stay cream or muted. Refines D-55 and D-56.
+  - *Why:* one rule, "amber is the winner", reads more easily than one rule for scores and another for time.
 
 ## 7. Shot form (espresso)
 
