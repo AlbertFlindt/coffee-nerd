@@ -16,7 +16,11 @@ Last updated: 2026-10-25
 
 | Question | Needed by | Source |
 |---|---|---|
-| *(none open)* | | |
+| Which bean the routine card compares on (screen 25 says "Guji Hambela only"): recommended the bean on Home, as D-205 does for the bell curve | M9 | D-204, D-205 |
+| Most consistent beans: is a bean's σ pooled within each reused recipe, or taken across all of them? Recommended pooled within recipe (data-model §5), so moving between recipes does not count as spread | M9 | D-56, D-203 |
+| Weekly average score: how many weeks it spans and how thin weeks show. Recommended the last 12 weeks (screen 24), with a week of fewer than 2 rated shots drawn as a gap | M9 | D-56, D-203 |
+| The bell curve when there is no best recipe (no bean on Home, D-198, or no rated shot yet, D-66): recommended the card says what it needs, as D-203 does | M9 | D-205, D-207 |
+| "No clear difference" (D-206): which number each card compares. Recommended the median for process, the average for origin, both within 0.5 points; σ for routines and beans, within 0.2 s or points; Progress and the bell curve have no "top two", so it does not apply to them | M9 | D-206 |
 
 ## 2. Screens and states not designed yet
 
@@ -27,10 +31,11 @@ Last updated: 2026-10-25
 | Home: replace the placeholder start page (logo, name and a temporary "Sign out" button above the tab bar); Home without data (D-198) and the Settings page with only Sign out (D-199) are built without a design | M8 | M0, M2, M3, D-198, D-199 |
 | The "Shot saved" message, the automatic-finish message with Undo, and "… is open again" (built as a plain card on the start page; M8 builds them as a bar above the tab bar, D-200, without a design) | M8 | D-95, D-200 |
 | The Rate sheet (Journal and Home's Last shot card, D-197) when the score cannot be saved: it stays open with "The score could not be saved. Nothing was changed." under the score row | M10 | D-111 |
-| "Compared with this recipe": the distance is compared as shown, to one decimal, so 1.04σ reads "Within normal range" (never "1.0σ faster than usual"); a reading of D-110 to confirm | M9 (Insights uses the same σ) | D-110 |
 | Shot form: the message when the server refuses a shot ("The shot could not be saved. Nothing was changed.", above Save) | M10 | M3 |
 | How "Sign out" looks on the Settings page (D-199: the gear on Home opens Settings, with only Sign out until M11) | M11 | M2, D-199 |
-| **Insights: the Dial-in tab has no design** (What I like, Progress and Comparisons do); more Dial-in cards, e.g. grind vs. time, sour/bitter vs. ratio | M9 | Open topic 16, D-55, D-56 |
+| Insights: the Dial-in tab shows only the bell curve card, which screen 24 draws under Progress (D-201); more Dial-in cards, e.g. grind vs. time, sour/bitter vs. ratio, and cards for roasters, flavor families, grinders and baskets (D-202) | After M9 | Open topic 16, D-55, D-201, D-202 |
+| Insights states built without a design (D-207): the tap tooltip with exact numbers, a card without enough data (D-203), the bell curve without a best recipe, and Insights with no shots | M9 | D-56, D-203, D-205, D-207 |
+| Insights card titles and sentences for each outcome: drafted in the pull request that builds each card, and the owner approves them there (D-206) | M9 | D-206 |
 | Journal: how a shot that is still waiting to sync looks | M10 | Open topic 23, D-61 |
 | App icon for the home screen (PWA) | M10 | Open topic 17 |
 | Settings (units, backup, export, and the dose, yield and time steps of D-89) | M11 | Roadmap M11, D-89 |
@@ -83,6 +88,7 @@ Last updated: 2026-10-25
 | "Back" and "Save shot" always return to the start page, also when "+" was pressed on the Journal; D-95 wants them to return to where "+" was pressed, with the "Shot saved" message there (the message lives only on the start page for now) | M8 | M3, D-114 |
 | M8 draws Home's Dial-in progress graph from its own query on the shots; data-model §5 says Home's graphs read from the `shot_facts` view, which M9 builds. Move the graph onto `shot_facts` then | M9 | D-196, data-model §5 |
 | Switching the bean (D-94) or "Use last shot recipe" (D-43) starts the form again and drops edits already made, without a warning; the local draft of D-61 may cover it | M10 | M3 |
+| D-204 groups routine comparisons by dose "within 0.2 g", which is not transitive (18.0 g is within reach of 17.8 and 18.2 g). The data layer needs a rule, e.g. measure against the dose of the recipe with the most shots | M9 | D-204, D-186 |
 | `npm audit`: 4 moderate advisories from an old esbuild inside drizzle-kit (development only, not in the Docker image). Recheck when drizzle-kit updates. | Each dependency update | PR #1 |
 | End-to-end: the Journal test expects the shots under Today, Yesterday and one earlier date; a run that crosses midnight in Copenhagen (the seed's time zone) would see one more day | Only if it gets in the way | M4 |
 | The push guard still blocks a command whose single-line commit text looks like a push to `main` (e.g. a literal `push\nto main`). Safe side; a fix needs a shell parser. | Only if it gets in the way | PR #2 |
