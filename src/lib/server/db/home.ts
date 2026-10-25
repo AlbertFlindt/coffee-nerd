@@ -5,7 +5,13 @@ import { gramsLeft, gramsLeftText, PROCESS_LABEL, roastAgeDays } from '../../dom
 import { recipeHistory, recipeTitle } from '../../domain/bean-detail';
 import { bestRecipe } from '../../domain/best-recipe';
 import type { RecipeMatch } from '../../domain/fingerprint';
-import { bestScoreOutOfTen, lastShotValues, thisWeek, type Week } from '../../domain/home';
+import {
+  bestScoreOutOfTen,
+  lastShotValues,
+  thisWeek,
+  type ShotValue,
+  type Week
+} from '../../domain/home';
 import type { GrinderSpec, MachineSpec } from '../../domain/schemas';
 import { setupSummary } from '../../domain/shot-form';
 import { decimalsFor, formatQuantity, type Thousandths } from '../../domain/units';
@@ -25,8 +31,8 @@ export type HomeLastShot = {
   score: number | null;
   /** The score of the recipe's latest rated shot before this one, the faint marker of the Rate sheet (D-12). */
   previousScore: number | null;
-  /** "Grind 1.6", "Time 25.5 s" … in two columns (D-32). */
-  values: { label: string; value: string }[];
+  /** "Grind 1.6", "Time 25.5 s" … in two fixed columns (D-32). */
+  values: { left: ShotValue[]; right: ShotValue[] };
   /** The recipe tag as it was when the shot was brewed (D-16). */
   recipeTag: RecipeMatch;
 };

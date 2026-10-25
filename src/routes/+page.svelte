@@ -113,8 +113,12 @@
               >
             {/if}
             <div class="values">
-              {#each last.values as v (v.label)}
-                <span><span class="muted">{v.label}</span> {v.value}</span>
+              {#each [last.values.left, last.values.right] as column, i (i)}
+                <span class="column">
+                  {#each column as v (v.label)}
+                    <span><span class="muted">{v.label}</span> {v.value}</span>
+                  {/each}
+                </span>
               {/each}
             </div>
           </div>
@@ -400,8 +404,15 @@
     min-width: 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px var(--space-3);
+    gap: var(--space-3);
     font-size: 14px;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
   }
 
   .numbers {

@@ -116,12 +116,11 @@ describe('loadHome', () => {
       previousScore: 8,
       recipeTag: { kind: 'reused', shotCount: 1 }
     });
-    expect(lastShot!.values.map((v) => `${v.label} ${v.value}`)).toEqual([
-      'Grind 1.6',
+    const text = (vs: { label: string; value: string }[]) => vs.map((v) => `${v.label} ${v.value}`);
+    expect(text(lastShot!.values.left)).toEqual(['Grind 1.6', 'In 18.0 g', 'Ratio 1 : 2.1']);
+    expect(text(lastShot!.values.right)).toEqual([
       'Time 25.5 s',
-      'In 18.0 g',
       'Out 38.5 g',
-      'Ratio 1 : 2.1',
       'Taste Slightly sour'
     ]);
   });

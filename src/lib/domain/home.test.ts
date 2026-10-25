@@ -76,21 +76,36 @@ describe('freshnessDetail', () => {
 describe('lastShotValues', () => {
   const steps = { grind: 100, dose: 100, yield: 100, time: 1000 };
   const shot = { grind: 1600, dose: 18000, yield: 38500, time: 25500, balance: -2 };
+  const labels = (v: ReturnType<typeof lastShotValues>) => ({
+    left: v.left.map((x) => x.label),
+    right: v.right.map((x) => x.label)
+  });
 
-  it('D-32: grind, time, in, out, ratio and taste, in two columns', () => {
-    expect(lastShotValues(shot, steps)).toEqual([
-      { label: 'Grind', value: '1.6' },
-      { label: 'Time', value: '25.5 s' },
-      { label: 'In', value: '18.0 g' },
-      { label: 'Out', value: '38.5 g' },
-      { label: 'Ratio', value: '1 : 2.1' },
-      { label: 'Taste', value: 'Slightly sour' }
-    ]);
+  it('D-32: grind, in and ratio on the left; time, out and taste on the right', () => {
+    expect(lastShotValues(shot, steps)).toEqual({
+      left: [
+        { label: 'Grind', value: '1.6' },
+        { label: 'In', value: '18.0 g' },
+        { label: 'Ratio', value: '1 : 2.1' }
+      ],
+      right: [
+        { label: 'Time', value: '25.5 s' },
+        { label: 'Out', value: '38.5 g' },
+        { label: 'Taste', value: 'Slightly sour' }
+      ]
+    });
+  });
+
+  it('D-91: without a time, the right column closes up and the left one stays', () => {
+    expect(labels(lastShotValues({ ...shot, time: null }, steps))).toEqual({
+      left: ['Grind', 'In', 'Ratio'],
+      right: ['Out', 'Taste']
+    });
   });
 
   it('D-91, D-11: a missing yield, time or balance is left out', () => {
     expect(
-      lastShotValues({ ...shot, yield: null, time: null, balance: null }, steps).map((v) => v.label)
-    ).toEqual(['Grind', 'In']);
+      labels(lastShotValues({ ...shot, yield: null, time: null, balance: null }, steps))
+    ).toEqual({ left: ['Grind', 'In'], right: [] });
   });
 });

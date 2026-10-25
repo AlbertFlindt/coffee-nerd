@@ -41,8 +41,9 @@ export function freshnessDetail(gramsLeft: string | null): string {
 }
 
 /**
- * The last shot's values in two columns, row by row (D-32): Grind, Time, In, Out, Ratio, Taste. A missing
- * yield, time or balance is left out (D-91, D-11), and so is the ratio without a yield.
+ * The last shot's values in two fixed columns (D-32): Grind, In, Ratio on the left; Time, Out, Taste on
+ * the right. A missing yield, time or balance is left out (D-91, D-11), and so is the ratio without a
+ * yield; the rest of its column closes up.
  */
 export function lastShotValues(
   shot: {
@@ -53,16 +54,22 @@ export function lastShotValues(
     balance: number | null;
   },
   steps: { grind: Thousandths; dose: Thousandths; yield: Thousandths; time: Thousandths }
-): { label: string; value: string }[] {
+): { left: ShotValue[]; right: ShotValue[] } {
   const shown = (value: Thousandths, step: Thousandths, unit?: string, atLeast = 1) =>
     formatQuantity(value, { decimals: Math.max(atLeast, decimalsFor(value, step)), unit });
-  const values: ({ label: string; value: string } | null)[] = [
-    { label: 'Grind', value: shown(shot.grind, steps.grind, undefined, 0) },
-    shot.time === null ? null : { label: 'Time', value: shown(shot.time, steps.time, 's') },
-    { label: 'In', value: shown(shot.dose, steps.dose, 'g') },
-    shot.yield === null ? null : { label: 'Out', value: shown(shot.yield, steps.yield, 'g') },
-    shot.yield === null ? null : { label: 'Ratio', value: formatRatio(shot.yield, shot.dose)! },
-    shot.balance === null ? null : { label: 'Taste', value: tasteWords('balance', shot.balance) }
-  ];
-  return values.filter((v) => v !== null);
+  const present = (values: (ShotValue | null)[]) => values.filter((v) => v !== null);
+  return {
+    left: present([
+      { label: 'Grind', value: shown(shot.grind, steps.grind, undefined, 0) },
+      { label: 'In', value: shown(shot.dose, steps.dose, 'g') },
+      shot.yield === null ? null : { label: 'Ratio', value: formatRatio(shot.yield, shot.dose)! }
+    ]),
+    right: present([
+      shot.time === null ? null : { label: 'Time', value: shown(shot.time, steps.time, 's') },
+      shot.yield === null ? null : { label: 'Out', value: shown(shot.yield, steps.yield, 'g') },
+      shot.balance === null ? null : { label: 'Taste', value: tasteWords('balance', shot.balance) }
+    ])
+  };
 }
+
+export type ShotValue = { label: string; value: string };
