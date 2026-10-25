@@ -1,6 +1,6 @@
 <script lang="ts">
   // σ bars (screen 25, D-56): per group a bar from zero to its standard deviation, lower is steadier,
-  // and the σ on the right ("σ 0.6"). The clear winner is amber (D-55); the rest are secondary (D-56).
+  // and the σ on the right ("σ 0.6"). The clear winner is amber (D-216); the rest are secondary (D-56).
   import { decimalText, statText, type BarRow, type Chart } from '../domain/insights';
   import RowChart from './RowChart.svelte';
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   // Average ± 1 σ (screens 23 and 25, D-56): per group a dot at the average with whiskers one standard
-  // deviation each way, and the σ on the right ("±0.7"). The clear winner is amber, as screens 23 and 25
-  // draw it (D-55); the rest are cream (D-56).
+  // deviation each way, and the σ on the right ("±0.7"). The clear winner is amber on any measure, as screens 23 and 25
+  // draw it (D-216); the rest are cream (D-56).
   import { decimalText, statText, type Chart, type DotRow } from '../domain/insights';
   import RowChart from './RowChart.svelte';
 

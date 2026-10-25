@@ -309,7 +309,7 @@ describe('shot time by routine (screen 25)', () => {
   const times = (seconds: number[], overrides: Partial<ShotFact> = {}) =>
     seconds.map((t) => fact({ time: t * 1000, recipeShots: seconds.length, ...overrides }));
 
-  it('D-204, D-210: compares routines on the bean on Home with the rest of the recipe equal', () => {
+  it('D-204, D-210, D-216: compares routines on the bean on Home with the rest of the recipe equal', () => {
     const result = routines([
       ...times([27, 28, 28, 29, 28]),
       ...times([25, 28, 31, 28, 30], light),
