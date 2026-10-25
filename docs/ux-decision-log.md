@@ -2,7 +2,7 @@
 
 Status: living document. Each decision records **what** was decided and **why**, so later design and code can be checked against it. Technical decisions start at section 13.
 
-Last updated: 2026-10-23
+Last updated: 2026-10-25
 
 ---
 
@@ -58,7 +58,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 ## 6. Information architecture
 
-- **D-30 — Bottom tab bar: Home · Journal · + · Library · Insights.** *(Revised 2026-10-18: see D-114.)* On tablet the bar becomes a left side rail. Settings (units, backup, export) sit behind a gear icon on Home, not in a tab.
+- **D-30 — Bottom tab bar: Home · Journal · + · Library · Insights.** *(Revised 2026-10-18: see D-114; 2026-10-25: see D-199.)* On tablet the bar becomes a left side rail. Settings (units, backup, export) sit behind a gear icon on Home, not in a tab.
 
 | Tab | Purpose |
 |---|---|
@@ -70,7 +70,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 - **D-31 — "+" is the only way to add a shot.** The center "+" is always visible and opens the prefilled shot form. No duplicate "brew again" shortcuts elsewhere.
   - *Why:* one obvious entry point; duplicates add clutter without saving taps.
-- **D-32 — Home = data for the bean you're brewing.** Top to bottom:
+- **D-32 — Home = data for the bean you're brewing.** *(Revised 2026-10-25: see D-193 to D-198.)* Top to bottom:
   - **App banner** (D-34) with the settings gear.
   - **Bean scope:** a pill with the last used bean; tap to switch between open beans (several can be open at once). Everything on Home follows this bean.
   - **Last shot:** score, grind, dose in/out, time, ratio, taste, recipe tag.
@@ -118,7 +118,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* nothing you entered stays hidden.
 - **D-116 — A shot can be deleted from the edit form.** The edit form ends with "Delete shot"; a confirmation asks first. Deleting removes the shot and its flavor notes; a recipe left with no shots is removed unless it is marked Brew next (data-model §4.1). The app then returns to the Journal. A bean that this shot finished automatically (D-40) stays finished; it is reopened from the bean page. Refines D-57.
   - *Why:* a mistaken shot should not stay in the statistics forever; the edit form is where you already change a shot.
-- **D-117 — "Back" returns to the Journal as you left it.** From the shot detail, "Back" opens the Journal with the filters you had (bean, recipe, unrated). "N shots this week" in the Journal header counts every shot, whatever the filters. Refines D-54 and D-57.
+- **D-117 — "Back" returns to the Journal as you left it.** *(Revised 2026-10-25: see D-197.)* From the shot detail, "Back" opens the Journal with the filters you had (bean, recipe, unrated). "N shots this week" in the Journal header counts every shot, whatever the filters. Refines D-54 and D-57.
   - *Why:* checking one shot should not lose the view you were working in; the header describes the Journal, the filters the list.
 - **D-118 — The shot detail names what changed for a new recipe.** For a recipe's first shot the tag reads like the shot form's, e.g. "New recipe · grind changed", compared with the bean's shot before it (D-81, D-113). Journal rows keep the short "New recipe". Refines D-57.
   - *Why:* the detail is where you look for why a shot differs; the list stays short.
@@ -134,6 +134,22 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* without spread there is no normal range to compare with; empty cards add nothing; the screens draw 12 px corners.
 - **D-124 — The Library tab opens Beans until the Library page exists.** *(Revised 2026-10-18: see D-156.)* Until the Library landing page (D-50) is built, the Library tab opens the Beans overview, which then has no back arrow. Refines D-114.
   - *Why:* Beans is reachable the way it will be, without building the landing page early.
+- **D-193 — Home shows one graph until the others are designed.** Home is built with the Dial-in progress graph only, and the chip row is left out while it is the only graph. Time vs. yield, Score vs. roast age and Recipe consistency come after Insights (roadmap M9), once they are designed (open topic 15); the chip row comes back with the second graph. Revises D-32.
+  - *Why:* the other three have no design, and the data layer for graphs is built with Insights; a chip that does nothing is clutter.
+- **D-194 — "This week" on Home counts the bean on Home.** The This week card counts this bean's shots since Monday (in the user's time zone), their average score and how many are rated. The Journal header keeps counting every shot (D-117). Refines D-32.
+  - *Why:* everything on Home follows the chosen bean; the count across beans is already in the Journal.
+- **D-195 — Home and "+" share one bean.** Choosing a bean with the bean pill on Home also makes it the bean the next "+" starts from, as a saved shot does. A Brew next mark on another bean still decides the next shot (D-43). Refines D-32 and D-140.
+  - *Why:* Home shows the bean you are about to brew; two different beans on Home and the shot form would confuse.
+- **D-196 — Dial-in progress plots the last 12 rated shots.** The graph shows the score of this bean's last 12 rated shots, oldest on the left; unrated shots are left out, never drawn as 0 (D-11). A cherry dashed line marks where a new recipe starts: before a shot whose recipe differs from the shot drawn before it. With fewer than 2 rated shots the graph area says that rated shots are needed. Refines D-32.
+  - *Why:* the graph is about score progress; unrated shots are a one-tap job on the Last shot card and in the Journal.
+- **D-197 — Home's cards open the shot and the bean.** Tapping the Last shot card opens that shot (D-57), and its Back returns to Home. Tapping the Best recipe card opens the bean page (D-42), where Brew next lives. An unrated last shot shows the dashed amber Rate block (D-111). No card starts a shot (D-31). Refines D-32 and D-117.
+  - *Why:* one tap to the details you want next, through pages that exist, without a second way to start a shot.
+- **D-198 — Home without data keeps its layout.** With no open bean, Home shows the banner and one card, "No open beans", with "Add bean". A bean with no shots shows the bean pill and bean freshness, and the other cards say "No shots yet". A bean with shots but none rated says on the best recipe card and the graph that a rated shot is needed. Built without a design. Refines D-32.
+  - *Why:* the first visit must not look broken, and each empty card says what fills it.
+- **D-199 — The gear on Home opens Settings.** The gear in the app banner opens a Settings page that holds only "Sign out" until Settings is built (roadmap M11), replacing the temporary button on the start page. Built without a design. Refines D-30 and D-34.
+  - *Why:* Settings is where signing out will live; M11 adds to the page instead of moving the button again.
+- **D-200 — "Shot saved" is a short bar above the tab bar.** After "Save shot" the app returns to the page where "+" was pressed, Home or the Journal (D-95), and shows a bar just above the tab bar. "Shot saved" fades after 4 seconds. When the shot finished the bean (D-40), the bar says so with Undo and stays 10 seconds; after Undo, "… is open again" shows the same way. Built without a design. Refines D-95.
+  - *Why:* within thumb reach for Undo, it covers neither the bean pill nor the Journal filters, and goes away on its own.
 
 ## 7. Shot form (espresso)
 
@@ -191,7 +207,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* at the brew station you look at the scale, not the phone; a short flash confirms a tap was taken without reading the value.
 - **D-94 — The bean card switches the bean.** *(Revised 2026-10-18: see D-113, D-134, D-153.)* Tapping the bean card on the shot form opens a list of open beans. Picking one starts the form again from that bean's starting values (D-03, D-43, D-73, D-38). Choosing another machine or grinder on the shot form waits for the Gear pages (roadmap M6). Refines D-14.
   - *Why:* switching between open beans is the change you make at the brew station; gear changes are rare and belong with the Gear pages.
-- **D-95 — After saving, the app goes back with a message.** "Save shot" returns to the page where "+" was pressed, with a short "Shot saved" message. When the shot used up the bag and the bean was finished automatically (D-40), the message says so, with an Undo that reopens the bean. Refines D-14 and D-40.
+- **D-95 — After saving, the app goes back with a message.** *(Revised 2026-10-25: see D-200.)* "Save shot" returns to the page where "+" was pressed, with a short "Shot saved" message. When the shot used up the bag and the bean was finished automatically (D-40), the message says so, with an Undo that reopens the bean. Refines D-14 and D-40.
   - *Why:* you see that the shot is safe without an extra screen, and the automatic finish can be undone right where it is announced.
 - **D-134 — The shot form's bean list shows roast age.** Each row in the bean list behind the bean card (D-94) shows the bean's name, process and roast age: "Guji Hambela · Natural · 12 days". The list stays a plain sheet. Refines D-94.
   - *Why:* freshness helps choose between open beans; a plain list is enough for one tap.
@@ -576,7 +592,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 12. ~~Puck prep routine builder and New step~~ (D-51, D-52)
 13. ~~Gear list, machine detail, Edit My setup~~ (D-38, D-44, D-45, D-48, D-49)
 14. ~~Tags home~~ (D-29, D-53, D-171 to D-174, D-179 to D-182)
-15. Home: design the other three graphs (Time vs. yield, Roast age, Consistency)
+15. Home: design the other three graphs (Time vs. yield, Roast age, Consistency) — after Insights (M9); Home ships with Dial-in progress only (D-193)
 16. ~~Journal, Insights, shot detail~~ (D-54 to D-57) — still to do: more Dial-in cards (e.g. grind vs time scatter, sour/bitter vs ratio)
 17. Logo: refine the bean-with-glasses mark (app icon for the PWA home screen)
 18. ~~Library landing page~~ (D-50)
