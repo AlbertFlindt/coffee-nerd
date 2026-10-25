@@ -6,6 +6,7 @@
   import JournalRow from '#lib/components/JournalRow.svelte';
   import RateSheet from '#lib/components/RateSheet.svelte';
   import { groupByDay } from '#lib/domain/journal.ts';
+  import SavedBar from '#lib/components/SavedBar.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
   import type { PageProps } from './$types';
 
@@ -169,6 +170,7 @@
   <RateSheet shot={rating} timeZone={journal.timeZone} onclose={() => (rating = null)} />
 {/if}
 
+<SavedBar flash={data.flash} from="journal" />
 <TabBar current="journal" />
 
 <style>

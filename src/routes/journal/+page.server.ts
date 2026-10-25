@@ -2,10 +2,12 @@ import { error, fail } from '@sveltejs/kit';
 import { getDb } from '#lib/server/db/connection.ts';
 import { loadJournal } from '#lib/server/db/journal.ts';
 import { rateShot, ShotRejected } from '#lib/server/db/shots.ts';
+import { takeFlash } from '#lib/server/flash.ts';
 import { rememberJournalFilters } from '#lib/server/journal-filters.ts';
 import type { Actions, PageServerLoad } from './$types';
 
-// Journal (screen 22, D-54): every shot, newest first; ?bean=, ?recipe= and ?unrated=1 filter it.
+// Journal (screen 22, D-54): every shot, newest first; ?bean=, ?recipe= and ?unrated=1 filter it. After a
+// shot saved from the Journal's "+", it shows the "Shot saved" bar (D-200).
 export const load: PageServerLoad = ({ locals, url, cookies, request }) => {
   if (!locals.user) error(401);
   const now = Date.now();
@@ -21,7 +23,7 @@ export const load: PageServerLoad = ({ locals, url, cookies, request }) => {
   );
   // D-117: remember the filters in effect; ids that no longer exist are dropped.
   rememberJournalFilters(cookies, journal, request);
-  return { now, journal };
+  return { now, journal, flash: takeFlash(cookies) };
 };
 
 export const actions: Actions = {

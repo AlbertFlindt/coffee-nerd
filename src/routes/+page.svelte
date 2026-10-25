@@ -6,6 +6,7 @@
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import DialInGraph from '#lib/components/DialInGraph.svelte';
   import RateSheet from '#lib/components/RateSheet.svelte';
+  import SavedBar from '#lib/components/SavedBar.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
   import { recipeTagText } from '#lib/domain/fingerprint.ts';
   import { freshnessDetail, thisWeekText } from '#lib/domain/home.ts';
@@ -41,23 +42,6 @@
     >
   </a>
 </header>
-
-{#if data.flash}
-  <!-- D-95: what happened to the shot just saved. The message itself is not designed yet. -->
-  <div class="cn-card message" role="status">
-    {#if data.flash.kind === 'saved'}
-      <span>Shot saved.</span>
-    {:else if data.flash.kind === 'finished'}
-      <span>Shot saved. {data.flash.beanName} is finished: its bag is used up.</span>
-      <form method="POST" action="?/undoFinish">
-        <input type="hidden" name="beanId" value={data.flash.beanId} />
-        <button type="submit" class="undo cn-tap">Undo</button>
-      </form>
-    {:else}
-      <span>{data.flash.beanName} is open again.</span>
-    {/if}
-  </div>
-{/if}
 
 {#if home.state === 'no-bean'}
   <main>
@@ -246,6 +230,7 @@
   {/if}
 {/if}
 
+<SavedBar flash={data.flash} from="home" />
 <TabBar current="home" />
 
 <style>
@@ -534,32 +519,5 @@
   .soft {
     font-weight: 500;
     color: var(--ink-muted);
-  }
-
-  .message {
-    position: absolute;
-    top: var(--space-5);
-    left: var(--space-5);
-    right: var(--space-5);
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    font-size: 15px;
-  }
-
-  .message span {
-    flex: 1;
-  }
-
-  .undo {
-    height: var(--touch-min);
-    padding: 0 var(--space-4);
-    border: none;
-    border-radius: var(--radius-pill);
-    background: var(--control);
-    color: var(--ink);
-    font-size: 15px;
-    font-weight: 700;
   }
 </style>

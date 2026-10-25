@@ -338,8 +338,11 @@ test('D-40, D-95: a shot that uses up the bag finishes the bean, with Undo', asy
   await expect(page.getByRole('status')).toContainText(
     'Guji Hambela is finished: its bag is used up.'
   );
+  // D-200: with Undo the bar stays 10 seconds, past the 4 of "Shot saved".
+  await page.waitForTimeout(5000);
+  await expect(page.getByRole('button', { name: 'Undo' })).toBeVisible();
   await page.getByRole('button', { name: 'Undo' }).click();
-  await expect(page.getByRole('status')).toContainText('Guji Hambela is open again.');
+  await expect(page.getByRole('status')).toContainText('Guji Hambela is open again');
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(page.getByText('Guji Hambela · Natural')).toBeVisible();
 });

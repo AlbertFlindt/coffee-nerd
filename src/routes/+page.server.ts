@@ -4,6 +4,8 @@ import { chooseHomeBean, loadHome } from '#lib/server/db/home.ts';
 import { bean } from '#lib/server/db/schema.ts';
 import { rateShot, reopenAutoFinishedBean, ShotRejected } from '#lib/server/db/shots.ts';
 import { setFlash, takeFlash } from '#lib/server/flash.ts';
+import { originPath } from '#lib/server/journal-filters.ts';
+import { originOf } from '#lib/domain/origin.ts';
 import { and, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -47,7 +49,8 @@ export const actions: Actions = {
   // D-95, D-40: Undo after a shot finished the bean automatically.
   undoFinish: async ({ locals, request, cookies }) => {
     if (!locals.user) error(401);
-    const beanId = String((await request.formData()).get('beanId') ?? '');
+    const data = await request.formData();
+    const beanId = String(data.get('beanId') ?? '');
     const db = getDb();
     if (reopenAutoFinishedBean(db, locals.user.id, beanId, Date.now())) {
       const reopened = db
@@ -57,6 +60,7 @@ export const actions: Actions = {
         .get();
       setFlash(cookies, request, { kind: 'reopened', beanName: reopened?.name ?? '' });
     }
-    redirect(303, '/');
+    // D-200: the bar stays on the page that showed it, Home or the Journal.
+    redirect(303, originPath(originOf(String(data.get('from') ?? '')), cookies));
   }
 };
