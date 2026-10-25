@@ -85,8 +85,12 @@
 <header>
   <a
     class="back cn-tap"
-    href={data.filters ? resolve(`/journal?${data.filters}`) : resolve('/journal')}
-    aria-label="Back to Journal"
+    href={data.fromHome
+      ? resolve('/')
+      : data.filters
+        ? resolve(`/journal?${data.filters}`)
+        : resolve('/journal')}
+    aria-label={data.fromHome ? 'Back to Home' : 'Back to Journal'}
   >
     <svg
       width="22"

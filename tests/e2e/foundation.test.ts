@@ -214,6 +214,8 @@ test('D-86: sign in, stay signed in, sign out', async ({ page, context }) => {
   await page.goto('/login');
   await expect(page).toHaveURL(/\/$/);
 
+  // D-199: Sign out lives on the Settings page behind the gear on Home.
+  await page.getByRole('link', { name: 'Settings' }).click();
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto('/');
