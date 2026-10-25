@@ -92,7 +92,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - **Not enough data:** a card only appears when it has enough shots behind it; otherwise it says what's missing (e.g. "Rate 5 more washed shots to compare").
   - *Why:* nerds want the numbers, but a sentence first makes the point instantly; showing the basis keeps the app honest about small samples.
 
-- **D-56 — Insights speak statistics.** *(Revised 2026-10-25: see D-201 to D-205, D-207.)* Refines D-55. Cards use real statistical charts, each with a one-sentence finding and its basis:
+- **D-56 — Insights speak statistics.** *(Revised 2026-10-25: see D-201 to D-205, D-207, D-211, D-212.)* Refines D-55. Cards use real statistical charts, each with a one-sentence finding and its basis:
   - **What I like:** **box plots** of score by process (box = middle 50 %, amber line = median, whiskers = range, n per group); **mean ± 1 σ** dot-and-whisker by origin.
   - **Progress:** **line chart** of weekly average score with a **± 1 σ band**, so you see both "better" (line rises) and "steadier" (band narrows).
   - **Dial-in:** a **bell curve** — histogram of shot time on one recipe with the fitted normal curve, mean line (μ) and the ± 1 σ zone ("2 in 3 shots land between 26.5 and 29.3 s").
@@ -155,13 +155,13 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the decision log already places it there, and Dial-in then has a card without a new design.
 - **D-202 — Insights starts with the six drawn cards.** Score by process (box plot), score by origin (average ± 1 σ), weekly average score (line with ± 1 σ band), shot time on one recipe (bell curve), shot time by puck prep routine (average ± 1 σ) and most consistent beans (σ bars). Cards for roasters, flavor families, grinders and baskets (D-55) come later, each as a new definition (D-64). Refines D-55 and D-56.
   - *Why:* these six are designed; the others would be built without a design and can be added without new code paths.
-- **D-203 — How much data a card needs.** Score by process and by origin: 2 groups with 5 rated shots each. Weekly average score: 4 weeks with 2 rated shots each. Bell curve: 10 shots with a time on the recipe. Routines: 2 routines with 5 shots each. Most consistent beans: 2 beans with 5 rated shots each on recipes brewed more than once. Below that, the card says what is missing (D-55). A group with fewer than 10 shots is named in the basis line as one to treat with care, as screen 25 does. Refines D-55 and D-56.
+- **D-203 — How much data a card needs.** *(Revised 2026-10-25: see D-211, D-212.)* Score by process and by origin: 2 groups with 5 rated shots each. Weekly average score: 4 weeks with 2 rated shots each. Bell curve: 10 shots with a time on the recipe. Routines: 2 routines with 5 shots each. Most consistent beans: 2 beans with 5 rated shots each on recipes brewed more than once. Below that, the card says what is missing (D-55). A group with fewer than 10 shots is named in the basis line as one to treat with care, as screen 25 does. Refines D-55 and D-56.
   - *Why:* five shots is the least that gives a spread worth showing; the care line keeps small groups honest without hiding them.
-- **D-204 — Comparing routines holds everything else equal.** The routine card compares shots of the same bean whose recipes are equal apart from the routine: same machine, grinder, grind, dose (within 0.2 g, D-186), basket and setup. Each routine's spread is measured within those groups. The routine is part of a recipe (D-65), so screen 25's "Same bean, same recipe" reads as this. Refines D-55 and D-56.
+- **D-204 — Comparing routines holds everything else equal.** *(Revised 2026-10-25: see D-210.)* The routine card compares shots of the same bean whose recipes are equal apart from the routine: same machine, grinder, grind, dose (within 0.2 g, D-186), basket and setup. Each routine's spread is measured within those groups. The routine is part of a recipe (D-65), so screen 25's "Same bean, same recipe" reads as this. Refines D-55 and D-56.
   - *Why:* this is D-55's "everything else equal"; with the bean alone, grind changes would mix into a routine's spread.
-- **D-205 — The bell curve uses the best recipe of the bean on Home.** The shot-time card draws the best recipe (D-66) of the bean on Home (D-195). When that recipe has too few shots with a time (D-203), the card says what it needs. Refines D-56.
+- **D-205 — The bell curve uses the best recipe of the bean on Home.** *(Revised 2026-10-25: see D-213.)* The shot-time card draws the best recipe (D-66) of the bean on Home (D-195). When that recipe has too few shots with a time (D-203), the card says what it needs. Refines D-56.
   - *Why:* it answers "is the recipe I'm brewing under control?", the question Dial-in is for.
-- **D-206 — Card titles follow the finding.** Each card has a title and a sentence for each outcome its data can have, including "no clear difference" when the top two are within 0.5 points (or 0.5 s for time). The wording is drafted in the pull request that builds the card, and the owner approves it there. Refines D-55.
+- **D-206 — Card titles follow the finding.** *(Revised 2026-10-25: see D-214.)* Each card has a title and a sentence for each outcome its data can have, including "no clear difference" when the top two are within 0.5 points (or 0.5 s for time). The wording is drafted in the pull request that builds the card, and the owner approves it there. Refines D-55.
   - *Why:* a title that states the finding is the point of D-55, so it has to change with the data, and never claim a winner that is not there.
 - **D-207 — Insights states without a design are built plainly.** The tap tooltip with exact numbers (D-56), a card without enough data (D-203) and Insights with no shots are built in the card's own style without a design, and listed in the open items for the canvas. Refines D-55 and D-56.
   - *Why:* as with Home (D-198), the first visit must not look broken, and waiting for designs would hold up M9.
@@ -169,6 +169,16 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* the header says how much you have logged; a score card must never count an unrated shot as 0.
 - **D-209 — "Within normal range" compares the distance as shown.** The distance in σ is rounded to one decimal before it is compared with one σ, so 1.04σ reads "Within normal range", never "1.0σ faster than usual". Refines D-110.
   - *Why:* the words must agree with the number on the screen.
+- **D-210 — The routine card compares on the bean on Home.** The routine card (D-204) uses the bean on Home (D-195), as the bell curve does (D-205), and names it in its basis line ("Guji Hambela only", screen 25). Without enough comparable shots on that bean, the card says what it needs (D-203). Refines D-204.
+  - *Why:* both Dial-in style cards then answer questions about the bean you are brewing.
+- **D-211 — A bean's consistency is its spread within each recipe.** The most consistent beans card measures each bean's score σ within each recipe brewed more than once and pools those (the pooled σ of data-model §5). Moving between recipes does not count as spread. Refines D-56 and D-203.
+  - *Why:* dialling in changes the score on purpose; consistency is how much the same recipe varies.
+- **D-212 — The weekly line spans the last 12 weeks.** The weekly average score covers the last 12 weeks, as screen 24 draws ("12 weeks ago" to "This week"). A week with fewer than 2 rated shots is drawn as a gap in the line and the band, never as 0 (D-11). Refines D-56 and D-203.
+  - *Why:* a week needs two shots for a σ; a gap is honest about a quiet week.
+- **D-213 — The bell curve without a best recipe says what it needs.** With no bean on Home (D-198) or no rated shot on it yet (D-66), the bell curve card says what it needs, as D-203 does. Refines D-205.
+  - *Why:* the card stays in place and tells you how to fill it, as Home's cards do (D-198).
+- **D-214 — Which number "no clear difference" compares.** Score by process compares medians, score by origin compares averages, both within 0.5 points. The routine and most consistent beans cards compare σ, within 0.2 s or 0.2 points. The weekly line and the bell curve have no "top two", so the rule does not apply to them. Refines D-206.
+  - *Why:* each card is judged by the number its chart shows; a σ gap of 0.5 would hide real differences in steadiness.
 
 ## 7. Shot form (espresso)
 

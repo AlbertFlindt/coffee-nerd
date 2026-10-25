@@ -51,13 +51,16 @@ export function groupByDay<T extends { brewedAt: number }>(
 
 /** How many shots were brewed since Monday of this week; weeks start on Monday (data-model §1.8). */
 export function shotsThisWeek(brewedAts: readonly number[], now: number, timeZone: string): number {
+  return brewedAts.filter((b) => isThisWeek(b, now, timeZone)).length;
+}
+
+/** Brewed since Monday of this week, in the user's time zone (data-model §1.8). */
+export function isThisWeek(brewedAt: number, now: number, timeZone: string): boolean {
   const today = dayNumber(localDate(now, timeZone));
   // Day 0 (1 Jan 1970) was a Thursday: Monday is 0 after shifting by 3.
   const monday = today - ((today + 3) % 7);
-  return brewedAts.filter((b) => {
-    const day = dayNumber(localDate(b, timeZone));
-    return day >= monday && day <= today;
-  }).length;
+  const day = dayNumber(localDate(brewedAt, timeZone));
+  return day >= monday && day <= today;
 }
 
 export type CoreValues = {

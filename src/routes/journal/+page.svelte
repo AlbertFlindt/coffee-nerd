@@ -1,13 +1,11 @@
 <script lang="ts">
   // Journal (screen 22, D-54): header, filter chips, then the shots grouped by day. Only the list
   // scrolls (D-36).
-  import { tick } from 'svelte';
-  import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import JournalRow from '#lib/components/JournalRow.svelte';
-  import ScoreRow from '#lib/components/ScoreRow.svelte';
-  import { clockTime, groupByDay } from '#lib/domain/journal.ts';
+  import RateSheet from '#lib/components/RateSheet.svelte';
+  import { groupByDay } from '#lib/domain/journal.ts';
   import TabBar from '#lib/components/TabBar.svelte';
   import type { PageProps } from './$types';
 
@@ -23,22 +21,9 @@
   let recipeSheet = $state(false);
   const recipeLabel = $derived(journal.recipes.find((r) => r.id === journal.recipeId)?.label);
 
-  // D-111: the Rate sheet. A tap on a score saves it; a slide saves where the finger lifts (D-10).
+  // D-111: the Rate sheet, opened from a row's Rate block.
   let rating: (typeof journal.shots)[number] | null = $state(null);
-  let score: number | null = $state(null);
-  let pressing = false;
-  let rateForm: HTMLFormElement | undefined = $state();
-  let rateFailed = $state(false);
-  const openRate = (shot: (typeof journal.shots)[number]) => {
-    score = null;
-    rateFailed = false;
-    rating = shot;
-  };
-  const submitScore = async () => {
-    if (score === null) return;
-    await tick(); // the hidden input carries the new score first
-    rateForm?.requestSubmit();
-  };
+  const openRate = (shot: (typeof journal.shots)[number]) => (rating = shot);
 </script>
 
 {#snippet chevron()}
@@ -181,54 +166,7 @@
 {/if}
 
 {#if rating}
-  <BottomSheet
-    short
-    label="Rate the shot"
-    closeLabel="Close without rating"
-    onclose={() => (rating = null)}
-  >
-    <!-- Not designed yet beyond D-111: the shot as the title, then the score row (docs/open-items.md). -->
-    <h2 class="cn-type-heading sheet-title">
-      {`${rating.beanName} · ${clockTime(rating.brewedAt, journal.timeZone)}`}
-    </h2>
-    <form
-      bind:this={rateForm}
-      method="POST"
-      action="?/rate"
-      use:enhance={() =>
-        async ({ result, update }) => {
-          await update();
-          // Closes only once the score is saved; otherwise the sheet stays with a message.
-          if (result.type === 'success') rating = null;
-          else rateFailed = true;
-        }}
-    >
-      <input type="hidden" name="shotId" value={rating.id} />
-      <input type="hidden" name="score" value={score ?? ''} />
-      <div
-        role="presentation"
-        onpointerdowncapture={() => (pressing = true)}
-        onpointerup={() => {
-          pressing = false;
-          submitScore();
-        }}
-        onpointercancel={() => (pressing = false)}
-      >
-        <ScoreRow
-          value={score}
-          previous={rating.previousScore}
-          onchange={(v) => {
-            score = v;
-            if (!pressing) submitScore();
-          }}
-        />
-      </div>
-    </form>
-    {#if rateFailed}
-      <!-- Not designed yet (docs/open-items.md). -->
-      <p class="problem" role="alert">The score could not be saved. Nothing was changed.</p>
-    {/if}
-  </BottomSheet>
+  <RateSheet shot={rating} timeZone={journal.timeZone} onclose={() => (rating = null)} />
 {/if}
 
 <TabBar current="journal" />
@@ -303,12 +241,6 @@
   .empty {
     margin: 0;
     color: var(--ink-muted);
-  }
-
-  .problem {
-    margin: 0;
-    font-size: 13px;
-    color: var(--ink-soft);
   }
 
   .sheet-title {

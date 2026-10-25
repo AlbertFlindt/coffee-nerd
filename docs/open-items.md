@@ -16,11 +16,7 @@ Last updated: 2026-10-25
 
 | Question | Needed by | Source |
 |---|---|---|
-| Which bean the routine card compares on (screen 25 says "Guji Hambela only"): recommended the bean on Home, as D-205 does for the bell curve | M9 | D-204, D-205 |
-| Most consistent beans: is a bean's σ pooled within each reused recipe, or taken across all of them? Recommended pooled within recipe (data-model §5), so moving between recipes does not count as spread | M9 | D-56, D-203 |
-| Weekly average score: how many weeks it spans and how thin weeks show. Recommended the last 12 weeks (screen 24), with a week of fewer than 2 rated shots drawn as a gap | M9 | D-56, D-203 |
-| The bell curve when there is no best recipe (no bean on Home, D-198, or no rated shot yet, D-66): recommended the card says what it needs, as D-203 does | M9 | D-205, D-207 |
-| "No clear difference" (D-206): which number each card compares. Recommended the median for process, the average for origin, both within 0.5 points; σ for routines and beans, within 0.2 s or points; Progress and the bell curve have no "top two", so it does not apply to them | M9 | D-206 |
+| *(none open)* | | |
 
 ## 2. Screens and states not designed yet
 
@@ -28,13 +24,13 @@ Last updated: 2026-10-25
 |---|---|---|
 | Proper design for the sign-in and "Create your account" pages (built simple for now) | Before release (M11) | D-84 |
 | Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency), and the chip row that comes back with the second graph | After M9 | Open topic 15, D-32, D-193 |
-| Home: replace the placeholder start page (logo, name and a temporary "Sign out" button above the tab bar); Home without data (D-198) and the Settings page with only Sign out (D-199) are built without a design | M8 | M0, M2, M3, D-198, D-199 |
-| The "Shot saved" message, the automatic-finish message with Undo, and "… is open again" (built as a plain card on the start page; M8 builds them as a bar above the tab bar, D-200, without a design) | M8 | D-95, D-200 |
+| As built, beside screen 6 (Home, D-32, D-193 to D-199): the Last shot card leaves out what was not entered (no Time without a time, no Out and Ratio without a yield, no Taste without a balance), and the rest of its column closes up (left Grind, In, Ratio; right Time, Out, Taste); an unrated last shot shows the dashed amber "Rate" block (72 px) in the score's place; the bean freshness line reads "since roast · 120 g left" with a bag weight; the best recipe's second line follows D-100 ("Preinfusion 4 s · Low bar start 5 s · 93 °C · Reused 3x", screen 6 draws the temperature first) and its first line ends with the latest shot's time; the bean pill opens a sheet "Open beans" built like the shot form's ("Kiambu AA · Washed · 5 days"); Home without data (D-198): "No open beans" with an "Add bean" button, "No shots yet" on the Last shot card, under "This week · 0 shots" and on the best recipe card, and "Rate a shot to see your best recipe." when no shot is rated; a week without shots shows "0 shots" alone; the Settings page (D-199): a back arrow "Back to Home", the title "Settings" and a full-width "Sign out" | When the canvas designs them | D-32, D-100, D-197 to D-199 |
+| From Home, the shot detail's Back returns to Home (D-197), but after Edit › "Save changes" the detail no longer knows it came from Home, so Back then goes to the Journal | M8 (with returning to where "+" was pressed, D-200) | D-197, D-117 |
+| The "Shot saved" message, the automatic-finish message with Undo, and "… is open again" (built as a plain card on Home; M8 builds them as a bar above the tab bar, D-200, without a design) | M8 | D-95, D-200 |
 | The Rate sheet (Journal and Home's Last shot card, D-197) when the score cannot be saved: it stays open with "The score could not be saved. Nothing was changed." under the score row | M10 | D-111 |
 | Shot form: the message when the server refuses a shot ("The shot could not be saved. Nothing was changed.", above Save) | M10 | M3 |
-| How "Sign out" looks on the Settings page (D-199: the gear on Home opens Settings, with only Sign out until M11) | M11 | M2, D-199 |
 | Insights: the Dial-in tab shows only the bell curve card, which screen 24 draws under Progress (D-201); more Dial-in cards, e.g. grind vs. time, sour/bitter vs. ratio, and cards for roasters, flavor families, grinders and baskets (D-202) | After M9 | Open topic 16, D-55, D-201, D-202 |
-| Insights states built without a design (D-207): the tap tooltip with exact numbers, a card without enough data (D-203), the bell curve without a best recipe, and Insights with no shots | M9 | D-56, D-203, D-205, D-207 |
+| Insights states built without a design (D-207): the tap tooltip with exact numbers, a card without enough data (D-203), the bell curve without a best recipe (D-213), a week drawn as a gap (D-212), and Insights with no shots | M9 | D-56, D-203, D-205, D-207 |
 | Insights card titles and sentences for each outcome: drafted in the pull request that builds each card, and the owner approves them there (D-206) | M9 | D-206 |
 | Journal: how a shot that is still waiting to sync looks | M10 | Open topic 23, D-61 |
 | App icon for the home screen (PWA) | M10 | Open topic 17 |

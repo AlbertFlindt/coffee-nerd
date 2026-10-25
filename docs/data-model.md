@@ -254,7 +254,7 @@ Four layers, each testable on its own:
    - *Measures:* score, time, yield, ratio, balance, body, sweetness, aftertaste.
    - *Dimensions:* process, country, roaster, roast level, recipe, routine, grinder, basket, week, roast age range, **`feature:<key>`** (any machine feature, read from the JSON) and **`step:<stepId>`** (any step setting).
    - *Filters:* bean, recipe, date range, rated shots only, reused recipes only.
-   - *Hold constant:* compare only within the same bean or the same recipe — the "fair comparison" rule of D-55. Comparing routines holds the bean and every other part of the recipe constant (machine, grinder, grind, dose within 0.2 g, basket, setup), since the routine is part of the recipe (D-204).
+   - *Hold constant:* compare only within the same bean or the same recipe — the "fair comparison" rule of D-55. Comparing routines holds the bean and every other part of the recipe constant (machine, grinder, grind, dose within 0.2 g, basket, setup), since the routine is part of the recipe (D-204). A bean's consistency is the pooled σ within its reused recipes (D-211).
    - A query is `{ measure, groupBy, filters, holdConstant }` and returns the values per group.
 3. **Statistics module** (pure TypeScript): count, mean, sample standard deviation (σ, divided by n − 1), median and quartiles (one documented method), range, histogram bins, fitted normal curve, how many σ one shot is from its recipe's average (D-57), and pooled σ within groups (for "hold constant").
 4. **Insight definitions** — data, not code: `{ id, topic, query, chart, minimum shots per group, sentence template, "not enough data" message }`. Chart types: box plot, mean ± σ, line with σ band, bell curve, σ bars (D-56).
