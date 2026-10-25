@@ -7,6 +7,7 @@ import {
   integer,
   primaryKey,
   sqliteTable,
+  sqliteView,
   text,
   uniqueIndex
 } from 'drizzle-orm/sqlite-core';
@@ -282,3 +283,61 @@ export const shotTag = sqliteTable(
   },
   (t) => [primaryKey({ columns: [t.shotId, t.tagId] }), index('shot_tag_tag').on(t.tagId)]
 );
+
+/**
+ * One wide row per shot for Insights and Home's graph (data-model §5, D-64): the shot, its recipe, bean
+ * and gear. Values stay as stored (thousandths, UTC milliseconds); the ratio, local day, week and roast
+ * age need the user's time zone or the units module, so `src/lib/server/insights/facts.ts` adds them.
+ * Archived gear and routines still count: their shots happened (data-model §1.7).
+ *
+ * Not created by a migration: SQLite cannot rebuild a table (the way drizzle-kit changes a column) while
+ * a view reads it. `openDatabase` drops the view before migrating and creates it again from
+ * `SHOT_FACTS_SQL` after, so it always matches this code.
+ */
+export const shotFacts = sqliteView('shot_facts', {
+  shotId: text('shot_id').notNull(),
+  ownerId: text('owner_id').notNull(),
+  recipeId: text('recipe_id').notNull(),
+  beanId: text('bean_id').notNull(),
+  beanName: text('bean_name').notNull(),
+  machineId: text('machine_id').notNull(),
+  grinderId: text('grinder_id').notNull(),
+  grinderName: text('grinder_name').notNull(),
+  grindStep: integer('grind_step').notNull(),
+  basketId: text('basket_id'),
+  basketName: text('basket_name'),
+  routineId: text('routine_id'),
+  routineName: text('routine_name'),
+  brewedAt: integer('brewed_at').notNull(),
+  score: integer('score'),
+  balance: integer('balance'),
+  body: integer('body'),
+  sweetness: integer('sweetness'),
+  aftertaste: integer('aftertaste'),
+  dose: integer('dose').notNull(),
+  yield: integer('yield'),
+  time: integer('time'),
+  grind: integer('grind').notNull(),
+  recipeDose: integer('recipe_dose').notNull(),
+  roastDate: text('roast_date').notNull(),
+  process: text('process', { enum: ['washed', 'natural', 'honey', 'anaerobic', 'other'] }),
+  countryCode: text('country_code'),
+  roaster: text('roaster'),
+  roastLevel: text('roast_level', { enum: ['light', 'medium_light', 'medium', 'dark'] }),
+  recipeShots: integer('recipe_shots').notNull(),
+  setup: text('setup', { mode: 'json' }).$type<SetupSnapshot>().notNull()
+}).existing();
+
+export const SHOT_FACTS_SQL = `create view shot_facts as select
+    s.id as shot_id, s.owner_id, s.recipe_id, r.bean_id, b.name as bean_name, r.machine_id,
+    r.grinder_id, g.name as grinder_name, json_extract(g.spec, '$.dial.step') as grind_step,
+    r.basket_id, k.name as basket_name, r.routine_id, rt.name as routine_name,
+    s.brewed_at, s.score, s.balance, s.body, s.sweetness, s.aftertaste, s.dose, s.yield, s.time,
+    r.grind, r.dose as recipe_dose, b.roast_date, b.process, b.country_code, b.roaster, b.roast_level,
+    (select count(*) from shot o where o.recipe_id = s.recipe_id) as recipe_shots, r.setup
+  from shot s
+  join recipe r on r.id = s.recipe_id
+  join bean b on b.id = r.bean_id
+  join gear g on g.id = r.grinder_id
+  left join gear k on k.id = r.basket_id
+  left join routine rt on rt.id = r.routine_id`;

@@ -17,6 +17,7 @@ import {
 import type { GrinderSpec, MachineSpec } from '../../domain/schemas';
 import { setupSummary } from '../../domain/shot-form';
 import { decimalsFor, formatQuantity, type Thousandths } from '../../domain/units';
+import { loadShotFacts } from '../insights/facts';
 import type { Db, Queryable } from './client';
 import { appState, bean, gear, recipe, shot, userSettings } from './schema';
 
@@ -150,7 +151,8 @@ export function loadHome(db: Queryable, ownerId: string, now: number): Home {
     lastShot,
     week: thisWeek(shots, now, timeZone),
     best: bestOf(db, ownerId, current.id, shots, steps),
-    graph: dialInProgress(shots),
+    // Home's graphs read the same shot facts as Insights (data-model §5); newest first for D-196.
+    graph: dialInProgress(loadShotFacts(db, ownerId, timeZone, { beanId: current.id }).reverse()),
     ratedShots: shots.filter((s) => s.score !== null).length,
     timeZone
   };

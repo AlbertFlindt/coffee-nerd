@@ -68,6 +68,14 @@ export const PROCESS_LABEL: Record<Process, string> = {
   other: 'Other'
 };
 
+/** How a roast level is written on screen (D-41). */
+export const ROAST_LEVEL_LABEL = {
+  light: 'Light',
+  medium_light: 'Med-light',
+  medium: 'Medium',
+  dark: 'Dark'
+} as const;
+
 /**
  * A bean's best score (D-135): its best recipe's average with one decimal ("7.7") once that recipe has
  * 3 rated shots, otherwise the highest single score ("8"). Null without a rated shot ("Not rated yet").
