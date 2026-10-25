@@ -15,7 +15,7 @@ concurrency:
 jobs:
   checks:
     name: Check, lint, test, build
-    # Pinned with @playwright/test 1.56.1, whose --with-deps knows Ubuntu up to 24.04; upgrade both together.
+    # Pinned together with @playwright/test (1.63.0): its --with-deps must know this Ubuntu release; upgrade both together.
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
