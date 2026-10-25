@@ -4,6 +4,7 @@
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
+  import DialInGraph from '#lib/components/DialInGraph.svelte';
   import RateSheet from '#lib/components/RateSheet.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
   import { recipeTagText } from '#lib/domain/fingerprint.ts';
@@ -182,6 +183,20 @@
             {last === null ? 'No shots yet' : 'Rate a shot to see your best recipe.'}
           </p>
         </div>
+      {/if}
+    </section>
+
+    <!-- D-193: Dial-in progress is the only graph for now, so there is no chip row above it. -->
+    <section class="graph" aria-label="Dial-in progress">
+      {#if home.graph}
+        <span class="muted small">Score per shot · last {home.graph.points.length} shots</span>
+        <DialInGraph graph={home.graph} />
+      {:else}
+        <span class="muted small">Score per shot</span>
+        <!-- D-196, D-198: not designed yet (docs/open-items.md). -->
+        <p class="muted">
+          {last === null ? 'No shots yet' : 'Rate 2 shots to see your progress here.'}
+        </p>
       {/if}
     </section>
   </main>
@@ -456,6 +471,18 @@
 
   .best-title {
     font-size: 14px;
+  }
+
+  /* D-32, D-36: the graph takes the height left, so Home fits shorter screens too. */
+  .graph {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: 14px var(--space-4) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
   }
 
   .empty-card {

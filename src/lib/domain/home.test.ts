@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { bestScoreOutOfTen, freshnessDetail, lastShotValues, thisWeek, thisWeekText } from './home';
+import {
+  bestScoreOutOfTen,
+  dialInProgress,
+  freshnessDetail,
+  lastShotValues,
+  thisWeek,
+  thisWeekText
+} from './home';
 
 const copenhagen = 'Europe/Copenhagen';
 // Saturday 17 Oct 2026, 09:00 in Copenhagen.
@@ -107,5 +114,41 @@ describe('lastShotValues', () => {
     expect(
       labels(lastShotValues({ ...shot, yield: null, time: null, balance: null }, steps))
     ).toEqual({ left: ['Grind', 'In'], right: [] });
+  });
+});
+
+describe('dialInProgress', () => {
+  const shot = (score: number | null, recipeId = 'a') => ({ score, recipeId });
+
+  it('D-196: the last 12 rated shots, oldest first; unrated shots are left out, never 0', () => {
+    const newestFirst = [
+      shot(7),
+      shot(null),
+      ...Array.from({ length: 12 }, (_, i) => shot(i % 2 === 0 ? 6 : 8))
+    ];
+    const graph = dialInProgress(newestFirst)!;
+    expect(graph.points).toHaveLength(12);
+    expect(graph.points.at(-1)!.score).toBe(7);
+    expect(graph.points.every((p) => p.score > 0)).toBe(true);
+  });
+
+  it('D-196: a recipe change is marked on the first shot drawn of the new recipe', () => {
+    const graph = dialInProgress([shot(8, 'b'), shot(7, 'b'), shot(6, 'a'), shot(5, 'a')])!;
+    expect(graph.points.map((p) => p.newRecipe)).toEqual([false, false, true, false]);
+  });
+
+  it('D-196: compared with the shot drawn before it, so an unrated shot of another recipe in between marks nothing', () => {
+    const graph = dialInProgress([shot(8, 'a'), shot(null, 'b'), shot(6, 'a')])!;
+    expect(graph.points.map((p) => p.newRecipe)).toEqual([false, false]);
+  });
+
+  it('D-196: fewer than 2 rated shots give no graph', () => {
+    expect(dialInProgress([shot(8), shot(null)])).toBeNull();
+  });
+
+  it('D-196: three whole-number grid lines around the scores, within 0 to 10', () => {
+    expect(dialInProgress([shot(8), shot(5)])!.ticks).toEqual([5, 7, 9]);
+    expect(dialInProgress([shot(10), shot(10)])!.ticks).toEqual([8, 9, 10]);
+    expect(dialInProgress([shot(10), shot(1)])!.ticks).toEqual([0, 5, 10]);
   });
 });

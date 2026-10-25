@@ -7,8 +7,10 @@ import { bestRecipe } from '../../domain/best-recipe';
 import type { RecipeMatch } from '../../domain/fingerprint';
 import {
   bestScoreOutOfTen,
+  dialInProgress,
   lastShotValues,
   thisWeek,
+  type DialInGraph,
   type ShotValue,
   type Week
 } from '../../domain/home';
@@ -50,6 +52,8 @@ export type Home =
       week: Week;
       /** The best recipe (D-66), its score as on the Beans pages (D-135, D-197); null without a rated shot. */
       best: { score: string; title: string; detail: string } | null;
+      /** Dial-in progress (D-196); null with fewer than 2 rated shots. */
+      graph: DialInGraph | null;
       timeZone: string;
     };
 
@@ -144,6 +148,7 @@ export function loadHome(db: Queryable, ownerId: string, now: number): Home {
     lastShot,
     week: thisWeek(shots, now, timeZone),
     best: bestOf(db, ownerId, current.id, shots, steps),
+    graph: dialInProgress(shots),
     timeZone
   };
 }

@@ -157,6 +157,24 @@ describe('loadHome', () => {
     expect(ready().best).toBeNull();
   });
 
+  it('D-196: Dial-in progress plots this bean’s rated shots, oldest first, with recipe changes', () => {
+    save(shotAt(T0 - 3 * DAY, { taste: taste(6) }));
+    save(shotAt(T0 - 2 * DAY, { taste: taste(null) }));
+    save(shotAt(T0 - DAY, { grind: 1500, taste: taste(8) }));
+    expect(ready().graph).toEqual({
+      points: [
+        { score: 6, newRecipe: false },
+        { score: 8, newRecipe: true }
+      ],
+      ticks: [6, 7, 8]
+    });
+  });
+
+  it('D-196: with fewer than 2 rated shots there is no graph', () => {
+    save(shotAt(T0 - DAY, { taste: taste(6) }));
+    expect(ready().graph).toBeNull();
+  });
+
   it('D-35: grams left when the bean has a bag weight', () => {
     db.update(bean).set({ bagWeight: 250000 }).where(eq(bean.id, ids.beanId)).run();
     save(shotAt(T0 - DAY));
