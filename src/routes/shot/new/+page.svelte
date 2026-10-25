@@ -9,5 +9,5 @@
 
 <!-- A new key per bean (D-94) or Brew next change starts the form from its own prefill. -->
 {#key `${data.form.bean.id}:${data.form.prefill.source}`}
-  <ShotForm data={data.form} problems={form?.problems} />
+  <ShotForm data={data.form} problems={form?.problems} origin={data.origin} />
 {/key}

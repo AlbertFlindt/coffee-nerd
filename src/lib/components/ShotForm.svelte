@@ -4,6 +4,8 @@
   // change (data-model §4.1).
   // With `data.edit` it edits a saved shot (D-57, D-113): "Save changes", back to the shot, and the bean
   // card moves the shot to another bean while keeping the values.
+  // `origin` is where "+" was pressed, or for an edit whether the shot was opened from Home: Back and
+  // Save return there (D-95, D-197, D-200).
   import { enhance } from '$app/forms';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
@@ -22,9 +24,18 @@
   import { validateSetupAgainstMachine } from '../domain/schemas';
   import { coreChanges, matchRecipe, setupChanges, setupSummary } from '../domain/shot-form';
   import { decimalsFor, formatNumber, formatRatio } from '../domain/units';
+  import type { Origin } from '../domain/origin';
   import type { ShotFormData } from '../server/db/shot-form';
 
-  let { data, problems = [] }: { data: ShotFormData; problems?: string[] } = $props();
+  let {
+    data,
+    problems = [],
+    origin = { from: 'home', filters: '' }
+  }: {
+    data: ShotFormData;
+    problems?: string[];
+    origin?: { from: Origin; filters: string };
+  } = $props();
 
   /** "Natural · 12 days" after a bean's name in the bean list (D-134). */
   function beanDetail(b: ShotFormData['openBeans'][number]): string {
@@ -57,7 +68,15 @@
 
   let shot: ShotState = $state(initial());
   const back = $derived(
-    data.edit ? resolve('/journal/[id]', { id: data.edit.shotId }) : resolve('/')
+    data.edit
+      ? origin.from === 'home'
+        ? resolve('/journal/[id]?from=home', { id: data.edit.shotId })
+        : resolve('/journal/[id]', { id: data.edit.shotId })
+      : origin.from === 'journal'
+        ? origin.filters
+          ? resolve(`/journal?${origin.filters}`)
+          : resolve('/journal')
+        : resolve('/')
   );
 
   // D-113: in edit mode another bean keeps the values; the page loads that bean's recipes to compare with.
@@ -67,7 +86,8 @@
   function chooseBeanForEdit(beanId: string) {
     sheet = null;
     const shotId = data.edit!.shotId;
-    goto(resolve(`/journal/[id]/edit?bean=${beanId}`, { id: shotId }), {
+    const from = origin.from === 'home' ? '&from=home' : '';
+    goto(resolve(`/journal/[id]/edit?bean=${beanId}${from}`, { id: shotId }), {
       replace: true,
       reset: false
     });
@@ -334,6 +354,7 @@
         {:else}
           <!-- D-94: picking a bean opens the form for it, from its own starting values. -->
           <form class="beans" method="GET" action={resolve('/shot/new')}>
+            {#if origin.from === 'journal'}<input type="hidden" name="from" value="journal" />{/if}
             {#each data.openBeans as b (b.id)}
               <button
                 type="submit"
@@ -424,6 +445,7 @@
       }}
     >
       <input type="hidden" name="shot" value={JSON.stringify(shot)} />
+      <input type="hidden" name="from" value={origin.from} />
       <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={saving}
         >{data.edit ? 'Save changes' : 'Save shot'}</button
       >
@@ -439,6 +461,7 @@
 
 {#snippet useLastShot()}
   <form method="POST" action="?/useLastShot">
+    <input type="hidden" name="from" value={origin.from} />
     <button type="submit" class="use-last cn-tap">Use last shot recipe</button>
   </form>
 {/snippet}

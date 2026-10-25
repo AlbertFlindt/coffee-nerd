@@ -1,7 +1,7 @@
 <script lang="ts">
   // The tab bar on tab screens (D-30): Home · Journal · + · Library · Insights. The amber + is the only way
   // to add a shot (D-31). Library opens the Library page (D-156); Insights is dimmed and does nothing until
-  // its page exists (D-114).
+  // its page exists (D-114). From the Journal, "+" says so, and Save and Back return there (D-200).
   import { resolve } from '$app/paths';
 
   let { current }: { current: 'home' | 'journal' | 'library' } = $props();
@@ -38,7 +38,7 @@
   <!-- The prefill must be current when the form opens (D-03, D-43): load on tap, not on hover. -->
   <a
     class="cn-plus cn-tap-strong"
-    href={resolve('/shot/new')}
+    href={current === 'journal' ? resolve('/shot/new?from=journal') : resolve('/shot/new')}
     aria-label="New shot"
     data-sveltekit-preload-data="tap"
   >

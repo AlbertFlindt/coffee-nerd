@@ -109,7 +109,12 @@
     <span class="when">{when}</span>
   </div>
   <!-- D-57, D-113: the shot form in edit mode. -->
-  <a class="edit cn-tap" href={resolve('/journal/[id]/edit', { id: shot.id })}>Edit</a>
+  <a
+    class="edit cn-tap"
+    href={data.fromHome
+      ? resolve('/journal/[id]/edit?from=home', { id: shot.id })
+      : resolve('/journal/[id]/edit', { id: shot.id })}>Edit</a
+  >
 </header>
 
 <main>

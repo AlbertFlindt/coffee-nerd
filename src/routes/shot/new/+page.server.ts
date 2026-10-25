@@ -4,20 +4,26 @@ import { loadShotForm } from '#lib/server/db/shot-form.ts';
 import { guideNext } from '#lib/server/first-run.ts';
 import { clearBrewNext, saveShot, shotRequestSchema, ShotRejected } from '#lib/server/db/shots.ts';
 import { setFlash } from '#lib/server/flash.ts';
+import { journalFilters, originPath } from '#lib/server/journal-filters.ts';
+import { originOf } from '#lib/domain/origin.ts';
 import { bean } from '#lib/server/db/schema.ts';
 import { and, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 
 // New shot (screens 1–5 and 11): "+" opens it prefilled (D-03, D-31); ?bean= picks another open bean (D-94).
 // With nothing to brew with yet, "+" resumes the step-by-step start at the first missing step (D-157).
+// ?from=journal when "+" was pressed on the Journal: Back and Save return there (D-95, D-200).
 const NOT_SAVED = 'The shot could not be saved. Nothing was changed.';
 
-export const load: PageServerLoad = ({ locals, url }) => {
+export const load: PageServerLoad = ({ locals, url, cookies }) => {
   if (!locals.user) error(401);
   const db = getDb();
   const form = loadShotForm(db, locals.user.id, url.searchParams.get('bean') ?? undefined);
   if (form.state === 'empty') redirect(303, guideNext(db, locals.user.id));
-  return { form };
+  return {
+    form,
+    origin: { from: originOf(url.searchParams.get('from')), filters: journalFilters(cookies) }
+  };
 };
 
 export const actions: Actions = {
@@ -58,14 +64,15 @@ export const actions: Actions = {
       }
       throw e;
     }
-    // D-95: back to where "+" was pressed; until Home and the tab bar exist (M8), that is the start page.
-    redirect(303, '/');
+    // D-95, D-200: back to where "+" was pressed, which shows the "Shot saved" bar.
+    redirect(303, originPath(originOf(String(data.get('from') ?? '')), cookies));
   },
 
   // D-43: "Use last shot recipe" clears the mark; the form starts from the last shot again.
-  useLastShot: ({ locals }) => {
+  useLastShot: async ({ locals, request }) => {
     if (!locals.user) error(401);
+    const from = originOf(String((await request.formData()).get('from') ?? ''));
     clearBrewNext(getDb(), locals.user.id, Date.now());
-    redirect(303, '/shot/new');
+    redirect(303, from === 'journal' ? '/shot/new?from=journal' : '/shot/new');
   }
 };

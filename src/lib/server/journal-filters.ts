@@ -1,6 +1,7 @@
 // D-117: the Journal remembers its filters, so "Back" from a shot (and after deleting one) returns to the
 // Journal as you left it. Kept in a cookie: it survives the edit form in between.
 import type { Cookies } from '@sveltejs/kit';
+import type { Origin } from '../domain/origin';
 import { isHttps } from './auth/csrf';
 
 const COOKIE = 'journal-filters';
@@ -39,4 +40,9 @@ export function journalFilters(cookies: Cookies): string {
 export function journalWithFilters(cookies: Cookies): string {
   const query = journalFilters(cookies);
   return query ? `/journal?${query}` : '/journal';
+}
+
+/** Where "Save shot" and Undo return to: the page where "+" was pressed (D-95, D-200). */
+export function originPath(from: Origin, cookies: Cookies): string {
+  return from === 'journal' ? journalWithFilters(cookies) : '/';
 }

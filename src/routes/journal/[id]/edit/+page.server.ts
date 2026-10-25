@@ -8,6 +8,7 @@ import { and, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 
 // Editing a shot (D-57, D-113): the shot form in edit mode; ?bean= moves the shot to another open bean.
+// ?from=home when the shot was opened from Home, so that its Back still returns there afterwards (D-197).
 const NOT_SAVED = 'The shot could not be saved. Nothing was changed.';
 
 export const load: PageServerLoad = ({ locals, params, url }) => {
@@ -19,15 +20,22 @@ export const load: PageServerLoad = ({ locals, params, url }) => {
     url.searchParams.get('bean') ?? undefined
   );
   if (!form) error(404, 'Shot not found');
-  return { form };
+  return {
+    form,
+    origin: {
+      from: url.searchParams.get('from') === 'home' ? ('home' as const) : ('journal' as const),
+      filters: ''
+    }
+  };
 };
 
 export const actions: Actions = {
   save: async ({ locals, params, request }) => {
     if (!locals.user) error(401);
+    const data = await request.formData();
     let json: unknown;
     try {
-      json = JSON.parse(String((await request.formData()).get('shot') ?? ''));
+      json = JSON.parse(String(data.get('shot') ?? ''));
     } catch {
       return fail(400, { problems: [NOT_SAVED] });
     }
@@ -58,8 +66,8 @@ export const actions: Actions = {
       }
       throw e;
     }
-    // D-113: "Save changes" returns to the shot.
-    redirect(303, `/journal/${params.id}`);
+    // D-113: "Save changes" returns to the shot, still knowing whether it was opened from Home (D-197).
+    redirect(303, `/journal/${params.id}${data.get('from') === 'home' ? '?from=home' : ''}`);
   },
 
   // D-116: delete after the confirmation; back to the Journal as you left it (D-117).
