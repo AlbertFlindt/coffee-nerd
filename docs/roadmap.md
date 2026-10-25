@@ -70,10 +70,10 @@ Built in four pull requests: the Puck prep page and steps (D-163, D-168, D-169),
 
 **Done when:** screenshots match `PuckPrep`, `NewStep`, `RoutineBuilder` and `Tags`; end-to-end tests: add, change and remove a step; build, reorder and archive a routine; change a step's value for one shot and see it as a recipe change; merge a duplicate flavor note and remove one that shots used.
 
-## M8 — Home ☐  (screen 6)
+## M8 — Home ◐  (screen 6)
 App banner with the gear, bean scope, last shot, quick numbers, best recipe and the Dial-in progress graph (D-32, D-34, D-193 to D-198). The gear opens a Settings page with only "Sign out" (D-199). After saving, the app returns to where "+" was pressed with the "Shot saved" bar (D-95, D-200). The other three graphs wait for their design and the Insights data layer (D-193, open topic 15).
 
-Planned in three pull requests: Home's cards with the bean switcher and the states without data (D-194, D-195, D-197, D-198); the Dial-in progress graph (D-196); the "Shot saved" bar, returning to where "+" was pressed, and the Settings page (D-199, D-200).
+Planned in three pull requests: Home's cards with the bean switcher, the states without data and the Settings page (D-194, D-195, D-197 to D-199); the Dial-in progress graph (D-196); the "Shot saved" bar and returning to where "+" was pressed (D-200).
 
 **Done when:** the seeded screenshot matches `Home`, apart from what D-193 leaves out (the chip row) and the best recipe's score, which reads as on the Beans pages (D-135); Home fits 412 × 915 without scrolling and the graph absorbs shorter screens (D-36); unit tests: this week counts this bean from Monday in the user's time zone, best recipe follows D-66 and D-135, the graph's points and recipe-change marks, grams left; end-to-end tests: switch the bean on Home and every card follows it, and "+" starts from it; save a shot from Home and from the Journal and land back there with "Shot saved"; a shot that uses up the bag shows the finished message and Undo reopens the bean; rate an unrated last shot from Home; the last shot opens its detail and Back returns to Home; Home with no open bean and with a bean without shots; sign out from the Settings page; the placeholder start page is gone.
 
