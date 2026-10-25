@@ -200,6 +200,27 @@ test('D-85: a wrong password does not sign in', async ({ page }) => {
   await expect(page).toHaveURL(/\/login$/);
 });
 
+test('D-203, D-207, D-208: with its first shot, a new account sees on Insights what each card needs', async ({
+  page
+}) => {
+  await page.goto('/login');
+  await page.getByLabel('Name').fill(NAME);
+  await page.getByLabel('Password').fill(PASSWORD);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.getByRole('link', { name: 'Insights' }).click();
+
+  await expect(page.getByText('From 1 shot · 1 bean')).toBeVisible();
+  const card = (title: string) =>
+    page.getByRole('article').filter({ has: page.getByRole('heading', { name: title }) });
+  await expect(card('Score by process')).toContainText(
+    'Rate 5 shots each from two processes to compare.'
+  );
+  await expect(card('Score by origin')).toContainText(
+    'Rate 5 shots each from two origins to compare.'
+  );
+  await expect(page.getByRole('img')).toHaveCount(0);
+});
+
 test('D-86: sign in, stay signed in, sign out', async ({ page, context }) => {
   await page.goto('/login');
   await page.getByLabel('Name').fill(NAME.toLowerCase());
