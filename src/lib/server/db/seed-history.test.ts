@@ -63,14 +63,22 @@ describe('seedShotHistory', () => {
     ).toEqual(['Daily routine', 'Light roast']);
   });
 
-  it('D-55: What I like shows the findings screen 23 is drawn with', () => {
+  it('D-55: every card shows the finding screens 23 to 25 are drawn with', () => {
     const { db, ids } = seeded();
-    const cards = loadInsights(db, ids.userId).cards;
+    const cards = loadInsights(db, ids.userId, T0).cards;
     expect(cards.map((c) => c.title)).toEqual([
       'Naturals are your thing',
-      'Ethiopia leads your origins'
+      'Ethiopia leads your origins',
+      'Better and steadier',
+      'Your shot time is under control',
+      'Daily routine is more repeatable',
+      'Most consistent beans'
     ]);
-    expect(cards[0].chart?.rows.map((r) => r.label)).toEqual(['Natural', 'Honey', 'Washed']);
+    expect(cards[0].chart?.kind === 'box' && cards[0].chart.rows.map((r) => r.label)).toEqual([
+      'Natural',
+      'Honey',
+      'Washed'
+    ]);
   });
 
   it('D-88: is the same every time', () => {

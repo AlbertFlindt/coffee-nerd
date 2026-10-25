@@ -3,8 +3,11 @@
   // chart, and its basis. Without enough data the chart is left out and the sentence says what is
   // missing (D-203, built without a design, D-207).
   import type { InsightCard } from '../domain/insights';
+  import BellCurve from './BellCurve.svelte';
   import BoxPlot from './BoxPlot.svelte';
   import DotPlot from './DotPlot.svelte';
+  import SigmaBars from './SigmaBars.svelte';
+  import WeeklyLine from './WeeklyLine.svelte';
 
   let { card }: { card: InsightCard } = $props();
 </script>
@@ -18,6 +21,12 @@
     <BoxPlot chart={card.chart} />
   {:else if card.chart?.kind === 'mean-sigma'}
     <DotPlot chart={card.chart} />
+  {:else if card.chart?.kind === 'weekly'}
+    <WeeklyLine chart={card.chart} />
+  {:else if card.chart?.kind === 'bell'}
+    <BellCurve chart={card.chart} />
+  {:else if card.chart?.kind === 'sigma-bars'}
+    <SigmaBars chart={card.chart} />
   {/if}
   {#if card.basis}
     <span class="cn-caption basis">{card.basis}</span>

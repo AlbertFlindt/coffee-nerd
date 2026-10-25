@@ -61,13 +61,10 @@ export type Home =
     };
 
 /**
- * Home for the bean Home and "+" share (D-195): the current bean while it is open, otherwise the newest
- * open bean, as on the shot form. With no open bean, Home has nothing to show for one (D-198).
+ * The open beans, newest first, and the bean Home and "+" share (D-195): the current bean while it is
+ * open, otherwise the newest open bean. None without an open bean (D-198). Insights uses it too (D-205).
  */
-export function loadHome(db: Queryable, ownerId: string, now: number): Home {
-  const settings = db.select().from(userSettings).where(eq(userSettings.userId, ownerId)).get();
-  if (!settings) throw new Error('Signed-in user without settings');
-  const { timeZone } = settings;
+export function homeBeans(db: Queryable, ownerId: string) {
   const open = db
     .select()
     .from(bean)
@@ -75,7 +72,18 @@ export function loadHome(db: Queryable, ownerId: string, now: number): Home {
     .orderBy(desc(bean.createdAt), desc(bean.id))
     .all();
   const state = db.select().from(appState).where(eq(appState.userId, ownerId)).get();
-  const current = open.find((b) => b.id === state?.currentBeanId) ?? open[0];
+  return { open, current: open.find((b) => b.id === state?.currentBeanId) ?? open[0] };
+}
+
+/**
+ * Home for the bean Home and "+" share (D-195): the current bean while it is open, otherwise the newest
+ * open bean, as on the shot form. With no open bean, Home has nothing to show for one (D-198).
+ */
+export function loadHome(db: Queryable, ownerId: string, now: number): Home {
+  const settings = db.select().from(userSettings).where(eq(userSettings.userId, ownerId)).get();
+  if (!settings) throw new Error('Signed-in user without settings');
+  const { timeZone } = settings;
+  const { open, current } = homeBeans(db, ownerId);
   if (!current) return { state: 'no-bean' };
 
   const choice = (b: (typeof open)[number]): HomeBean => {

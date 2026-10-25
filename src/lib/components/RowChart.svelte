@@ -11,6 +11,7 @@
     label,
     spacing,
     gridTop,
+    plotLeft = 53,
     plotRight,
     rightSize,
     mark
@@ -22,21 +23,21 @@
     /** Row centres are this far apart; the first sits `spacing / 2 + gridTop` down (screens 23, 25). */
     spacing: number;
     gridTop: number;
+    /** Where the plot starts, after the labels: further in for longer labels (screen 25). */
+    plotLeft?: number;
     /** Room left of the right edge for the figures (n 38, ±0.7). */
     plotRight: number;
     rightSize: number;
     mark: Snippet<[Row, (value: number) => number, number]>;
   } = $props();
 
-  // The plot starts where the labels end, as on screens 23 and 25.
-  const PLOT_LEFT = 53;
   let width = $state(0);
   let chosen: number | null = $state(null);
 
   const gridBottom = $derived(gridTop + spacing * rows.length);
   const height = $derived(gridBottom + 26);
   const x = (value: number) =>
-    PLOT_LEFT + ((value - axis.from) / (axis.to - axis.from)) * (width - plotRight - PLOT_LEFT);
+    plotLeft + ((value - axis.from) / (axis.to - axis.from)) * (width - plotRight - plotLeft);
   const centre = (i: number) => gridTop + spacing / 2 + spacing * i;
   const choose = (i: number) => (chosen = chosen === i ? null : i);
 </script>
@@ -46,7 +47,9 @@
     <svg {width} {height} viewBox="0 0 {width} {height}" role="img" aria-label={label}>
       {#each axis.ticks as tick (tick)}
         <line class="grid" x1={x(tick)} y1={gridTop} x2={x(tick)} y2={gridBottom} />
-        <text class="tick" x={x(tick)} y={gridBottom + 16} text-anchor="middle">{tick}</text>
+        <text class="tick" x={x(tick)} y={gridBottom + 16} text-anchor="middle"
+          >{tick}{axis.unit ? ` ${axis.unit}` : ''}</text
+        >
       {/each}
       {#each rows as row, i (row.label)}
         <text class="name" x="0" y={centre(i) + 4}>{row.label}</text>

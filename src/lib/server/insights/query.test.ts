@@ -10,7 +10,7 @@ describe('runQuery', () => {
   it('D-11: unrated shots are left out of a score, never counted as 0', () => {
     const facts = [fact({ score: 7 }), fact({ score: null }), fact({ score: 9 })];
     expect(runQuery(facts, { measure: 'score' })).toEqual([
-      { key: 'all', label: 'All shots', values: [7, 9], held: [] }
+      { key: 'all', label: 'All shots', values: [7, 9], held: [], heldKeys: [] }
     ]);
   });
 

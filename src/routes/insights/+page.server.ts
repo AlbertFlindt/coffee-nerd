@@ -6,5 +6,5 @@ import type { PageServerLoad } from './$types';
 // Insights (screens 23–25, D-55, D-56): the data basis and every card; the page shows one topic at a time.
 export const load: PageServerLoad = ({ locals }) => {
   if (!locals.user) error(401);
-  return { insights: loadInsights(getDb(), locals.user.id) };
+  return { insights: loadInsights(getDb(), locals.user.id, Date.now()) };
 };
