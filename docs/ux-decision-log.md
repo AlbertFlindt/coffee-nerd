@@ -87,12 +87,12 @@ Users never pick a persona. Personas are used to check that each screen works fo
 - **D-54 — Journal.** *(Revised 2026-10-18: see D-111, D-112, D-117.)* Every shot, newest first, grouped by day (Today, Yesterday, then dates). Header "Journal" with "9 shots this week". **Filter chips:** All beans ▾, Unrated · N, Any recipe ▾. Each shot is a row: score block on the left (or a dashed amber **"Rate"** block for unrated shots), bean name and time, core values ("1.6 · 18.0 → 38.5 g · 25.5 s"), then taste and the recipe tag (cherry, D-16). The list is the scrolling region (D-36). Tapping a shot opens it.
   - *Why:* one quick scan answers "what did I pull, how was it, and was it the same recipe?"; the Rate block turns unrated shots into a one-tap job instead of a nag.
 
-- **D-55 — Insights: plain-language insight cards, four topics.** Header "Insights" with the data basis ("From 214 shots · 9 beans"). Topic chips: **What I like** (origins, processes, roasters, flavor families), **Progress** (score and consistency over time), **Dial-in** (how grind, ratio, preinfusion etc. relate to score and sour/bitter), **Comparisons** (routines, grinders, baskets compared fairly — same bean, everything else equal). Each **card** states one finding as a sentence ("You score natural coffees 1.1 points higher than washed ones"), shows a small chart, and names its basis ("Average score · 86 rated shots · 7 beans"). The card list scrolls (D-36).
+- **D-55 — Insights: plain-language insight cards, four topics.** *(Revised 2026-10-25: see D-201 to D-204, D-206 to D-208.)* Header "Insights" with the data basis ("From 214 shots · 9 beans"). Topic chips: **What I like** (origins, processes, roasters, flavor families), **Progress** (score and consistency over time), **Dial-in** (how grind, ratio, preinfusion etc. relate to score and sour/bitter), **Comparisons** (routines, grinders, baskets compared fairly — same bean, everything else equal). Each **card** states one finding as a sentence ("You score natural coffees 1.1 points higher than washed ones"), shows a small chart, and names its basis ("Average score · 86 rated shots · 7 beans"). The card list scrolls (D-36).
   - **Honest charts:** bars start at zero (scores on a 0–10 scale); the top item is amber (it is your score data, D-19), the rest muted.
   - **Not enough data:** a card only appears when it has enough shots behind it; otherwise it says what's missing (e.g. "Rate 5 more washed shots to compare").
   - *Why:* nerds want the numbers, but a sentence first makes the point instantly; showing the basis keeps the app honest about small samples.
 
-- **D-56 — Insights speak statistics.** Refines D-55. Cards use real statistical charts, each with a one-sentence finding and its basis:
+- **D-56 — Insights speak statistics.** *(Revised 2026-10-25: see D-201 to D-205, D-207, D-211, D-212.)* Refines D-55. Cards use real statistical charts, each with a one-sentence finding and its basis:
   - **What I like:** **box plots** of score by process (box = middle 50 %, amber line = median, whiskers = range, n per group); **mean ± 1 σ** dot-and-whisker by origin.
   - **Progress:** **line chart** of weekly average score with a **± 1 σ band**, so you see both "better" (line rises) and "steadier" (band narrows).
   - **Dial-in:** a **bell curve** — histogram of shot time on one recipe with the fitted normal curve, mean line (μ) and the ± 1 σ zone ("2 in 3 shots land between 26.5 and 29.3 s").
@@ -104,7 +104,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* a shot only means something next to its recipe's history; the σ comparison tells you instantly whether this shot was an outlier or normal variation.
 - **D-109 — "Compared with this recipe" uses the recipe's other shots.** The shot detail compares this shot with the recipe's other shots, not including itself. It needs at least two other shots with a value; with fewer, the line says "Not enough shots yet". The count in the card's header ("3 shots") counts all of the recipe's shots. Refines D-57.
   - *Why:* an outlier should not pull the average and the spread towards itself.
-- **D-110 — Within one σ is "within normal range".** A shot whose time or score lies within one σ of the other shots' average reads "Within normal range". Further away, time reads "1.7σ faster than usual" or "slower than usual", and score "higher than usual" or "lower than usual". Time and score are compared, as on the screen. Refines D-57.
+- **D-110 — Within one σ is "within normal range".** *(Revised 2026-10-25: see D-209.)* A shot whose time or score lies within one σ of the other shots' average reads "Within normal range". Further away, time reads "1.7σ faster than usual" or "slower than usual", and score "higher than usual" or "lower than usual". Time and score are compared, as on the screen. Refines D-57.
   - *Why:* matches the screen, where 1.7σ is named as unusual; one σ is a common, easily explained bar.
 - **D-111 — The Rate block opens a score sheet.** *(Revised 2026-10-25: see D-197.)* Tapping the dashed "Rate" block on a Journal row opens a small sheet with the score row; tapping a score saves it and closes the sheet. The rest of the row still opens the shot. Refines D-54.
   - *Why:* rating an unrated shot becomes the one-tap job D-54 promises.
@@ -150,6 +150,35 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* Settings is where signing out will live; M11 adds to the page instead of moving the button again.
 - **D-200 — "Shot saved" is a short bar above the tab bar.** After "Save shot" the app returns to the page where "+" was pressed, Home or the Journal (D-95), and shows a bar just above the tab bar. "Shot saved" fades after 4 seconds. When the shot finished the bean (D-40), the bar says so with Undo and stays 10 seconds; after Undo, "… is open again" shows the same way. Built without a design. Refines D-95.
   - *Why:* within thumb reach for Undo, it covers neither the bean pill nor the Journal filters, and goes away on its own.
+
+- **D-201 — The bell curve lives under Dial-in.** The shot-time bell curve card (drawn on screen 24) shows under the Dial-in chip, as D-56 says; Progress shows the weekly average score line only. More Dial-in cards come later (open topic 16). Refines D-55 and D-56.
+  - *Why:* the decision log already places it there, and Dial-in then has a card without a new design.
+- **D-202 — Insights starts with the six drawn cards.** Score by process (box plot), score by origin (average ± 1 σ), weekly average score (line with ± 1 σ band), shot time on one recipe (bell curve), shot time by puck prep routine (average ± 1 σ) and most consistent beans (σ bars). Cards for roasters, flavor families, grinders and baskets (D-55) come later, each as a new definition (D-64). Refines D-55 and D-56.
+  - *Why:* these six are designed; the others would be built without a design and can be added without new code paths.
+- **D-203 — How much data a card needs.** *(Revised 2026-10-25: see D-211, D-212.)* Score by process and by origin: 2 groups with 5 rated shots each. Weekly average score: 4 weeks with 2 rated shots each. Bell curve: 10 shots with a time on the recipe. Routines: 2 routines with 5 shots each. Most consistent beans: 2 beans with 5 rated shots each on recipes brewed more than once. Below that, the card says what is missing (D-55). A group with fewer than 10 shots is named in the basis line as one to treat with care, as screen 25 does. Refines D-55 and D-56.
+  - *Why:* five shots is the least that gives a spread worth showing; the care line keeps small groups honest without hiding them.
+- **D-204 — Comparing routines holds everything else equal.** *(Revised 2026-10-25: see D-210.)* The routine card compares shots of the same bean whose recipes are equal apart from the routine: same machine, grinder, grind, dose (within 0.2 g, D-186), basket and setup. Each routine's spread is measured within those groups. The routine is part of a recipe (D-65), so screen 25's "Same bean, same recipe" reads as this. Refines D-55 and D-56.
+  - *Why:* this is D-55's "everything else equal"; with the bean alone, grind changes would mix into a routine's spread.
+- **D-205 — The bell curve uses the best recipe of the bean on Home.** *(Revised 2026-10-25: see D-213.)* The shot-time card draws the best recipe (D-66) of the bean on Home (D-195). When that recipe has too few shots with a time (D-203), the card says what it needs. Refines D-56.
+  - *Why:* it answers "is the recipe I'm brewing under control?", the question Dial-in is for.
+- **D-206 — Card titles follow the finding.** *(Revised 2026-10-25: see D-214.)* Each card has a title and a sentence for each outcome its data can have, including "no clear difference" when the top two are within 0.5 points (or 0.5 s for time). The wording is drafted in the pull request that builds the card, and the owner approves it there. Refines D-55.
+  - *Why:* a title that states the finding is the point of D-55, so it has to change with the data, and never claim a winner that is not there.
+- **D-207 — Insights states without a design are built plainly.** The tap tooltip with exact numbers (D-56), a card without enough data (D-203) and Insights with no shots are built in the card's own style without a design, and listed in the open items for the canvas. Refines D-55 and D-56.
+  - *Why:* as with Home (D-198), the first visit must not look broken, and waiting for designs would hold up M9.
+- **D-208 — What Insights counts, and where it opens.** The header counts every shot and every bean with a shot ("From 214 shots · 9 beans"); cards on score count rated shots only (D-11). Weeks run Monday to Sunday in the user's time zone, as on Home (D-194). Insights opens on What I like each time. Refines D-55.
+  - *Why:* the header says how much you have logged; a score card must never count an unrated shot as 0.
+- **D-209 — "Within normal range" compares the distance as shown.** The distance in σ is rounded to one decimal before it is compared with one σ, so 1.04σ reads "Within normal range", never "1.0σ faster than usual". Refines D-110.
+  - *Why:* the words must agree with the number on the screen.
+- **D-210 — The routine card compares on the bean on Home.** The routine card (D-204) uses the bean on Home (D-195), as the bell curve does (D-205), and names it in its basis line ("Guji Hambela only", screen 25). Without enough comparable shots on that bean, the card says what it needs (D-203). Refines D-204.
+  - *Why:* both Dial-in style cards then answer questions about the bean you are brewing.
+- **D-211 — A bean's consistency is its spread within each recipe.** The most consistent beans card measures each bean's score σ within each recipe brewed more than once and pools those (the pooled σ of data-model §5). Moving between recipes does not count as spread. Refines D-56 and D-203.
+  - *Why:* dialling in changes the score on purpose; consistency is how much the same recipe varies.
+- **D-212 — The weekly line spans the last 12 weeks.** The weekly average score covers the last 12 weeks, as screen 24 draws ("12 weeks ago" to "This week"). A week with fewer than 2 rated shots is drawn as a gap in the line and the band, never as 0 (D-11). Refines D-56 and D-203.
+  - *Why:* a week needs two shots for a σ; a gap is honest about a quiet week.
+- **D-213 — The bell curve without a best recipe says what it needs.** With no bean on Home (D-198) or no rated shot on it yet (D-66), the bell curve card says what it needs, as D-203 does. Refines D-205.
+  - *Why:* the card stays in place and tells you how to fill it, as Home's cards do (D-198).
+- **D-214 — Which number "no clear difference" compares.** Score by process compares medians, score by origin compares averages, both within 0.5 points. The routine and most consistent beans cards compare σ, within 0.2 s or 0.2 points. The weekly line and the bell curve have no "top two", so the rule does not apply to them. Refines D-206.
+  - *Why:* each card is judged by the number its chart shows; a σ gap of 0.5 would hide real differences in steadiness.
 
 ## 7. Shot form (espresso)
 
@@ -593,7 +622,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 13. ~~Gear list, machine detail, Edit My setup~~ (D-38, D-44, D-45, D-48, D-49)
 14. ~~Tags home~~ (D-29, D-53, D-171 to D-174, D-179 to D-182)
 15. Home: design the other three graphs (Time vs. yield, Roast age, Consistency) — after Insights (M9); Home ships with Dial-in progress only (D-193)
-16. ~~Journal, Insights, shot detail~~ (D-54 to D-57) — still to do: more Dial-in cards (e.g. grind vs time scatter, sour/bitter vs ratio)
+16. ~~Journal, Insights, shot detail~~ (D-54 to D-57) — still to do: more Dial-in cards (e.g. grind vs time scatter, sour/bitter vs ratio); M9 ships Dial-in with the bell curve only (D-201)
 17. Logo: refine the bean-with-glasses mark (app icon for the PWA home screen)
 18. ~~Library landing page~~ (D-50)
 19. ~~Origin field: free text vs. a country list~~ (D-41: country picker + free-text region)
