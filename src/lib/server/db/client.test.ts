@@ -1,9 +1,10 @@
-import { mkdtempSync, readFileSync, rmSync, existsSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, existsSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { sql } from 'drizzle-orm';
 import { afterAll, describe, expect, it } from 'vitest';
 import { isDatabaseReachable, openDatabase } from './client';
+import { MIGRATIONS_FOLDER } from './paths';
 
 const dir = mkdtempSync(join(tmpdir(), 'coffee-nerd-db-'));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
@@ -24,6 +25,33 @@ describe('openDatabase', () => {
       openDatabase(path).get<{ n: number }>(sql`select count(*) as n from __drizzle_migrations`)?.n;
 
     expect(count()).toBe(count());
+  });
+
+  it('D-64: a later migration can rebuild a table the shot facts view reads', () => {
+    const path = join(dir, 'rebuild.db');
+    openDatabase(path); // the view now exists
+    // A migration as drizzle-kit writes one for a column change: copy, drop, rename.
+    const folder = join(dir, 'rebuild-migrations');
+    cpSync(MIGRATIONS_FOLDER, folder, { recursive: true });
+    writeFileSync(
+      join(folder, '9999_rebuild_gear.sql'),
+      'CREATE TABLE `__new_gear` AS SELECT * FROM `gear`;--> statement-breakpoint\n' +
+        'DROP TABLE `gear`;--> statement-breakpoint\n' +
+        'ALTER TABLE `__new_gear` RENAME TO `gear`;'
+    );
+    const journalPath = join(folder, 'meta', '_journal.json');
+    const journal = JSON.parse(readFileSync(journalPath, 'utf8'));
+    journal.entries.push({
+      idx: journal.entries.length,
+      version: '6',
+      when: Date.now(),
+      tag: '9999_rebuild_gear',
+      breakpoints: true
+    });
+    writeFileSync(journalPath, JSON.stringify(journal));
+
+    const db = openDatabase(path, folder);
+    expect(db.all(sql`select * from shot_facts`)).toEqual([]);
   });
 
   it('D-59: uses write-ahead logging and enforces foreign keys', () => {

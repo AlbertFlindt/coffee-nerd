@@ -21,7 +21,10 @@ export function openDatabase(path: string, migrationsFolder = MIGRATIONS_FOLDER)
   client.pragma('journal_mode = WAL');
   client.pragma('foreign_keys = ON');
   const db = drizzle(client, { schema });
+  // Views are made after migrating, so a migration can rebuild the tables they read (schema.ts).
+  client.exec('drop view if exists shot_facts');
   migrate(db, { migrationsFolder });
+  client.exec(schema.SHOT_FACTS_SQL);
   rematchRecipesByDose(db);
   return db;
 }
