@@ -23,13 +23,13 @@ Last updated: 2026-10-25
 | What is missing | Needed by | Source |
 |---|---|---|
 | Proper design for the sign-in and "Create your account" pages (built simple for now) | Before release (M11) | D-84 |
-| Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency) | M8 | Open topic 15, D-32 |
-| Home: replace the placeholder start page (logo, name and a temporary "Sign out" button above the tab bar) | M8 | M0, M2, M3 |
-| The "Shot saved" message, the automatic-finish message with Undo, and "… is open again" (built as a plain card on the start page) | M8 | D-95 |
-| The Rate sheet when the score cannot be saved: it stays open with "The score could not be saved. Nothing was changed." under the score row | M10 | D-111 |
+| Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency), and the chip row that comes back with the second graph | After M9 | Open topic 15, D-32, D-193 |
+| Home: replace the placeholder start page (logo, name and a temporary "Sign out" button above the tab bar); Home without data (D-198) and the Settings page with only Sign out (D-199) are built without a design | M8 | M0, M2, M3, D-198, D-199 |
+| The "Shot saved" message, the automatic-finish message with Undo, and "… is open again" (built as a plain card on the start page; M8 builds them as a bar above the tab bar, D-200, without a design) | M8 | D-95, D-200 |
+| The Rate sheet (Journal and Home's Last shot card, D-197) when the score cannot be saved: it stays open with "The score could not be saved. Nothing was changed." under the score row | M10 | D-111 |
 | "Compared with this recipe": the distance is compared as shown, to one decimal, so 1.04σ reads "Within normal range" (never "1.0σ faster than usual"); a reading of D-110 to confirm | M9 (Insights uses the same σ) | D-110 |
 | Shot form: the message when the server refuses a shot ("The shot could not be saved. Nothing was changed.", above Save) | M10 | M3 |
-| Where "Sign out" lives (for now on the placeholder start page; Settings is the likely home) | M11 | M2 |
+| How "Sign out" looks on the Settings page (D-199: the gear on Home opens Settings, with only Sign out until M11) | M11 | M2, D-199 |
 | **Insights: the Dial-in tab has no design** (What I like, Progress and Comparisons do); more Dial-in cards, e.g. grind vs. time, sour/bitter vs. ratio | M9 | Open topic 16, D-55, D-56 |
 | Journal: how a shot that is still waiting to sync looks | M10 | Open topic 23, D-61 |
 | App icon for the home screen (PWA) | M10 | Open topic 17 |
@@ -81,6 +81,7 @@ Last updated: 2026-10-25
 | Opened over plain http (`http://<server>:3000`) the browser treats the app as not secure: it runs (no code may rely on `crypto.randomUUID`, a lint rule guards it), but offline use and queued shots (D-61) and installing the app need https or localhost. Decide whether the install guide requires https or supports plain http with that limit | M10 | Plain-HTTP fix |
 | Install guide: behind a reverse proxy with https, forward `X-Forwarded-Proto` (and `X-Forwarded-Host` if the proxy changes the host), so the sign-in cookie is marked secure and forms are accepted | M11 | M2 |
 | "Back" and "Save shot" always return to the start page, also when "+" was pressed on the Journal; D-95 wants them to return to where "+" was pressed, with the "Shot saved" message there (the message lives only on the start page for now) | M8 | M3, D-114 |
+| M8 draws Home's Dial-in progress graph from its own query on the shots; data-model §5 says Home's graphs read from the `shot_facts` view, which M9 builds. Move the graph onto `shot_facts` then | M9 | D-196, data-model §5 |
 | Switching the bean (D-94) or "Use last shot recipe" (D-43) starts the form again and drops edits already made, without a warning; the local draft of D-61 may cover it | M10 | M3 |
 | `npm audit`: 4 moderate advisories from an old esbuild inside drizzle-kit (development only, not in the Docker image). Recheck when drizzle-kit updates. | Each dependency update | PR #1 |
 | End-to-end: the Journal test expects the shots under Today, Yesterday and one earlier date; a run that crosses midnight in Copenhagen (the seed's time zone) would see one more day | Only if it gets in the way | M4 |
