@@ -26,7 +26,7 @@ Last updated: 2026-10-25
 | Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency), and the chip row that comes back with the second graph | After M9 | Open topic 15, D-32, D-193 |
 | Home: replace the placeholder start page (logo, name and a temporary "Sign out" button above the tab bar); Home without data (D-198) and the Settings page with only Sign out (D-199) are built without a design | M8 | M0, M2, M3, D-198, D-199 |
 | The "Shot saved" message, the automatic-finish message with Undo, and "… is open again" (built as a plain card on the start page; M8 builds them as a bar above the tab bar, D-200, without a design) | M8 | D-95, D-200 |
-| The Rate sheet when the score cannot be saved: it stays open with "The score could not be saved. Nothing was changed." under the score row | M10 | D-111 |
+| The Rate sheet (Journal and Home's Last shot card, D-197) when the score cannot be saved: it stays open with "The score could not be saved. Nothing was changed." under the score row | M10 | D-111 |
 | "Compared with this recipe": the distance is compared as shown, to one decimal, so 1.04σ reads "Within normal range" (never "1.0σ faster than usual"); a reading of D-110 to confirm | M9 (Insights uses the same σ) | D-110 |
 | Shot form: the message when the server refuses a shot ("The shot could not be saved. Nothing was changed.", above Save) | M10 | M3 |
 | How "Sign out" looks on the Settings page (D-199: the gear on Home opens Settings, with only Sign out until M11) | M11 | M2, D-199 |
