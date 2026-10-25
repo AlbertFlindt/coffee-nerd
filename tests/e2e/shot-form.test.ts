@@ -343,6 +343,8 @@ test('D-40, D-95: a shot that uses up the bag finishes the bean, with Undo', asy
   await expect(page.getByRole('button', { name: 'Undo' })).toBeVisible();
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect(page.getByRole('status')).toContainText('Guji Hambela is open again');
+  // D-200: "… is open again" fades like "Shot saved".
+  await expect(page.getByRole('status')).toHaveText('', { timeout: 6000 });
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(page.getByText('Guji Hambela · Natural')).toBeVisible();
 });

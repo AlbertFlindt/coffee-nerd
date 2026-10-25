@@ -292,6 +292,15 @@ test('D-200, D-95: "+" on the Journal returns there, with Back and with "Save sh
   await page.goto('/journal');
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(page).toHaveURL(/\/shot\/new\?from=journal$/);
+  // Another bean from the bean card keeps the way back (D-94).
+  await page
+    .getByRole('button', { name: /, choose another bean$/ })
+    .click({ position: { x: 22, y: 10 } });
+  await page
+    .getByRole('region', { name: 'Choose a bean' })
+    .getByRole('button', { name: /Guji Hambela/ })
+    .click();
+  await expect(page).toHaveURL(/\/shot\/new\?from=journal&bean=/);
   await page.getByRole('link', { name: 'Back without saving' }).click();
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
   await page.getByRole('link', { name: 'New shot' }).click();
@@ -310,4 +319,34 @@ test('D-197: a shot opened from Home still returns to Home after Edit and "Save 
   await expect(page.getByRole('heading', { name: 'Shot', level: 1 })).toBeVisible();
   await page.getByRole('link', { name: 'Back to Home' }).click();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd', level: 1 })).toBeVisible();
+});
+
+test('D-200, D-40: Undo after a shot from the Journal finished the bean stays on the Journal', async () => {
+  const guji = sql<{ id: string; bag: number | null }>(
+    "select id, bag_weight as bag from bean where name = 'Guji Hambela'"
+  );
+  const used = sql<{ d: number }>(
+    'select sum(r.dose) as d from shot s join recipe r on r.id = s.recipe_id where r.bean_id = ?',
+    guji.id
+  ).d;
+  sql('update bean set bag_weight = ? where id = ?', used + 18000, guji.id);
+  const shots = () => sql<{ n: number }>('select count(*) as n from shot').n;
+  const before = shots();
+  try {
+    await page.goto('/journal');
+    await page.getByRole('link', { name: 'New shot' }).click();
+    await page.getByRole('button', { name: 'Save shot' }).click();
+    await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
+    await expect(bar()).toContainText('Guji Hambela is finished: its bag is used up.');
+    await bar().getByRole('button', { name: 'Undo' }).click();
+    await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
+    await expect(bar()).toHaveText('Guji Hambela is open again');
+  } finally {
+    sql(
+      "update bean set status = 'open', finished_at = null, bag_weight = ? where id = ?",
+      guji.bag,
+      guji.id
+    );
+    if (shots() > before) await deleteNewestShot();
+  }
 });
