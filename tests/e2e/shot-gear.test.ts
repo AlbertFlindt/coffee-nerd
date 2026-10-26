@@ -70,6 +70,9 @@ test('D-153: the gear line switches the grinder for this shot; the grind control
   await expect(page.locator('.card')).toContainText('Lelit Bianca · Comandante C40');
   await expect(page.getByRole('button', { name: 'Grind plus 1' })).toBeVisible();
   await expect(page.locator('.cn-tag')).toContainText('New recipe');
+  // Back ends the draft (D-226): the next shot starts from the last shot's gear again.
+  await page.getByRole('link', { name: 'Back without saving' }).click();
+  await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
 });
 
 test('D-153: switching the machine brings its own features; values both have stay', async () => {

@@ -7,6 +7,7 @@
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import { versionText } from '#lib/domain/version.ts';
   import { clearWaiting, waiting } from '#lib/shot-queue.svelte.ts';
+  import { forgetDrafts } from '#lib/shot-draft.ts';
   import type { PageProps } from './$types';
 
   let { data }: PageProps = $props();
@@ -27,6 +28,7 @@
     // that could not reach the server deletes nothing (the "Offline" line says why).
     if (response?.redirected) {
       await clearWaiting(data.userId);
+      forgetDrafts(data.userId);
       location.replace(response.url);
       return;
     }
