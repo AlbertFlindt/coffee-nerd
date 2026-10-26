@@ -4,9 +4,11 @@
 import type { ActionResult } from '$app/forms';
 import { invalidateAll } from '$app/navigation';
 import {
+  afterSend,
   applyChange,
   queueRequest,
   sendOrder,
+  type SendResult,
   type WaitingChange,
   type WaitingEntry
 } from './domain/waiting';
@@ -59,8 +61,6 @@ async function update(
 
 /** Reads the phone's database into `waiting`. */
 export async function loadWaiting(): Promise<void> {
-  // Shots not yet sent are kept even when the phone runs short of space and clears what sites stored.
-  void navigator.storage?.persist?.().catch(() => false);
   try {
     await update();
   } catch {
@@ -72,14 +72,28 @@ export async function loadWaiting(): Promise<void> {
 /** Keeps a shot, an edit or a score on the phone, then tries to send it at once. */
 export async function keepWaiting(change: WaitingChange, ownerId: string): Promise<void> {
   await update((entries) => applyChange(entries, $state.snapshot(change), ownerId, Date.now()));
+  void keepStorage();
   void sendWaiting(ownerId);
+}
+
+/**
+ * Shots not yet sent are kept even when the phone runs short of space and clears what sites stored.
+ * Asked once a shot waits, and only until granted: some browsers ask the person.
+ */
+async function keepStorage() {
+  try {
+    if (navigator.storage && !(await navigator.storage.persisted()))
+      await navigator.storage.persist();
+  } catch {
+    // Not offered here: the browser decides.
+  }
 }
 
 /** D-224, D-231: deletes a shot that is not on the server. */
 export async function deleteWaiting(shotId: string): Promise<void> {
   const removed = await locked(async () => {
     const kept = (await update()).some((e) => e.shotId === shotId);
-    if (kept) await dropWaiting(shotId);
+    if (kept) await update((entries) => entries.filter((e) => e.shotId !== shotId));
     return kept;
   });
   // Sent meanwhile: the server has it now, so it is deleted there (D-116).
@@ -91,9 +105,13 @@ export async function deleteWaiting(shotId: string): Promise<void> {
     }).catch(() => {});
 }
 
-/** A change saved online replaces what waited for the same shot: the latest change wins (D-223). */
+/**
+ * A change saved online replaces what waited for the same shot: the latest change wins (D-223). Also
+ * "Discard change" (D-238). Waits for a send in progress, so the waiting change never arrives after it
+ * (D-239).
+ */
 export async function dropWaiting(shotId: string): Promise<void> {
-  await update((entries) => entries.filter((e) => e.shotId !== shotId));
+  await locked(() => update((entries) => entries.filter((e) => e.shotId !== shotId)));
 }
 
 /** Whether anything of this shot waits on the phone: a score for it then waits with it (D-223). */
@@ -113,14 +131,15 @@ export async function clearWaiting(ownerId: string): Promise<void> {
   await update((entries) => entries.filter((e) => e.ownerId !== ownerId));
 }
 
-/** Ends an entry once the server has it, unless it changed while it was being sent. */
-function settle(entry: WaitingEntry, status: 'sent' | 'refused') {
-  return update((entries) =>
-    entries.flatMap((e) => {
-      if (e.shotId !== entry.shotId || e.revision !== entry.revision) return [e];
-      return status === 'sent' ? [] : [{ ...e, status: 'refused' as const }];
-    })
-  );
+/** What the server's answer means for an entry; null: no answer from the app, so try again later. */
+async function resultOf(response: Response): Promise<SendResult | null> {
+  if (!response.headers.get('content-type')?.includes('json')) return null;
+  const body = (await response.json()) as { outcome?: string; problems?: string[] };
+  if (body.outcome === 'saved' || body.outcome === 'gone') return { kind: 'sent' };
+  if (body.outcome === 'refused') return { kind: 'refused', problems: body.problems ?? [] };
+  // D-237: an error of the app itself. A proxy's page while the server restarts is not one.
+  if (response.status >= 500) return { kind: 'failed' };
+  return null;
 }
 
 let sending: Promise<void> | null = null;
@@ -155,24 +174,28 @@ async function send(ownerId: string) {
     }
     let changed = false;
     for (const entry of entries) {
-      let outcome: string | undefined;
+      let result: SendResult | null;
       try {
         const response = await fetch('/queue', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(queueRequest(entry))
         });
-        if (response.headers.get('content-type')?.includes('json'))
-          outcome = ((await response.json()) as { outcome?: string }).outcome;
+        result = await resultOf(response);
       } catch {
         // No connection: everything waits for the next try.
         break;
       }
-      if (outcome === 'saved' || outcome === 'gone') await settle(entry, 'sent');
-      else if (outcome === 'refused') await settle(entry, 'refused');
-      // Signed out, another account, or the server in trouble: try again later.
-      else break;
-      changed = true;
+      // Signed out, another account, or no answer from the app: try again later.
+      if (!result) break;
+      let stop = false;
+      await update((all) => {
+        const after = afterSend(all, entry, result);
+        stop = after.stop;
+        return after.entries;
+      });
+      if (result.kind !== 'failed') changed = true;
+      if (stop) break;
     }
     return changed;
   };

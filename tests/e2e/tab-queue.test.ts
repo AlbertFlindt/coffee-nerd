@@ -182,6 +182,10 @@ test('D-231: tapping a waiting shot opens its form; a change keeps it waiting wi
 
 test('D-61, D-220, D-223: back online, the shot reaches the server once, with its brew time and score', async () => {
   const [entry] = await entries();
+  const sentBodies: string[] = [];
+  page.on('request', (r) => {
+    if (new URL(r.url()).pathname === '/queue') sentBodies.push(r.postData()!);
+  });
   await context.setOffline(false);
   await expect(page.locator('main .item').first().getByText(WAITING)).toHaveCount(0, {
     timeout: 15_000
@@ -200,17 +204,24 @@ test('D-61, D-220, D-223: back online, the shot reaches the server once, with it
   expect(row.brewed_at).toBe(entry.brewedAt);
   expect(row.score).toBe(8);
 
-  // Sent again (an answer lost on the way): nothing changes.
-  const again = await page.evaluate(async (id) => {
-    const response = await fetch('/queue', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ ownerId: 'x', kind: 'rate', shotId: id, score: 3 })
-    });
-    return response.status;
-  }, entry.shotId);
-  expect(again).toBe(409);
+  const [phoneSent] = sentBodies;
+  // Sent again under another account: refused, nothing changes.
+  const send = (body: unknown) =>
+    page.evaluate(async (b) => {
+      const response = await fetch('/queue', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(b)
+      });
+      return response.status;
+    }, body);
+  expect(await send({ ownerId: 'x', kind: 'rate', shotId: entry.shotId, score: 3 })).toBe(409);
+  // Sent again by the phone (an answer lost on the way): still one shot, with the same score.
+  expect(await send(JSON.parse(phoneSent))).toBe(200);
   expect(newShots()).toEqual([entry.shotId]);
+  const d2 = db();
+  expect(d2.prepare('select score from shot where id = ?').get(entry.shotId)).toEqual({ score: 8 });
+  d2.close();
 });
 
 test('D-220: an edit saved offline keeps the brew time of its shot', async () => {
@@ -234,6 +245,130 @@ test('D-220: an edit saved offline keeps the brew time of its shot', async () =>
   await context.setOffline(false);
   await expect.poll(entries, { timeout: 15_000 }).toEqual([]);
   expect(brewedAt()).toBe(entry.brewedAt);
+});
+
+test('D-239, D-238: the edit page shows the change waiting for the shot; it can be discarded or saved', async () => {
+  const [id] = newShots();
+  const timeOnServer = () => {
+    const d = db();
+    const row = d.prepare('select time from shot where id = ?').get(id) as { time: number };
+    d.close();
+    return row.time;
+  };
+  const before = timeOnServer();
+  // An edit saved offline that cannot reach the server yet.
+  const waitWithChange = async () => {
+    await context.route('**/queue', (route) => route.abort());
+    await page.goto(`/journal/${id}/edit`);
+    await expect(page.getByRole('heading', { name: 'Edit shot' })).toBeVisible();
+    await context.setOffline(true);
+    await page.getByRole('button', { name: 'Time plus 1 second' }).click();
+    const time = await valueOf('Time');
+    await page.getByRole('button', { name: 'Save changes' }).click();
+    await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
+    await context.setOffline(false);
+    return time;
+  };
+
+  const time = await waitWithChange();
+  await page.goto(`/journal/${id}/edit`);
+  expect(await valueOf('Time')).toBe(time);
+  await screenshot('EditWaitingChange');
+  await page.getByRole('button', { name: 'Discard change' }).click();
+  await expect(page.getByRole('heading', { name: 'Edit shot' })).toHaveCount(0);
+  expect(await entries()).toEqual([]);
+  expect(timeOnServer()).toBe(before);
+
+  const again = await waitWithChange();
+  await page.goto(`/journal/${id}/edit`);
+  expect(await valueOf('Time')).toBe(again);
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.getByRole('heading', { name: 'Edit shot' })).toHaveCount(0);
+  expect(await entries()).toEqual([]);
+  expect(timeOnServer()).toBe(before + 1000);
+  await context.unroute('**/queue');
+});
+
+test('D-220, D-61: several waiting shots arrive once each, in brew order, also when a send is cut off', async () => {
+  const before = shotIds();
+  await page.goto('/journal');
+  await context.setOffline(true);
+  for (let i = 0; i < 2; i++) {
+    await page.getByRole('link', { name: 'New shot' }).click();
+    await page.getByRole('button', { name: 'Save shot' }).click();
+    await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
+  }
+  const waitingIds = (await entries()).sort((a, b) => a.brewedAt - b.brewedAt).map((e) => e.shotId);
+  expect(waitingIds).toHaveLength(2);
+  // The first send reaches the server, but its answer is lost on the way back.
+  let cut = true;
+  await context.route('**/queue', async (route) => {
+    if (!cut) return route.continue();
+    cut = false;
+    await route.fetch();
+    return route.abort();
+  });
+  await context.setOffline(false);
+  await expect
+    .poll(
+      async () => {
+        await page.evaluate(() => dispatchEvent(new Event('online')));
+        return (await entries()).length;
+      },
+      { timeout: 15_000 }
+    )
+    .toBe(0);
+  const d = db();
+  const arrived = (
+    d.prepare(`select id from shot where id in (?, ?) order by brewed_at`).all(...waitingIds) as {
+      id: string;
+    }[]
+  ).map((r) => r.id);
+  d.close();
+  expect(arrived).toEqual(waitingIds);
+  expect(shotIds().filter((s) => !before.includes(s))).toHaveLength(2);
+  await context.unroute('**/queue');
+});
+
+test('D-237: a shot the server keeps failing on is "Not saved" with the reason, to save again or delete', async () => {
+  await page.goto('/journal');
+  await context.setOffline(true);
+  await page.getByRole('link', { name: 'New shot' }).click();
+  await page.getByRole('button', { name: 'Save shot' }).click();
+  await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
+  // The server answers with an error of its own, every time.
+  let tries = 0;
+  await context.route('**/queue', (route) => {
+    tries += 1;
+    return route.fulfill({
+      status: 500,
+      contentType: 'application/json',
+      body: JSON.stringify({ message: 'Internal Error' })
+    });
+  });
+  await context.setOffline(false);
+  const first = page.locator('main .item').first();
+  await expect
+    .poll(
+      async () => {
+        await page.evaluate(() => dispatchEvent(new Event('online')));
+        return first.getByText('Not saved').count();
+      },
+      { timeout: 15_000 }
+    )
+    .toBe(1);
+  expect(tries).toBe(3);
+  await first.getByRole('link').click();
+  await expect(page.getByText('The server could not save it.')).toBeVisible();
+  await screenshot('ShotFormServerFailed');
+  await context.unroute('**/queue');
+  await page.getByRole('button', { name: 'Delete shot' }).click();
+  await page
+    .getByRole('region', { name: 'Delete this shot' })
+    .getByRole('button', { name: 'Delete shot' })
+    .click();
+  await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
+  expect(await entries()).toEqual([]);
 });
 
 test('D-224: a waiting shot the server refuses is kept as "Not saved", to fix or delete', async () => {

@@ -44,6 +44,10 @@ export type WaitingEntry = {
   revision: number;
   /** Refused: the server did not take it; it stays until fixed or deleted (D-224). */
   status: WaitingStatus;
+  /** Why it was not saved, as the server said (D-237). */
+  problems?: string[];
+  /** Server errors in a row on this change (D-237). */
+  failures?: number;
 };
 
 export type WaitingChange =
@@ -121,8 +125,57 @@ export function applyChange(
       status: 'waiting'
     };
   }
+  // A change starts again: its reasons and its count of server errors belong to the last one (D-237).
+  next = { ...next, problems: [], failures: 0 };
   const position = existing ? entries.indexOf(existing) : rest.length;
   return [...rest.slice(0, position), next, ...rest.slice(position)];
+}
+
+/** What a shot the server kept failing on says (D-237). */
+export const SERVER_FAILED = 'The server could not save it.';
+const MAX_FAILURES = 3;
+
+export type SendResult =
+  | { kind: 'sent' }
+  | { kind: 'refused'; problems: string[] }
+  /** The server answered with an error of its own, not a refusal. */
+  | { kind: 'failed' };
+
+/**
+ * The entries after sending one (D-61, D-237), unless it changed while it was on its way: then the
+ * change waits to be sent. `stop`: the server is in trouble, so the next ones wait for the next try.
+ */
+export function afterSend(
+  entries: readonly WaitingEntry[],
+  sent: WaitingEntry,
+  result: SendResult
+): { entries: WaitingEntry[]; stop: boolean } {
+  const current = entries.find((e) => e.shotId === sent.shotId);
+  if (!current || current.revision !== sent.revision)
+    return { entries: [...entries], stop: result.kind === 'failed' };
+  const others = entries.filter((e) => e !== current);
+  const at = entries.indexOf(current);
+  const put = (entry: WaitingEntry | null) =>
+    entry ? [...others.slice(0, at), entry, ...others.slice(at)] : others;
+  if (result.kind === 'sent') return { entries: put(null), stop: false };
+  if (result.kind === 'refused')
+    return {
+      entries: put({ ...current, status: 'refused', problems: result.problems }),
+      stop: false
+    };
+  const failures = (current.failures ?? 0) + 1;
+  if (failures < MAX_FAILURES) return { entries: put({ ...current, failures }), stop: true };
+  return {
+    entries: put({ ...current, failures, status: 'refused', problems: [SERVER_FAILED] }),
+    stop: false
+  };
+}
+
+/** D-239: a shot's edit page starts from the change that waits for it on the phone. */
+export function startWithPending(saved: ShotState, pending: WaitingEntry | null): ShotState {
+  if (!pending) return saved;
+  if (pending.shot) return JSON.parse(JSON.stringify(pending.shot)) as ShotState;
+  return { ...saved, taste: { ...saved.taste, score: pending.score } };
 }
 
 /** What is sent for this account, in the order the shots were brewed (D-220); refused ones wait for a fix. */
