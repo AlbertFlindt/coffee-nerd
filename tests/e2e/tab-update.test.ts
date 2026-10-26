@@ -35,13 +35,18 @@ test('D-236: while a new version waits, the copies for offline use stay current'
     const worker = request.serviceWorker()?.url() ?? '';
     if (!request.headers()['x-coffee-nerd-offline-copy'] || worker.includes('version=next'))
       return route.fallback();
-    const response = await route.fetch();
-    const body = (await response.text()).replace(/version: "[^"]*"/, 'version: "next"');
-    await route.fulfill({
-      response,
-      body,
-      headers: { ...response.headers(), 'x-sveltekit-version': 'next' }
-    });
+    // A copy still on its way when the test goes offline is dropped, as the phone would drop it.
+    try {
+      const response = await route.fetch();
+      const body = (await response.text()).replace(/version: "[^"]*"/, 'version: "next"');
+      await route.fulfill({
+        response,
+        body,
+        headers: { ...response.headers(), 'x-sveltekit-version': 'next' }
+      });
+    } catch {
+      await route.abort().catch(() => {});
+    }
   });
   // The new version installs and waits.
   const waiting = await page.evaluate(async (url) => {
