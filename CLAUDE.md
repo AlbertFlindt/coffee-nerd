@@ -10,7 +10,7 @@ Read the relevant one before changing behavior or visuals. Do not import them he
 - `docs/data-model.md`: entities, recipe matching, prefill, best recipe, Insights query system.
 - `design-system/`: tokens, `components.css` (`cn-` classes), `components.md`. Synced with the design-system artifact; change it only as part of a sync (D-146).
 - `docs/screens/`: every designed screen as PNG + static HTML at 412 × 915. Match them.
-- `docs/roadmap.md`: milestones with acceptance criteria. Work on one milestone at a time.
+- `docs/roadmap.md`: milestones with acceptance criteria, built in order (parallel threads: D-240).
 - `docs/open-items.md`: unanswered questions, screens not designed yet, deferred code and tooling, each with the milestone that needs it.
 
 If they disagree: decision log for behavior, design system for visuals. If something is not covered, or a decision seems wrong, stop and ask the owner. Never invent product behavior or change a decision silently.
@@ -60,7 +60,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - Use plan mode first for anything that touches more than two files or a decision.
 - Domain logic: write the failing test first. Test names cite the decision: `it('D-16: returning to an earlier grind reuses that recipe')`.
 - Screens: use the `/build-screen` skill. Not done until your screenshot matches the PNG in `docs/screens/`.
-- Before a pull request: `npm run check && npm run lint && npm test && npm run test:e2e`, then have the `decision-reviewer` subagent review the diff and fix what it finds about correctness or decisions.
+- Before a pull request: `npm run check && npm run lint && npm test && npm run test:e2e`, then have the `decision-reviewer` subagent review the diff and fix what it finds about correctness or decisions. Where that subagent is not available (project threads), run a general agent told to follow `.claude/agents/decision-reviewer.md`.
 - When reporting work as done, show evidence: the commands you ran and their results, screenshots for UI.
 - When the owner settles a question, record it with the `record-decision` skill before building on it.
 - Keep `docs/open-items.md` current in every pull request: add any question you could not answer, any state without a design, any shortcut or limitation you leave; delete items you settle. Nothing open lives only in a chat or a pull request description.
@@ -69,7 +69,9 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 ## Working with the owner
 
 - Ask with question cards (`AskUserQuestion`): 2–4 options, the recommended one first, marked "(Recommended)", each with its consequence in one line. Group related questions, up to four per card. Ask before building anything they affect; never guess product behavior.
-- One pull request at a time. Its description says what is done, what comes next and what is blocked. When it is green, tell the owner with the link, keep watching it, and wait for the merge before starting the next one from the new `main`.
+- Up to three threads may work at once, each in its own area: no file or screen another open pull request touches. Each thread keeps one pull request open at a time, and its description says what is done, what comes next and what is blocked (D-240).
+- Who merges (D-240): the thread merges a pull request that changes only documentation (not decisions), tests, CI, or code that keeps decided behavior and looks, once CI is green and a fresh `decision-reviewer` run on the final diff ends with "Verdict: approve". Anything that records or changes a decision, adds or changes a screen, look or wording, changes the database, changes `CLAUDE.md` or `.claude/`, or needs a phone check waits for the owner: tell them with the link when green and keep watching it. If unsure, it waits for the owner.
+- Before merging, update the branch from `main` and rerun the checks; take a new D-number only after that update, as another thread may have used it. Start the next pull request from the new `main`.
 - Show each screen's screenshot next to its reference PNG.
 - Helpers (subagents) only for work in separate files, with the screen, the D-numbers and the exact files they may touch; they do not build, run the browser tests, format the whole repository or touch git. Review every line they write and run all checks yourself.
 - Report in plain words, without code names, and keep messages short.
