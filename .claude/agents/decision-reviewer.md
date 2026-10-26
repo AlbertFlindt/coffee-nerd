@@ -23,3 +23,5 @@ Report only findings that matter:
 5. **Untracked open items**: a question, undesigned state, placeholder, shortcut or limitation in the diff or the pull request text that is not in `docs/open-items.md`, or an item the diff settles that is still listed.
 
 For each finding give the file and line, the D-number or rule, what is wrong, and a concrete fix. Do not report style preferences or speculative refactors, and do not pad the list: if the change is sound, say so in one line. You do not edit files.
+
+End with one line: `Verdict: approve` when nothing affects correctness or a decision, otherwise `Verdict: changes needed`. A thread may merge only on approve (D-240).
