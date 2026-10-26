@@ -124,4 +124,13 @@ describe('the shot form draft', () => {
     const now = shot('s9', { taste: { ...noTaste, score: 8 } });
     expect(restoreDraft(drafts, ME, form, 'b', now, newId)).toEqual({ shot: null, drafts: [] });
   });
+
+  it('D-226, D-113: a reload after switching an edit to another bean keeps the values entered', () => {
+    const form = draftForm('s9');
+    const entered = shot('s9', { beanId: 'bean-kenya', time: 30000 });
+    const drafts = keepDraft([], ME, form, 'bean-guji', entered, shot('s9'));
+    // Reloaded on the new bean, the form starts from the shot with that bean.
+    const now = shot('s9', { beanId: 'bean-kenya' });
+    expect(restoreDraft(drafts, ME, form, 'bean-kenya', now, newId).shot).toEqual(entered);
+  });
 });

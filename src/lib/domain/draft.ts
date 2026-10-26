@@ -40,7 +40,12 @@ export function restoreDraft(
   newId: () => string
 ): { shot: ShotState | null; drafts: Draft[] } {
   const draft = drafts.find((d) => same(d, ownerId, form));
-  if (draft && form !== 'new' && sameValues(draft.start, start))
+  // The bean is one of the values entered (D-113): the form opens on another bean with the same shot.
+  if (
+    draft &&
+    form !== 'new' &&
+    sameValues({ ...draft.start, beanId: '' }, { ...start, beanId: '' })
+  )
     return { shot: structuredClone(draft.shot), drafts: [...drafts] };
   if (draft && form === 'new' && draft.basis === basis)
     return { shot: { ...structuredClone(draft.shot), id: newId() }, drafts: [...drafts] };

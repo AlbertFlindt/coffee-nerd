@@ -165,6 +165,10 @@ test('D-226, D-113: an edit draft made with another bean opens on that bean agai
     .click();
   const kiambu = page.getByRole('button', { name: /^Kiambu AA.*, choose another bean$/ });
   await expect(kiambu).toBeVisible();
+  // Reloaded with the bean in its address.
+  await page.reload();
+  await expect(kiambu).toBeVisible();
+  expect(await time()).toBe(entered);
   // Opened again without the bean in its address.
   await page.goto(`/journal/${id}/edit`);
   await expect(kiambu).toBeVisible();

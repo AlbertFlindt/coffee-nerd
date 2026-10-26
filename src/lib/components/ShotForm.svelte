@@ -97,7 +97,11 @@
   beforeNavigate(({ type }) => {
     if (type !== 'leave' && !switchingBean) endDraft();
   });
-  afterNavigate(() => (switchingBean = false));
+  // Still on this form afterwards (the bean already chosen, picked again): it keeps its draft again.
+  afterNavigate(() => {
+    switchingBean = false;
+    draftEnded = false;
+  });
   /** Save and Back end the draft (D-226). */
   function endDraft() {
     draftEnded = true;
