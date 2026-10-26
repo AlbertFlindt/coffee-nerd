@@ -11,7 +11,7 @@
   // `pending`, the edit page starts from the change waiting for the shot (D-239). Without a connection, Save keeps the shot or the edit on the
   // phone and returns as online (D-61, D-232).
   import { enhance } from '$app/forms';
-  import { goto } from '$app/navigation';
+  import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
   import { PROCESS_LABEL } from '#lib/domain/bean.ts';
@@ -90,6 +90,14 @@
     return ownerId ? openDraft(ownerId, form, basis) : null;
   }
   let draftEnded = false;
+  // Another bean while editing stays in the same form, with its draft (D-113).
+  let switchingBean = false;
+  // D-226: leaving the form ends the draft, also with the phone's own back gesture; closing the app or
+  // reloading keeps it.
+  beforeNavigate(({ type }) => {
+    if (type !== 'leave' && !switchingBean) endDraft();
+  });
+  afterNavigate(() => (switchingBean = false));
   /** Save and Back end the draft (D-226). */
   function endDraft() {
     draftEnded = true;
@@ -151,6 +159,7 @@
   });
   function chooseBeanForEdit(beanId: string) {
     sheet = null;
+    switchingBean = true;
     if (waiting) {
       goto(resolve(`/shot/new${waitingFormQuery(waiting.shotId, beanId, origin.from)}`), {
         replaceState: true

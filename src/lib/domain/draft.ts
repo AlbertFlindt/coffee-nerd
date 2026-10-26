@@ -21,17 +21,21 @@ const same = (d: Draft, ownerId: string, form: string) => d.ownerId === ownerId 
 /**
  * The values to open the form with, and the drafts after opening it. A new shot's draft from another
  * bean (D-94) or another prefill ("Use last shot recipe", D-43) is dropped: the form starts again. A
- * shot's own draft keeps its values with another bean (D-113).
+ * shot's own draft keeps its values with another bean (D-113). A new shot's draft opens with a new id
+ * (`newId`): its Save may have reached the server just before the app closed, and the server keeps a
+ * shot's id once (D-61), so the values entered again are saved as a shot of their own, never dropped.
  */
 export function restoreDraft(
   drafts: readonly Draft[],
   ownerId: string,
   form: string,
-  basis: string
+  basis: string,
+  newId: () => string
 ): { shot: ShotState | null; drafts: Draft[] } {
   const draft = drafts.find((d) => same(d, ownerId, form));
-  if (draft && (form !== 'new' || draft.basis === basis))
-    return { shot: structuredClone(draft.shot), drafts: [...drafts] };
+  if (draft && form !== 'new') return { shot: structuredClone(draft.shot), drafts: [...drafts] };
+  if (draft && draft.basis === basis)
+    return { shot: { ...structuredClone(draft.shot), id: newId() }, drafts: [...drafts] };
   return { shot: null, drafts: drafts.filter((d) => d !== draft) };
 }
 

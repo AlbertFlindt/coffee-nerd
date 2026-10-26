@@ -1,5 +1,6 @@
 // The shot form's draft on the phone (D-226), in the browser's own storage: kept at once on every change,
 // so it is there however the page ends. Without storage (a private window that refuses it) there is none.
+import { v7 } from 'uuid';
 import type { ShotState } from './components/shot-state';
 import { clearDrafts, endDraft, keepDraft, restoreDraft, type Draft } from './domain/draft';
 
@@ -24,7 +25,7 @@ function write(drafts: Draft[]) {
 }
 
 export function openDraft(ownerId: string, form: string, basis: string): ShotState | null {
-  const { shot, drafts } = restoreDraft(read(), ownerId, form, basis);
+  const { shot, drafts } = restoreDraft(read(), ownerId, form, basis, v7);
   write(drafts);
   return shot;
 }
