@@ -1,6 +1,6 @@
 # Coffee Nerd — Roadmap
 
-Build order and what "done" means for each milestone. One milestone at a time, one pull request (or a few small ones) per milestone, merged only when CI is green and the acceptance list is met (D-62, D-70).
+Build order and what "done" means for each milestone. Milestones go in order, one pull request (or a few small ones) per milestone, merged only when CI is green and the acceptance list is met (D-62, D-70). Up to three threads may work at once on separate areas (D-240).
 
 The order gets a usable core loop (log a shot, see it) onto a phone early, so it can be tested at a real brew station (open topic 6) while the rest is built.
 
