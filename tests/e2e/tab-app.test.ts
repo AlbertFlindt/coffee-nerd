@@ -83,6 +83,26 @@ test("D-61: the service worker keeps the app's own files and answers for them", 
   );
 });
 
+test('D-219: on the first visit the app is ready offline without opening it again', async ({
+  browser
+}) => {
+  const fresh = await browser.newContext();
+  const first = await fresh.newPage();
+  await signIn(first);
+  // The service worker takes the open page, then keeps Home for offline use, with no reload.
+  await expect.poll(() => first.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+  await expect
+    .poll(() =>
+      first.evaluate(async () => {
+        const name = (await caches.keys()).find((k) => k.startsWith('pages-'));
+        const keys = name ? await (await caches.open(name)).keys() : [];
+        return keys.map((r) => new URL(r.url).pathname);
+      })
+    )
+    .toContain('/__data.json');
+  await fresh.close();
+});
+
 test('D-36: in a browser tab the screen does not stretch or pull down past the end of a list', async () => {
   await page.goto('/journal');
   for (const element of ['html', 'body'])

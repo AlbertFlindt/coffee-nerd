@@ -59,6 +59,8 @@ async function update(
 
 /** Reads the phone's database into `waiting`. */
 export async function loadWaiting(): Promise<void> {
+  // Shots not yet sent are kept even when the phone runs short of space and clears what sites stored.
+  void navigator.storage?.persist?.().catch(() => false);
   try {
     await update();
   } catch {

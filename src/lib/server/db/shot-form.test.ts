@@ -339,7 +339,13 @@ describe('loadEditShotForm', () => {
     );
     const form = ready(loadEditShotForm(db, ids.userId, shotId)!);
     expect(form.prefill).toMatchObject({ grind: 1500, dose: 18000, yield: 38500, time: 25500 });
-    expect(form.edit).toEqual({ shotId, taste: rated, tagIds: [berry.id], notes: 'thin' });
+    expect(form.edit).toEqual({
+      shotId,
+      brewedAt: expect.any(Number),
+      taste: rated,
+      tagIds: [berry.id],
+      notes: 'thin'
+    });
     expect(form.bean.id).toBe(ids.beanId);
   });
 

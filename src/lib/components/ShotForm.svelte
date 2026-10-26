@@ -500,8 +500,10 @@
         return async ({ result, update }) => {
           if (unreached(result) && ownerId) {
             // D-61, D-232: no connection, so the shot waits on the phone; the page returns as online.
+            // An edit keeps the shot's brew time, so it is sent in brew order (D-220).
             const kind = data.edit ? ('edit' as const) : ('new' as const);
-            await keepWaiting({ kind, shot, brewedAt, show: waitingShow() }, ownerId);
+            const at = data.edit ? data.edit.brewedAt : brewedAt;
+            await keepWaiting({ kind, shot, brewedAt: at, show: waitingShow() }, ownerId);
             if (data.edit) {
               // The shot's own page shows it as it was: the Journal shows the change waiting.
               await goto(origin.from === 'home' ? resolve('/') : resolve('/journal'));

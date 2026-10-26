@@ -39,16 +39,21 @@ sw.addEventListener('install', (event) => {
 });
 
 sw.addEventListener('activate', (event) => {
-  // The new version is in charge: the files and pages of earlier versions are no longer needed.
+  // The new version is in charge: the files and pages of earlier versions are no longer needed. It
+  // also takes the open page on the first visit, so the app is ready offline at once; on an update no
+  // window is open by now (D-229), so this never takes over a shot in progress.
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE && key !== PAGES)
-          .filter((key) => key.startsWith('app-') || key.startsWith('pages-'))
-          .map((key) => caches.delete(key))
+    sw.clients
+      .claim()
+      .then(() => caches.keys())
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((key) => key !== CACHE && key !== PAGES)
+            .filter((key) => key.startsWith('app-') || key.startsWith('pages-'))
+            .map((key) => caches.delete(key))
+        )
       )
-    )
   );
 });
 
@@ -195,8 +200,15 @@ async function keep(force: boolean) {
     return;
   }
   reached(true);
-  if (await signedOut(list)) return forget();
-  if (!list.ok) return;
+  // Not signed in (the first visit opens on signing in): the pages are kept as soon as it is.
+  if (await signedOut(list)) {
+    keptAt = 0;
+    return forget();
+  }
+  if (!list.ok) {
+    keptAt = 0;
+    return;
+  }
   for (const path of (await list.json()) as string[]) await copy(path);
 }
 

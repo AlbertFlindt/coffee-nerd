@@ -19,6 +19,10 @@ export function watchNetwork(): void {
     keepForOffline();
   });
   if (!navigator.onLine) network.offline = true;
+  // The service worker took over this page (the first visit): it keeps the offline pages at once.
+  navigator.serviceWorker?.addEventListener('controllerchange', () =>
+    post({ type: 'keep', force: true })
+  );
   navigator.serviceWorker?.addEventListener('message', (event) => {
     const data = event.data as { type?: string; online?: boolean } | null;
     if (data?.type === 'network') {
