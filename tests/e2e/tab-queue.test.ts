@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
+import { dataUrl } from '../../src/lib/offline';
 
 // Shots saved offline (roadmap M10, D-61, D-220 to D-225, D-231 to D-234): they wait on the phone, show at
 // once, and reach the server once when the connection returns. The shots saved here are deleted again at
@@ -77,29 +78,25 @@ test.beforeAll(async ({ browser }) => {
   await page.getByRole('link', { name: 'Journal' }).click();
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
   await page.getByRole('link', { name: 'Home' }).click();
-  const keptPairs = () =>
+  const keptNow = () =>
     page.evaluate(async () => {
       const name = (await caches.keys()).find((k) => k.startsWith('pages-'));
       const keys = name ? await (await caches.open(name)).keys() : [];
-      const kept = keys.map((r) => new URL(r.url).pathname + new URL(r.url).search);
-      const pages = kept.filter((k) => !k.includes('__data.json'));
-      return {
-        pages: pages.length,
-        withData: pages.filter((p) => {
-          const [path, search] = p.split('?');
-          const data = `${path.replace(/\/$/, '')}/__data.json${search ? `?${search}` : ''}`;
-          return kept.includes(data);
-        }).length
-      };
+      return keys.map((r) => new URL(r.url).pathname + new URL(r.url).search);
     });
   // Every open bean adds a shot-form page; the shots logged by earlier files decide how many there are.
-  // They are kept one after the other, so the check waits until the last one has its data.
+  // They are kept one after the other, so the check waits until every page the server lists is there
+  // with its data, not only those kept so far.
+  const listed = await page.evaluate(
+    async () => (await fetch('/offline')).json() as Promise<string[]>
+  );
+  expect(listed.length).toBeGreaterThan(2);
   await expect
     .poll(async () => {
-      const { pages, withData } = await keptPairs();
-      return pages > 2 && withData === pages;
+      const kept = await keptNow();
+      return listed.filter((p) => !kept.includes(p) || !kept.includes(dataUrl(p)));
     })
-    .toBe(true);
+    .toEqual([]);
 });
 
 test.afterAll(async () => {
