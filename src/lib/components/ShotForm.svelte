@@ -11,7 +11,7 @@
   // `pending`, the edit page starts from the change waiting for the shot (D-239). Without a connection, Save keeps the shot or the edit on the
   // phone and returns as online (D-61, D-232).
   import { enhance } from '$app/forms';
-  import { goto } from '$app/navigation';
+  import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
   import { PROCESS_LABEL } from '#lib/domain/bean.ts';
@@ -45,6 +45,8 @@
     unreached
   } from '../shot-queue.svelte';
   import type { ShotFormData } from '../server/db/shot-form';
+  import { draftForm, fitsForm } from '../domain/draft';
+  import { dropDraft, openDraft, saveDraft } from '../shot-draft';
 
   let {
     data,
@@ -74,6 +76,41 @@
     return startWithPending(saved(), data.edit ? pending : null);
   }
 
+  // D-226: what is being entered is kept on the phone as a draft, for this form: a new shot from its
+  // bean and prefill, or one shot's own form.
+  function draftOf() {
+    return {
+      ownerId: page.data.userId as string | undefined,
+      form: draftForm(data.edit?.shotId ?? waiting?.shotId ?? null),
+      basis: data.edit || waiting ? data.bean.id : `${data.bean.id}:${data.prefill.source}`
+    };
+  }
+  function restored(start: ShotState): ShotState | null {
+    const { ownerId, form, basis } = draftOf();
+    return ownerId ? openDraft(ownerId, form, basis, start) : null;
+  }
+  let draftEnded = false;
+  // Another bean while editing stays in the same form, with its draft (D-113).
+  let switchingBean = false;
+  // D-226: leaving the form ends the draft, also with the phone's own back gesture; closing the app or
+  // reloading keeps it.
+  beforeNavigate(({ type }) => {
+    if (type !== 'leave' && !switchingBean) endDraft();
+  });
+  // Still on this form afterwards (the bean already chosen, picked again): it keeps its draft again.
+  afterNavigate(() => {
+    switchingBean = false;
+    draftEnded = false;
+    const { ownerId, form, basis } = draftOf();
+    if (ownerId) saveDraft(ownerId, form, basis, $state.snapshot(shot), start);
+  });
+  /** Save and Back end the draft (D-226). */
+  function endDraft() {
+    draftEnded = true;
+    const { ownerId, form } = draftOf();
+    if (ownerId) dropDraft(ownerId, form);
+  }
+
   function saved(): ShotState {
     const p = data.prefill;
     const edit = data.edit;
@@ -97,7 +134,15 @@
     };
   }
 
-  let shot: ShotState = $state(initial());
+  const start = initial();
+  const kept = restored(start);
+  const draft = kept && fitsForm(kept, start) ? kept : null;
+  let shot: ShotState = $state(draft ?? structuredClone(start));
+  $effect(() => {
+    const now = $state.snapshot(shot);
+    const { ownerId, form, basis } = draftOf();
+    if (ownerId && !draftEnded) saveDraft(ownerId, form, basis, now, start);
+  });
   // D-224, D-237: a change the server did not take says so, with the server's reasons.
   const refused = $derived([waiting, pending].find((e) => e?.status === 'refused') ?? null);
   const notSaved = $derived(refused ? [NOT_SAVED_WAITING, ...(refused.problems ?? [])] : []);
@@ -121,6 +166,10 @@
   });
   function chooseBeanForEdit(beanId: string) {
     sheet = null;
+    switchingBean = true;
+    // The draft goes with the new bean: a waiting shot's form opens again for it (D-113, D-226).
+    const { ownerId, form, basis } = draftOf();
+    if (ownerId) saveDraft(ownerId, form, basis, { ...$state.snapshot(shot), beanId }, start);
     if (waiting) {
       goto(resolve(`/shot/new${waitingFormQuery(waiting.shotId, beanId, origin.from)}`), {
         replaceState: true
@@ -213,6 +262,14 @@
     Math.max(at_least, value === null ? 0 : decimalsFor(value, step));
 
   onMount(() => {
+    // A shot's draft made with another bean opens with that bean again (D-113, D-226).
+    if (
+      draft &&
+      (data.edit || waiting) &&
+      draft.beanId !== data.bean.id &&
+      data.openBeans.some((b) => b.id === draft.beanId)
+    )
+      chooseBeanForEdit(draft.beanId);
     // Context of use: the screen stays awake while brewing (decision log §2).
     let lock: WakeLockSentinel | null = null;
     const keepAwake = async () => {
@@ -252,7 +309,7 @@
 <div class="page">
   <div class="above-save">
     <header>
-      <a class="back cn-tap" href={back} aria-label="Back without saving">
+      <a class="back cn-tap" href={back} aria-label="Back without saving" onclick={endDraft}>
         <svg
           width="22"
           height="22"
@@ -471,9 +528,13 @@
           method="POST"
           action="?/delete"
           class="delete-actions"
+          data-waits={waiting ? '' : undefined}
           onsubmit={async (event) => {
             deleting = true;
+            // A saved shot's delete is sent as a page of its own: its draft stays until signing out, and
+            // its edit page no longer opens (docs/open-items.md). Offline it changes nothing.
             if (!waiting) return;
+            endDraft();
             // D-231: a shot that is only on the phone is removed from it.
             event.preventDefault();
             await deleteWaiting(waiting.shotId);
@@ -511,6 +572,7 @@
           saving = true;
           const change = { kind: 'new' as const, shot, show: waitingShow(), fromWaiting: true };
           await keepWaiting({ ...change, brewedAt: waiting.brewedAt }, ownerId);
+          endDraft();
           await goto(back);
           return;
         }
@@ -525,6 +587,7 @@
             const kind = data.edit ? ('edit' as const) : ('new' as const);
             const at = data.edit ? data.edit.brewedAt : brewedAt;
             await keepWaiting({ kind, shot, brewedAt: at, show: waitingShow() }, ownerId);
+            endDraft();
             if (data.edit) {
               // The shot's own page shows it as it was: the Journal shows the change waiting.
               await goto(origin.from === 'home' ? resolve('/') : resolve('/journal'));
@@ -536,6 +599,7 @@
           }
           // Refused or failed: the change that waited is not lost when the form is left.
           if (dropped && result.type !== 'redirect') await putBackWaiting(dropped);
+          if (result.type === 'redirect') endDraft();
           await update();
           saving = false;
         };
@@ -555,6 +619,7 @@
           onclick={async () => {
             saving = true;
             await dropWaiting(discardable.shotId);
+            endDraft();
             await goto(back, { invalidateAll: true });
           }}>Discard change</button
         >
