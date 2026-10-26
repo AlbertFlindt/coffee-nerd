@@ -123,6 +123,23 @@ test('D-226, D-94: another bean starts the new shot again, without the draft', a
   expect(await grind()).toBe(prefilled);
 });
 
+test('D-226, D-94: picking the bean already chosen keeps the draft', async () => {
+  await newShot();
+  await page.getByRole('button', { name: 'Grind plus 0.1' }).click();
+  const entered = await grind();
+  const bean = page.getByRole('button', { name: /choose another bean/ });
+  const name = (await bean.getAttribute('aria-label'))!.split(' · ')[0].split(',')[0];
+  await bean.click({ position: { x: 22, y: 10 } });
+  await page.getByRole('region', { name: 'Choose a bean' }).getByRole('button', { name }).click();
+  await expect(page.getByRole('region', { name: 'Choose a bean' })).toBeHidden();
+  await expect.poll(drafts).not.toBeNull();
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Save shot' })).toBeVisible();
+  expect(await grind()).toBe(entered);
+  await page.getByRole('link', { name: 'Back without saving' }).click();
+  await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
+});
+
 test('D-226: an edit survives a reload; Save ends it', async () => {
   const db = new Database(DATABASE, { readonly: true });
   const { id } = db.prepare('select id from shot order by brewed_at desc limit 1').get() as {

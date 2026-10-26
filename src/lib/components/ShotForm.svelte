@@ -101,6 +101,8 @@
   afterNavigate(() => {
     switchingBean = false;
     draftEnded = false;
+    const { ownerId, form, basis } = draftOf();
+    if (ownerId) saveDraft(ownerId, form, basis, $state.snapshot(shot), start);
   });
   /** Save and Back end the draft (D-226). */
   function endDraft() {
@@ -529,7 +531,8 @@
           data-waits={waiting ? '' : undefined}
           onsubmit={async (event) => {
             deleting = true;
-            // A saved shot's delete leaves the form, which ends the draft; offline it changes nothing.
+            // A saved shot's delete is sent as a page of its own: its draft stays until signing out, and
+            // its edit page no longer opens (docs/open-items.md). Offline it changes nothing.
             if (!waiting) return;
             endDraft();
             // D-231: a shot that is only on the phone is removed from it.
