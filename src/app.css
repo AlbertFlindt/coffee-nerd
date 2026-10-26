@@ -11,6 +11,11 @@ body {
   margin: 0;
   height: 100%;
   background: var(--bg);
+  /*
+   * D-36: the page itself never moves. In a browser tab (Vanadium, Firefox, or Chrome before it installs
+   * the app) a drag past the end of a list otherwise stretches or pulls the whole screen down to reload.
+   */
+  overscroll-behavior: none;
 }
 
 /*

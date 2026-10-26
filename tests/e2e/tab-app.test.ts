@@ -83,6 +83,16 @@ test("D-61: the service worker keeps the app's own files and answers for them", 
   );
 });
 
+test('D-36: in a browser tab the screen does not stretch or pull down past the end of a list', async () => {
+  await page.goto('/journal');
+  for (const element of ['html', 'body'])
+    await expect(page.locator(element)).toHaveCSS('overscroll-behavior-y', 'none');
+  const pageMoves = await page.evaluate(
+    () => document.scrollingElement!.scrollHeight > document.scrollingElement!.clientHeight
+  );
+  expect(pageMoves).toBe(false);
+});
+
 test('D-227, D-229: a new version waits until the app is closed, then takes over', async () => {
   // A shot in progress: the form is open and a value was entered.
   await page.goto('/shot/new');

@@ -93,10 +93,13 @@ test.beforeAll(async ({ browser }) => {
       };
     });
   // Every open bean adds a shot-form page; the shots logged by earlier files decide how many there are.
-  await expect.poll(keptPairs).toEqual(expect.objectContaining({ withData: expect.any(Number) }));
-  const { pages, withData } = await keptPairs();
-  expect(withData).toBe(pages);
-  expect(pages).toBeGreaterThan(2);
+  // They are kept one after the other, so the check waits until the last one has its data.
+  await expect
+    .poll(async () => {
+      const { pages, withData } = await keptPairs();
+      return pages > 2 && withData === pages;
+    })
+    .toBe(true);
 });
 
 test.afterAll(async () => {
