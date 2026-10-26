@@ -24,17 +24,21 @@ const ASSETS = new Set([...immutable, ...assets].map(({ path }) => `/${path}`));
 const NEVER_KEPT = new Set(['/login', '/welcome', '/logout', '/health', '/offline']);
 // Keeping the pages again at most this often while moving around; always after a change.
 const KEEP_EVERY = 60_000;
+// D-235: a server that has not answered by then counts as offline.
+const TIME_LIMIT = 4_000;
 
 sw.addEventListener('install', (event) => {
   // D-227: no skipWaiting. A new version waits until every window of the app is closed, so it never
   // takes over a page that is in the middle of a shot.
   // Fetched past the browser's own cache, so an updated icon or manifest is never kept from an old copy.
+  // D-236: an update keeps fresh copies of the pages from the start, while it waits.
   event.waitUntil(
     caches
       .open(CACHE)
       .then((cache) =>
         cache.addAll([...ASSETS].map((path) => new Request(path, { cache: 'reload' })))
       )
+      .then(() => sw.registration.active && keep(true).catch(() => {}))
   );
 });
 
@@ -69,12 +73,50 @@ async function tell(message: unknown) {
   for (const client of await sw.clients.matchAll({ type: 'window' })) client.postMessage(message);
 }
 
-// D-225: signed out, nothing of the account stays on the phone. A copy fetched before signing out
-// and arriving after it is not kept.
+// D-225: signed out, nothing of the account stays on the phone, also in the copies of a version
+// that waits (D-236). A copy fetched before signing out and arriving after it is not kept.
 let signOuts = 0;
-function forget() {
+async function forget() {
   signOuts += 1;
-  return caches.delete(PAGES);
+  newer()?.postMessage({ type: 'forget' });
+  const keys = await caches.keys();
+  await Promise.all(
+    keys.filter((key) => key.startsWith('pages-')).map((key) => caches.delete(key))
+  );
+}
+
+/** The newer version waiting to take over (D-229), when this version is the one in charge. */
+function newer(): ServiceWorker | null {
+  return sw.serviceWorker?.state === 'activated' ? sw.registration.waiting : null;
+}
+
+/**
+ * The copy the phone kept of a page or its data. While an update waits there are two sets of copies,
+ * this version's and the newer one's (D-236): the latest copy opens.
+ */
+async function keptCopy(url: URL): Promise<Response | undefined> {
+  const key = pageKey(url);
+  let latest: Response | undefined;
+  for (const name of (await caches.keys()).filter((k) => k.startsWith('pages-'))) {
+    const kept = await (await caches.open(name)).match(key);
+    if (kept && (!latest || takenAt(kept) > takenAt(latest))) latest = kept;
+  }
+  return latest;
+}
+
+function takenAt(response: Response) {
+  return Date.parse(response.headers.get('date') ?? '') || 0;
+}
+
+/** D-235: the server's answer, or a failure once it has taken too long. */
+function inTime(answer: Promise<Response>): Promise<Response> {
+  return new Promise((done, fail) => {
+    const timer = setTimeout(
+      () => fail(new Error('The server did not answer in time.')),
+      TIME_LIMIT
+    );
+    answer.then(done, fail).finally(() => clearTimeout(timer));
+  });
 }
 
 function isPage(request: Request, url: URL) {
@@ -95,8 +137,8 @@ async function signedOut(response: Response) {
  * left out, and not a page of a newer version whose scripts this version does not have. Streamed
  * data (text/sveltekit-data, for loads that return promises) is not used by the app.
  */
-async function store(address: string, response: Response, since: number) {
-  if (!response.ok || response.redirected) return;
+async function store(address: string, response: Response, since: number): Promise<boolean> {
+  if (!response.ok || response.redirected) return false;
   const text = await response.clone().text();
   const header = response.headers.get(VERSION_HEADER);
   if (
@@ -104,26 +146,42 @@ async function store(address: string, response: Response, since: number) {
       ? header !== version
       : !address.endsWith('/__data.json') && !text.includes(`version: ${JSON.stringify(version)}`)
   )
-    return;
-  if (/^\{"type":"redirect"|\{"type":"(skip|error)"/.test(text)) return;
-  if (since !== signOuts) return;
+    return false;
+  if (/^\{"type":"redirect"|\{"type":"(skip|error)"/.test(text)) return false;
+  if (since !== signOuts) return false;
   await (await caches.open(PAGES)).put(pageKey(new URL(address, sw.location.origin)), response);
+  return true;
 }
 
-/** Keeps a page and its data, fetched as copies that change nothing (D-219). */
-async function copy(path: string) {
-  const since = signOuts;
-  for (const address of [path, dataUrl(path)]) {
+/**
+ * Keeps a page and its data, fetched as copies that change nothing (D-219). The shot form as the
+ * Journal opens it keeps only its data: it is only ever opened from inside the app.
+ */
+async function copy(path: string, since = signOuts) {
+  const addresses = path.includes('from=journal') ? [dataUrl(path)] : [path, dataUrl(path)];
+  for (const address of addresses) {
     const response = await fetch(address, { headers: { [OFFLINE_COPY_HEADER]: '1' } });
     await store(address, response, since);
   }
 }
 
+/** Keeps a page as it was opened, and fetches the other half, its page or its data, as a copy. */
+async function keepOpened(url: URL, response: Response, since: number) {
+  const path = pagePath(url);
+  const opened = url.pathname.endsWith('/__data.json') ? dataUrl(path) : path;
+  // Data loaded when moving between pages usually leaves out the parts already on screen: not whole.
+  if (!(await store(opened, response, since))) return copy(path, since);
+  const other = opened === path ? dataUrl(path) : path;
+  await store(other, await fetch(other, { headers: { [OFFLINE_COPY_HEADER]: '1' } }), since);
+}
+
 /** A page or its data: from the server when it answers, else as the phone kept it (D-219). */
 async function page(event: FetchEvent, url: URL): Promise<Response> {
   const { request } = event;
+  const answer = fetch(request);
+  answer.catch(() => {});
   try {
-    const response = await fetch(request);
+    const response = await answeredInTime(answer, url);
     reached(true);
     if (response.type === 'opaqueredirect') {
       // A redirect the page cannot read: keeping the pages finds out whether it was to signing in.
@@ -137,11 +195,11 @@ async function page(event: FetchEvent, url: URL): Promise<Response> {
     // Home, the Journal and the shot form are kept by keep(). Another page is kept as it is opened,
     // the page and its data both, so it opens offline from inside the app and from outside it.
     if (response.ok && !isKeptPage(url.pathname))
-      event.waitUntil(copy(pagePath(url)).catch(() => {}));
+      event.waitUntil(keepOpened(url, response.clone(), signOuts).catch(() => {}));
     return response;
   } catch (failure) {
     reached(false);
-    const kept = await caches.match(pageKey(url), { cacheName: PAGES });
+    const kept = await keptCopy(url);
     if (kept) return kept;
     if (request.mode === 'navigate') {
       // A page the phone does not have: Home, which it always has, opens instead.
@@ -157,6 +215,16 @@ async function page(event: FetchEvent, url: URL): Promise<Response> {
   }
 }
 
+/** D-235: a slow server counts as offline when the phone has a copy; without one, the page waits. */
+async function answeredInTime(answer: Promise<Response>, url: URL): Promise<Response> {
+  try {
+    return await inTime(answer);
+  } catch (failure) {
+    if (await keptCopy(url)) throw failure;
+    return answer;
+  }
+}
+
 /**
  * A change: it needs the server (D-219); without one, nothing changes and the page says so, or the page
  * keeps a shot waiting (D-61).
@@ -164,8 +232,14 @@ async function page(event: FetchEvent, url: URL): Promise<Response> {
 async function change(event: FetchEvent, url: URL): Promise<Response> {
   const { request } = event;
   const enhanced = request.headers.has('x-sveltekit-action');
+  // D-235: a shot, an edit or a score waits on the phone once the server is slow; other changes wait
+  // for it, since a slow server may still make them. The shots on their way time out on their own.
+  const answer = fetch(request);
+  answer.catch(() => {});
   try {
-    const response = await fetch(request);
+    const response = await (waitsOffline(url) && url.pathname !== '/queue'
+      ? inTime(answer)
+      : answer);
     reached(true);
     if (url.pathname === '/logout') await forget();
     // The kept pages follow the change at once, also when the page does not move (a score given).
@@ -187,9 +261,33 @@ async function change(event: FetchEvent, url: URL): Promise<Response> {
 }
 
 let keptAt = 0;
-/** Keeps Home, the Journal and the shot form for every open bean ready for offline use (D-219). */
-async function keep(force: boolean) {
-  if (!force && Date.now() - keptAt < KEEP_EVERY) return;
+let keeping: Promise<void> | null = null;
+let askedAgain = false;
+let forcedAgain = false;
+/**
+ * Keeps Home, the Journal and the shot form for every open bean ready for offline use (D-219), one
+ * round at a time. Asked during a round, it keeps again after it when the round was not enough: a change
+ * came in, or the round found the phone signed out (on the first visit, signing in may finish while the
+ * round still sees the sign-in page).
+ */
+function keep(force: boolean): Promise<void> {
+  if (keeping) {
+    askedAgain = true;
+    forcedAgain ||= force;
+    return keeping;
+  }
+  if (!force && Date.now() - keptAt < KEEP_EVERY) return Promise.resolve();
+  keeping = (async () => {
+    do {
+      askedAgain = forcedAgain = false;
+      await keepOnce(force).catch(() => {});
+      force = forcedAgain || (askedAgain && keptAt === 0);
+    } while (force);
+  })().finally(() => (keeping = null));
+  return keeping;
+}
+
+async function keepOnce(force: boolean) {
   keptAt = Date.now();
   let list: Response;
   try {
@@ -210,11 +308,14 @@ async function keep(force: boolean) {
     return;
   }
   for (const path of (await list.json()) as string[]) await copy(path);
+  // D-236: a newer version waiting to take over keeps its own copies, which this version cannot.
+  newer()?.postMessage({ type: 'keep', force });
 }
 
 sw.addEventListener('message', (event) => {
   const message = event.data as { type?: string; force?: boolean } | null;
   if (message?.type === 'keep') event.waitUntil(keep(!!message.force).catch(() => {}));
+  if (message?.type === 'forget') event.waitUntil(forget());
   if (message?.type === 'status') event.source?.postMessage({ type: 'network', online });
 });
 
@@ -223,11 +324,14 @@ sw.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== sw.location.origin) return;
   if (request.method === 'GET') {
-    if (ASSETS.has(url.pathname))
+    // The scripts of a newer version that waits are on the phone too: a page it kept may need them
+    // offline (D-236).
+    if (ASSETS.has(url.pathname) || url.pathname.startsWith('/_app/immutable/'))
       event.respondWith(
         caches
           .open(CACHE)
           .then((cache) => cache.match(url.pathname))
+          .then((cached) => cached ?? caches.match(url.pathname))
           .then((cached) => cached ?? fetch(request))
       );
     else if (isPage(request, url)) event.respondWith(page(event, url));

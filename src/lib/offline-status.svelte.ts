@@ -6,8 +6,14 @@ export const network = $state({ offline: false, message: null as string | null }
 
 let changedAt = 0;
 
+// Also to a service worker that does not control this page yet: on the first visit a page opened while
+// it was taking over stays without one until the next, but the pages can still be kept for offline use.
 function post(message: unknown) {
-  navigator.serviceWorker?.controller?.postMessage(message);
+  const controller = navigator.serviceWorker?.controller;
+  if (controller) return controller.postMessage(message);
+  void navigator.serviceWorker?.ready.then((registration) =>
+    registration.active?.postMessage(message)
+  );
 }
 
 /** Called once by the layout. */

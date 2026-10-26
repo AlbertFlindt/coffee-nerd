@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { expect, test, type BrowserContext, type Page } from '@playwright/test';
+import { expect, test, type BrowserContext, type Page, type Request } from '@playwright/test';
 
 // Opening offline (roadmap M10, D-219, D-225): the service worker keeps Home, the Journal and the shot
 // form ready, pages already opened open as the phone kept them, and changes need a connection.
@@ -53,6 +53,8 @@ test('D-219: Home, the Journal and the shot form for every open bean are kept, w
   for (const { id } of beans)
     expected.push(`/shot/new?bean=${id}`, `/shot/new/__data.json?bean=${id}&from=journal`);
   await expect.poll(kept).toEqual(expect.arrayContaining(expected));
+  // The shot form as the Journal opens it keeps only its data: it only opens from inside the app.
+  expect(await kept()).not.toContain('/shot/new?from=journal');
 });
 
 test('D-219, D-200, D-117: the kept copies take no "Shot saved" and leave the cookies as they are', async () => {
@@ -87,6 +89,20 @@ test('D-219: a page opened before is kept as it was opened', async () => {
   await page.getByRole('link', { name: 'Library' }).click();
   await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
   await expect.poll(kept).toContain('/library/__data.json');
+  // Opened as a whole page, the page itself is kept as it arrived: only its data is fetched again.
+  const copies: string[] = [];
+  const count = (request: Request) => {
+    if (request.headers()['x-coffee-nerd-offline-copy'])
+      copies.push(new URL(request.url()).pathname);
+  };
+  context.on('request', count);
+  await page.goto('/library');
+  await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
+  await expect
+    .poll(() => copies.filter((p) => p.startsWith('/library')))
+    .toEqual(['/library/__data.json']);
+  context.off('request', count);
+  expect(await kept()).toEqual(expect.arrayContaining(['/library', '/library/__data.json']));
 });
 
 test('D-219: offline, the app opens on Home with the "Offline" line, and "+" opens the shot form', async () => {
@@ -151,6 +167,25 @@ test('D-219: a change that cannot reach the server changes nothing and says so',
 test('D-219: back online, the "Offline" line goes', async () => {
   await context.setOffline(false);
   await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
+  await expect(line()).toHaveCount(0);
+});
+
+test('D-235: a server that has not answered in 4 seconds counts as offline: a kept page opens from its copy', async () => {
+  // The server takes 6 seconds, then the answer is lost.
+  const slow = (url: URL) => url.pathname === '/journal/__data.json';
+  await context.route(slow, async (route) => {
+    await new Promise((done) => setTimeout(done, 6_000));
+    await route.abort().catch(() => {});
+  });
+  const pressed = Date.now();
+  await page.getByRole('link', { name: 'Journal' }).click();
+  await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible({ timeout: 10_000 });
+  expect(Date.now() - pressed).toBeLessThan(6_000);
+  await expect(line()).toHaveText(OFFLINE_LINE);
+  await context.unroute(slow);
+  // The next answer in time: online again.
+  await page.getByRole('link', { name: 'Home' }).click();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
   await expect(line()).toHaveCount(0);
 });
