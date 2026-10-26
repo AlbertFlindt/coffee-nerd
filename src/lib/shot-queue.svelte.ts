@@ -110,8 +110,22 @@ export async function deleteWaiting(shotId: string): Promise<void> {
  * "Discard change" (D-238). Waits for a send in progress, so the waiting change never arrives after it
  * (D-239).
  */
-export async function dropWaiting(shotId: string): Promise<void> {
-  await locked(() => update((entries) => entries.filter((e) => e.shotId !== shotId)));
+export async function dropWaiting(shotId: string): Promise<WaitingEntry | null> {
+  let dropped: WaitingEntry | null = null;
+  await locked(() =>
+    update((entries) => {
+      dropped = entries.find((e) => e.shotId === shotId) ?? null;
+      return entries.filter((e) => e.shotId !== shotId);
+    })
+  );
+  return dropped;
+}
+
+/** A change dropped for an online save the server did not take waits again as it was (D-239). */
+export async function putBackWaiting(entry: WaitingEntry): Promise<void> {
+  await update((entries) =>
+    entries.some((e) => e.shotId === entry.shotId) ? entries : [...entries, entry]
+  );
 }
 
 /** Whether anything of this shot waits on the phone: a score for it then waits with it (D-223). */

@@ -40,6 +40,7 @@
     deleteWaiting,
     dropWaiting,
     keepWaiting,
+    putBackWaiting,
     showSavedOnPhone,
     unreached
   } from '../shot-queue.svelte';
@@ -515,8 +516,8 @@
         }
         saving = true;
         // D-239: the form holds the change that waited, so it is dropped first, once any send of it is
-        // done; without a connection it waits again with this change.
-        if (data.edit) await dropWaiting(shot.id);
+        // done; without a connection it waits again with this change, and as it was if refused.
+        const dropped = data.edit ? await dropWaiting(shot.id) : null;
         return async ({ result, update }) => {
           if (unreached(result) && ownerId) {
             // D-61, D-232: no connection, so the shot waits on the phone; the page returns as online.
@@ -533,6 +534,8 @@
             }
             return;
           }
+          // Refused or failed: the change that waited is not lost when the form is left.
+          if (dropped && result.type !== 'redirect') await putBackWaiting(dropped);
           await update();
           saving = false;
         };

@@ -279,6 +279,36 @@ test('D-239, D-238: the edit page shows the change waiting for the shot; it can 
   expect(await entries()).toEqual([]);
   expect(timeOnServer()).toBe(before);
 
+  // An online save the server refuses or fails on leaves the change waiting as it was.
+  const kept = await waitWithChange();
+  for (const answer of [
+    {
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        type: 'failure',
+        status: 400,
+        data: '[{"problems":1},[2],"Refused."]'
+      })
+    },
+    { status: 500, contentType: 'text/html', body: '<p>Internal Error</p>' }
+  ]) {
+    await page.goto(`/journal/${id}/edit`);
+    const save = (url: URL) => url.pathname.endsWith('/edit') && url.search === '?/save';
+    await context.route(save, (route) => route.fulfill(answer));
+    const answered = page.waitForResponse((r) => save(new URL(r.url())));
+    await page.getByRole('button', { name: 'Save changes' }).click();
+    await answered;
+    await expect.poll(async () => (await entries()).map((e) => e.shotId)).toEqual([id]);
+    await context.unroute(save);
+    await page.goto('/journal');
+    await page.goto(`/journal/${id}/edit`);
+    expect(await valueOf('Time')).toBe(kept);
+  }
+  expect(timeOnServer()).toBe(before);
+  await page.getByRole('button', { name: 'Discard change' }).click();
+  await expect(page.getByRole('heading', { name: 'Edit shot' })).toHaveCount(0);
+
   const again = await waitWithChange();
   await page.goto(`/journal/${id}/edit`);
   expect(await valueOf('Time')).toBe(again);
