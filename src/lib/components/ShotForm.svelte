@@ -85,9 +85,9 @@
       basis: data.edit || waiting ? data.bean.id : `${data.bean.id}:${data.prefill.source}`
     };
   }
-  function restored(): ShotState | null {
+  function restored(start: ShotState): ShotState | null {
     const { ownerId, form, basis } = draftOf();
-    return ownerId ? openDraft(ownerId, form, basis) : null;
+    return ownerId ? openDraft(ownerId, form, basis, start) : null;
   }
   let draftEnded = false;
   // Another bean while editing stays in the same form, with its draft (D-113).
@@ -129,7 +129,7 @@
   }
 
   const start = initial();
-  const kept = restored();
+  const kept = restored(start);
   const draft = kept && fitsForm(kept, start) ? kept : null;
   let shot: ShotState = $state(draft ?? structuredClone(start));
   $effect(() => {
@@ -525,8 +525,9 @@
           data-waits={waiting ? '' : undefined}
           onsubmit={async (event) => {
             deleting = true;
-            endDraft();
+            // A saved shot's delete leaves the form, which ends the draft; offline it changes nothing.
             if (!waiting) return;
+            endDraft();
             // D-231: a shot that is only on the phone is removed from it.
             event.preventDefault();
             await deleteWaiting(waiting.shotId);

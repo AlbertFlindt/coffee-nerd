@@ -10,6 +10,8 @@ export type Draft = {
   /** What a new shot started from: its bean and prefill. Another one starts the form again. */
   basis: string;
   shot: ShotState;
+  /** What the form opened with when the draft began; a shot's form that now opens otherwise drops it. */
+  start: ShotState;
 };
 
 export function draftForm(shotId: string | null): string {
@@ -17,11 +19,15 @@ export function draftForm(shotId: string | null): string {
 }
 
 const same = (d: Draft, ownerId: string, form: string) => d.ownerId === ownerId && d.form === form;
+const sameValues = (a: ShotState, b: ShotState) =>
+  JSON.stringify({ ...a, id: '' }) === JSON.stringify({ ...b, id: '' });
 
 /**
  * The values to open the form with, and the drafts after opening it. A new shot's draft from another
  * bean (D-94) or another prefill ("Use last shot recipe", D-43) is dropped: the form starts again. A
- * shot's own draft keeps its values with another bean (D-113). A new shot's draft opens with a new id
+ * shot's own draft keeps its values with another bean (D-113), but only while the shot opens as it did
+ * when the draft began: a change that waits for it since (a score given offline, D-239), or the shot
+ * sent and saved meanwhile, starts the form from that instead. A new shot's draft opens with a new id
  * (`newId`): its Save may have reached the server just before the app closed, and the server keeps a
  * shot's id once (D-61), so the values entered again are saved as a shot of their own, never dropped.
  */
@@ -30,11 +36,13 @@ export function restoreDraft(
   ownerId: string,
   form: string,
   basis: string,
+  start: ShotState,
   newId: () => string
 ): { shot: ShotState | null; drafts: Draft[] } {
   const draft = drafts.find((d) => same(d, ownerId, form));
-  if (draft && form !== 'new') return { shot: structuredClone(draft.shot), drafts: [...drafts] };
-  if (draft && draft.basis === basis)
+  if (draft && form !== 'new' && sameValues(draft.start, start))
+    return { shot: structuredClone(draft.shot), drafts: [...drafts] };
+  if (draft && form === 'new' && draft.basis === basis)
     return { shot: { ...structuredClone(draft.shot), id: newId() }, drafts: [...drafts] };
   return { shot: null, drafts: drafts.filter((d) => d !== draft) };
 }
@@ -49,8 +57,11 @@ export function keepDraft(
   start: ShotState
 ): Draft[] {
   const rest = drafts.filter((d) => !same(d, ownerId, form));
-  if (JSON.stringify({ ...shot, id: '' }) === JSON.stringify({ ...start, id: '' })) return rest;
-  return [...rest, { ownerId, form, basis, shot: structuredClone(shot) }];
+  if (sameValues(shot, start)) return rest;
+  return [
+    ...rest,
+    { ownerId, form, basis, shot: structuredClone(shot), start: structuredClone(start) }
+  ];
 }
 
 /** Save and Back end the draft (D-226). */

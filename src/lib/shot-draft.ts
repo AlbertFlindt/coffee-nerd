@@ -24,8 +24,13 @@ function write(drafts: Draft[]) {
   }
 }
 
-export function openDraft(ownerId: string, form: string, basis: string): ShotState | null {
-  const { shot, drafts } = restoreDraft(read(), ownerId, form, basis, v7);
+export function openDraft(
+  ownerId: string,
+  form: string,
+  basis: string,
+  start: ShotState
+): ShotState | null {
+  const { shot, drafts } = restoreDraft(read(), ownerId, form, basis, start, v7);
   write(drafts);
   return shot;
 }
