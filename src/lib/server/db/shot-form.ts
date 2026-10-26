@@ -69,7 +69,7 @@ export type ShotFormData = {
   /** −/+ steps for dose, yield and time (D-89). */
   steps: { dose: Thousandths; yield: Thousandths; time: Thousandths };
   /** Editing a saved shot (D-57, D-113): its id and what it already has besides the recipe. */
-  edit?: { shotId: string; taste: Taste; tagIds: string[]; notes: string | null };
+  edit?: { shotId: string; brewedAt: number; taste: Taste; tagIds: string[]; notes: string | null };
 };
 
 export type MachineChoice = { id: string; name: string; features: FeatureDefinition[] };
@@ -262,6 +262,7 @@ export function loadEditShotForm(
     steps: { dose: settings.doseStep, yield: settings.yieldStep, time: settings.timeStep },
     edit: {
       shotId: s.id,
+      brewedAt: s.brewedAt,
       taste: {
         score: s.score,
         balance: s.balance,

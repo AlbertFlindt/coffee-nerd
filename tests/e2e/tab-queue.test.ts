@@ -213,6 +213,29 @@ test('D-61, D-220, D-223: back online, the shot reaches the server once, with it
   expect(newShots()).toEqual([entry.shotId]);
 });
 
+test('D-220: an edit saved offline keeps the brew time of its shot', async () => {
+  const [id] = newShots();
+  const brewedAt = () => {
+    const d = db();
+    const row = d.prepare('select brewed_at from shot where id = ?').get(id) as {
+      brewed_at: number;
+    };
+    d.close();
+    return row.brewed_at;
+  };
+  await page.goto(`/journal/${id}/edit`);
+  await expect(page.getByRole('heading', { name: 'Edit shot' })).toBeVisible();
+  await context.setOffline(true);
+  await page.getByRole('button', { name: 'Time plus 1 second' }).click();
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
+  const [entry] = await entries();
+  expect(entry).toEqual(expect.objectContaining({ kind: 'edit', brewedAt: brewedAt() }));
+  await context.setOffline(false);
+  await expect.poll(entries, { timeout: 15_000 }).toEqual([]);
+  expect(brewedAt()).toBe(entry.brewedAt);
+});
+
 test('D-224: a waiting shot the server refuses is kept as "Not saved", to fix or delete', async () => {
   await context.setOffline(true);
   await page.getByRole('link', { name: 'New shot' }).click();
