@@ -21,6 +21,8 @@ export const load: PageServerLoad = ({ locals, url, cookies }) => {
   const form = loadShotForm(db, locals.user.id, url.searchParams.get('bean') ?? undefined);
   if (form.state === 'empty') redirect(303, guideNext(db, locals.user.id));
   return {
+    // D-61, D-225: whose shots wait on the phone.
+    userId: locals.user.id,
     form,
     origin: { from: originOf(url.searchParams.get('from')), filters: journalFilters(cookies) }
   };

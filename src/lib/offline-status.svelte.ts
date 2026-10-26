@@ -36,7 +36,8 @@ export function watchNetwork(): void {
     (event) => {
       const form = event.target as HTMLFormElement;
       const method = (event.submitter?.getAttribute('formmethod') ?? form.method).toLowerCase();
-      if (method !== 'post') return;
+      // A shot, an edit or a score waits on the phone instead (D-61, D-223).
+      if (method !== 'post' || form.hasAttribute('data-waits')) return;
       // Only when the phone itself has no network: a server that did not answer once may answer now,
       // and the service worker answers a change that cannot be sent (nothing changes either way).
       if (!navigator.onLine) {

@@ -4,5 +4,6 @@ import type { PageServerLoad } from './$types';
 // Settings behind the gear on Home (D-30, D-34): only "Sign out" until Settings is built (D-199, M11).
 export const load: PageServerLoad = ({ locals }) => {
   if (!locals.user) error(401);
-  return {};
+  // D-225: signing out clears this account's waiting shots, and asks first.
+  return { userId: locals.user.id };
 };

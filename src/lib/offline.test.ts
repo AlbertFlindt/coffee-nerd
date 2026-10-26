@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { dataUrl, isKeptPage, pageKey, pagePath, NO_CHANGE_ACTION_DATA } from './offline';
+import {
+  dataUrl,
+  isKeptPage,
+  pageKey,
+  pagePath,
+  NO_CHANGE_ACTION_DATA,
+  waitsOffline
+} from './offline';
 
 describe('offline page keys', () => {
   it('D-219: a page and its data are kept under one key whatever the order of the query', () => {
@@ -48,5 +55,24 @@ describe('offline page keys', () => {
 
   it('D-219: a change made offline answers as a failed form without problems of its own', () => {
     expect(JSON.parse(NO_CHANGE_ACTION_DATA)).toEqual([{}]);
+  });
+});
+
+describe('waitsOffline', () => {
+  const waits = (address: string) => waitsOffline(new URL(address, 'https://x'));
+
+  it('D-61, D-223: saving a shot, new or edited, and a score wait on the phone', () => {
+    expect(waits('/shot/new?/save')).toBe(true);
+    expect(waits('/journal/0199/edit?/save')).toBe(true);
+    expect(waits('/?/rate')).toBe(true);
+    expect(waits('/journal?/rate')).toBe(true);
+    expect(waits('/queue')).toBe(true);
+  });
+
+  it('D-219: every other change needs a connection', () => {
+    expect(waits('/shot/new?/useLastShot')).toBe(false);
+    expect(waits('/journal/0199/edit?/delete')).toBe(false);
+    expect(waits('/library/beans/new?/save')).toBe(false);
+    expect(waits('/logout')).toBe(false);
   });
 });
