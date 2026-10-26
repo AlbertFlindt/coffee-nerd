@@ -7,7 +7,7 @@ argument-hint: "<milestone id, e.g. M7>"
 
 Work on milestone $ARGUMENTS from `docs/roadmap.md`. The owner decides product behavior and merges every pull request that needs them (D-240); you plan, ask, build, prove and report.
 
-1. **Read** the milestone's section in `docs/roadmap.md`, the D-numbers and data-model sections it mentions, its screens in `docs/screens/`, and every item in `docs/open-items.md` that names it. Search the decision log for what you need instead of reading all of it. If an earlier milestone is not done, stop and tell the owner.
+1. **Read** the milestone's section in `docs/roadmap.md`, the D-numbers and data-model sections it mentions, its screens in `docs/screens/`, and every item in `docs/open-items.md` that names it. Search the decision log for what you need instead of reading all of it. If an earlier milestone still has features to build (not only fixes, D-240), stop and tell the owner.
 2. **Ask first.** Collect every open behavior question (undesigned states, missing rules, conflicts) and ask them with question cards (`AskUserQuestion`): up to four per card, 2–4 options each, the recommended option first with "(Recommended)", each option's consequence in one line. Record every answer with `record-decision` before building on it.
 3. **Plan** in plan mode: the pull requests (one reviewable step each), and per pull request the files, the tests that prove each acceptance item, and the order. Name which parts helpers (subagents) can take: only work in separate files, done after you have built and tested the shared layer.
 4. **Branch** from an up-to-date `main` (`git fetch origin main`; in a cloud session use the branch the session names, restarting it from `origin/main` after each merge).
