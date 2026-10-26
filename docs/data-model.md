@@ -265,14 +265,18 @@ A new insight is a new definition. A new kind of data becomes usable everywhere 
 
 ---
 
-## 6. Offline queue (D-61)
+## 6. Offline queue (D-61, D-218 to D-227)
 
-- The service worker caches the app and what the shot form needs: open beans, their recipes and latest shots, gear, routines, tags, My setup and app state.
-- A shot saved offline (new or edited) goes into a queue on the device (IndexedDB) with its own ID, and is sent in order when the connection returns. Sending the same shot twice changes nothing.
-- The shot form keeps a local draft, so reloading the page never loses input.
+- Needs https or localhost; over plain http the app works online only (D-218).
+- The service worker caches the app and what the shot form needs: open beans, their recipes and latest shots, gear, routines, tags, My setup and app state. Home, the shot form and the Journal always open offline; other pages already visited open read only (D-219).
+- A shot saved offline (new or edited, or a score from the Rate sheet) goes into a queue on the device (IndexedDB) with its own ID, and is sent in order when the connection returns. A new shot gets the phone's time at Save as its brew time (D-220); an edit or a score keeps the shot's brew time. Sending the same shot twice changes nothing (D-223).
+- The next shot starts from the newest waiting shot (D-222).
+- A queued shot the server refuses stays on the device, marked "Not saved", until it is fixed or deleted (D-224).
+- The shot form keeps a local draft, so reloading the page never loses input; Save and Back end it (D-226).
 - Library changes need a connection.
 - With one user, the latest change wins if the same shot was edited twice.
-- The Journal marks shots that are still waiting (design still to do, open topic 23).
+- The Journal and Home's Last shot card mark shots that are still waiting (D-221).
+- Signing out removes the cache, the draft and the queue, after asking when shots are waiting (D-225). A new app version takes over only when the app next opens (D-227).
 
 ---
 
