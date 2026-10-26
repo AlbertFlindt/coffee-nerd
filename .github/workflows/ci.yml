@@ -33,8 +33,13 @@ jobs:
       - name: Install the Playwright browser
         run: |
           for try in 1 2 3; do
-            timeout 180 npx playwright install --with-deps chromium && exit 0
+            timeout 300 npx playwright install --with-deps chromium && exit 0
             echo "Try $try stalled or failed; trying again."
+            # A try cut off leaves its apt-get running with the package lock: wait for it to finish.
+            for wait in $(seq 120); do
+              sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || break
+              sleep 5
+            done
           done
           exit 1
       - run: npm run test:e2e
