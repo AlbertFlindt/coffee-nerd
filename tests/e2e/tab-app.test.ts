@@ -71,14 +71,13 @@ test("D-61: the service worker keeps the app's own files and answers for them", 
   expect(cached).toContain('/manifest.webmanifest');
   expect(cached).toContain('/icons/icon-512.png');
   expect(cached.some((p) => p.startsWith('/_app/immutable/'))).toBe(true);
-  // A script of the app comes from the service worker; the page itself still comes from the server.
+  // A script of the app comes from the service worker's own copy (pages: tab-offline.test.ts).
   const fromWorker: Record<string, boolean> = {};
   page.on('response', (r) => {
     fromWorker[new URL(r.url()).pathname] = r.fromServiceWorker();
   });
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
-  expect(fromWorker['/']).toBe(false);
   expect(Object.entries(fromWorker).some(([p, w]) => p.startsWith('/_app/immutable/') && w)).toBe(
     true
   );

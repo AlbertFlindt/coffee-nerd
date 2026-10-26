@@ -1,9 +1,17 @@
 <script lang="ts">
   import '../app.css';
+  import { afterNavigate } from '$app/navigation';
+  import { onMount } from 'svelte';
   import logo from '../../design-system/logo/coffee-nerd-mark.svg';
+  import OfflineLine from '#lib/components/OfflineLine.svelte';
+  import { keepForOffline, watchNetwork } from '#lib/offline-status.svelte.ts';
   import type { LayoutProps } from './$types';
 
   let { children }: LayoutProps = $props();
+
+  // D-219: Home, the Journal and the shot form stay ready for offline use.
+  onMount(watchNetwork);
+  afterNavigate(keepForOffline);
 </script>
 
 <svelte:head>
@@ -12,6 +20,7 @@
 </svelte:head>
 
 <div class="cn-root app">
+  <OfflineLine />
   {@render children()}
 </div>
 

@@ -5,6 +5,7 @@ import { hasAccount } from '#lib/server/auth/account.ts';
 import { isCrossSiteWrite } from '#lib/server/auth/csrf.ts';
 import { SESSION_COOKIE, sessionCookieOptions, validateSession } from '#lib/server/auth/session.ts';
 import { getDb } from '#lib/server/db/connection.ts';
+import { OFFLINE_COPY_HEADER } from '#lib/offline.ts';
 
 // Open the database and apply migrations at startup, so a broken database fails fast.
 export const init: ServerInit = () => {
@@ -17,6 +18,18 @@ export const handle: Handle = async ({ event, resolve }) => {
     return new Response('Cross-site form submissions are refused.', { status: 403 });
   if (pathname === '/health') return resolve(event);
 
+  // D-219: a copy the service worker keeps for offline use changes nothing on the server or the phone.
+  event.locals.offlineCopy = event.request.headers.get(OFFLINE_COPY_HEADER) === '1';
+  if (event.locals.offlineCopy) {
+    const response = await respond({ event, resolve });
+    response.headers.delete('set-cookie');
+    return response;
+  }
+  return respond({ event, resolve });
+};
+
+const respond: Handle = async ({ event, resolve }) => {
+  const { pathname } = event.url;
   const db = getDb();
   const token = event.cookies.get(SESSION_COOKIE);
   event.locals.user = token ? validateSession(db, token, Date.now()) : null;
