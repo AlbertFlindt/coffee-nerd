@@ -16,7 +16,8 @@ Last updated: 2026-10-26
 
 | Question | Needed by | Source |
 |---|---|---|
-| *(none open)* | | |
+| Installed, the app opens standalone: no browser bar, but the phone's status bar (clock, battery) stays, the usual choice for installed apps. The context section says "full screen", which could also mean hiding the status bar. Keep standalone? Not yet checked on the Pixel 8a; Safari on iPhone and iPad is not tested | M10 | D-217 |
+| A new version takes over once every window of the app is closed (D-227). On Android an app left open among the recent apps keeps the old version until it is swiped away. Is that close enough to "the next time the app opens"? | M10 | D-227 |
 
 ## 2. Screens and states not designed yet
 
