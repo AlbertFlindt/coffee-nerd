@@ -12,7 +12,10 @@ import type { Actions, PageServerLoad } from './$types';
 // Home (screen 6, D-32): the bean you're brewing, its last shot, quick numbers and best recipe.
 export const load: PageServerLoad = ({ locals, cookies }) => {
   if (!locals.user) error(401);
-  return { home: loadHome(getDb(), locals.user.id, Date.now()), flash: takeFlash(cookies) };
+  return {
+    home: loadHome(getDb(), locals.user.id, Date.now()),
+    flash: locals.offlineCopy ? null : takeFlash(cookies)
+  };
 };
 
 export const actions: Actions = {

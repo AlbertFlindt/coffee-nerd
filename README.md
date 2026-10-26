@@ -8,7 +8,7 @@
 - Installable as an app on your phone or tablet (PWA); opens offline, and shots saved offline are sent when you're back online.
 - Built for coffee nerds: recipe matching across your whole history, σ and distributions in Insights, any machine described by hand.
 
-> **Status:** the shot form, the Journal, the shot detail, the whole Library (Beans, Gear, Puck prep, Tags), My setup, Home and Insights work, with a step-by-step start after creating the account (milestones M3 to M9). The app can be installed on a phone's home screen over https (M10, in progress); working offline comes next. Not ready for daily use yet. Private for now; it will become open source once it is mature.
+> **Status:** the shot form, the Journal, the shot detail, the whole Library (Beans, Gear, Puck prep, Tags), My setup, Home and Insights work, with a step-by-step start after creating the account (milestones M3 to M9). The app can be installed on a phone's home screen over https and opens offline (M10, in progress); saving shots offline comes next. Not ready for daily use yet. Private for now; it will become open source once it is mature.
 
 ## Try the latest build on your server (Dockge)
 

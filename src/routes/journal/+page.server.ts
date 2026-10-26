@@ -22,8 +22,8 @@ export const load: PageServerLoad = ({ locals, url, cookies, request }) => {
     now
   );
   // D-117: remember the filters in effect; ids that no longer exist are dropped.
-  rememberJournalFilters(cookies, journal, request);
-  return { now, journal, flash: takeFlash(cookies) };
+  if (!locals.offlineCopy) rememberJournalFilters(cookies, journal, request);
+  return { now, journal, flash: locals.offlineCopy ? null : takeFlash(cookies) };
 };
 
 export const actions: Actions = {

@@ -13,12 +13,14 @@ const BG = JSON.parse(readFileSync('design-system/tokens.json', 'utf8')).color.t
 ).value.dark;
 
 const svg = readFileSync(LOGO, 'utf8');
-// The bean fits a circle of radius 16 around (20, 21) in the logo's 40 × 40 box. Android crops an
-// adaptive (maskable) icon to a circle whose radius is 40 % of its size, so the box at 90 % of the icon, centred
-// on the bean, keeps the whole bean inside it with a margin.
+// The bean fits a circle of radius 16 around (20, 21) in the logo's 40 × 40 box, and a box about
+// 27 × 32 units. Android crops an adaptive (maskable) icon to a circle whose radius is 40 % of its size,
+// so there the box at 90 % of the icon, centred on the bean, keeps the whole bean inside it. The plain
+// icons, which a launcher may shrink onto a white disc, are cropped to the bean: it fills 92 % of their
+// height (D-217, D-230).
 const icons = [
-  { file: 'icon-192.png', size: 192, background: null, scale: 1 },
-  { file: 'icon-512.png', size: 512, background: null, scale: 1 },
+  { file: 'icon-192.png', size: 192, background: null, scale: 1.17 },
+  { file: 'icon-512.png', size: 512, background: null, scale: 1.17 },
   { file: 'icon-maskable-512.png', size: 512, background: BG, scale: 0.9 },
   // iOS fills a transparent icon with black, so its icon carries the background too.
   { file: 'apple-touch-icon.png', size: 180, background: BG, scale: 0.9 }
