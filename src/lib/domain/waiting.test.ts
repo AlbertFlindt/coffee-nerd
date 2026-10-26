@@ -2,13 +2,16 @@ import { describe, expect, it } from 'vitest';
 import type { ShotState } from '../components/shot-state';
 import { recipeFingerprint } from './fingerprint';
 import {
+  afterSend,
   applyChange,
   beanToOpen,
+  SERVER_FAILED,
   journalWithWaiting,
   lastShotWithWaiting,
   queueRequest,
   sendOrder,
   startFromWaiting,
+  startWithPending,
   type FormStart,
   type JournalLike,
   type WaitingEntry,
@@ -361,5 +364,85 @@ describe('the form of a waiting shot', () => {
     expect(waitingFormQuery('0199-a', BEAN, 'home')).toBe(`?bean=${BEAN}#waiting=0199-a`);
     expect(waitingShotOf(new URL(`https://x/shot/new${query}`).hash)).toBe('0199-a');
     expect(waitingShotOf('')).toBeNull();
+  });
+});
+
+describe('afterSend', () => {
+  const [entry] = queue({ kind: 'new', shot: shot('s1'), brewedAt: 500, show });
+
+  it('D-61: a shot the server has is gone from the phone', () => {
+    expect(afterSend([entry], entry, { kind: 'sent' })).toEqual({ entries: [], stop: false });
+  });
+
+  it('D-237: a refused shot keeps the reasons the server gave, and the next one is sent', () => {
+    const { entries, stop } = afterSend([entry], entry, {
+      kind: 'refused',
+      problems: ['No grinder']
+    });
+    expect(entries).toEqual([{ ...entry, status: 'refused', problems: ['No grinder'] }]);
+    expect(stop).toBe(false);
+  });
+
+  it('D-237: after three server errors in a row the shot is "Not saved" and the next one is sent', () => {
+    let entries = [entry];
+    for (const tries of [1, 2]) {
+      const result = afterSend(entries, entries[0], { kind: 'failed' });
+      expect(result.stop).toBe(true);
+      expect(result.entries[0]).toEqual({ ...entry, failures: tries });
+      entries = result.entries;
+    }
+    const third = afterSend(entries, entries[0], { kind: 'failed' });
+    expect(third.stop).toBe(false);
+    expect(third.entries[0]).toEqual({
+      ...entry,
+      failures: 3,
+      status: 'refused',
+      problems: [SERVER_FAILED]
+    });
+  });
+
+  it('D-61: a change made while the shot was on its way is kept, and its count starts again', () => {
+    const [changed] = applyChange(
+      [entry],
+      { kind: 'new', shot: shot('s1', { grind: 1700 }), brewedAt: 500, show },
+      ME,
+      2000
+    );
+    expect(afterSend([changed], entry, { kind: 'sent' }).entries).toEqual([changed]);
+    const failed = afterSend(
+      [{ ...entry, failures: 2, status: 'refused', problems: ['x'] }],
+      entry,
+      { kind: 'failed' }
+    ).entries[0];
+    const [again] = applyChange(
+      [failed],
+      { kind: 'new', shot: shot('s1'), brewedAt: 500, show },
+      ME,
+      3000
+    );
+    expect(again).toEqual(
+      expect.objectContaining({ status: 'waiting', failures: 0, problems: [] })
+    );
+  });
+});
+
+describe('D-239: the edit page starts from what waits for the shot', () => {
+  const saved = shot('s1', { grind: 1500, taste: { ...noTaste, score: 6 } });
+
+  it('a waiting edit gives its values', () => {
+    const [edit] = queue({ kind: 'edit', shot: shot('s1', { grind: 1700 }), brewedAt: 500, show });
+    expect(startWithPending(saved, edit).grind).toBe(1700);
+  });
+
+  it('a waiting score goes into the saved values', () => {
+    const [rate] = queue({ kind: 'rate', shotId: 's1', score: 9, brewedAt: 500 });
+    expect(startWithPending(saved, rate)).toEqual({
+      ...saved,
+      taste: { ...saved.taste, score: 9 }
+    });
+  });
+
+  it('nothing waiting leaves the saved values', () => {
+    expect(startWithPending(saved, null)).toBe(saved);
   });
 });

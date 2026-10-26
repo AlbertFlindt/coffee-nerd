@@ -29,14 +29,19 @@ export const queueRequestSchema = z.discriminatedUnion('kind', [
  */
 export type QueueOutcome = 'saved' | 'gone' | 'refused' | 'other-account';
 
-export function receiveQueued(db: Db, ownerId: string, body: unknown, now: number): QueueOutcome {
+/** The outcome, with the server's reasons when it refused the change (D-237). */
+export type QueueResult = { outcome: QueueOutcome; problems: string[] };
+
+const done = (outcome: QueueOutcome): QueueResult => ({ outcome, problems: [] });
+
+export function receiveQueued(db: Db, ownerId: string, body: unknown, now: number): QueueResult {
   const parsed = queueRequestSchema.safeParse(body);
-  if (!parsed.success) return 'refused';
+  if (!parsed.success) return { outcome: 'refused', problems: ['The shot could not be read.'] };
   const request = parsed.data;
-  if (request.ownerId !== ownerId) return 'other-account';
+  if (request.ownerId !== ownerId) return done('other-account');
   try {
     if (request.kind === 'rate')
-      return rateShot(db, ownerId, request.shotId, request.score, now) ? 'saved' : 'gone';
+      return done(rateShot(db, ownerId, request.shotId, request.score, now) ? 'saved' : 'gone');
     const existing = db
       .select({ brewedAt: shot.brewedAt })
       .from(shot)
@@ -45,18 +50,18 @@ export function receiveQueued(db: Db, ownerId: string, body: unknown, now: numbe
     if (request.kind === 'new' && !existing) {
       // D-220: the phone's time at Save; a phone clock ahead of the server never brews in the future.
       saveShot(db, ownerId, { ...request.shot, brewedAt: Math.min(request.brewedAt, now) }, now);
-      return 'saved';
+      return done('saved');
     }
     // A new shot the server already has (its answer was lost, or it was changed on the phone while it
     // was being sent) is saved as an edit: the latest values win, and it is still one shot (D-61, D-223).
-    if (!existing) return 'gone';
+    if (!existing) return done('gone');
     // D-113, D-220: an edit keeps the shot's brew time.
     editShot(db, ownerId, request.shot.id, { ...request.shot, brewedAt: existing.brewedAt }, now);
-    return 'saved';
+    return done('saved');
   } catch (e) {
     if (e instanceof ShotRejected) {
       console.error('Waiting shot rejected:', e.problems.join('; '));
-      return 'refused';
+      return { outcome: 'refused', problems: e.problems };
     }
     throw e;
   }

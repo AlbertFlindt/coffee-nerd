@@ -7,7 +7,8 @@
   // `origin` is where "+" was pressed, or for an edit whether the shot was opened from Home: Back and
   // Save return there (D-95, D-197, D-200).
   // With `waiting` it changes a shot still on the phone (D-224, D-231): Save keeps it waiting with the
-  // change, Delete removes it from the phone. Without a connection, Save keeps the shot or the edit on the
+  // change, Delete removes it from the phone, and "Discard change" drops a waiting edit (D-238). With
+  // `pending`, the edit page starts from the change waiting for the shot (D-239). Without a connection, Save keeps the shot or the edit on the
   // phone and returns as online (D-61, D-232).
   import { enhance } from '$app/forms';
   import { goto } from '$app/navigation';
@@ -29,11 +30,17 @@
   import { coreChanges, matchRecipe, setupChanges, setupSummary } from '../domain/shot-form';
   import { decimalsFor, formatNumber, formatRatio } from '../domain/units';
   import type { Origin } from '../domain/origin';
-  import { waitingFormQuery, type WaitingEntry, type WaitingShow } from '../domain/waiting';
+  import {
+    startWithPending,
+    waitingFormQuery,
+    type WaitingEntry,
+    type WaitingShow
+  } from '../domain/waiting';
   import {
     deleteWaiting,
     dropWaiting,
     keepWaiting,
+    putBackWaiting,
     showSavedOnPhone,
     unreached
   } from '../shot-queue.svelte';
@@ -43,12 +50,14 @@
     data,
     problems = [],
     origin = { from: 'home', filters: '' },
-    waiting = null
+    waiting = null,
+    pending = null
   }: {
     data: ShotFormData;
     problems?: string[];
     origin?: { from: Origin; filters: string };
     waiting?: WaitingEntry | null;
+    pending?: WaitingEntry | null;
   } = $props();
 
   const NOT_SAVED_WAITING =
@@ -62,6 +71,10 @@
 
   function initial(): ShotState {
     if (waiting?.shot) return structuredClone(waiting.shot);
+    return startWithPending(saved(), data.edit ? pending : null);
+  }
+
+  function saved(): ShotState {
     const p = data.prefill;
     const edit = data.edit;
     return {
@@ -85,6 +98,11 @@
   }
 
   let shot: ShotState = $state(initial());
+  // D-224, D-237: a change the server did not take says so, with the server's reasons.
+  const refused = $derived([waiting, pending].find((e) => e?.status === 'refused') ?? null);
+  const notSaved = $derived(refused ? [NOT_SAVED_WAITING, ...(refused.problems ?? [])] : []);
+  // D-238: a change to a saved shot that waits or was not saved can be dropped from the phone.
+  const discardable = $derived(waiting?.kind === 'edit' ? waiting : data.edit ? pending : null);
   const back = $derived(
     data.edit
       ? origin.from === 'home'
@@ -474,7 +492,7 @@
   </div>
 
   <footer>
-    {#each [...localProblems, ...problems, ...(waiting?.status === 'refused' ? [NOT_SAVED_WAITING] : [])] as problem (problem)}
+    {#each [...localProblems, ...problems, ...notSaved] as problem (problem)}
       <p class="problem" role="alert">{problem}</p>
     {/each}
     <form
@@ -497,6 +515,9 @@
           return;
         }
         saving = true;
+        // D-239: the form holds the change that waited, so it is dropped first, once any send of it is
+        // done; without a connection it waits again with this change, and as it was if refused.
+        const dropped = data.edit ? await dropWaiting(shot.id) : null;
         return async ({ result, update }) => {
           if (unreached(result) && ownerId) {
             // D-61, D-232: no connection, so the shot waits on the phone; the page returns as online.
@@ -513,8 +534,8 @@
             }
             return;
           }
-          // D-223: a change saved online replaces what waited on the phone for this shot.
-          if (data.edit && result.type === 'redirect') await dropWaiting(shot.id);
+          // Refused or failed: the change that waited is not lost when the form is left.
+          if (dropped && result.type !== 'redirect') await putBackWaiting(dropped);
           await update();
           saving = false;
         };
@@ -525,7 +546,19 @@
       <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={saving}
         >{data.edit || waiting ? 'Save changes' : 'Save shot'}</button
       >
-      {#if data.edit || waiting?.kind === 'new'}
+      {#if discardable}
+        <!-- D-238: the shot stays as the server has it; it can be deleted once the change is gone. -->
+        <button
+          class="cn-btn-quiet delete cn-tap"
+          type="button"
+          disabled={saving}
+          onclick={async () => {
+            saving = true;
+            await dropWaiting(discardable.shotId);
+            await goto(back, { invalidateAll: true });
+          }}>Discard change</button
+        >
+      {:else if data.edit || waiting?.kind === 'new'}
         <!-- D-116: the edit form ends with "Delete shot"; a waiting edit of a saved shot is deleted
              on the shot's own page. -->
         <button class="cn-btn-quiet delete cn-tap" type="button" onclick={() => (sheet = 'delete')}

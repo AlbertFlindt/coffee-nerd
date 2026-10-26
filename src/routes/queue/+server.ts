@@ -14,6 +14,6 @@ export const POST: RequestHandler = async ({ locals, request }) => {
   } catch {
     body = null;
   }
-  const outcome = receiveQueued(getDb(), locals.user.id, body, Date.now());
-  return json({ outcome }, { status: STATUS[outcome] });
+  const result = receiveQueued(getDb(), locals.user.id, body, Date.now());
+  return json(result, { status: STATUS[result.outcome] });
 };
