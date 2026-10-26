@@ -2,7 +2,7 @@
 
 Status: living document. Each decision records **what** was decided and **why**, so later design and code can be checked against it. Technical decisions start at section 13.
 
-Last updated: 2026-10-25
+Last updated: 2026-10-26
 
 ---
 
@@ -106,7 +106,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* an outlier should not pull the average and the spread towards itself.
 - **D-110 — Within one σ is "within normal range".** *(Revised 2026-10-25: see D-209.)* A shot whose time or score lies within one σ of the other shots' average reads "Within normal range". Further away, time reads "1.7σ faster than usual" or "slower than usual", and score "higher than usual" or "lower than usual". Time and score are compared, as on the screen. Refines D-57.
   - *Why:* matches the screen, where 1.7σ is named as unusual; one σ is a common, easily explained bar.
-- **D-111 — The Rate block opens a score sheet.** *(Revised 2026-10-25: see D-197.)* Tapping the dashed "Rate" block on a Journal row opens a small sheet with the score row; tapping a score saves it and closes the sheet. The rest of the row still opens the shot. Refines D-54.
+- **D-111 — The Rate block opens a score sheet.** *(Revised 2026-10-25: see D-197; 2026-10-26: see D-223.)* Tapping the dashed "Rate" block on a Journal row opens a small sheet with the score row; tapping a score saves it and closes the sheet. The rest of the row still opens the shot. Refines D-54.
   - *Why:* rating an unrated shot becomes the one-tap job D-54 promises.
 - **D-112 — "Any recipe" lists the chosen bean's recipes.** The Journal's recipe filter appears once a bean is chosen and lists that bean's recipes by their values ("1.6 · 18.0 g · Daily routine · 3 shots"), most recently brewed first. Refines D-54.
   - *Why:* recipes have no names; within one bean their values tell them apart.
@@ -186,7 +186,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 ## 7. Shot form (espresso)
 
-- **D-03 — Prefill from last shot.** *(Revised 2026-10-17: see D-72, D-75, D-76.)* A new shot starts as a copy of the last shot (bean and core values). Changed values are highlighted against the previous shot. Ratio is calculated automatically. When there is no last shot for this bean, the shot starts from **My setup** defaults (D-38). When a recipe is marked **"Brew next"** (D-43), the next shot starts from that recipe instead.
+- **D-03 — Prefill from last shot.** *(Revised 2026-10-17: see D-72, D-75, D-76; 2026-10-26: see D-222.)* A new shot starts as a copy of the last shot (bean and core values). Changed values are highlighted against the previous shot. Ratio is calculated automatically. When there is no last shot for this bean, the shot starts from **My setup** defaults (D-38). When a recipe is marked **"Brew next"** (D-43), the next shot starts from that recipe instead.
   - *Why:* the most valuable action is "brew again, change one thing."
 - **D-72 — A bean's first shot starts with an empty time.** *(Revised 2026-10-17: see D-80, D-91.)* When a shot starts from My setup (D-38), grind, dose and yield come from My setup; the time has no default and stays empty until it is set. Refines D-03.
   - *Why:* My setup holds what you choose before brewing; time is a result, so inventing one would be a guess (same reasoning as D-11).
@@ -579,8 +579,30 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* every home barista's gear is different; example gear would have to be removed before use.
 - **D-105 — Until M11 the published image can seed the reference setup.** The image published from `main` carries a command that fills an empty installation with the reference setup, so the app can be tried on a server before gear and My setup can be added in the app (roadmap M6). It only works before an account exists. It is removed from the image when the real install guide lands (roadmap M11). Refines D-88.
   - *Why:* trying the app at the brew station early is the point of building the core loop first (D-70); without gear a server install could not log a shot.
-- **D-61 — Offline: the app opens offline, and shots wait to sync.** A service worker caches the app and the data needed to brew (open beans, their recipes, gear, routines, tags, My setup), so the app opens and the shot form prefills without a connection. A shot saved offline (new or edited) goes into a **queue on the device** and is sent when the connection returns; the server accepts each queued shot exactly once. Library changes need a connection. *(Revised 2026-10-16: saving offline was first out of scope.)*
+- **D-61 — Offline: the app opens offline, and shots wait to sync.** A service worker caches the app and the data needed to brew (open beans, their recipes, gear, routines, tags, My setup), so the app opens and the shot form prefills without a connection. A shot saved offline (new or edited) goes into a **queue on the device** and is sent when the connection returns; the server accepts each queued shot exactly once. Library changes need a connection. *(Revised 2026-10-16: saving offline was first out of scope; 2026-10-26: see D-218 to D-227.)*
   - *Why:* a shot should never be lost because the Wi-Fi dropped at the brew station; limiting the queue to shots keeps the sync logic small.
+- **D-217 — The app icon is the logo.** The home-screen icon is the bean-with-glasses mark itself (D-34), drawn from its vector file so it is sharp at every size. Where the phone needs a full square (Android's adaptive icon), the mark sits inside the safe area on the app's own background. Refining the logo stays open (open topic 17) and reaches the icon through a design-system sync (D-58).
+  - *Why:* the owner wants the logo in high quality, not a new mark; the vector file gives that at every size.
+- **D-218 — Installing the app and offline need https.** Installing the app and working offline (D-61) only work when the app is opened over https (or on localhost). Opened over plain http the app keeps working online as before, without an error. The install guide (M11) asks for https. Settles the plain-http open item.
+  - *Why:* browsers allow the service worker and installing only on secure connections; the owner already reaches the server over https.
+- **D-219 — What opens offline.** Home, the shot form and the Journal always open offline. Any other page already visited opens from what the phone kept, read only, with an "Offline" line at the top. Changes other than shots (Library, Settings) say they need a connection and change nothing. The wording is approved by screenshot in the pull request that builds it. Refines D-61.
+  - *Why:* the brew station needs Home, the shot form and the Journal; read-only pages are better than a blank screen, and keeping changes to shots keeps the sync logic small (D-61).
+- **D-220 — A shot saved offline keeps the time it was brewed.** A shot saved without a connection gets the time on the phone when Save was pressed, not the time it reaches the server. An edit or a score given offline keeps the shot's brew time. Refines D-61.
+  - *Why:* the Journal, the weekly counts and Insights are about when the shot was brewed.
+- **D-221 — How a waiting shot looks.** A shot that is still waiting to send shows a muted "Waiting to send" line with an icon on its Journal row and on Home's Last shot card. It is built from design-system parts and approved by screenshot in the pull request that builds it; the canvas can design it later. Settles open topic 23.
+  - *Why:* waiting for a canvas design would hold up M10, as with Home and Insights (D-198, D-207).
+- **D-222 — The next shot starts from a waiting shot.** A shot waiting to send is the last shot brewed, so the next shot starts from it (D-03) and the recipe tag judges it against it. Refines D-03 and D-61.
+  - *Why:* dialling in offline must work like dialling in online: each shot builds on the one before.
+- **D-223 — Rating offline waits like an edit.** A score given offline on the Rate sheet waits on the phone and is sent like an edited shot. Refines D-61 and D-111.
+  - *Why:* rating right after the shot is the habit the app builds (D-54, D-111); it should not need a connection.
+- **D-224 — A queued shot the server refuses is kept.** When the server refuses a shot that waited on the phone, the shot stays on the phone, marked "Not saved" in the Journal. Tapping it opens the shot form with its values, to fix and save it again, or to delete it. Refines D-61.
+  - *Why:* a shot is never lost (D-61, D-182), and the owner decides what happens to it.
+- **D-225 — Signing out clears the phone.** Signing out removes everything the app kept on the phone: the cached pages and data, the draft and any waiting shots. When shots are still waiting, signing out asks first (for example "1 shot is still waiting to send"); the wording is approved by screenshot in the pull request that builds it. Refines D-61.
+  - *Why:* the app is self-hosted and private; a signed-out phone keeps nothing, and a waiting shot is never deleted without asking.
+- **D-226 — The shot form keeps a draft.** A new or edited shot is kept on the phone while it is being entered, so a reload or closing the app never loses input; opening the form again restores it. Save and Back end the draft. Switching the bean (D-94) or "Use last shot recipe" (D-43) still starts the form again, as now. Refines D-61.
+  - *Why:* the Wi-Fi or the phone should never cost a shot; switching bean is a deliberate fresh start.
+- **D-227 — A new version never interrupts a shot.** When a new version of the app is installed on the server, the phone takes it the next time the app opens, never while a form is open. Shots waiting from the old version are still sent.
+  - *Why:* updating mid-shot could lose input; waiting shots must survive an update.
 - **D-62 — Claude Code writes all the code, so guardrails come first.** The owner decides behavior (this log, the design system, the running app) and does not review code. Therefore: TypeScript strict mode; automated tests on domain logic (recipe matching, prefill rules, statistics) written before the UI that uses it, each test naming the D-number it protects; linting and formatting enforced; CI must pass before anything is merged; a separate review pass by Claude Code before merge. CLAUDE.md points to this log (behavior) and the design system (visuals) as sources of truth. *(Revised 2026-10-16: was "most of the code".)*
   - *Why:* when an AI agent writes all the code, the owner's confidence has to come from checks that run every time and trace back to decisions, not from reviewing lines.
 - **D-63 — Recipe is its own entity.** A recipe is a stored record (bean, machine, grinder, basket, puck prep routine, grind, dose and setup values). Every shot points to one recipe. A recipe never changes: saving a shot with different values finds the matching existing recipe for that bean and machine, or creates a new one.
@@ -627,13 +649,13 @@ Users never pick a persona. Personas are used to check that each screen works fo
 14. ~~Tags home~~ (D-29, D-53, D-171 to D-174, D-179 to D-182)
 15. Home: design the other three graphs (Time vs. yield, Roast age, Consistency) — after Insights (M9); Home ships with Dial-in progress only (D-193)
 16. ~~Journal, Insights, shot detail~~ (D-54 to D-57) — still to do: more Dial-in cards (e.g. grind vs time scatter, sour/bitter vs ratio); M9 ships Dial-in with the bell curve only (D-201)
-17. Logo: refine the bean-with-glasses mark (app icon for the PWA home screen)
+17. Logo: refine the bean-with-glasses mark (the app icon is the logo as it is, D-217)
 18. ~~Library landing page~~ (D-50)
 19. ~~Origin field: free text vs. a country list~~ (D-41: country picker + free-text region)
 20. Measuring gear (scales, refractometers): where it fits, what it records (results like yield, time, TDS) (D-47)
 21. Grinder: "Log burr change / recalibration" — a dated marker on the grinder that also shows as a line on Home's graphs (future)
 22. Households: each user builds their own Library, or a household share toggle on Library items (D-60; the data model supports both)
-23. ~~Shot form when a save fails offline~~ (D-61: queued and sent when online) — still to do: how a waiting shot looks in the Journal
+23. ~~Shot form when a save fails offline~~ (D-61: queued and sent when online; a waiting shot's look: D-221)
 24. ~~Data model~~ (`docs/data-model.md`, D-63 to D-68)
 25. ~~Repository setup and CLAUDE.md~~ (D-69, D-70; `docs/roadmap.md`)
 26. Open source: license (e.g. MIT or AGPL), contributing guide and code of conduct, when the project is mature (D-69, roadmap M11)
