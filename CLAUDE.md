@@ -30,6 +30,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - `npm run db:seed`: fill an empty database with the reference setup (sign in as "Demo" / "coffee-nerd"); development and screenshots only (D-88)
 - `docker compose up --build`: the production image on port 3000, data in the `/data` volume
 - `docker compose exec coffee-nerd node scripts/reset-password.mjs`: set a new password and sign out every device (D-87)
+- `npm run icons`: draw the home-screen icons in `static/icons/` from the logo (D-217); run it after a design-system sync changes the logo
 - `node design-system/build-tokens.mjs`: regenerate `tokens.css` after changing `tokens.json`, as part of a design-system sync (D-69, D-146).
 
 ## Architecture

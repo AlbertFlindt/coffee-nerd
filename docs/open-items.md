@@ -70,6 +70,7 @@ Last updated: 2026-10-26
 ## 4. Code and tooling to revisit
 
 | Item | When | Source |
+| The installed app (D-217, D-228) is not yet checked on the Pixel 8a, the owner's check after the installable-app pull request; Safari on iPhone and iPad is not tested | M10 | D-217 |
 |---|---|---|
 | The seeded end-to-end files share one database and run in name order (`shot-*`, then `tab-*`), each leaving the reference setup as it found it; a file cannot run alone after an earlier one fails | Any time | M6 tests |
 | The rows in the Setup sheet and in the pressure profile sheet have −/+ only, no tap to type: from empty, flat pressure needs 18 taps to reach 9.0 bar (D-78). Tap to type on these rows would help, mostly on the first My setup | When the canvas designs it | D-78, D-24 |

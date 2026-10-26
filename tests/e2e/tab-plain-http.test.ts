@@ -50,3 +50,11 @@ test('CustomFeature, D-46: opens and adds the feature on plain HTTP', async () =
   await expect(page.getByRole('button', { name: 'Edit Bloom' })).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test('D-218: on plain HTTP the app works online, without installing or a service worker', async () => {
+  errors.length = 0;
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
+  expect(await page.evaluate(() => 'serviceWorker' in navigator)).toBe(false);
+  expect(errors).toEqual([]);
+});
