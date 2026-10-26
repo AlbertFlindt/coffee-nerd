@@ -18,6 +18,7 @@ const DATABASE = 'coffee-nerd';
 const STORE = 'waiting-shots';
 // While shots wait and the phone seems online, the server is tried again this often.
 const RETRY_EVERY = 30_000;
+const TIME_LIMIT = 4_000;
 
 /** The entries as the pages show them; filled once the layout has read the phone's database. */
 export const waiting = $state({ entries: [] as WaitingEntry[], loaded: false });
@@ -193,11 +194,13 @@ async function send(ownerId: string) {
         const response = await fetch('/queue', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(queueRequest(entry))
+          body: JSON.stringify(queueRequest(entry)),
+          // D-235: a server this slow counts as offline; the server saves each change once anyway.
+          signal: AbortSignal.timeout(TIME_LIMIT)
         });
         result = await resultOf(response);
       } catch {
-        // No connection: everything waits for the next try.
+        // No connection, or no answer in time: everything waits for the next try.
         break;
       }
       // Signed out, another account, or no answer from the app: try again later.

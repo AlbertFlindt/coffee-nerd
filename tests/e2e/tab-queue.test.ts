@@ -94,7 +94,9 @@ test.beforeAll(async ({ browser }) => {
   await expect
     .poll(async () => {
       const kept = await keptNow();
-      return listed.filter((p) => !kept.includes(p) || !kept.includes(dataUrl(p)));
+      // The shot form as the Journal opens it keeps only its data.
+      const page = (p: string) => p.includes('from=journal') || kept.includes(p);
+      return listed.filter((p) => !page(p) || !kept.includes(dataUrl(p)));
     })
     .toEqual([]);
 });
@@ -447,6 +449,40 @@ test('D-224: a waiting shot the server refuses is kept as "Not saved", to fix or
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
   await expect(page.getByText('Not saved')).toHaveCount(0);
   expect(await entries()).toEqual([]);
+});
+
+test('D-235: a save the server has not answered in 4 seconds waits on the phone, and so does a slow send', async () => {
+  const before = shotIds();
+  await page.goto('/journal');
+  await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
+  // The server takes 6 seconds, then the answer is lost.
+  const slow = (url: URL) =>
+    url.pathname === '/queue' || (url.pathname === '/shot/new' && url.search === '?/save');
+  await context.route(slow, async (route) => {
+    await new Promise((done) => setTimeout(done, 6_000));
+    await route.abort().catch(() => {});
+  });
+  await page.getByRole('link', { name: 'New shot' }).click();
+  await expect(page.getByRole('button', { name: 'Save shot' })).toBeVisible();
+  const pressed = Date.now();
+  await page.getByRole('button', { name: 'Save shot' }).click();
+  await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText('Shot saved')).toBeVisible();
+  expect(Date.now() - pressed).toBeLessThan(6_000);
+  // Sending it times out as well: it keeps waiting, it is not "Not saved".
+  await page.waitForTimeout(5_000);
+  expect(await entries()).toEqual([expect.objectContaining({ kind: 'new', status: 'waiting' })]);
+  await context.unroute(slow);
+  await expect
+    .poll(
+      async () => {
+        await page.evaluate(() => dispatchEvent(new Event('online')));
+        return (await entries()).length;
+      },
+      { timeout: 15_000 }
+    )
+    .toBe(0);
+  expect(shotIds().filter((s) => !before.includes(s))).toHaveLength(1);
 });
 
 test('D-225, D-234: signing out asks first while a shot waits, then leaves nothing on the phone', async () => {

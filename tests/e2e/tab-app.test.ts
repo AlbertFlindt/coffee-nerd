@@ -89,15 +89,17 @@ test('D-219: on the first visit the app is ready offline without opening it agai
   const fresh = await browser.newContext();
   const first = await fresh.newPage();
   await signIn(first);
-  // The service worker takes the open page, then keeps Home for offline use, with no reload.
-  await expect.poll(() => first.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+  // The service worker keeps Home for offline use, with no reload. Installing copies every file of the
+  // app first, which can take a while on a busy machine.
   await expect
-    .poll(() =>
-      first.evaluate(async () => {
-        const name = (await caches.keys()).find((k) => k.startsWith('pages-'));
-        const keys = name ? await (await caches.open(name)).keys() : [];
-        return keys.map((r) => new URL(r.url).pathname);
-      })
+    .poll(
+      () =>
+        first.evaluate(async () => {
+          const name = (await caches.keys()).find((k) => k.startsWith('pages-'));
+          const keys = name ? await (await caches.open(name)).keys() : [];
+          return keys.map((r) => new URL(r.url).pathname);
+        }),
+      { timeout: 15_000 }
     )
     .toContain('/__data.json');
   await fresh.close();

@@ -14,6 +14,12 @@ export const POST: RequestHandler = async ({ locals, request }) => {
   } catch {
     body = null;
   }
-  const result = receiveQueued(getDb(), locals.user.id, body, Date.now());
-  return json(result, { status: STATUS[result.outcome] });
+  try {
+    const result = receiveQueued(getDb(), locals.user.id, body, Date.now());
+    return json(result, { status: STATUS[result.outcome] });
+  } catch (failure) {
+    // D-237: an error of the app answers as the app, so the phone counts it toward "Not saved".
+    console.error('Waiting shot failed:', failure);
+    return json({ outcome: 'error' }, { status: 500 });
+  }
 };
