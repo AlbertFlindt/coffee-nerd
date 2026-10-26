@@ -45,7 +45,7 @@
     unreached
   } from '../shot-queue.svelte';
   import type { ShotFormData } from '../server/db/shot-form';
-  import { draftForm } from '../domain/draft';
+  import { draftForm, fitsForm } from '../domain/draft';
   import { dropDraft, openDraft, saveDraft } from '../shot-draft';
 
   let {
@@ -129,7 +129,8 @@
   }
 
   const start = initial();
-  const draft = restored();
+  const kept = restored();
+  const draft = kept && fitsForm(kept, start) ? kept : null;
   let shot: ShotState = $state(draft ?? structuredClone(start));
   $effect(() => {
     const now = $state.snapshot(shot);
@@ -160,6 +161,9 @@
   function chooseBeanForEdit(beanId: string) {
     sheet = null;
     switchingBean = true;
+    // The draft goes with the new bean: a waiting shot's form opens again for it (D-113, D-226).
+    const { ownerId, form, basis } = draftOf();
+    if (ownerId) saveDraft(ownerId, form, basis, { ...$state.snapshot(shot), beanId }, start);
     if (waiting) {
       goto(resolve(`/shot/new${waitingFormQuery(waiting.shotId, beanId, origin.from)}`), {
         replaceState: true
@@ -518,6 +522,7 @@
           method="POST"
           action="?/delete"
           class="delete-actions"
+          data-waits={waiting ? '' : undefined}
           onsubmit={async (event) => {
             deleting = true;
             endDraft();

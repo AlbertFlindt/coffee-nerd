@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { ShotState } from '../components/shot-state';
-import { clearDrafts, draftForm, endDraft, keepDraft, restoreDraft, type Draft } from './draft';
+import {
+  clearDrafts,
+  draftForm,
+  endDraft,
+  fitsForm,
+  keepDraft,
+  restoreDraft,
+  type Draft
+} from './draft';
 
 const ME = 'user-me';
 const OTHER = 'user-other';
@@ -93,5 +101,14 @@ describe('the shot form draft', () => {
     drafts = keepDraft(drafts, OTHER, NEW, BASIS, shot('s2', { grind: 1500 }), shot('s2'));
     expect(restoreDraft(drafts, OTHER, NEW, BASIS, newId).shot?.grind).toBe(1500);
     expect(clearDrafts(drafts, ME).map((d) => d.ownerId)).toEqual([OTHER]);
+  });
+
+  it('D-226: a draft kept by an earlier version of the app, with other values, is not restored', () => {
+    expect(fitsForm(shot('s1', { grind: 1700 }), shot('s1'))).toBe(true);
+    const older: Partial<ShotState> = shot('s1');
+    delete older.notes;
+    expect(fitsForm(older as ShotState, shot('s1'))).toBe(false);
+    const oldTaste = { ...shot('s1'), taste: { score: 7 } } as unknown as ShotState;
+    expect(fitsForm(oldTaste, shot('s1'))).toBe(false);
   });
 });

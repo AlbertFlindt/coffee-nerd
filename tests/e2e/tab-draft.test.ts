@@ -151,6 +151,62 @@ test('D-226: an edit survives a reload; Save ends it', async () => {
   expect(await drafts()).toBeNull();
 });
 
+test('D-226, D-113: an edit draft made with another bean opens on that bean again', async () => {
+  const id = newestId();
+  await page.goto(`/journal/${id}/edit`);
+  await page.getByRole('button', { name: 'Time plus 1 second' }).click();
+  const entered = await time();
+  await page
+    .getByRole('button', { name: /choose another bean/ })
+    .click({ position: { x: 22, y: 10 } });
+  await page
+    .getByRole('region', { name: 'Choose a bean' })
+    .getByRole('button', { name: 'Kiambu AA' })
+    .click();
+  const kiambu = page.getByRole('button', { name: /^Kiambu AA.*, choose another bean$/ });
+  await expect(kiambu).toBeVisible();
+  // Opened again without the bean in its address.
+  await page.goto(`/journal/${id}/edit`);
+  await expect(kiambu).toBeVisible();
+  expect(await time()).toBe(entered);
+  await page.getByRole('link', { name: 'Back without saving' }).click();
+  expect(await drafts()).toBeNull();
+});
+
+test('D-226, D-113, D-231: a waiting shot keeps its values and the bean chosen for it', async () => {
+  await page.goto('/journal');
+  await context.setOffline(true);
+  await page.getByRole('link', { name: 'New shot' }).click();
+  await page.getByRole('button', { name: 'Save shot' }).click();
+  await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
+  await page.locator('main .item').first().getByRole('link').click();
+  await expect(page.getByRole('heading', { name: 'Edit shot' })).toBeVisible();
+  await page.getByRole('button', { name: 'Time plus 1 second' }).click();
+  const entered = await time();
+  await page
+    .getByRole('button', { name: /choose another bean/ })
+    .click({ position: { x: 22, y: 10 } });
+  await page
+    .getByRole('region', { name: 'Choose a bean' })
+    .getByRole('button', { name: 'Kiambu AA' })
+    .click();
+  const kiambu = page.getByRole('button', { name: /^Kiambu AA.*, choose another bean$/ });
+  await expect(kiambu).toBeVisible();
+  // It stays on the bean chosen, with the values entered.
+  await page.waitForTimeout(500);
+  await expect(kiambu).toBeVisible();
+  expect(await time()).toBe(entered);
+  // Deleted again: it was only on the phone.
+  await page.getByRole('button', { name: 'Delete shot' }).click();
+  await page
+    .getByRole('region', { name: 'Delete this shot' })
+    .getByRole('button', { name: 'Delete shot' })
+    .click();
+  await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
+  await context.setOffline(false);
+  expect(await drafts()).toBeNull();
+});
+
 test('D-226, D-61: a draft whose Save already reached the server is saved as a shot of its own', async () => {
   // The app closed after Save reached the server, before the draft ended: the draft has the id of a
   // shot the server has.

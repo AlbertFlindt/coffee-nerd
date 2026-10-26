@@ -62,3 +62,19 @@ export function endDraft(drafts: readonly Draft[], ownerId: string, form: string
 export function clearDrafts(drafts: readonly Draft[], ownerId: string): Draft[] {
   return drafts.filter((d) => d.ownerId !== ownerId);
 }
+
+/**
+ * Whether a restored draft still has the form's shape: a draft kept by an earlier version of the app,
+ * with other values, is not restored.
+ */
+export function fitsForm(shot: ShotState, start: ShotState): boolean {
+  const keys = (o: object | null) =>
+    o && typeof o === 'object' ? Object.keys(o).sort().join() : '';
+  return (
+    keys(shot) === keys(start) &&
+    keys(shot.taste) === keys(start.taste) &&
+    keys(shot.setup) === keys(start.setup) &&
+    Array.isArray(shot.tagIds) &&
+    Array.isArray(shot.newTagNames)
+  );
+}

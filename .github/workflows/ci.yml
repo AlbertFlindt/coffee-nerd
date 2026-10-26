@@ -17,7 +17,8 @@ jobs:
     name: Check, lint, test, build
     # Pinned together with @playwright/test (1.63.0): its --with-deps must know this Ubuntu release; upgrade both together.
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    # Room for three browser install tries that each wait out a stalled package lock (below).
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,7 +37,7 @@ jobs:
             timeout 300 npx playwright install --with-deps chromium && exit 0
             echo "Try $try stalled or failed; trying again."
             # A try cut off leaves its apt-get running with the package lock: wait for it to finish.
-            for wait in $(seq 120); do
+            for wait in $(seq 36); do
               sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || break
               sleep 5
             done
