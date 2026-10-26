@@ -16,8 +16,7 @@ Last updated: 2026-10-26
 
 | Question | Needed by | Source |
 |---|---|---|
-| Installed, the app opens standalone: no browser bar, but the phone's status bar (clock, battery) stays, the usual choice for installed apps. The context section says "full screen", which could also mean hiding the status bar. Keep standalone? Not yet checked on the Pixel 8a; Safari on iPhone and iPad is not tested | M10 | D-217 |
-| A new version takes over once every window of the app is closed (D-227). On Android an app left open among the recent apps keeps the old version until it is swiped away. Is that close enough to "the next time the app opens"? | M10 | D-227 |
+| *(none open)* | | |
 
 ## 2. Screens and states not designed yet
 
@@ -71,6 +70,7 @@ Last updated: 2026-10-26
 ## 4. Code and tooling to revisit
 
 | Item | When | Source |
+| The installed app (D-217, D-228) is not yet checked on the Pixel 8a, the owner's check after the installable-app pull request; Safari on iPhone and iPad is not tested | M10 | D-217 |
 |---|---|---|
 | The seeded end-to-end files share one database and run in name order (`shot-*`, then `tab-*`), each leaving the reference setup as it found it; a file cannot run alone after an earlier one fails | Any time | M6 tests |
 | The rows in the Setup sheet and in the pressure profile sheet have −/+ only, no tap to type: from empty, flat pressure needs 18 taps to reach 9.0 bar (D-78). Tap to type on these rows would help, mostly on the first My setup | When the canvas designs it | D-78, D-24 |

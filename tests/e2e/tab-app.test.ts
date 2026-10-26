@@ -23,7 +23,7 @@ test.beforeAll(async ({ browser }) => {
 
 test.afterAll(() => context.close());
 
-test('D-217: the manifest names the app, opens it standalone and uses the logo as icon', async ({
+test('D-217, D-228: the manifest names the app, opens it standalone and uses the logo as icon', async ({
   request
 }) => {
   const href = await page.locator('link[rel="manifest"]').getAttribute('href');
@@ -84,7 +84,7 @@ test("D-61: the service worker keeps the app's own files and answers for them", 
   );
 });
 
-test('D-227: a new version waits until the app is closed, then takes over', async () => {
+test('D-227, D-229: a new version waits until the app is closed, then takes over', async () => {
   // A shot in progress: the form is open and a value was entered.
   await page.goto('/shot/new');
   await page.getByRole('radio', { name: '7' }).click();
