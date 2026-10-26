@@ -23,7 +23,13 @@ export const load: PageServerLoad = ({ locals, url, cookies, request }) => {
   );
   // D-117: remember the filters in effect; ids that no longer exist are dropped.
   if (!locals.offlineCopy) rememberJournalFilters(cookies, journal, request);
-  return { now, journal, flash: locals.offlineCopy ? null : takeFlash(cookies) };
+  // D-61, D-225: whose shots wait on the phone; they are only shown and sent for their own account.
+  return {
+    userId: locals.user.id,
+    now,
+    journal,
+    flash: locals.offlineCopy ? null : takeFlash(cookies)
+  };
 };
 
 export const actions: Actions = {

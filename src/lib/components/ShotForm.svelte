@@ -6,9 +6,13 @@
   // card moves the shot to another bean while keeping the values.
   // `origin` is where "+" was pressed, or for an edit whether the shot was opened from Home: Back and
   // Save return there (D-95, D-197, D-200).
+  // With `waiting` it changes a shot still on the phone (D-224, D-231): Save keeps it waiting with the
+  // change, Delete removes it from the phone. Without a connection, Save keeps the shot or the edit on the
+  // phone and returns as online (D-61, D-232).
   import { enhance } from '$app/forms';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
+  import { page } from '$app/state';
   import { PROCESS_LABEL } from '#lib/domain/bean.ts';
   import { onMount } from 'svelte';
   import { v7 } from 'uuid';
@@ -25,17 +29,30 @@
   import { coreChanges, matchRecipe, setupChanges, setupSummary } from '../domain/shot-form';
   import { decimalsFor, formatNumber, formatRatio } from '../domain/units';
   import type { Origin } from '../domain/origin';
+  import { waitingFormQuery, type WaitingEntry, type WaitingShow } from '../domain/waiting';
+  import {
+    deleteWaiting,
+    dropWaiting,
+    keepWaiting,
+    showSavedOnPhone,
+    unreached
+  } from '../shot-queue.svelte';
   import type { ShotFormData } from '../server/db/shot-form';
 
   let {
     data,
     problems = [],
-    origin = { from: 'home', filters: '' }
+    origin = { from: 'home', filters: '' },
+    waiting = null
   }: {
     data: ShotFormData;
     problems?: string[];
     origin?: { from: Origin; filters: string };
+    waiting?: WaitingEntry | null;
   } = $props();
+
+  const NOT_SAVED_WAITING =
+    'Not saved: the server did not take this shot. Change it and save again, or delete it.';
 
   /** "Natural · 12 days" after a bean's name in the bean list (D-134). */
   function beanDetail(b: ShotFormData['openBeans'][number]): string {
@@ -44,6 +61,7 @@
   }
 
   function initial(): ShotState {
+    if (waiting?.shot) return structuredClone(waiting.shot);
     const p = data.prefill;
     const edit = data.edit;
     return {
@@ -81,10 +99,16 @@
 
   // D-113: in edit mode another bean keeps the values; the page loads that bean's recipes to compare with.
   $effect(() => {
-    if (data.edit) shot.beanId = data.bean.id;
+    if (data.edit || waiting) shot.beanId = data.bean.id;
   });
   function chooseBeanForEdit(beanId: string) {
     sheet = null;
+    if (waiting) {
+      goto(resolve(`/shot/new${waitingFormQuery(waiting.shotId, beanId, origin.from)}`), {
+        replaceState: true
+      });
+      return;
+    }
     const shotId = data.edit!.shotId;
     const from = origin.from === 'home' ? '&from=home' : '';
     goto(resolve(`/journal/[id]/edit?bean=${beanId}${from}`, { id: shotId }), {
@@ -125,6 +149,20 @@
     )
   );
   const setup = $derived(setupChanges(identity, last?.recipe ?? null));
+
+  /** What the Journal and Home show of the shot while it waits on the phone (D-221). */
+  function waitingShow(): WaitingShow {
+    return {
+      beanName: data.bean.name,
+      grindStep: dial.step,
+      steps: data.steps,
+      recipeTag:
+        match.kind === 'reused'
+          ? { kind: 'reused', shotCount: match.shotCount }
+          : { kind: 'new', changes: match.changes },
+      previousScore: match.kind === 'reused' ? match.lastScore : null
+    };
+  }
   const ratio = $derived(formatRatio(shot.yield, shot.dose));
   const lastRatio = $derived(last ? formatRatio(last.yield, last.dose ?? last.recipe.dose) : null);
   // D-153: the machine and grinder can be switched for this shot; features and grind control follow.
@@ -209,7 +247,7 @@
           aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg
         >
       </a>
-      <h1 class="cn-type-title">{data.edit ? 'Edit shot' : 'New shot'}</h1>
+      <h1 class="cn-type-title">{data.edit || waiting ? 'Edit shot' : 'New shot'}</h1>
       <span></span>
     </header>
 
@@ -337,8 +375,8 @@
         onclose={() => (sheet = null)}
       >
         <h2 class="sheet-title">Open beans</h2>
-        {#if data.edit}
-          <!-- D-113: editing, another bean keeps the values entered. -->
+        {#if data.edit || waiting}
+          <!-- D-113, D-231: editing, another bean keeps the values entered. -->
           <div class="beans">
             {#each data.openBeans as b (b.id)}
               <button
@@ -415,7 +453,14 @@
           method="POST"
           action="?/delete"
           class="delete-actions"
-          onsubmit={() => (deleting = true)}
+          onsubmit={async (event) => {
+            deleting = true;
+            if (!waiting) return;
+            // D-231: a shot that is only on the phone is removed from it.
+            event.preventDefault();
+            await deleteWaiting(waiting.shotId);
+            await goto(back);
+          }}
         >
           <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={deleting}
             >Delete shot</button
@@ -429,16 +474,45 @@
   </div>
 
   <footer>
-    {#each [...localProblems, ...problems] as problem (problem)}
+    {#each [...localProblems, ...problems, ...(waiting?.status === 'refused' ? [NOT_SAVED_WAITING] : [])] as problem (problem)}
       <p class="problem" role="alert">{problem}</p>
     {/each}
     <form
       method="POST"
       action="?/save"
-      use:enhance={({ cancel }) => {
+      data-waits
+      use:enhance={async ({ cancel }) => {
         if (!check()) return cancel();
+        // D-220: a shot kept on the phone is brewed when Save is pressed.
+        const brewedAt = Date.now();
+        const ownerId = page.data.userId;
+        if (waiting) {
+          // D-231: a shot still on the phone stays there with the change, and keeps its brew time.
+          cancel();
+          if (!ownerId) return;
+          saving = true;
+          const change = { kind: 'new' as const, shot, show: waitingShow(), fromWaiting: true };
+          await keepWaiting({ ...change, brewedAt: waiting.brewedAt }, ownerId);
+          await goto(back);
+          return;
+        }
         saving = true;
-        return async ({ update }) => {
+        return async ({ result, update }) => {
+          if (unreached(result) && ownerId) {
+            // D-61, D-232: no connection, so the shot waits on the phone; the page returns as online.
+            const kind = data.edit ? ('edit' as const) : ('new' as const);
+            await keepWaiting({ kind, shot, brewedAt, show: waitingShow() }, ownerId);
+            if (data.edit) {
+              // The shot's own page shows it as it was: the Journal shows the change waiting.
+              await goto(origin.from === 'home' ? resolve('/') : resolve('/journal'));
+            } else {
+              showSavedOnPhone();
+              await goto(back);
+            }
+            return;
+          }
+          // D-223: a change saved online replaces what waited on the phone for this shot.
+          if (data.edit && result.type === 'redirect') await dropWaiting(shot.id);
           await update();
           saving = false;
         };
@@ -447,10 +521,11 @@
       <input type="hidden" name="shot" value={JSON.stringify(shot)} />
       <input type="hidden" name="from" value={origin.from} />
       <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={saving}
-        >{data.edit ? 'Save changes' : 'Save shot'}</button
+        >{data.edit || waiting ? 'Save changes' : 'Save shot'}</button
       >
-      {#if data.edit}
-        <!-- D-116: the edit form ends with "Delete shot". -->
+      {#if data.edit || waiting?.kind === 'new'}
+        <!-- D-116: the edit form ends with "Delete shot"; a waiting edit of a saved shot is deleted
+             on the shot's own page. -->
         <button class="cn-btn-quiet delete cn-tap" type="button" onclick={() => (sheet = 'delete')}
           >Delete shot</button
         >

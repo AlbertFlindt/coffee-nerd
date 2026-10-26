@@ -21,6 +21,8 @@ export const load: PageServerLoad = ({ locals, params, url }) => {
   );
   if (!form) error(404, 'Shot not found');
   return {
+    // D-61: an edit saved without a connection waits on the phone, for this account.
+    userId: locals.user.id,
     form,
     origin: {
       from: url.searchParams.get('from') === 'home' ? ('home' as const) : ('journal' as const),

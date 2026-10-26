@@ -1,12 +1,15 @@
 <script lang="ts">
   // The Rate sheet (D-111), opened by the dashed Rate block in the Journal and on Home (D-197): the shot as
   // the title, then the score row. A tap on a score saves it; a slide saves where the finger lifts (D-10).
-  // It posts to the page's own `?/rate` action and closes once the score is saved.
+  // It posts to the page's own `?/rate` action and closes once the score is saved. Without a connection
+  // the score waits on the phone and the sheet closes as well (D-223).
   import { tick } from 'svelte';
   import { enhance } from '$app/forms';
+  import { page } from '$app/state';
   import BottomSheet from './BottomSheet.svelte';
   import ScoreRow from './ScoreRow.svelte';
   import { clockTime } from '../domain/journal';
+  import { isWaiting, keepWaiting, unreached } from '../shot-queue.svelte';
 
   let {
     shot,
@@ -38,13 +41,33 @@
     bind:this={rateForm}
     method="POST"
     action="?/rate"
-    use:enhance={() =>
-      async ({ result, update }) => {
+    data-waits
+    use:enhance={async ({ cancel }) => {
+      // A shot on the phone takes its score there too, so a later send never undoes it (D-223).
+      if (isWaiting(shot.id) && score !== null && page.data.userId) {
+        cancel();
+        await keepWaiting(
+          { kind: 'rate', shotId: shot.id, score, brewedAt: shot.brewedAt },
+          page.data.userId
+        );
+        onclose();
+        return;
+      }
+      return async ({ result, update }) => {
+        if (unreached(result) && score !== null && page.data.userId) {
+          await keepWaiting(
+            { kind: 'rate', shotId: shot.id, score, brewedAt: shot.brewedAt },
+            page.data.userId
+          );
+          onclose();
+          return;
+        }
         await update();
         // Closes only once the score is saved; otherwise the sheet stays with a message.
         if (result.type === 'success') onclose();
         else rateFailed = true;
-      }}
+      };
+    }}
   >
     <input type="hidden" name="shotId" value={shot.id} />
     <input type="hidden" name="score" value={score ?? ''} />

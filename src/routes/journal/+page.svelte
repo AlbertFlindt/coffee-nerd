@@ -1,11 +1,13 @@
 <script lang="ts">
   // Journal (screen 22, D-54): header, filter chips, then the shots grouped by day. Only the list
-  // scrolls (D-36).
+  // scrolls (D-36). Shots still on the phone show at once among them (D-221, D-224).
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import JournalRow from '#lib/components/JournalRow.svelte';
   import RateSheet from '#lib/components/RateSheet.svelte';
   import { groupByDay } from '#lib/domain/journal.ts';
+  import { journalWithWaiting } from '#lib/domain/waiting.ts';
+  import { takeSavedOnPhone, waiting } from '#lib/shot-queue.svelte.ts';
   import SavedBar from '#lib/components/SavedBar.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
   import type { PageProps } from './$types';
@@ -13,7 +15,14 @@
   let { data }: PageProps = $props();
 
   const journal = $derived(data.journal);
-  const groups = $derived(groupByDay(journal.shots, data.now, journal.timeZone));
+  const shots = $derived(
+    data.userId
+      ? journalWithWaiting(journal.shots, waiting.entries, data.userId, journal)
+      : journal.shots
+  );
+  const groups = $derived(groupByDay(shots, data.now, journal.timeZone));
+  // D-232: a shot just kept on the phone shows the usual "Shot saved" bar.
+  const savedOnPhone = takeSavedOnPhone();
   const beanName = $derived(journal.beans.find((b) => b.id === journal.beanId)?.name);
   const weekText = $derived(
     `${journal.shotsThisWeek} ${journal.shotsThisWeek === 1 ? 'shot' : 'shots'} this week`
@@ -23,8 +32,8 @@
   const recipeLabel = $derived(journal.recipes.find((r) => r.id === journal.recipeId)?.label);
 
   // D-111: the Rate sheet, opened from a row's Rate block.
-  let rating: (typeof journal.shots)[number] | null = $state(null);
-  const openRate = (shot: (typeof journal.shots)[number]) => (rating = shot);
+  let rating: (typeof shots)[number] | null = $state(null);
+  const openRate = (shot: (typeof shots)[number]) => (rating = shot);
 </script>
 
 {#snippet chevron()}
@@ -170,7 +179,7 @@
   <RateSheet shot={rating} timeZone={journal.timeZone} onclose={() => (rating = null)} />
 {/if}
 
-<SavedBar flash={data.flash} from="journal" />
+<SavedBar flash={data.flash ?? savedOnPhone} from="journal" />
 <TabBar current="journal" />
 
 <style>

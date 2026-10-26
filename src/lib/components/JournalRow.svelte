@@ -1,11 +1,13 @@
 <script lang="ts">
   // One shot in the Journal (D-54): score block (or a dashed amber "Rate" block when unrated), bean and
   // time, core values, then taste and the recipe tag (cherry, D-16). The row opens the shot; the Rate
-  // block is a button of its own that opens the score sheet (D-111).
+  // block is a button of its own that opens the score sheet (D-111). A shot still on the phone says so
+  // (D-221, D-224), and one the server does not have yet opens its form (D-231).
   import { resolve } from '$app/paths';
+  import WaitingLine from './WaitingLine.svelte';
   import { recipeTagText } from '../domain/fingerprint';
   import { clockTime, coreValuesText, journalTasteText } from '../domain/journal';
-  import type { JournalShot } from '../server/db/journal';
+  import { waitingFormQuery, type JournalLike, type Waiting } from '../domain/waiting';
   import type { Thousandths } from '../domain/units';
 
   let {
@@ -14,17 +16,22 @@
     steps,
     onrate
   }: {
-    shot: JournalShot;
+    shot: JournalLike & { waiting?: Waiting };
     timeZone: string;
     steps: { dose: Thousandths; yield: Thousandths; time: Thousandths };
     onrate: () => void;
   } = $props();
 
   const taste = $derived(journalTasteText(shot.score, shot.balance));
+  const href = $derived(
+    shot.waiting?.form
+      ? resolve(`/shot/new${waitingFormQuery(shot.id, shot.waiting.form.beanId, 'journal')}`)
+      : resolve('/journal/[id]', { id: shot.id })
+  );
 </script>
 
 <div class="item">
-  <a class="row cn-tap" href={resolve('/journal/[id]', { id: shot.id })}>
+  <a class="row cn-tap" {href}>
     {#if shot.score === null}
       <!-- Room for the Rate button, which sits on top of the row (a button cannot be inside a link). -->
       <span class="block-space"></span>
@@ -44,6 +51,7 @@
         <span class="cn-tag" class:cn-tag--new={shot.recipeTag.kind === 'new'}
           >{recipeTagText(shot.recipeTag)}</span
         >
+        {#if shot.waiting}<WaitingLine status={shot.waiting.status} />{/if}
       </span>
     </span>
   </a>

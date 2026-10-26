@@ -3,7 +3,7 @@ import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 
 // Opening offline (roadmap M10, D-219, D-225): the service worker keeps Home, the Journal and the shot
 // form ready, pages already opened open as the phone kept them, and changes need a connection.
-// Nothing is saved: the shot tried offline is refused, and the files after this one find the data as is.
+// Nothing is saved, so the files after this one find the data as is.
 test.describe.configure({ mode: 'serial' });
 
 const DATABASE = 'test-results/e2e-seeded.db';
@@ -14,15 +14,6 @@ let context: BrowserContext;
 // The line at the top of every page while offline (D-219).
 const line = () => page.getByRole('status').filter({ hasText: /offline/i });
 let page: Page;
-
-const shotCount = () => {
-  const db = new Database(DATABASE, { readonly: true });
-  try {
-    return (db.prepare('select count(*) as n from shot').get() as { n: number }).n;
-  } finally {
-    db.close();
-  }
-};
 
 const kept = () =>
   page.evaluate(async () => {
@@ -114,14 +105,14 @@ test('D-219: offline, the app opens on Home with the "Offline" line, and "+" ope
   await page.screenshot({ path: 'screenshots/ShotFormOffline.png' });
 });
 
-test('D-219: offline, saving a shot changes nothing and says so', async () => {
-  const before = shotCount();
-  await page.getByRole('radio', { name: '7' }).click();
-  await page.getByRole('button', { name: 'Save shot' }).click();
+test('D-219: offline, a change other than a shot changes nothing and says so', async () => {
+  // Saving a shot waits on the phone instead (tab-queue.test.ts); choosing Home's bean needs the server.
+  await page.getByRole('link', { name: 'Back without saving' }).click();
+  await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
+  await page.getByRole('button', { name: /, choose another bean$/ }).click();
+  await page.getByRole('region', { name: 'Choose a bean' }).getByRole('button').first().click();
   await expect(line()).toHaveText(NOTHING_CHANGED);
-  await expect(page.getByRole('button', { name: 'Save shot' })).toBeVisible();
-  expect(shotCount()).toBe(before);
-  await page.screenshot({ path: 'screenshots/ShotFormOfflineSave.png' });
+  await page.screenshot({ path: 'screenshots/HomeOfflineChange.png' });
 });
 
 test('D-219: offline, the Journal and a page opened before open; another page says it is not kept', async () => {

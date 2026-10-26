@@ -1,6 +1,7 @@
 <script lang="ts">
   // Home (screen 6, D-32): the app banner with the gear (D-34, D-199), the bean pill (D-195), then the
   // last shot, quick numbers and best recipe for that bean. Everything follows the bean on the pill.
+  // A shot still on the phone is the Last shot at once (D-221, D-233).
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
@@ -8,9 +9,12 @@
   import RateSheet from '#lib/components/RateSheet.svelte';
   import SavedBar from '#lib/components/SavedBar.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
+  import WaitingLine from '#lib/components/WaitingLine.svelte';
   import { recipeTagText } from '#lib/domain/fingerprint.ts';
   import { freshnessDetail, thisWeekText } from '#lib/domain/home.ts';
   import { clockTime, dayLabel } from '#lib/domain/journal.ts';
+  import { lastShotWithWaiting, waitingFormQuery } from '#lib/domain/waiting.ts';
+  import { takeSavedOnPhone, waiting } from '#lib/shot-queue.svelte.ts';
   import logo from '../../design-system/logo/coffee-nerd-mark.svg';
   import type { PageProps } from './$types';
 
@@ -20,6 +24,13 @@
   let beanSheet = $state(false);
   let rating = $state(false);
   const now = Date.now();
+  // D-232: a shot just kept on the phone shows the usual "Shot saved" bar.
+  const savedOnPhone = takeSavedOnPhone();
+  const lastShot = $derived(
+    home.state === 'ready'
+      ? lastShotWithWaiting(home.lastShot, home.bean.id, waiting.entries, data.userId ?? '')
+      : null
+  );
 </script>
 
 <header class="banner">
@@ -52,7 +63,7 @@
     </section>
   </main>
 {:else}
-  {@const last = home.lastShot}
+  {@const last = lastShot}
   {@const week = thisWeekText(home.week)}
   <div class="scope">
     <button
@@ -81,7 +92,12 @@
     <section class="last" aria-label="Last shot">
       {#if last}
         <!-- D-197: the card opens the shot, and its Back returns here. -->
-        <a class="card cn-tap" href={resolve('/journal/[id]?from=home', { id: last.id })}>
+        <a
+          class="card cn-tap"
+          href={last.waiting?.form
+            ? resolve(`/shot/new${waitingFormQuery(last.id, last.waiting.form.beanId, 'home')}`)
+            : resolve('/journal/[id]?from=home', { id: last.id })}
+        >
           <div class="card-top">
             <h2>Last shot</h2>
             <span class="muted"
@@ -107,9 +123,12 @@
               {/each}
             </div>
           </div>
-          <span class="cn-tag" class:cn-tag--new={last.recipeTag.kind === 'new'}
-            >{recipeTagText(last.recipeTag)}</span
-          >
+          <span class="tags">
+            <span class="cn-tag" class:cn-tag--new={last.recipeTag.kind === 'new'}
+              >{recipeTagText(last.recipeTag)}</span
+            >
+            {#if last.waiting}<WaitingLine status={last.waiting.status} />{/if}
+          </span>
         </a>
         {#if last.score === null}
           <!-- D-197, D-111: the Rate block opens the score sheet; the rest of the card opens the shot. -->
@@ -230,7 +249,7 @@
   {/if}
 {/if}
 
-<SavedBar flash={data.flash} from="home" />
+<SavedBar flash={data.flash ?? savedOnPhone} from="home" />
 <TabBar current="home" />
 
 <style>
@@ -442,6 +461,13 @@
   .big {
     font-size: 22px;
     font-weight: 600;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) 10px;
   }
 
   .best .card {

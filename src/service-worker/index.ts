@@ -9,9 +9,12 @@ import {
   NO_CHANGE_ACTION_DATA,
   OFFLINE_COPY_HEADER,
   pageKey,
-  pagePath
+  pagePath,
+  waitsOffline
 } from '#lib/offline.ts';
 
+// The version a page or its data was made by, as the app itself names it.
+const VERSION_HEADER = 'x-sveltekit-version';
 const CACHE = `app-${version}`;
 // Pages and their data, per version: a page refers to the scripts of the version that made it.
 const PAGES = `pages-${version}`;
@@ -90,7 +93,7 @@ async function signedOut(response: Response) {
 async function store(address: string, response: Response, since: number) {
   if (!response.ok || response.redirected) return;
   const text = await response.clone().text();
-  const header = response.headers.get('x-sveltekit-version');
+  const header = response.headers.get(VERSION_HEADER);
   if (
     header
       ? header !== version
@@ -140,15 +143,19 @@ async function page(event: FetchEvent, url: URL): Promise<Response> {
       if (url.pathname !== '/') return Response.redirect('/', 302);
       throw failure;
     }
-    // Moving to a page the phone does not have: the error page says so.
+    // Moving to a page the phone does not have: the error page says so, in the shape the app expects
+    // of a load that failed, with this version's name (without it the app reloads the whole page).
     return Response.json(
       { message: 'This page is not on the phone yet. Open it once with a connection to keep it.' },
-      { status: 503 }
+      { status: 503, headers: { [VERSION_HEADER]: version } }
     );
   }
 }
 
-/** A change: it needs the server (D-219); without one, nothing changes and the page says so. */
+/**
+ * A change: it needs the server (D-219); without one, nothing changes and the page says so, or the page
+ * keeps a shot waiting (D-61).
+ */
 async function change(event: FetchEvent, url: URL): Promise<Response> {
   const { request } = event;
   const enhanced = request.headers.has('x-sveltekit-action');
@@ -159,12 +166,17 @@ async function change(event: FetchEvent, url: URL): Promise<Response> {
     // The kept pages follow the change at once, also when the page does not move (a score given).
     else event.waitUntil(keep(true).catch(() => {}));
     return response;
-  } catch {
+  } catch (failure) {
     reached(false);
-    void tell({ type: 'needs-connection' });
+    // A shot, an edit or a score waits on the phone instead (D-61, D-223): the page keeps it.
+    if (url.pathname === '/queue') throw failure;
+    if (!waitsOffline(url)) void tell({ type: 'needs-connection' });
     // The page stays as it is, and its "Offline" line says why.
     if (enhanced)
-      return Response.json({ type: 'failure', status: 503, data: NO_CHANGE_ACTION_DATA });
+      return Response.json(
+        { type: 'failure', status: 503, data: NO_CHANGE_ACTION_DATA },
+        { status: 503 }
+      );
     return new Response(null, { status: 204 });
   }
 }

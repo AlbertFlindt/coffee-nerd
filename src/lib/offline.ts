@@ -47,3 +47,15 @@ export function isKeptPage(pathname: string): boolean {
     : pathname;
   return path === '/' || path === '/journal' || path === '/shot/new';
 }
+
+/**
+ * A change that waits on the phone when it cannot reach the server (D-61, D-223): saving a shot, new or
+ * edited, a score from the Rate sheet, and the waiting shots themselves on their way to the server.
+ */
+export function waitsOffline(url: URL): boolean {
+  if (url.pathname === '/queue') return true;
+  if (url.search === '?/save')
+    return url.pathname === '/shot/new' || /^\/journal\/[^/]+\/edit$/.test(url.pathname);
+  if (url.search === '?/rate') return url.pathname === '/' || url.pathname === '/journal';
+  return false;
+}

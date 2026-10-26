@@ -105,12 +105,14 @@ async function openTopic(name: string) {
 
 test('InsightsProgress, D-56, D-212: Progress shows the weekly average score with its band', async () => {
   await openTopic('Progress');
-  const weekly = card('Better and steadier');
-  // The sentence spans the first to the last drawn week (D-212). Early in the week (a Monday) this
-  // week has fewer than 2 rated shots yet and is a gap, so the span is 11 weeks, and a whole
-  // change reads "2 points".
+  // The only card under Progress. Its title and sentence follow the seeded history, which is drawn
+  // back from the time the test runs: early in the week (a Monday) this week has fewer than 2 rated
+  // shots yet and is a gap, so the span is 11 weeks, and the spread may then stay about the same.
+  const weekly = page.getByRole('article');
+  await expect(weekly.getByRole('heading')).toHaveText(/^(Better and steadier|Getting better)$/);
+  // The sentence spans the first to the last drawn week (D-212).
   await expect(weekly).toContainText(
-    /^.*Up \d(\.\d)? points in 1[12] weeks, and your spread (halved|narrowed): σ went from \d(\.\d)? to \d(\.\d)?\./
+    /^.*Up \d(\.\d)? points in 1[12] weeks, and your spread (halved|narrowed|stayed about the same)/
   );
   await expect(weekly).toContainText('12 weeks ago');
   await expect(weekly).toContainText('This week');

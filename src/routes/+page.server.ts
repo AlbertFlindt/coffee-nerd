@@ -13,6 +13,8 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = ({ locals, cookies }) => {
   if (!locals.user) error(401);
   return {
+    // D-61, D-225: whose shots wait on the phone; they are only shown and sent for their own account.
+    userId: locals.user.id,
     home: loadHome(getDb(), locals.user.id, Date.now()),
     flash: locals.offlineCopy ? null : takeFlash(cookies)
   };
