@@ -21,6 +21,8 @@
   --sage: #9DCB98;
   --on-sage: #22301F;
   --cherry: #E9837A;
+  --danger: #A84A40;
+  --on-danger: var(--ink);
   --bean: #A86B45;
   --bean-crease: #5A3624;
   --chart-grid: var(--control);

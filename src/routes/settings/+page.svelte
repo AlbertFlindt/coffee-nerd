@@ -4,7 +4,7 @@
   // D-225: signing out clears the phone, and asks first while shots wait to be sent.
   import { version } from '$app/env';
   import { resolve } from '$app/paths';
-  import BottomSheet from '#lib/components/BottomSheet.svelte';
+  import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
   import { versionText } from '#lib/domain/version.ts';
   import { clearWaiting, waiting } from '#lib/shot-queue.svelte.ts';
   import { forgetDrafts } from '#lib/shot-draft.ts';
@@ -65,7 +65,7 @@
 
 {#if asking}
   <!-- D-225: not designed yet; the wording is approved by screenshot (docs/open-items.md). -->
-  <BottomSheet short label="Sign out" closeLabel="Stay signed in" onclose={() => (asking = false)}>
+  <ConfirmDialog label="Sign out" closeLabel="Stay signed in" onclose={() => (asking = false)}>
     <h2 class="cn-type-heading sheet-title">
       {count === 1 ? '1 shot is' : `${count} shots are`} still waiting to send
     </h2>
@@ -74,14 +74,14 @@
       with a connection to send {count === 1 ? 'it' : 'them'} first.
     </p>
     <form method="POST" action="/logout" class="actions" onsubmit={signOut}>
-      <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={leaving}
+      <button class="cn-btn-danger cn-tap-strong" type="submit" disabled={leaving}
         >Sign out and delete</button
       >
-      <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (asking = false)}
+      <button class="cn-btn-primary cn-tap-strong" type="button" onclick={() => (asking = false)}
         >Stay signed in</button
       >
     </form>
-  </BottomSheet>
+  </ConfirmDialog>
 {/if}
 
 <style>

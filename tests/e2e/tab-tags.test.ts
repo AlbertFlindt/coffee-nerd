@@ -43,6 +43,8 @@ const card = () => page.getByRole('region', { name: 'Possible duplicate' });
 async function addTag(name: string, family: string) {
   await page.getByRole('button', { name: 'Add tag' }).click();
   const sheet = page.getByRole('region', { name: 'New tag' });
+  // D-241: every bottom sheet has a line outline.
+  await expect(sheet).toHaveCSS('border-top-width', '1px');
   await expect(sheet.getByRole('radio', { name: 'Other' })).toHaveAttribute('aria-checked', 'true');
   await sheet.getByLabel('Name').fill(name);
   await sheet.getByRole('radio', { name: family }).click();
@@ -127,6 +129,9 @@ test('D-173: "Keep both" is remembered for that pair', async () => {
   await chip('Carmel').click();
   await sheet.getByRole('button', { name: 'Remove tag' }).click();
   await expect(sheet.getByRole('heading', { name: 'Delete this tag?' })).toBeVisible();
+  // D-241: deleting is red, keeping amber.
+  await expect(sheet.getByRole('button', { name: 'Delete tag' })).toHaveClass(/cn-btn-danger/);
+  await expect(sheet.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);
   await screenshot('TagRemove');
   await sheet.getByRole('button', { name: 'Delete tag' }).click();
   await expect(chip('Carmel')).toHaveCount(0);

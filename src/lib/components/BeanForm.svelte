@@ -7,6 +7,7 @@
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
+  import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
   import PickRow from '#lib/components/PickRow.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import { PROCESS_LABEL, roastDateText, type Process } from '#lib/domain/bean.ts';
@@ -330,24 +331,19 @@
     </form>
   </BottomSheet>
 {:else if sheet === 'delete'}
-  <!-- D-145: the confirmation sheet, as for a shot (D-116). -->
-  <BottomSheet
-    short
-    label="Delete this bean"
-    closeLabel="Keep the bean"
-    onclose={() => (sheet = null)}
-  >
+  <!-- D-145, D-241: the confirmation dialog, as for a shot (D-116). -->
+  <ConfirmDialog label="Delete this bean" closeLabel="Keep the bean" onclose={() => (sheet = null)}>
     <h2 class="sheet-title">Delete this bean?</h2>
     <p class="cn-type-body note">It has no shots yet. This cannot be undone.</p>
     <form class="confirm" method="POST" action="?/delete" onsubmit={() => (deleting = true)}>
-      <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={deleting}
+      <button class="cn-btn-danger cn-tap-strong" type="submit" disabled={deleting}
         >Delete bean</button
       >
-      <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (sheet = null)}
+      <button class="cn-btn-primary cn-tap-strong" type="button" onclick={() => (sheet = null)}
         >Keep it</button
       >
     </form>
-  </BottomSheet>
+  </ConfirmDialog>
 {:else if sheet === 'country'}
   <BottomSheet
     label="Choose a country"

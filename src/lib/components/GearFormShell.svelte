@@ -7,7 +7,7 @@
   import type { Snippet } from 'svelte';
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
-  import BottomSheet from '#lib/components/BottomSheet.svelte';
+  import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
   import type { Guide } from '#lib/domain/guide.ts';
 
   let {
@@ -98,8 +98,7 @@
 
 {#if confirm}
   <!-- D-148: archiving asks first, like deleting a bean (D-145). -->
-  <BottomSheet
-    short
+  <ConfirmDialog
     label="Archive this {kind}"
     closeLabel="Keep the {kind}"
     onclose={() => (confirm = false)}
@@ -107,14 +106,13 @@
     <h2 class="sheet-title">Archive this {kind}?</h2>
     <p class="note">It leaves the Gear page and the pickers. Past shots keep its name.</p>
     <form class="confirm" method="POST" action="?/archive" onsubmit={() => (archiving = true)}>
-      <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={archiving}
-        >Archive</button
+      <button class="cn-btn-danger cn-tap-strong" type="submit" disabled={archiving}>Archive</button
       >
-      <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (confirm = false)}
+      <button class="cn-btn-primary cn-tap-strong" type="button" onclick={() => (confirm = false)}
         >Keep it</button
       >
     </form>
-  </BottomSheet>
+  </ConfirmDialog>
 {/if}
 
 <style>

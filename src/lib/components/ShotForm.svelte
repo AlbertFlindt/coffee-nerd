@@ -19,6 +19,7 @@
   import { v7 } from 'uuid';
   import BeanCard from './BeanCard.svelte';
   import BottomSheet from './BottomSheet.svelte';
+  import ConfirmDialog from './ConfirmDialog.svelte';
   import MoreSheet from './MoreSheet.svelte';
   import PickRow from './PickRow.svelte';
   import ScoreRow from './ScoreRow.svelte';
@@ -513,9 +514,8 @@
         </div>
       </BottomSheet>
     {:else if sheet === 'delete'}
-      <!-- D-116: deleting asks first. The confirmation is not designed yet (docs/open-items.md). -->
-      <BottomSheet
-        short
+      <!-- D-116, D-241: deleting asks first, in a dialog built ahead of the canvas (docs/open-items.md). -->
+      <ConfirmDialog
         label="Delete this shot"
         closeLabel="Keep the shot"
         onclose={() => (sheet = null)}
@@ -541,14 +541,14 @@
             await goto(back);
           }}
         >
-          <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={deleting}
+          <button class="cn-btn-danger cn-tap-strong" type="submit" disabled={deleting}
             >Delete shot</button
           >
-          <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (sheet = null)}
+          <button class="cn-btn-primary cn-tap-strong" type="button" onclick={() => (sheet = null)}
             >Keep it</button
           >
         </form>
-      </BottomSheet>
+      </ConfirmDialog>
     {/if}
   </div>
 
@@ -647,7 +647,7 @@
     margin-top: var(--space-1);
   }
 
-  /* Like the confirmation sheets drawn on the canvas (screens 35, 40): the line close under the question. */
+  /* Like the confirmations drawn on the canvas (screens 35, 40): the line close under the question. */
   .delete-note {
     margin: -8px 0 8px;
     font-size: 14px;

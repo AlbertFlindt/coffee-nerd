@@ -7,6 +7,7 @@
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
+  import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
   import PickRow from '#lib/components/PickRow.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import ValueCard from '#lib/components/ValueCard.svelte';
@@ -287,9 +288,8 @@
 </footer>
 
 {#if sheet === 'archive' || sheet === 'delete'}
-  <!-- D-167, D-148, D-145: the confirmation sheet. -->
-  <BottomSheet
-    short
+  <!-- D-167, D-148, D-145, D-241: the confirmation dialog. -->
+  <ConfirmDialog
     label={sheet === 'archive' ? 'Archive this routine' : 'Delete this routine'}
     closeLabel="Keep the routine"
     onclose={() => (sheet = null)}
@@ -307,14 +307,14 @@
       action={sheet === 'archive' ? '?/archive' : '?/delete'}
       onsubmit={() => (confirming = true)}
     >
-      <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={confirming}
+      <button class="cn-btn-danger cn-tap-strong" type="submit" disabled={confirming}
         >{sheet === 'archive' ? 'Archive' : 'Delete routine'}</button
       >
-      <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (sheet = null)}
+      <button class="cn-btn-primary cn-tap-strong" type="button" onclick={() => (sheet = null)}
         >Keep it</button
       >
     </form>
-  </BottomSheet>
+  </ConfirmDialog>
 {:else if sheet !== null && sheet.kind === 'insert'}
   <!-- Read safely: closing the sheet clears it while this block is still being torn down. -->
   {@const position = sheet?.kind === 'insert' ? sheet.position : 0}
@@ -625,9 +625,7 @@
     color: var(--ink-soft);
   }
 
-  /* Screen 56: "Keep it" sits on the sheet's field colour, as in the other sheets. */
   .confirm {
-    --surface: var(--surface-sheet-field);
     display: flex;
     flex-direction: column;
     gap: var(--space-2);

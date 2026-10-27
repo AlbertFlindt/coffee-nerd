@@ -396,7 +396,7 @@ test('D-237: a shot the server keeps failing on is "Not saved" with the reason, 
   await context.unroute('**/queue');
   await page.getByRole('button', { name: 'Delete shot' }).click();
   await page
-    .getByRole('region', { name: 'Delete this shot' })
+    .getByRole('dialog', { name: 'Delete this shot' })
     .getByRole('button', { name: 'Delete shot' })
     .click();
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
@@ -443,7 +443,7 @@ test('D-224: a waiting shot the server refuses is kept as "Not saved", to fix or
   await screenshot('ShotFormNotSaved');
   await page.getByRole('button', { name: 'Delete shot' }).click();
   await page
-    .getByRole('region', { name: 'Delete this shot' })
+    .getByRole('dialog', { name: 'Delete this shot' })
     .getByRole('button', { name: 'Delete shot' })
     .click();
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
@@ -498,18 +498,23 @@ test('D-225, D-234: signing out asks first while a shot waits, then leaves nothi
   await page.getByRole('link', { name: 'Settings' }).click();
   await expect(page.getByText(/^Version of \d+ \w+ \d{4}, \d\d:\d\d$/)).toBeVisible();
   await page.getByRole('button', { name: 'Sign out' }).click();
-  const sheet = page.getByRole('region', { name: 'Sign out' });
+  const sheet = page.getByRole('dialog', { name: 'Sign out' });
   await expect(
     sheet.getByRole('heading', { name: '1 shot is still waiting to send' })
   ).toBeVisible();
   await screenshot('SignOutWaiting');
+  // D-241: signing out and deleting is red, staying amber.
+  await expect(sheet.getByRole('button', { name: 'Sign out and delete' })).toHaveClass(
+    /cn-btn-danger/
+  );
+  await expect(sheet.getByRole('button', { name: 'Stay signed in' })).toHaveClass(/cn-btn-primary/);
   await sheet.getByRole('button', { name: 'Stay signed in' }).click();
   await expect(sheet).toHaveCount(0);
   expect(await entries()).toHaveLength(1);
 
   await page.getByRole('button', { name: 'Sign out' }).click();
   await page
-    .getByRole('region', { name: 'Sign out' })
+    .getByRole('dialog', { name: 'Sign out' })
     .getByRole('button', { name: 'Sign out and delete' })
     .click();
   await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();

@@ -25,6 +25,8 @@
 .cn-btn-quiet{width:100%;height:var(--touch-min);border:none;border-radius:var(--radius-md);background:none;color:var(--ink-muted);font-size:15px;font-weight:600}
 /* primary button */
 .cn-btn-primary{width:100%;height:var(--button-primary-h);border-radius:var(--radius-lg);border:none;background:var(--amber);color:var(--on-amber);font-size:17px;font-weight:700}
+/* danger button: the delete, remove or archive choice in a confirmation, nothing else (D-241) */
+.cn-btn-danger{width:100%;height:var(--button-primary-h);border-radius:var(--radius-lg);border:none;background:var(--danger);color:var(--on-danger);font-size:17px;font-weight:700}
 .cn-btn-secondary{width:100%;height:52px;border-radius:var(--radius-md);border:none;background:var(--surface);color:var(--ink);font-size:15px;font-weight:600}
 .cn-btn-add{display:inline-flex;align-items:center;gap:6px;height:var(--touch-min);padding:0 16px;border-radius:var(--radius-pill);border:none;background:var(--amber);color:var(--on-amber);font-size:15px;font-weight:700}
 /* chips */
@@ -53,11 +55,14 @@
 .cn-score button[aria-checked="true"]{background:var(--amber);color:var(--on-amber);font-weight:700}
 .cn-score button.is-previous{border:1.5px dashed var(--cherry)}
 /* sheet */
-.cn-sheet{background:var(--surface-sheet);border-radius:var(--radius-sheet) var(--radius-sheet) 0 0;padding:10px 20px 20px;display:flex;flex-direction:column;gap:12px}
+/* the thin line outline keeps the sheet's edge clear against the dimmed screen (D-241) */
+.cn-sheet{background:var(--surface-sheet);border:1px solid var(--line);border-bottom:none;border-radius:var(--radius-sheet) var(--radius-sheet) 0 0;padding:10px 20px 20px;display:flex;flex-direction:column;gap:12px}
 .cn-sheet__handle{align-self:center;width:40px;height:5px;border-radius:3px;background:var(--line)}
 /* the 44px strip at the top of a sheet, with the handle in its middle; dragging it down closes the sheet (D-108) */
 .cn-sheet__grip{flex:none;display:flex;justify-content:center;align-items:center;height:var(--touch-min);margin:-10px -20px -12px;touch-action:none;cursor:grab}
 .cn-scrim{background:var(--scrim)}
+/* confirmation dialog: in the middle of the screen, over all of it (D-241) */
+.cn-dialog{background:var(--surface-sheet);border:1px solid var(--line);border-radius:var(--radius-sheet);padding:20px;display:flex;flex-direction:column;gap:12px}
 /* preview frame */
 .cn-preview{padding:10px;border-radius:var(--radius-xl);border:1.5px dashed var(--line)}
 /* tab bar */

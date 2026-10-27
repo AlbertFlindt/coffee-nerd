@@ -49,8 +49,9 @@ Choose one of 2–4 options (roast level, machine type, dial). Selected value = 
 
 - **Primary** (amber, 56px, full width): the one action of a task screen — Save shot, Add bean, Save setup. Sits at the bottom with 28px under it.
 - **Secondary** (surface): quiet actions like Mark as finished.
+- **Danger** (`cn-btn-danger`, muted red, 56px, full width, ink text): only the delete, remove or archive choice in a confirmation (D-241). Nothing else is red.
 - **Add** pill (amber): sits in the header of Library pages (Add bean, Add gear, New routine). The center + in the tab bar is reserved for new shots (D-31).
-- **Quiet** (`cn-btn-quiet`, no background, ink-muted, 44px): a destructive or rare action at the end of a form, below its primary button — Delete shot, Delete bean (D-116, D-145). It always opens a confirmation sheet first.
+- **Quiet** (`cn-btn-quiet`, no background, ink-muted, 44px): a destructive or rare action at the end of a form, below its primary button — Delete shot, Delete bean (D-116, D-145). It always opens a confirmation dialog (ConfirmDialog) first.
 - **Pressed** (D-107): buttons flash amber while pressed and fade back (`cn-tap`); amber buttons press in slightly and brighten instead (`cn-tap-strong`). Choices that change state (score, chips, segments, switches) show their new state instead. The browser's own tap flash is off.
 
 ## RecipeTag
@@ -62,11 +63,14 @@ Choose one of 2–4 options (roast level, machine type, dial). Selected value = 
 
 Bottom sheet for secondary detail (More, Add your own feature, New step).
 
-- Background surface-sheet, top corners radius-sheet, a handle, then content.
+- Background surface-sheet, top corners radius-sheet, a 1px line outline on its top and sides (D-241), a handle, then content.
 - Behind it the screen is dimmed with scrim; tapping the scrim closes the sheet.
 - On the shot form the sheet stops above the Save button, which stays usable (D-21).
 - The handle sits in the middle of a 44px strip at the top (`cn-sheet__grip`), so it has room above and below; dragging the strip down closes the sheet (D-108).
-- **Confirmation sheet** (D-116, D-145): a short sheet with a question as its title ("Delete this shot?"), one line saying what happens, then the action as a primary button ("Delete shot") and "Keep it" as a secondary button below it.
+
+## ConfirmDialog
+
+- **Confirmation dialog** (`cn-dialog`, D-116, D-145, D-241): a card in the middle of the screen, over all of it (the form's Save included), on a scrim; surface-sheet, radius-sheet on every corner, a 1px line outline, 20px padding. A question as its title ("Delete this shot?"), one line saying what happens, then the action as a danger button ("Delete shot") and "Keep it" as a primary button below it. Tapping the scrim or Escape closes it; it has no handle.
 
 ## TasteSlider
 

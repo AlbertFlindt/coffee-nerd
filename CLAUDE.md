@@ -51,7 +51,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - A new insight is a definition in the registry, not ad-hoc SQL (D-64). σ is the sample standard deviation (n − 1).
 - UI copy: plain words, no abbreviations, sentence case; "Gear", never "Equipment" (D-20, D-39).
 - Screens fit the viewport; only lists scroll; no visible scrollbars (D-36). Touch targets ≥ 44 px.
-- Colors only through tokens. Amber = your input, sage = changed since last shot, cherry = recipe history, nothing else (D-19).
+- Colors only through tokens. Amber = your input, sage = changed since last shot, cherry = recipe history, muted red = the delete choice in a confirmation, nothing else (D-19, D-241).
 - No external requests at runtime (fonts, analytics, CDNs): the app is self-hosted and private.
 
 ## Workflow

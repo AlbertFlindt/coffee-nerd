@@ -231,6 +231,12 @@ test('D-167: a routine no shot used offers Delete', async () => {
   await expect(page.getByRole('button', { name: 'Archive', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Delete routine' }).click();
   await expect(page.getByRole('heading', { name: 'Delete this routine?' })).toBeVisible();
+  // D-241: deleting is red, keeping amber.
+  const confirm = page.getByRole('dialog', { name: 'Delete this routine' });
+  await expect(confirm.getByRole('button', { name: 'Delete routine' })).toHaveClass(
+    /cn-btn-danger/
+  );
+  await expect(confirm.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);
   await screenshot('RoutineArchive');
   await page.getByRole('button', { name: 'Keep it' }).click();
   await page.getByRole('link', { name: 'Close without saving' }).click();
@@ -272,7 +278,7 @@ test('D-167, D-168: once a shot used it, the routine is archived, and so is its 
   await expect(page.getByRole('button', { name: 'Delete routine' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Archive', exact: true }).click();
   await page
-    .getByRole('region', { name: 'Archive this routine' })
+    .getByRole('dialog', { name: 'Archive this routine' })
     .getByRole('button', { name: 'Archive' })
     .click();
   await expect(page.getByRole('heading', { name: 'Puck prep', level: 1 })).toBeVisible();
