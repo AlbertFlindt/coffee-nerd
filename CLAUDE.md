@@ -64,7 +64,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - When reporting work as done, show evidence: the commands you ran and their results, screenshots for UI.
 - When the owner settles a question, record it with the `record-decision` skill before building on it.
 - Keep `docs/open-items.md` current in every pull request: add any question you could not answer, any state without a design, any shortcut or limitation you leave; delete items you settle. Nothing open lives only in a chat or a pull request description.
-- Commit messages leave out the Claude session line, and changes add no links to claude.ai sessions or artifacts (D-244).
+- Commit messages leave out the Claude session line, and changes add no links to claude.ai sessions or artifacts (D-245).
 - Pull requests use `.github/pull_request_template.md`: decisions touched, evidence, anything not designed yet.
 
 ## Working with the owner
