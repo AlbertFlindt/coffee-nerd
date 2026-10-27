@@ -29,9 +29,13 @@
 </div>
 
 <style>
-  /* D-36: the app fills the viewport; a screen fits it and only its lists scroll. */
+  /*
+   * D-36: the app fills the viewport; a screen fits it and only its lists scroll. The height follows the page
+   * (html and body are 100%), not 100dvh: in the app installed from Chrome, a page that opens after a form
+   * is sent (deleting a shot, a bean, gear) got a 100dvh taller than the screen, which cut off the tab bar.
+   */
   .app {
-    height: 100dvh;
+    height: 100%;
     overflow: hidden;
     display: flex;
     flex-direction: column;

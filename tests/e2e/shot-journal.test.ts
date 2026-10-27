@@ -303,6 +303,10 @@ test('D-116: a shot is deleted from the edit form, after a confirmation', async 
   await confirm.getByRole('button', { name: 'Delete shot' }).click();
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
   await expect(rows()).toHaveCount(before - 1);
+  // D-36: the Journal the delete opens as a page of its own still fits the screen, tab bar included.
+  await expectNoPageScroll();
+  const bar = (await page.getByRole('navigation', { name: 'Main' }).boundingBox())!;
+  expect(bar.y + bar.height).toBeCloseTo(page.viewportSize()!.height, 0);
 });
 
 test('D-116, D-117: after deleting, the Journal keeps its filters', async () => {
