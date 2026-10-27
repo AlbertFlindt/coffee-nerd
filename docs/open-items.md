@@ -8,8 +8,8 @@ Everything that is unanswered, not designed yet, or deliberately left for later,
 
 The decision log keeps the history of product topics; this file is the working list.
 
-Last updated: 2026-10-26
 Last updated: 2026-10-27
+
 ---
 
 ## 1. Questions for the owner
