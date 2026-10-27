@@ -142,10 +142,10 @@
       {/if}
       <form class="confirm" method="POST" action="?/remove" use:enhance={submit}>
         <input type="hidden" name="id" value={tag?.id} />
-        <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={pending}
+        <button class="cn-btn-danger cn-tap-strong" type="submit" disabled={pending}
           >{count > 0 ? 'Remove tag' : 'Delete tag'}</button
         >
-        <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (view = 'form')}
+        <button class="cn-btn-primary cn-tap-strong" type="button" onclick={() => (view = 'form')}
           >Keep it</button
         >
       </form>

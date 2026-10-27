@@ -290,6 +290,7 @@
   <!-- D-167, D-148, D-145: the confirmation sheet. -->
   <BottomSheet
     short
+    cover
     label={sheet === 'archive' ? 'Archive this routine' : 'Delete this routine'}
     closeLabel="Keep the routine"
     onclose={() => (sheet = null)}
@@ -307,10 +308,10 @@
       action={sheet === 'archive' ? '?/archive' : '?/delete'}
       onsubmit={() => (confirming = true)}
     >
-      <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={confirming}
+      <button class="cn-btn-danger cn-tap-strong" type="submit" disabled={confirming}
         >{sheet === 'archive' ? 'Archive' : 'Delete routine'}</button
       >
-      <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (sheet = null)}
+      <button class="cn-btn-primary cn-tap-strong" type="button" onclick={() => (sheet = null)}
         >Keep it</button
       >
     </form>
@@ -625,9 +626,7 @@
     color: var(--ink-soft);
   }
 
-  /* Screen 56: "Keep it" sits on the sheet's field colour, as in the other sheets. */
   .confirm {
-    --surface: var(--surface-sheet-field);
     display: flex;
     flex-direction: column;
     gap: var(--space-2);

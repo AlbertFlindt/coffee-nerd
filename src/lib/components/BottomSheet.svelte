@@ -1,7 +1,8 @@
 <script lang="ts">
   // A bottom sheet over a dimmed screen; tapping the dimmed part closes it (D-21). Placed inside the area
   // above the Save button, so the sheet stops above it and Save stays usable. It slides in and out, and
-  // dragging its handle down closes it (D-108).
+  // dragging its handle down closes it (D-108). A confirmation sheet covers the whole screen instead,
+  // Save included, so only its two choices show (D-241).
   import type { Snippet } from 'svelte';
   import { cubicOut } from 'svelte/easing';
   import { fade, fly } from 'svelte/transition';
@@ -11,6 +12,7 @@
     closeLabel,
     onclose,
     short = false,
+    cover = false,
     children
   }: {
     label: string;
@@ -18,6 +20,8 @@
     onclose: () => void;
     /** As tall as its content, for a sheet with one control (the Rate sheet, D-111). */
     short?: boolean;
+    /** Over the whole screen, Save included: a confirmation sheet (D-241). */
+    cover?: boolean;
     children: Snippet;
   } = $props();
 
@@ -51,7 +55,7 @@
 
 <svelte:window onkeydown={(e) => e.key === 'Escape' && onclose()} />
 
-<div class="layer">
+<div class="layer" class:cover>
   <button
     type="button"
     class="cn-scrim scrim"
@@ -91,6 +95,10 @@
     z-index: 10;
     /* The sheet slides in from below; nothing of it shows outside the area above Save. */
     overflow: hidden;
+  }
+
+  .layer.cover {
+    position: fixed;
   }
 
   .scrim {

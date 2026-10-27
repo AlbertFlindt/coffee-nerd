@@ -516,6 +516,7 @@
       <!-- D-116: deleting asks first. The confirmation is not designed yet (docs/open-items.md). -->
       <BottomSheet
         short
+        cover
         label="Delete this shot"
         closeLabel="Keep the shot"
         onclose={() => (sheet = null)}
@@ -541,10 +542,10 @@
             await goto(back);
           }}
         >
-          <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={deleting}
+          <button class="cn-btn-danger cn-tap-strong" type="submit" disabled={deleting}
             >Delete shot</button
           >
-          <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (sheet = null)}
+          <button class="cn-btn-primary cn-tap-strong" type="button" onclick={() => (sheet = null)}
             >Keep it</button
           >
         </form>

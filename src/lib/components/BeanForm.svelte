@@ -333,6 +333,7 @@
   <!-- D-145: the confirmation sheet, as for a shot (D-116). -->
   <BottomSheet
     short
+    cover
     label="Delete this bean"
     closeLabel="Keep the bean"
     onclose={() => (sheet = null)}
@@ -340,10 +341,10 @@
     <h2 class="sheet-title">Delete this bean?</h2>
     <p class="cn-type-body note">It has no shots yet. This cannot be undone.</p>
     <form class="confirm" method="POST" action="?/delete" onsubmit={() => (deleting = true)}>
-      <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={deleting}
+      <button class="cn-btn-danger cn-tap-strong" type="submit" disabled={deleting}
         >Delete bean</button
       >
-      <button class="cn-btn-secondary cn-tap" type="button" onclick={() => (sheet = null)}
+      <button class="cn-btn-primary cn-tap-strong" type="button" onclick={() => (sheet = null)}
         >Keep it</button
       >
     </form>

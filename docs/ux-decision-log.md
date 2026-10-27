@@ -2,7 +2,7 @@
 
 Status: living document. Each decision records **what** was decided and **why**, so later design and code can be checked against it. Technical decisions start at section 13.
 
-Last updated: 2026-10-26
+Last updated: 2026-10-27
 
 ---
 
@@ -552,6 +552,10 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
   - The logo and app name (D-34) use the coffee-brown and cream tones, not the accents, so the accent roles stay intact.
   - *Why:* strict roles let colors explain themselves across screens (e.g. cherry always means "this recipe's past" in Insights). Color is never the only signal: deltas and markers carry text or shape too.
+  - *(Refined 2026-10-27: see D-241, a muted red for the button that deletes.)*
+
+- **D-241 — A confirmation sheet makes deleting look different from keeping.** In a confirmation sheet (D-116, D-145), the button that deletes, removes or archives ("Delete shot", "Delete bean", "Remove tag", "Archive", "Sign out and delete") is a new muted red, used for nothing else; the button that keeps things as they are ("Keep it", "Stay signed in") is the amber primary button. A confirmation sheet covers the whole screen, the form's own Save and Delete buttons included, so only its two choices show. Every bottom sheet gets a thin outline in the line color, so its edge is clear against the dimmed screen. Refines D-18, D-19 and D-21.
+  - *Why:* the owner found "Delete shot" and "Keep it" too alike, with the amber Delete looking like the expected choice and the page's own Save showing under the sheet; red is the color people already read as "this deletes something".
 
 ## 12. Design system
 
