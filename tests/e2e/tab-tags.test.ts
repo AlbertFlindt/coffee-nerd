@@ -43,6 +43,8 @@ const card = () => page.getByRole('region', { name: 'Possible duplicate' });
 async function addTag(name: string, family: string) {
   await page.getByRole('button', { name: 'Add tag' }).click();
   const sheet = page.getByRole('region', { name: 'New tag' });
+  // D-241: every bottom sheet has a line outline.
+  await expect(sheet).toHaveCSS('border-top-width', '1px');
   await expect(sheet.getByRole('radio', { name: 'Other' })).toHaveAttribute('aria-checked', 'true');
   await sheet.getByLabel('Name').fill(name);
   await sheet.getByRole('radio', { name: family }).click();

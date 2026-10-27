@@ -288,7 +288,7 @@
 </footer>
 
 {#if sheet === 'archive' || sheet === 'delete'}
-  <!-- D-167, D-148, D-145: the confirmation sheet. -->
+  <!-- D-167, D-148, D-145, D-241: the confirmation dialog. -->
   <ConfirmDialog
     label={sheet === 'archive' ? 'Archive this routine' : 'Delete this routine'}
     closeLabel="Keep the routine"

@@ -232,7 +232,7 @@ test('D-145: a bean without shots can be deleted; one with shots cannot', async 
   await page.goto(`/library/beans/${latest}/edit`);
   await page.getByRole('button', { name: 'Delete bean' }).click();
   await expect(page.getByRole('heading', { name: 'Delete this bean?' })).toBeVisible();
-  // D-241: deleting is red, keeping amber, and the sheet has a line outline.
+  // D-241: deleting is red, keeping amber, and the dialog has a line outline.
   const confirm = page.getByRole('dialog', { name: 'Delete this bean' });
   await expect(confirm.getByRole('button', { name: 'Delete bean' })).toHaveClass(/cn-btn-danger/);
   await expect(confirm.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);

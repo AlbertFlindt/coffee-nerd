@@ -51,7 +51,7 @@ Choose one of 2–4 options (roast level, machine type, dial). Selected value = 
 - **Secondary** (surface): quiet actions like Mark as finished.
 - **Danger** (`cn-btn-danger`, muted red, 56px, full width, ink text): only the delete, remove or archive choice in a confirmation (D-241). Nothing else is red.
 - **Add** pill (amber): sits in the header of Library pages (Add bean, Add gear, New routine). The center + in the tab bar is reserved for new shots (D-31).
-- **Quiet** (`cn-btn-quiet`, no background, ink-muted, 44px): a destructive or rare action at the end of a form, below its primary button — Delete shot, Delete bean (D-116, D-145). It always opens a confirmation sheet first.
+- **Quiet** (`cn-btn-quiet`, no background, ink-muted, 44px): a destructive or rare action at the end of a form, below its primary button — Delete shot, Delete bean (D-116, D-145). It always opens a confirmation dialog (ConfirmDialog) first.
 - **Pressed** (D-107): buttons flash amber while pressed and fade back (`cn-tap`); amber buttons press in slightly and brighten instead (`cn-tap-strong`). Choices that change state (score, chips, segments, switches) show their new state instead. The browser's own tap flash is off.
 
 ## RecipeTag

@@ -331,7 +331,7 @@
     </form>
   </BottomSheet>
 {:else if sheet === 'delete'}
-  <!-- D-145: the confirmation sheet, as for a shot (D-116). -->
+  <!-- D-145, D-241: the confirmation dialog, as for a shot (D-116). -->
   <ConfirmDialog label="Delete this bean" closeLabel="Keep the bean" onclose={() => (sheet = null)}>
     <h2 class="sheet-title">Delete this bean?</h2>
     <p class="cn-type-body note">It has no shots yet. This cannot be undone.</p>

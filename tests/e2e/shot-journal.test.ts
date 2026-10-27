@@ -280,7 +280,7 @@ test('D-116: a shot is deleted from the edit form, after a confirmation', async 
   await page.getByRole('button', { name: 'Delete shot' }).click();
   const confirm = page.getByRole('dialog', { name: 'Delete this shot' });
   await expect(confirm).toContainText('This cannot be undone.');
-  // D-241: deleting is red, keeping amber, and the sheet covers the form's own Save and Delete.
+  // D-241: deleting is red, keeping amber, and the dialog covers the form's own Save and Delete.
   await expect(confirm.getByRole('button', { name: 'Delete shot' })).toHaveClass(/cn-btn-danger/);
   await expect(confirm.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);
   const save = (await page.getByRole('button', { name: 'Save changes' }).boundingBox())!;

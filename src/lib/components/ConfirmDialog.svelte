@@ -20,6 +20,13 @@
   const reducedMotion =
     typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const duration = reducedMotion ? 0 : 200;
+
+  // Focus moves into the dialog while it is open and goes back to where it was after.
+  function holdFocus(node: HTMLElement) {
+    const before = document.activeElement as HTMLElement | null;
+    node.focus();
+    return { destroy: () => before?.focus() };
+  }
 </script>
 
 <svelte:window onkeydown={(e) => e.key === 'Escape' && onclose()} />
@@ -37,6 +44,8 @@
     role="dialog"
     aria-modal="true"
     aria-label={label}
+    tabindex="-1"
+    use:holdFocus
     transition:scale={{ start: 0.95, duration, easing: cubicOut }}
   >
     {@render children()}

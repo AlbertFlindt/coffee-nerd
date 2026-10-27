@@ -514,7 +514,7 @@
         </div>
       </BottomSheet>
     {:else if sheet === 'delete'}
-      <!-- D-116: deleting asks first. The confirmation is not designed yet (docs/open-items.md). -->
+      <!-- D-116, D-241: deleting asks first, in a dialog built ahead of the canvas (docs/open-items.md). -->
       <ConfirmDialog
         label="Delete this shot"
         closeLabel="Keep the shot"
@@ -647,7 +647,7 @@
     margin-top: var(--space-1);
   }
 
-  /* Like the confirmation sheets drawn on the canvas (screens 35, 40): the line close under the question. */
+  /* Like the confirmations drawn on the canvas (screens 35, 40): the line close under the question. */
   .delete-note {
     margin: -8px 0 8px;
     font-size: 14px;
