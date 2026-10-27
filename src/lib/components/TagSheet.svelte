@@ -160,9 +160,9 @@
       <form class="confirm" method="POST" action="?/merge" use:enhance={submit}>
         <input type="hidden" name="id" value={tag?.id} />
         <input type="hidden" name="into" value={view.id} />
-        <button class="cn-btn-primary cn-tap-strong" type="submit" disabled={pending}>Merge</button>
+        <button class="cn-btn-danger cn-tap-strong" type="submit" disabled={pending}>Merge</button>
         <button
-          class="cn-btn-secondary cn-tap"
+          class="cn-btn-primary cn-tap-strong"
           type="button"
           onclick={() => (into ? onclose() : (view = 'merge'))}>Back</button
         >
