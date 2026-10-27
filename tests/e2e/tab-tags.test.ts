@@ -121,6 +121,11 @@ test('D-173: "Keep both" is remembered for that pair', async () => {
   await screenshot('TagMergeList');
   await sheet.getByRole('button', { name: /^Caramel/ }).click();
   await expect(sheet.getByRole('heading', { name: 'Merge into Caramel?' })).toBeVisible();
+  // D-242: merging removes a tag, so it is red and going back amber.
+  await expect(sheet.getByRole('button', { name: 'Merge', exact: true })).toHaveClass(
+    /cn-btn-danger/
+  );
+  await expect(sheet.getByRole('button', { name: 'Back' })).toHaveClass(/cn-btn-primary/);
   await screenshot('TagMergeConfirm');
   await page.keyboard.press('Escape');
   await expect(sheet).toHaveCount(0);
