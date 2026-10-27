@@ -7,6 +7,7 @@
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
+  import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
   import PickRow from '#lib/components/PickRow.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import ValueCard from '#lib/components/ValueCard.svelte';
@@ -288,9 +289,7 @@
 
 {#if sheet === 'archive' || sheet === 'delete'}
   <!-- D-167, D-148, D-145: the confirmation sheet. -->
-  <BottomSheet
-    short
-    cover
+  <ConfirmDialog
     label={sheet === 'archive' ? 'Archive this routine' : 'Delete this routine'}
     closeLabel="Keep the routine"
     onclose={() => (sheet = null)}
@@ -315,7 +314,7 @@
         >Keep it</button
       >
     </form>
-  </BottomSheet>
+  </ConfirmDialog>
 {:else if sheet !== null && sheet.kind === 'insert'}
   <!-- Read safely: closing the sheet clears it while this block is still being torn down. -->
   {@const position = sheet?.kind === 'insert' ? sheet.position : 0}

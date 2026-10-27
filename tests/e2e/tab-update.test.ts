@@ -93,7 +93,7 @@ test('D-236: while a new version waits, the copies for offline use stay current'
   await page.goto(`/journal/${id}/edit`);
   await page.getByRole('button', { name: 'Delete shot' }).click();
   await page
-    .getByRole('region', { name: 'Delete this shot' })
+    .getByRole('dialog', { name: 'Delete this shot' })
     .getByRole('button', { name: 'Delete shot' })
     .click();
   await expect(page.getByRole('heading', { name: 'Edit shot' })).toHaveCount(0);

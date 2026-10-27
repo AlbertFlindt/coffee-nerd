@@ -247,7 +247,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 ### More (bottom sheet)
 
-- **D-21 — More opens as a bottom sheet with two tabs: Setup and Tasting.** *(Revised 2026-10-17: see D-108; 2026-10-23: see D-189; refined 2026-10-27: see D-241, a confirmation sheet covers Save.)* The sheet covers the form but **stops above the Save button**, which stays visible and active. Tapping outside the sheet (the dimmed form) closes it.
+- **D-21 — More opens as a bottom sheet with two tabs: Setup and Tasting.** *(Revised 2026-10-17: see D-108; 2026-10-23: see D-189; refined 2026-10-27: see D-241, a confirmation is a dialog over Save.)* The sheet covers the form but **stops above the Save button**, which stays visible and active. Tapping outside the sheet (the dimmed form) closes it.
   - *Why:* the user can save from anywhere without closing the sheet first; tap-outside-to-close is the expected sheet behavior on phones.
 - **D-108 — Sheets slide, and can be dragged down to close.** A bottom sheet slides up when it opens and down when it closes, and the dimmed screen behind it fades. Dragging the handle (or the top of the sheet) down closes it; a short drag springs back. Tapping outside still closes it (D-21). Without motion when the phone asks for reduced motion. Refines D-21.
   - *Why:* the handle invites a drag on every phone; a sheet that ignores it feels stuck.
@@ -554,8 +554,8 @@ Users never pick a persona. Personas are used to check that each screen works fo
   - *Why:* strict roles let colors explain themselves across screens (e.g. cherry always means "this recipe's past" in Insights). Color is never the only signal: deltas and markers carry text or shape too.
   - *(Refined 2026-10-27: see D-241, a muted red for the button that deletes.)*
 
-- **D-241 — A confirmation sheet makes deleting look different from keeping.** In a confirmation sheet (D-116, D-145), the button that deletes, removes or archives ("Delete shot", "Delete bean", "Remove tag", "Archive", "Sign out and delete") is a new muted red, used for nothing else; the button that keeps things as they are ("Keep it", "Stay signed in") is the amber primary button. A confirmation sheet covers the whole screen, the form's own Save and Delete buttons included, so only its two choices show. Every bottom sheet gets a thin outline in the line color, so its edge is clear against the dimmed screen. Refines D-18, D-19 and D-21.
-  - *Why:* the owner found "Delete shot" and "Keep it" too alike, with the amber Delete looking like the expected choice and the page's own Save showing under the sheet; red is the color people already read as "this deletes something".
+- **D-241 — A confirmation is a dialog in the middle of the screen, and deleting looks different from keeping.** A confirmation (D-116, D-145) is no longer a bottom sheet: it opens as a dialog in the middle of the screen, over all of it, with a thin outline in the line color; tapping the dimmed screen closes it, as for a sheet. In it, the button that deletes, removes or archives ("Delete shot", "Delete bean", "Remove tag", "Archive", "Sign out and delete") is a new muted red, used for nothing else; the button that keeps things as they are ("Keep it", "Stay signed in") is the amber primary button. The dialog covers the whole screen, the form's own Save and Delete buttons included, so only its two choices show. Every bottom sheet also gets the thin outline, so its edge is clear against the dimmed screen. The tag sheet's "Remove this tag?" step stays inside the tag sheet, with the same red and amber buttons. Refines D-18, D-19, D-21, D-116 and D-145.
+  - *Why:* the owner found "Delete shot" and "Keep it" too alike, with the amber Delete looking like the expected choice and the page's own Save showing under the sheet; an important question belongs in the middle of the screen; red is the color people already read as "this deletes something".
 
 ## 12. Design system
 

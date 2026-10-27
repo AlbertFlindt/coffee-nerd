@@ -233,7 +233,7 @@ test('D-145: a bean without shots can be deleted; one with shots cannot', async 
   await page.getByRole('button', { name: 'Delete bean' }).click();
   await expect(page.getByRole('heading', { name: 'Delete this bean?' })).toBeVisible();
   // D-241: deleting is red, keeping amber, and the sheet has a line outline.
-  const confirm = page.getByRole('region', { name: 'Delete this bean' });
+  const confirm = page.getByRole('dialog', { name: 'Delete this bean' });
   await expect(confirm.getByRole('button', { name: 'Delete bean' })).toHaveClass(/cn-btn-danger/);
   await expect(confirm.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);
   await expect(confirm).toHaveCSS('border-top-width', '1px');
@@ -242,7 +242,7 @@ test('D-145: a bean without shots can be deleted; one with shots cannot', async 
   await expect(page.getByRole('heading', { name: 'Delete this bean?' })).toBeHidden();
   await page.getByRole('button', { name: 'Delete bean' }).click();
   await page
-    .getByRole('region', { name: 'Delete this bean' })
+    .getByRole('dialog', { name: 'Delete this bean' })
     .getByRole('button', { name: 'Delete bean' })
     .click();
   await expect(page.getByRole('heading', { name: 'Beans', level: 1 })).toBeVisible();
@@ -420,12 +420,12 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
   await page.getByRole('button', { name: 'Archive' }).click();
   await expect(page.getByRole('heading', { name: 'Archive this basket?' })).toBeVisible();
   // D-241: archiving is red, keeping amber.
-  const archive = page.getByRole('region', { name: 'Archive this basket' });
+  const archive = page.getByRole('dialog', { name: 'Archive this basket' });
   await expect(archive.getByRole('button', { name: 'Archive' })).toHaveClass(/cn-btn-danger/);
   await expect(archive.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);
   await screenshot('GearArchive');
   await page
-    .getByRole('region', { name: 'Archive this basket' })
+    .getByRole('dialog', { name: 'Archive this basket' })
     .getByRole('button', { name: 'Archive' })
     .click();
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
@@ -445,7 +445,7 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
   await page.getByRole('link', { name: /^IMS · 20 g/ }).click();
   await page.getByRole('button', { name: 'Archive' }).click();
   await page
-    .getByRole('region', { name: 'Archive this basket' })
+    .getByRole('dialog', { name: 'Archive this basket' })
     .getByRole('button', { name: 'Archive' })
     .click();
   await expect(page.getByRole('link', { name: /^IMS/ })).toHaveCount(0);

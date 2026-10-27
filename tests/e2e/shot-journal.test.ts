@@ -278,7 +278,7 @@ test('D-116: a shot is deleted from the edit form, after a confirmation', async 
   await rows().first().click();
   await page.getByRole('link', { name: 'Edit' }).click();
   await page.getByRole('button', { name: 'Delete shot' }).click();
-  const confirm = page.getByRole('region', { name: 'Delete this shot' });
+  const confirm = page.getByRole('dialog', { name: 'Delete this shot' });
   await expect(confirm).toContainText('This cannot be undone.');
   // D-241: deleting is red, keeping amber, and the sheet covers the form's own Save and Delete.
   await expect(confirm.getByRole('button', { name: 'Delete shot' })).toHaveClass(/cn-btn-danger/);
@@ -314,7 +314,7 @@ test('D-116, D-117: after deleting, the Journal keeps its filters', async () => 
   await page.getByRole('link', { name: 'Edit' }).click();
   await page.getByRole('button', { name: 'Delete shot' }).click();
   await page
-    .getByRole('region', { name: 'Delete this shot' })
+    .getByRole('dialog', { name: 'Delete this shot' })
     .getByRole('button', { name: 'Delete shot' })
     .click();
   await expect(page).toHaveURL(/[?&]unrated=1/);

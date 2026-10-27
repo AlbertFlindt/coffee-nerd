@@ -265,7 +265,7 @@ async function deleteNewestShot() {
   await page.getByRole('link', { name: 'Edit' }).click();
   await page.getByRole('button', { name: 'Delete shot' }).click();
   await page
-    .getByRole('region', { name: 'Delete this shot' })
+    .getByRole('dialog', { name: 'Delete this shot' })
     .getByRole('button', { name: 'Delete shot' })
     .click();
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();

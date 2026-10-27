@@ -220,7 +220,7 @@ test('D-226, D-113, D-231: a waiting shot keeps its values and the bean chosen f
   // Deleted again: it was only on the phone.
   await page.getByRole('button', { name: 'Delete shot' }).click();
   await page
-    .getByRole('region', { name: 'Delete this shot' })
+    .getByRole('dialog', { name: 'Delete this shot' })
     .getByRole('button', { name: 'Delete shot' })
     .click();
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();

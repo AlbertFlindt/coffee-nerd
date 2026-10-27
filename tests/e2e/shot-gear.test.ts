@@ -146,7 +146,7 @@ test('the machine and grinder added for this file are archived again', async () 
   await page.getByRole('link', { name: /^Gaggia Classic/ }).click();
   await page.getByRole('button', { name: 'Archive' }).click();
   await page
-    .getByRole('region', { name: 'Archive this machine' })
+    .getByRole('dialog', { name: 'Archive this machine' })
     .getByRole('button', { name: 'Archive' })
     .click();
   await expect(page.getByRole('link', { name: /^Gaggia Classic/ })).toHaveCount(0);
@@ -155,7 +155,7 @@ test('the machine and grinder added for this file are archived again', async () 
   await page.getByRole('link', { name: /^Comandante C40/ }).click();
   await page.getByRole('button', { name: 'Archive' }).click();
   await page
-    .getByRole('region', { name: 'Archive this grinder' })
+    .getByRole('dialog', { name: 'Archive this grinder' })
     .getByRole('button', { name: 'Archive' })
     .click();
   await expect(page.getByRole('link', { name: /^Comandante C40/ })).toHaveCount(0);

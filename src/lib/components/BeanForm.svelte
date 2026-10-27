@@ -7,6 +7,7 @@
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
+  import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
   import PickRow from '#lib/components/PickRow.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import { PROCESS_LABEL, roastDateText, type Process } from '#lib/domain/bean.ts';
@@ -331,13 +332,7 @@
   </BottomSheet>
 {:else if sheet === 'delete'}
   <!-- D-145: the confirmation sheet, as for a shot (D-116). -->
-  <BottomSheet
-    short
-    cover
-    label="Delete this bean"
-    closeLabel="Keep the bean"
-    onclose={() => (sheet = null)}
-  >
+  <ConfirmDialog label="Delete this bean" closeLabel="Keep the bean" onclose={() => (sheet = null)}>
     <h2 class="sheet-title">Delete this bean?</h2>
     <p class="cn-type-body note">It has no shots yet. This cannot be undone.</p>
     <form class="confirm" method="POST" action="?/delete" onsubmit={() => (deleting = true)}>
@@ -348,7 +343,7 @@
         >Keep it</button
       >
     </form>
-  </BottomSheet>
+  </ConfirmDialog>
 {:else if sheet === 'country'}
   <BottomSheet
     label="Choose a country"

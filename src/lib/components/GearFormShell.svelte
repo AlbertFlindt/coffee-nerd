@@ -7,7 +7,7 @@
   import type { Snippet } from 'svelte';
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
-  import BottomSheet from '#lib/components/BottomSheet.svelte';
+  import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
   import type { Guide } from '#lib/domain/guide.ts';
 
   let {
@@ -98,9 +98,7 @@
 
 {#if confirm}
   <!-- D-148: archiving asks first, like deleting a bean (D-145). -->
-  <BottomSheet
-    short
-    cover
+  <ConfirmDialog
     label="Archive this {kind}"
     closeLabel="Keep the {kind}"
     onclose={() => (confirm = false)}
@@ -114,7 +112,7 @@
         >Keep it</button
       >
     </form>
-  </BottomSheet>
+  </ConfirmDialog>
 {/if}
 
 <style>

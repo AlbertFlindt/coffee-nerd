@@ -19,6 +19,7 @@
   import { v7 } from 'uuid';
   import BeanCard from './BeanCard.svelte';
   import BottomSheet from './BottomSheet.svelte';
+  import ConfirmDialog from './ConfirmDialog.svelte';
   import MoreSheet from './MoreSheet.svelte';
   import PickRow from './PickRow.svelte';
   import ScoreRow from './ScoreRow.svelte';
@@ -514,9 +515,7 @@
       </BottomSheet>
     {:else if sheet === 'delete'}
       <!-- D-116: deleting asks first. The confirmation is not designed yet (docs/open-items.md). -->
-      <BottomSheet
-        short
-        cover
+      <ConfirmDialog
         label="Delete this shot"
         closeLabel="Keep the shot"
         onclose={() => (sheet = null)}
@@ -549,7 +548,7 @@
             >Keep it</button
           >
         </form>
-      </BottomSheet>
+      </ConfirmDialog>
     {/if}
   </div>
 
