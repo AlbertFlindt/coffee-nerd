@@ -503,6 +503,11 @@ test('D-225, D-234: signing out asks first while a shot waits, then leaves nothi
     sheet.getByRole('heading', { name: '1 shot is still waiting to send' })
   ).toBeVisible();
   await screenshot('SignOutWaiting');
+  // D-241: signing out and deleting is red, staying amber.
+  await expect(sheet.getByRole('button', { name: 'Sign out and delete' })).toHaveClass(
+    /cn-btn-danger/
+  );
+  await expect(sheet.getByRole('button', { name: 'Stay signed in' })).toHaveClass(/cn-btn-primary/);
   await sheet.getByRole('button', { name: 'Stay signed in' }).click();
   await expect(sheet).toHaveCount(0);
   expect(await entries()).toHaveLength(1);

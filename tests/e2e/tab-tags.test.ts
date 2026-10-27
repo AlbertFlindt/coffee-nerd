@@ -127,6 +127,9 @@ test('D-173: "Keep both" is remembered for that pair', async () => {
   await chip('Carmel').click();
   await sheet.getByRole('button', { name: 'Remove tag' }).click();
   await expect(sheet.getByRole('heading', { name: 'Delete this tag?' })).toBeVisible();
+  // D-241: deleting is red, keeping amber.
+  await expect(sheet.getByRole('button', { name: 'Delete tag' })).toHaveClass(/cn-btn-danger/);
+  await expect(sheet.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);
   await screenshot('TagRemove');
   await sheet.getByRole('button', { name: 'Delete tag' }).click();
   await expect(chip('Carmel')).toHaveCount(0);

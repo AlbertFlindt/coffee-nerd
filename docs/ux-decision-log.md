@@ -247,7 +247,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 ### More (bottom sheet)
 
-- **D-21 — More opens as a bottom sheet with two tabs: Setup and Tasting.** *(Revised 2026-10-17: see D-108; 2026-10-23: see D-189.)* The sheet covers the form but **stops above the Save button**, which stays visible and active. Tapping outside the sheet (the dimmed form) closes it.
+- **D-21 — More opens as a bottom sheet with two tabs: Setup and Tasting.** *(Revised 2026-10-17: see D-108; 2026-10-23: see D-189; refined 2026-10-27: see D-241, a confirmation sheet covers Save.)* The sheet covers the form but **stops above the Save button**, which stays visible and active. Tapping outside the sheet (the dimmed form) closes it.
   - *Why:* the user can save from anywhere without closing the sheet first; tap-outside-to-close is the expected sheet behavior on phones.
 - **D-108 — Sheets slide, and can be dragged down to close.** A bottom sheet slides up when it opens and down when it closes, and the dimmed screen behind it fades. Dragging the handle (or the top of the sheet) down closes it; a short drag springs back. Tapping outside still closes it (D-21). Without motion when the phone asks for reduced motion. Refines D-21.
   - *Why:* the handle invites a drag on every phone; a sheet that ignores it feels stuck.
@@ -539,7 +539,7 @@ Users never pick a persona. Personas are used to check that each screen works fo
 
 ## 11. Visual direction
 
-- **D-18 — Coffee-toned, surface-based dark UI.** Dark roast background with slightly lighter mocha cards; separation comes from surfaces, not borders or dividers. Soft rounded corners, generous spacing, a friendly geometric sans (Figtree) with tabular numbers. One full-width primary action per task screen.
+- **D-18 — Coffee-toned, surface-based dark UI.** *(Refined 2026-10-27: see D-241, bottom sheets get a thin outline.)* Dark roast background with slightly lighter mocha cards; separation comes from surfaces, not borders or dividers. Soft rounded corners, generous spacing, a friendly geometric sans (Figtree) with tabular numbers. One full-width primary action per task screen.
   - Light cream cards are used sparingly for the one thing that should stand out on a page (e.g. roast age on bean cards, My setup on Gear).
   - *Why:* calm and uncluttered at the brew station; warm tones fit the subject. Earlier directions (warm-amber default and a cool "instrument" style) read as generic or cluttered.
 - **D-19 — Accent colors have one job each.**

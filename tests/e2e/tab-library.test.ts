@@ -232,6 +232,11 @@ test('D-145: a bean without shots can be deleted; one with shots cannot', async 
   await page.goto(`/library/beans/${latest}/edit`);
   await page.getByRole('button', { name: 'Delete bean' }).click();
   await expect(page.getByRole('heading', { name: 'Delete this bean?' })).toBeVisible();
+  // D-241: deleting is red, keeping amber, and the sheet has a line outline.
+  const confirm = page.getByRole('region', { name: 'Delete this bean' });
+  await expect(confirm.getByRole('button', { name: 'Delete bean' })).toHaveClass(/cn-btn-danger/);
+  await expect(confirm.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);
+  await expect(confirm).toHaveCSS('border-top-width', '1px');
   await screenshot('BeanDelete');
   await page.getByRole('button', { name: 'Keep it' }).click();
   await expect(page.getByRole('heading', { name: 'Delete this bean?' })).toBeHidden();
@@ -414,6 +419,10 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
   await ims.click();
   await page.getByRole('button', { name: 'Archive' }).click();
   await expect(page.getByRole('heading', { name: 'Archive this basket?' })).toBeVisible();
+  // D-241: archiving is red, keeping amber.
+  const archive = page.getByRole('region', { name: 'Archive this basket' });
+  await expect(archive.getByRole('button', { name: 'Archive' })).toHaveClass(/cn-btn-danger/);
+  await expect(archive.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);
   await screenshot('GearArchive');
   await page
     .getByRole('region', { name: 'Archive this basket' })
