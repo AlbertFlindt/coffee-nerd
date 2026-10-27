@@ -12,7 +12,7 @@
 
 ## Try the latest build on your server (Dockge)
 
-Every merge to `main` is published as the image `ghcr.io/albertflindt/coffee-nerd:main`. For trying it out, not yet for daily use: the full install guide comes with milestone M11.
+Every merge to `main` is published as the image `ghcr.io/albertflindt/coffee-nerd:main`. For trying it out, not yet for daily use: the full install guide comes with the release (milestone M12).
 
 1. **Once: let the server pull the private image.** On GitHub, create a personal access token (classic) with only the `read:packages` scope. On the server run `docker login ghcr.io -u AlbertFlindt` and paste the token as the password. Dockge uses the server's Docker, so this is enough.
 2. **Create the stack.** In Dockge choose **+ Compose**, name it `coffee-nerd`, paste this and press **Deploy**:
