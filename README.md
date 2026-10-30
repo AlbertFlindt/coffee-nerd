@@ -113,8 +113,8 @@ Coffee Nerd is one container with one data volume. Each release is published as
 1. **Once: let the server pull the image.** The image is private for now. On GitHub, create a
    personal access token (classic) with only the `read:packages` scope, run
    `docker login ghcr.io -u <your GitHub name>` on the server and paste the token as the password.
-2. **Start it.** Save this as `compose.yaml` (or paste it into Dockge as a new stack called
-   `coffee-nerd`) and run `docker compose up -d`:
+2. **Start it.** Save this as `compose.yaml` in a folder called `coffee-nerd` and run
+   `docker compose up -d`:
 
    ```yaml
    services:
@@ -134,7 +134,7 @@ Coffee Nerd is one container with one data volume. Each release is published as
    the server can claim the app. The app then walks you through your gear and first bean.
 
 **Trying it with sample data instead:** before creating an account, run
-`docker compose exec coffee-nerd node scripts/seed.mjs` (in Dockge, the stack's terminal). It fills
+`docker compose exec coffee-nerd node scripts/seed.mjs`. It fills
 an empty app with a reference setup (Lelit Bianca, Timemore 064S, VST 18 g, a Daily routine, one
 bean). Sign in as **Demo** with the password **coffee-nerd**, then set your own password at once.
 
@@ -144,10 +144,10 @@ signs out every device.
 **Behind a reverse proxy** with https, forward `X-Forwarded-Proto` (and `X-Forwarded-Host` if the
 proxy changes the host), so the sign-in cookie is marked secure and forms are accepted.
 
-**Update:** `docker compose pull && docker compose up -d` (in Dockge, **Update**). Your shots stay in
+**Update:** `docker compose pull && docker compose up -d` Your shots stay in
 the `data` volume, and database changes are applied when the app starts.
 
-**Start over:** stop the stack and delete its `data` volume (`docker volume rm coffee-nerd_data`).
+**Start over:** stop the app and delete its `data` volume (`docker volume rm coffee-nerd_data`).
 
 ## Back up and restore
 
@@ -158,7 +158,7 @@ password in scrambled form. **Export shots** (a CSV for spreadsheets) and **Expo
 
 **Restore** on the server, as a deliberate step: it replaces all data in the app with the backup.
 
-1. Stop the stack (`docker compose stop`, or **Stop** in Dockge).
+1. Stop the app: `docker compose stop`.
 2. Put the backup file in a folder on the server, open a terminal there and run, with your file's name:
 
    ```sh
@@ -169,7 +169,7 @@ password in scrambled form. **Export shots** (a CSV for spreadsheets) and **Expo
    ```
 
    Removing the `-wal` and `-shm` files matters: they belong to the old database.
-3. Start the stack again. A backup from an older version is brought up to date when the app starts.
+3. Start the app again: `docker compose start`. A backup from an older version is brought up to date when the app starts.
    Every device signs in again.
 
 ## Running from source
