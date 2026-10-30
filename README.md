@@ -84,11 +84,6 @@ with its spread), **Dial-in** (how steady your shot time is on the best recipe, 
 your most consistent beans). Every card
 opens with a finding in plain words, then the chart and how many shots it rests on.
 
-### Getting started
-
-After you create your account, the app walks you through your machine, grinder, basket, My setup
-and first bean, one step at a time.
-
 ### Installable and offline
 
 Over https, add Coffee Nerd to your phone's home screen and it runs like an app. Home, the Journal
@@ -131,7 +126,8 @@ Coffee Nerd is one container with one data volume. Each release is published as
    ```
 
 3. **Create your account right away** at `http://<server>:3000`. Until then, anyone who can reach
-   the server can claim the app. The app then walks you through your gear and first bean.
+   the server can claim the app. The app then walks you through your machine, grinder,
+   basket, My setup and first bean, one step at a time.
 
 **Trying it with sample data instead:** before creating an account, run
 `docker compose exec coffee-nerd node scripts/seed.mjs`. It fills
