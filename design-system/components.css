@@ -21,11 +21,11 @@
 .cn-row__btn{width:var(--touch-min);height:var(--touch-min);border-radius:var(--radius-sm);border:none;background:var(--control-strong);color:var(--ink);font-size:20px}
 .cn-row__value{width:72px;text-align:center;font-size:20px;font-weight:600}
 .cn-row__sub{display:block;font-size:13px;font-weight:600;color:var(--amber)}
-/* quiet button: a destructive or rare action at the end of a form, e.g. Delete shot, Delete bean (D-116, D-145) */
+/* quiet button: a destructive or rare action at the end of a form, e.g. Delete shot, Delete bean */
 .cn-btn-quiet{width:100%;height:var(--touch-min);border:none;border-radius:var(--radius-md);background:none;color:var(--ink-muted);font-size:15px;font-weight:600}
 /* primary button */
 .cn-btn-primary{width:100%;height:var(--button-primary-h);border-radius:var(--radius-lg);border:none;background:var(--amber);color:var(--on-amber);font-size:17px;font-weight:700}
-/* danger button: the delete, remove or archive choice in a confirmation, nothing else (D-241) */
+/* danger button: the delete, remove or archive choice in a confirmation, nothing else */
 .cn-btn-danger{width:100%;height:var(--button-primary-h);border-radius:var(--radius-lg);border:none;background:var(--danger);color:var(--on-danger);font-size:17px;font-weight:700}
 .cn-btn-secondary{width:100%;height:52px;border-radius:var(--radius-md);border:none;background:var(--surface);color:var(--ink);font-size:15px;font-weight:600}
 .cn-btn-add{display:inline-flex;align-items:center;gap:6px;height:var(--touch-min);padding:0 16px;border-radius:var(--radius-pill);border:none;background:var(--amber);color:var(--on-amber);font-size:15px;font-weight:700}
@@ -55,13 +55,13 @@
 .cn-score button[aria-checked="true"]{background:var(--amber);color:var(--on-amber);font-weight:700}
 .cn-score button.is-previous{border:1.5px dashed var(--cherry)}
 /* sheet */
-/* the thin line outline keeps the sheet's edge clear against the dimmed screen (D-241) */
+/* the thin line outline keeps the sheet's edge clear against the dimmed screen */
 .cn-sheet{background:var(--surface-sheet);border:1px solid var(--line);border-bottom:none;border-radius:var(--radius-sheet) var(--radius-sheet) 0 0;padding:10px 20px 20px;display:flex;flex-direction:column;gap:12px}
 .cn-sheet__handle{align-self:center;width:40px;height:5px;border-radius:3px;background:var(--line)}
-/* the 44px strip at the top of a sheet, with the handle in its middle; dragging it down closes the sheet (D-108) */
+/* the 44px strip at the top of a sheet, with the handle in its middle; dragging it down closes the sheet */
 .cn-sheet__grip{flex:none;display:flex;justify-content:center;align-items:center;height:var(--touch-min);margin:-10px -20px -12px;touch-action:none;cursor:grab}
 .cn-scrim{background:var(--scrim)}
-/* confirmation dialog: in the middle of the screen, over all of it (D-241) */
+/* confirmation dialog: in the middle of the screen, over all of it */
 .cn-dialog{background:var(--surface-sheet);border:1px solid var(--line);border-radius:var(--radius-sheet);padding:20px;display:flex;flex-direction:column;gap:12px}
 /* preview frame */
 .cn-preview{padding:10px;border-radius:var(--radius-xl);border:1.5px dashed var(--line)}
@@ -74,9 +74,9 @@
 .cn-insight{display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:var(--radius-xl);background:var(--surface)}
 .cn-insight h3{margin:0;font-size:17px;line-height:22px;font-weight:700}
 .cn-insight p{margin:0;font-size:14px;line-height:1.4;color:var(--ink-soft)}
-/* taste slider: an empty slider shows a hollow dashed handle in the middle (D-106, D-11) */
+/* taste slider: an empty slider shows a hollow dashed handle in the middle */
 .cn-slider-handle--empty{width:24px;height:24px;margin-left:-12px;border-radius:var(--radius-pill);border:1.5px dashed var(--ink-muted);background:transparent}
-/* pressed: buttons flash amber while pressed and fade back; amber buttons press in slightly (D-107, D-19) */
+/* pressed: buttons flash amber while pressed and fade back; amber buttons press in slightly */
 .cn-root{-webkit-tap-highlight-color:transparent}
 .cn-root .cn-tap{transition:background-color 200ms ease-out,color 200ms ease-out}
 .cn-root .cn-tap:active{background:var(--amber);color:var(--on-amber);transition:none}
