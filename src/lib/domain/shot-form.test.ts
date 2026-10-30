@@ -4,6 +4,7 @@ import type { FeatureDefinition } from './schemas';
 import {
   coreChanges,
   matchRecipe,
+  prepDetail,
   routineParts,
   setupChanges,
   setupDetail,
@@ -446,5 +447,30 @@ describe('routineParts', () => {
       { key: `step:${WDT}:1`, text: 'WDT 10 s' }
     ]);
     expect(routineParts(null, labels)).toEqual([]);
+  });
+});
+
+describe('prepDetail', () => {
+  const labels = (stepId: string, value: string) =>
+    stepId === 'filter' && value === 'metal' ? 'Metal' : value;
+
+  it('the routine by name, then every step in order; a step without a setting by its name alone', () => {
+    const routine = {
+      name: 'Daily routine',
+      steps: [
+        { stepId: WDT, name: 'WDT', unit: 's', value: 20000 },
+        { stepId: 'distributor', name: 'Distributor', value: null },
+        { stepId: 'tamp', name: 'Tamp', unit: 'kg', value: 15500 },
+        { stepId: 'filter', name: 'Filter', value: 'metal' }
+      ]
+    };
+    expect(prepDetail(routine, labels)).toBe(
+      'Daily routine: WDT 20 s · Distributor · Tamp 15.5 kg · Filter Metal'
+    );
+  });
+
+  it('a routine without steps by its name; no routine, no line', () => {
+    expect(prepDetail({ name: 'Just tamp', steps: [] }, labels)).toBe('Just tamp');
+    expect(prepDetail(null, labels)).toBeNull();
   });
 });

@@ -187,8 +187,16 @@ test('ShotDetail: tapping a shot opens it', async () => {
   const card = page.getByRole('region', { name: 'Bean and setup' });
   await expect(card).toContainText('Guji Hambela');
   await expect(card).toContainText(/\d+ days? since roast/);
-  await expect(card).toContainText('Lelit Bianca · Timemore 064S · VST · 18 g · Daily routine');
+  await expect(
+    card.getByText('Lelit Bianca · Timemore 064S · VST · 18 g', { exact: true })
+  ).toBeVisible();
   await expect(card).toContainText('93 °C · Flat 9.0 bar');
+  // The puck prep used: the routine, then every step.
+  await expect(
+    card.getByText('Daily routine: WDT 20 s · Distributor · Tamp 15 kg · Puck screen', {
+      exact: true
+    })
+  ).toBeVisible();
   const values = page.getByRole('region', { name: 'Core values' });
   for (const label of ['Grind', 'Dose', 'Yield', 'Time']) await expect(values).toContainText(label);
   await expect(page.getByText(/^Ratio 1 : \d\.\d$/)).toBeVisible();
