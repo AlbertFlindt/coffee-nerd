@@ -1,0 +1,64 @@
+name: Bug report
+description: Something in Coffee Nerd doesn't work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. To report a vulnerability, don't use this form: see SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Settings shows it at the bottom.
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Phone and browser
+      placeholder: Pixel 8a, Chrome 141
+    validations:
+      required: true
+  - type: dropdown
+    id: installed
+    attributes:
+      label: How you open the app
+      options:
+        - Installed on the home screen
+        - In the browser
+    validations:
+      required: true
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Server
+      options:
+        - Over https, behind a reverse proxy
+        - Over plain http
+        - Running from source
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps
+      description: What you did, one step per line, so someone else can see the problem too.
+      placeholder: |
+        1. Open the shot form
+        2. Tap + on Dose twice
+        3. Save
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: A screenshot helps. Server errors are in `docker compose logs coffee-nerd`.
+    validations:
+      required: true
