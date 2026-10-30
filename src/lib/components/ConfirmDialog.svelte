@@ -1,7 +1,8 @@
 <script lang="ts">
   // A confirmation in the middle of the screen, over all of it, Save included, so only its two choices
-  // show. Tapping the dimmed screen or Escape closes it, as for a bottom sheet.
-  import type { Snippet } from 'svelte';
+  // show. Tapping the dimmed screen, Escape or the phone's back gesture closes it, as for a bottom sheet.
+  import { onMount, type Snippet } from 'svelte';
+  import { closeOnBack } from '#lib/back-closes.ts';
   import { cubicOut } from 'svelte/easing';
   import { fade, scale } from 'svelte/transition';
 
@@ -16,6 +17,8 @@
     onclose: () => void;
     children: Snippet;
   } = $props();
+
+  onMount(() => closeOnBack(() => onclose()));
 
   const reducedMotion =
     typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;

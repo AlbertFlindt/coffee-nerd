@@ -14,6 +14,7 @@
   import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
+  import { closeAll } from '#lib/back-closes.ts';
   import { PROCESS_LABEL } from '#lib/domain/bean.ts';
   import { onMount } from 'svelte';
   import { v7 } from 'uuid';
@@ -165,8 +166,9 @@
   $effect(() => {
     if (data.edit || waiting) shot.beanId = data.bean.id;
   });
-  function chooseBeanForEdit(beanId: string) {
-    sheet = null;
+  async function chooseBeanForEdit(beanId: string) {
+    // The bean sheet's history entry goes first: the form's own entry is the one replaced.
+    await closeAll();
     switchingBean = true;
     // The draft goes with the new bean: a waiting shot's form opens again for it.
     const { ownerId, form, basis } = draftOf();

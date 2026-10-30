@@ -3,6 +3,7 @@
   import { afterNavigate } from '$app/navigation';
   import { page } from '$app/state';
   import { onMount } from 'svelte';
+  import { watchBack } from '#lib/back-closes.ts';
   import logo from '../../design-system/logo/coffee-nerd-mark.svg';
   import OfflineLine from '#lib/components/OfflineLine.svelte';
   import { keepForOffline, watchNetwork } from '#lib/offline-status.svelte.ts';
@@ -16,6 +17,8 @@
   afterNavigate(keepForOffline);
   // Shots saved offline wait on the phone and go to the server once it can be reached.
   onMount(() => watchWaiting(() => page.data.userId));
+  // The phone's back gesture closes an open sheet or dialog before it leaves the page.
+  onMount(watchBack);
 </script>
 
 <svelte:head>

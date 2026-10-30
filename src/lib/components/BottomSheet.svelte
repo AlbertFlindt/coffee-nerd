@@ -1,10 +1,12 @@
 <script lang="ts">
   // A bottom sheet over a dimmed screen; tapping the dimmed part closes it. Placed inside the area
-  // above the Save button, so the sheet stops above it and Save stays usable. It slides in and out, and
-  // dragging its handle down closes it.
-  import type { Snippet } from 'svelte';
+  // above the Save button, so the sheet stops above it and Save stays usable. It slides in and out.
+  // Dragging its handle down closes it, so does swiping down anywhere on it while its content is
+  // scrolled to the top, and so does the phone's back gesture.
+  import { onMount, type Snippet } from 'svelte';
   import { cubicOut } from 'svelte/easing';
   import { fade, fly } from 'svelte/transition';
+  import { closeOnBack } from '#lib/back-closes.ts';
 
   let {
     label,
@@ -47,6 +49,71 @@
     if (dragged > CLOSE_AFTER) onclose();
     else dragged = 0;
   }
+
+  onMount(() => closeOnBack(() => onclose()));
+
+  /** Fingers moved less than this are still a tap. */
+  const SLOP = 8;
+
+  /** Whether a swipe down from `target` belongs to the sheet: not to a field, a slider or a list that can scroll up. */
+  function swipesSheet(target: EventTarget | null): boolean {
+    for (let el = target as HTMLElement | null; el && el !== sheet; el = el.parentElement) {
+      if (el.matches('input, textarea, select, [contenteditable]')) return false;
+      const style = getComputedStyle(el);
+      if (style.touchAction === 'none') return false;
+      if (el.scrollTop > 0 && /auto|scroll/.test(style.overflowY)) return false;
+    }
+    return true;
+  }
+
+  // Swiping the content down: touch events, which keep coming while the browser scrolls, and
+  // which can stop the browser once the swipe is the sheet's. The handle's strip has its own above.
+  function swipeDown(node: HTMLElement) {
+    let from: { x: number; y: number } | null = null;
+    let ours = false;
+    const start = (e: TouchEvent) => {
+      const grip = (e.target as HTMLElement).closest('.cn-sheet__grip');
+      from =
+        e.touches.length === 1 && !grip
+          ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
+          : null;
+      ours = false;
+    };
+    const move = (e: TouchEvent) => {
+      if (!from) return;
+      const dx = e.touches[0].clientX - from.x;
+      const dy = e.touches[0].clientY - from.y;
+      if (!ours) {
+        if (Math.abs(dx) < SLOP && Math.abs(dy) < SLOP) return;
+        // Sideways, up, or on something that scrolls or slides: not the sheet's.
+        if (dy <= Math.abs(dx) || !swipesSheet(e.target)) {
+          from = null;
+          return;
+        }
+        ours = true;
+        dragFrom = from.y;
+      }
+      if (e.cancelable) e.preventDefault();
+      dragged = Math.max(0, dy);
+    };
+    const end = () => {
+      if (ours) onpointerup();
+      from = null;
+      ours = false;
+    };
+    node.addEventListener('touchstart', start, { passive: true });
+    node.addEventListener('touchmove', move, { passive: false });
+    node.addEventListener('touchend', end);
+    node.addEventListener('touchcancel', end);
+    return {
+      destroy() {
+        node.removeEventListener('touchstart', start);
+        node.removeEventListener('touchmove', move);
+        node.removeEventListener('touchend', end);
+        node.removeEventListener('touchcancel', end);
+      }
+    };
+  }
 </script>
 
 <svelte:window onkeydown={(e) => e.key === 'Escape' && onclose()} />
@@ -67,6 +134,7 @@
     aria-label={label}
     style:transform={dragged > 0 ? `translateY(${dragged}px)` : undefined}
     transition:fly={{ y: sheet?.offsetHeight ?? 600, duration, easing: cubicOut }}
+    use:swipeDown
   >
     <!-- The handle and the strip around it can be dragged down to close; Escape and tapping
          outside do the same for keyboards and screen readers. -->

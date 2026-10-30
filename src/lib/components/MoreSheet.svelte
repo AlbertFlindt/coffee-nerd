@@ -3,6 +3,8 @@
   // temperature, pressure profile, basket, puck prep, changes since the last shot in
   // sage. Tasting: balance, body, sweetness, aftertaste, flavor notes that fold away
   // and notes; all start empty. Tasting scrolls as a whole.
+  import { untrack } from 'svelte';
+  import { closeOnBack } from '#lib/back-closes.ts';
   import BottomSheet from './BottomSheet.svelte';
   import ChoiceRow from './ChoiceRow.svelte';
   import PickRow from './PickRow.svelte';
@@ -41,6 +43,11 @@
   /** A view inside the Setup tab: a picker, or the routine's steps with their values. */
   let picking: 'basket' | 'routine' | 'prep' | null = $state(null);
   let adding = $state(false);
+  // Back from a picker or the puck prep view goes back to Setup, not out of the sheet.
+  const inView = $derived(picking !== null);
+  $effect(() => {
+    if (inView) return untrack(() => closeOnBack(() => (picking = null)));
+  });
   let newName = $state('');
 
   // Whether Flavor notes is folded is remembered on this phone. Storage can be missing or blocked
