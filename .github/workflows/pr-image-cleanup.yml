@@ -1,0 +1,31 @@
+name: PR image cleanup
+
+# A closed pull request's image (ghcr.io/<owner>/coffee-nerd:pr-<number>, see ci.yml) is removed.
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  packages: write
+
+jobs:
+  delete:
+    name: Delete the pull request image
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Delete the version tagged pr-<number>
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          TAG: pr-${{ github.event.pull_request.number }}
+        run: |
+          versions="/users/$OWNER/packages/container/coffee-nerd/versions"
+          id=$(gh api --paginate "$versions" \
+            --jq ".[] | select(.metadata.container.tags | index(\"$TAG\")) | .id")
+          if [ -z "$id" ]; then
+            echo "No image tagged $TAG; nothing to delete."; exit 0
+          fi
+          gh api --method DELETE "$versions/$id"
+          echo "Deleted $TAG (version $id)."
