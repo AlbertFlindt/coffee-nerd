@@ -2,11 +2,18 @@
 
 All notable changes to Coffee Nerd. Each version is a tag and a GitHub release.
 
-## 1.1.0 (2026-10-30)
+## 1.2.0 (2026-10-30)
 
 ### Added
 - **Home:** on the score per shot graph, tapping the highlighted point again opens that shot. Its
   Back returns to Home.
+
+## 1.1.0 (2026-10-30)
+
+### Added
+- **Shot detail shows the puck prep:** under the setup, the routine you used and each of its steps
+  with its setting, as "Daily routine: WDT 20 s · Distributor · Tamp 15 kg · Puck screen". The
+  routine's name moved there from the gear line.
 
 ## 1.0.2 (2026-10-30)
 

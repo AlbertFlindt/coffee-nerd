@@ -260,7 +260,7 @@ describe('loadShotDetail', () => {
     ]);
   });
 
-  it('the bean, roast age, gear, routine, setup, values, taste, flavor notes and notes', () => {
+  it('the bean, roast age, gear, setup, puck prep steps, values, taste, flavor notes and notes', () => {
     const berry = db.select().from(tag).where(eq(tag.name, 'Berry')).get()!;
     save(shotAt(T0 - DAY));
     const id = save(
@@ -276,8 +276,9 @@ describe('loadShotDetail', () => {
     expect(detail).toMatchObject({
       beanName: 'Guji Hambela',
       roastDate: REFERENCE_ROAST(),
-      gear: 'Lelit Bianca · Timemore 064S · VST · 18 g · Daily routine',
+      gear: 'Lelit Bianca · Timemore 064S · VST · 18 g',
       setup: '93 °C · Flat 9.0 bar · Preinfusion 4 s · Low bar start 5 s at 2.0 bar',
+      prep: 'Daily routine: WDT 20 s · Distributor · Tamp 15 kg · Puck screen',
       recipeTag: { kind: 'reused', shotCount: 1 },
       grind: 1600,
       dose: 18000,
