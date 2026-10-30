@@ -1,6 +1,6 @@
 # Progress / handoff
 
-**Last updated:** 2026-10-30. **Latest release:** 1.0.2 (details in `CHANGELOG.md`).
+**Last updated:** 2026-10-30. **Latest release:** 1.0.3 (details in `CHANGELOG.md`).
 How things work: `docs/SPEC.md`.
 
 ## Current state
@@ -30,6 +30,8 @@ request template.
   page now turns off the browser's stretch and pull-to-reload; check on the phone that Vanadium
   no longer moves the screen when dragged.
 - Daily use at a real brew station.
+- On the phone: the back gesture closing a sheet, and swiping a sheet down from its content.
+  Tested in Chromium with touch events at 412 × 915.
 - Phones shorter than about 740 px: the shot form then scrolls inside itself, so Setup and Tasting
   can scroll out of view.
 
@@ -53,6 +55,8 @@ request template.
 - The step-by-step start (built from the existing pages, with "Step 1 of 5").
 - Puck prep and Tags: empty states, the step sheet's edit mode, the routine builder's sheets and
   problem lines, the tag sheet with Merge and Remove, and the duplicate-tag card.
+- Sheets close with the back gesture (a list inside Setup goes back to Setup first) and with a
+  swipe down anywhere on them while their content is at the top; the design only drags the handle.
 - The shot form's Setup and Tasting rows, the sheets without tabs, folding flavor notes, the "Use it
   for new shots?" sheet, and the Archived lists of Gear, Puck prep and Tags.
 - Where a screen in `docs/screens/` differs from the app in a detail (a "Delete feature" on a used
