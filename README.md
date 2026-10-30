@@ -174,7 +174,7 @@ container next to the real one, with its own data. Save this as `compose.yaml` i
 ```yaml
 services:
   coffee-nerd-test:
-    image: ghcr.io/albertflindt/coffee-nerd:${PR_TAG:-latest}
+    image: ghcr.io/albertflindt/coffee-nerd:pr-82
     ports:
       - '3001:3000'
     volumes:
@@ -185,9 +185,8 @@ volumes:
   data:
 ```
 
-To switch it to a pull request, put its tag in a `.env` file in that folder (`PR_TAG=pr-82`), run
-`docker compose pull && docker compose up -d` there, and open `http://<server>:3001`. Without a
-`.env` it runs the latest release.
+To switch it to another pull request, change the tag in `image:` (`pr-82` is an example), run
+`docker compose pull && docker compose up -d` in that folder, and open `http://<server>:3001`.
 
 - **Its data is its own.** A pull request can change the database, and that change is applied to the
   test data when it starts. To try one with your real shots, restore a backup into the test
