@@ -42,7 +42,7 @@ test.beforeAll(async ({ browser }) => {
 
 test.afterAll(() => context.close());
 
-test('D-219: Home, the Journal and the shot form for every open bean are kept, with their data', async () => {
+test('Home, the Journal and the shot form for every open bean are kept, with their data', async () => {
   // Moving to another page asks the service worker to keep them.
   await page.getByRole('link', { name: 'Journal' }).click();
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
@@ -57,7 +57,7 @@ test('D-219: Home, the Journal and the shot form for every open bean are kept, w
   expect(await kept()).not.toContain('/shot/new?from=journal');
 });
 
-test('D-219, D-200, D-117: the kept copies take no "Shot saved" and leave the cookies as they are', async () => {
+test('the kept copies take no "Shot saved" and leave the cookies as they are', async () => {
   // A "Shot saved" waiting for the next page, and the Journal filtered by bean.
   const { origin } = new URL(page.url());
   await page.request.get('/journal?unrated=1');
@@ -85,7 +85,7 @@ test('D-219, D-200, D-117: the kept copies take no "Shot saved" and leave the co
   await page.request.get('/journal');
 });
 
-test('D-219: a page opened before is kept as it was opened', async () => {
+test('a page opened before is kept as it was opened', async () => {
   await page.getByRole('link', { name: 'Library' }).click();
   await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
   await expect.poll(kept).toContain('/library/__data.json');
@@ -105,7 +105,7 @@ test('D-219: a page opened before is kept as it was opened', async () => {
   expect(await kept()).toEqual(expect.arrayContaining(['/library', '/library/__data.json']));
 });
 
-test('D-219: offline, the app opens on Home with the "Offline" line, and "+" opens the shot form', async () => {
+test('offline, the app opens on Home with the "Offline" line, and "+" opens the shot form', async () => {
   // The form as it opens online, to compare with.
   await page.goto('/shot/new');
   const tag = await page.locator('.cn-tag').innerText();
@@ -121,7 +121,7 @@ test('D-219: offline, the app opens on Home with the "Offline" line, and "+" ope
   await page.screenshot({ path: 'screenshots/ShotFormOffline.png' });
 });
 
-test('D-219: offline, a change other than a shot changes nothing and says so', async () => {
+test('offline, a change other than a shot changes nothing and says so', async () => {
   // Saving a shot waits on the phone instead (tab-queue.test.ts); choosing Home's bean needs the server.
   await page.getByRole('link', { name: 'Back without saving' }).click();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
@@ -131,7 +131,7 @@ test('D-219: offline, a change other than a shot changes nothing and says so', a
   await page.screenshot({ path: 'screenshots/HomeOfflineChange.png' });
 });
 
-test('D-219: offline, the Journal and a page opened before open; another page says it is not kept', async () => {
+test('offline, the Journal and a page opened before open; another page says it is not kept', async () => {
   await page.goto('/journal');
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
   await page.getByRole('link', { name: 'Library' }).click();
@@ -145,7 +145,7 @@ test('D-219: offline, the Journal and a page opened before open; another page sa
   await page.screenshot({ path: 'screenshots/PageNotKept.png' });
 });
 
-test('D-219: a change that cannot reach the server changes nothing and says so', async () => {
+test('a change that cannot reach the server changes nothing and says so', async () => {
   await page.goto('/');
   await expect(line()).toHaveText(OFFLINE_LINE);
   // Sent straight away, as when the page has not noticed yet: the service worker answers instead.
@@ -164,14 +164,14 @@ test('D-219: a change that cannot reach the server changes nothing and says so',
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
 });
 
-test('D-219: back online, the "Offline" line goes', async () => {
+test('back online, the "Offline" line goes', async () => {
   await context.setOffline(false);
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
   await expect(line()).toHaveCount(0);
 });
 
-test('D-235: a server that has not answered in 4 seconds counts as offline: a kept page opens from its copy', async () => {
+test('a server that has not answered in 4 seconds counts as offline: a kept page opens from its copy', async () => {
   // The server takes 6 seconds, then the answer is lost.
   const slow = (url: URL) => url.pathname === '/journal/__data.json';
   await context.route(slow, async (route) => {
@@ -190,7 +190,7 @@ test('D-235: a server that has not answered in 4 seconds counts as offline: a ke
   await expect(line()).toHaveCount(0);
 });
 
-test('D-225, D-87: a session ended elsewhere leaves nothing of the account on the phone', async () => {
+test('a session ended elsewhere leaves nothing of the account on the phone', async () => {
   await expect.poll(kept).toContain('/');
   const db = new Database(DATABASE);
   db.prepare('delete from session').run();
@@ -205,7 +205,7 @@ test('D-225, D-87: a session ended elsewhere leaves nothing of the account on th
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
 });
 
-test('D-225: signing out leaves no page or data of the account on the phone', async () => {
+test('signing out leaves no page or data of the account on the phone', async () => {
   await expect.poll(kept).toContain('/');
   await page.goto('/settings');
   await page.getByRole('button', { name: 'Sign out' }).click();

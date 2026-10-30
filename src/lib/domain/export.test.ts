@@ -38,7 +38,7 @@ const row: ShotExportRow = {
 };
 
 describe('decimal', () => {
-  it('D-252: thousandths become plain decimals with a point, empty when not set', () => {
+  it('thousandths become plain decimals with a point, empty when not set', () => {
     expect(decimal(18000)).toBe('18');
     expect(decimal(36500)).toBe('36.5');
     expect(decimal(1600)).toBe('1.6');
@@ -49,7 +49,7 @@ describe('decimal', () => {
 });
 
 describe('csvField and csvText', () => {
-  it('D-252: a field with a comma, quote or line break is quoted, quotes doubled', () => {
+  it('a field with a comma, quote or line break is quoted, quotes doubled', () => {
     expect(csvField('plain')).toBe('plain');
     expect(csvField('a, b')).toBe('"a, b"');
     expect(csvField('say "hi"')).toBe('"say ""hi"""');
@@ -57,7 +57,7 @@ describe('csvField and csvText', () => {
     expect(csvField('')).toBe('');
   });
 
-  it('D-252: rows end with CRLF and the file starts with a byte order mark, so spreadsheets read ø and °', () => {
+  it('rows end with CRLF and the file starts with a byte order mark, so spreadsheets read ø and °', () => {
     expect(
       csvText([
         ['a', 'b'],
@@ -68,7 +68,7 @@ describe('csvField and csvText', () => {
 });
 
 describe('shotsCsv', () => {
-  it('D-252: plain column names with their units', () => {
+  it('plain column names with their units', () => {
     expect(SHOT_COLUMNS).toEqual([
       'Date',
       'Time of day',
@@ -95,7 +95,7 @@ describe('shotsCsv', () => {
     ]);
   });
 
-  it('D-252: one row per shot, the date and time in the account’s time zone', () => {
+  it('one row per shot, the date and time in the account’s time zone', () => {
     const lines = shotsCsv([row], ZONE).slice(1).split('\r\n');
     expect(lines).toHaveLength(3);
     expect(lines[1]).toBe(
@@ -106,7 +106,7 @@ describe('shotsCsv', () => {
     expect(lines[2]).toBe('');
   });
 
-  it('D-11, D-252: what was not set stays empty, never 0', () => {
+  it('what was not set stays empty, never 0', () => {
     const csv = shotsCsv(
       [
         {
@@ -133,14 +133,14 @@ describe('shotsCsv', () => {
     expect(fields[3]).toBe('');
   });
 
-  it('D-252: the ratio is rounded once to one decimal, as the app shows it (D-03)', () => {
+  it('the ratio is rounded once to one decimal, as the app shows it', () => {
     const csv = shotsCsv([{ ...row, dose: 18000, yield: 37800 }], ZONE);
     expect(csv.split('\r\n')[1].split(',')[14]).toBe('2.1');
   });
 });
 
 describe('decimalsDeep', () => {
-  it('D-252: every number in a stored setup or spec becomes a decimal; text, true/false and empty stay', () => {
+  it('every number in a stored setup or spec becomes a decimal; text, true/false and empty stay', () => {
     expect(
       decimalsDeep({
         temperature: { label: 'Temperature', unit: '°C', on: true, value: 93000 },
@@ -160,7 +160,7 @@ describe('decimalsDeep', () => {
 });
 
 describe('exportFileName', () => {
-  it('D-251, D-252: files are named by the day in the account’s time zone', () => {
+  it('files are named by the day in the account’s time zone', () => {
     const late = Date.UTC(2026, 9, 30, 23, 30); // 00:30 on 31 October in Copenhagen
     expect(exportFileName('backup', late, ZONE)).toBe('coffee-nerd-backup-2026-10-31.db');
     expect(exportFileName('shots', BREWED, ZONE)).toBe('coffee-nerd-shots-2026-10-30.csv');

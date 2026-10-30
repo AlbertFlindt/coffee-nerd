@@ -30,8 +30,8 @@ const basket: GearInput = {
   spec: { brand: 'IMS', sizeG: 20000, type: 'precision', shotSize: 'double', diameterMm: 58000 }
 };
 
-describe('archived gear (D-188)', () => {
-  it('D-188: archived gear is listed with its summary, and Restore puts it back', () => {
+describe('archived gear', () => {
+  it('archived gear is listed with its summary, and Restore puts it back', () => {
     expect(archivedCount(db, ids.userId, 'gear')).toBe(0);
     const id = addGear(db, ids.userId, basket, T0);
     archiveGear(db, ids.userId, id, T0);
@@ -48,7 +48,7 @@ describe('archived gear (D-188)', () => {
     expect(archivedCount(db, ids.userId, 'gear')).toBe(0);
   });
 
-  it('D-60: not someone else’s, and not an item that is not archived', () => {
+  it('not someone else’s, and not an item that is not archived', () => {
     const id = addGear(db, ids.userId, basket, T0);
     expect(restoreArchived(db, ids.userId, 'gear', id, T0)).toBe(null);
     archiveGear(db, ids.userId, id, T0);
@@ -57,8 +57,8 @@ describe('archived gear (D-188)', () => {
   });
 });
 
-describe('archived puck prep (D-188)', () => {
-  it('D-188, D-169: a restored routine brings back the archived steps it holds', () => {
+describe('archived puck prep', () => {
+  it('a restored routine brings back the archived steps it holds', () => {
     const stepId = newId(T0);
     db.insert(prepStep)
       .values({
@@ -104,7 +104,7 @@ describe('archived puck prep (D-188)', () => {
     expect(archivedCount(db, ids.userId, 'puck-prep')).toBe(0);
   });
 
-  it('D-188: a step is restored on its own', () => {
+  it('a step is restored on its own', () => {
     db.update(prepStep).set({ archivedAt: T0 }).where(eq(prepStep.id, ids.stepIds[3])).run();
     expect(restoreArchived(db, ids.userId, 'step', ids.stepIds[3], T0)).toBe('restored');
     expect(
@@ -113,7 +113,7 @@ describe('archived puck prep (D-188)', () => {
   });
 });
 
-describe('a restored routine that no longer fits (D-188)', () => {
+describe('a restored routine that no longer fits', () => {
   function archivedRoutine(steps: { stepId: string; value: number | string | null }[]): string {
     const id = newId(T0 + 5);
     db.insert(routine)
@@ -130,7 +130,7 @@ describe('a restored routine that no longer fits (D-188)', () => {
     return id;
   }
 
-  it('D-188, D-175: a value outside a step’s narrowed range is brought into range; it opens to fix', () => {
+  it('a value outside a step’s narrowed range is brought into range; it opens to fix', () => {
     const id = archivedRoutine([{ stepId: ids.stepIds[0], value: 20000 }]);
     // WDT's range narrowed while the routine was archived.
     const wdt = db.select().from(prepStep).where(eq(prepStep.id, ids.stepIds[0])).get()!;
@@ -146,15 +146,15 @@ describe('a restored routine that no longer fits (D-188)', () => {
     ]);
   });
 
-  it('D-188, D-176: a routine whose steps were all deleted comes back empty, to fix', () => {
+  it('a routine whose steps were all deleted comes back empty, to fix', () => {
     const id = archivedRoutine([]);
     expect(restoreArchived(db, ids.userId, 'routine', id, T0)).toBe('fix');
     expect(db.select().from(routine).where(eq(routine.id, id)).get()?.archivedAt).toBeNull();
   });
 });
 
-describe('archived flavor notes (D-188)', () => {
-  it('D-188: a removed note is listed with its family and comes back on Restore', () => {
+describe('archived flavor notes', () => {
+  it('a removed note is listed with its family and comes back on Restore', () => {
     const berry = db.select().from(tag).where(eq(tag.name, 'Berry')).get()!;
     db.update(tag).set({ archivedAt: T0 }).where(eq(tag.id, berry.id)).run();
     expect(loadArchived(db, ids.userId, 'tags')).toEqual([

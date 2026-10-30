@@ -64,7 +64,7 @@ async function screenshot(name: string) {
 
 const rows = () => page.getByRole('main').getByRole('link');
 
-test('Journal, D-54: every shot, newest first, grouped by day', async () => {
+test('Journal: every shot, newest first, grouped by day', async () => {
   await page
     .getByRole('navigation', { name: 'Main' })
     .getByRole('link', { name: 'Journal' })
@@ -92,13 +92,13 @@ test('Journal, D-54: every shot, newest first, grouped by day', async () => {
   await screenshot('Journal');
 });
 
-test('D-36: only the list scrolls', async () => {
+test('only the list scrolls', async () => {
   const main = page.getByRole('main');
   const overflowY = await main.evaluate((el) => getComputedStyle(el).overflowY);
   expect(overflowY).toBe('auto');
 });
 
-test('D-54, D-11: "Unrated · N" shows the N unrated shots, with a Rate block', async () => {
+test('"Unrated · N" shows the N unrated shots, with a Rate block', async () => {
   const chip = page.getByRole('button', { name: /^Unrated · \d+$/ });
   const n = Number((await chip.textContent())!.match(/\d+/)![0]);
   await chip.click();
@@ -115,7 +115,7 @@ test('D-54, D-11: "Unrated · N" shows the N unrated shots, with a Rate block', 
   );
 });
 
-test('D-111: the Rate block opens a score sheet; a tap saves the score', async () => {
+test('the Rate block opens a score sheet; a tap saves the score', async () => {
   const chip = page.getByRole('button', { name: /^Unrated · \d+$/ });
   const before = Number((await chip.textContent())!.match(/\d+/)![0]);
   const rate = page.getByRole('button', { name: /^Rate the shot at / }).first();
@@ -133,7 +133,7 @@ test('D-111: the Rate block opens a score sheet; a tap saves the score', async (
   await expect(row).toContainText('6score');
 });
 
-test('D-54: the bean filter lists the beans that have shots', async () => {
+test('the bean filter lists the beans that have shots', async () => {
   const total = await rows().count();
   await page.getByRole('button', { name: 'All beans' }).click();
   const sheet = page.getByRole('region', { name: 'Choose a bean' });
@@ -180,7 +180,7 @@ test('D-54: the bean filter lists the beans that have shots', async () => {
   await expect(rows()).toHaveCount(total);
 });
 
-test('ShotDetail, D-57: tapping a shot opens it', async () => {
+test('ShotDetail: tapping a shot opens it', async () => {
   await rows().first().click();
   await expect(page.getByRole('heading', { name: 'Shot', level: 1 })).toBeVisible();
   await expect(page.getByText(/^Today \d\d:\d\d$/)).toBeVisible();
@@ -211,12 +211,12 @@ test('ShotDetail, D-57: tapping a shot opens it', async () => {
   await screenshot('ShotDetail');
 });
 
-test('D-57: back returns to the Journal', async () => {
+test('back returns to the Journal', async () => {
   await page.getByRole('link', { name: 'Back to Journal' }).click();
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
 });
 
-test('D-57, D-113: Edit opens the shot form on the shot; "Save changes" returns to it', async () => {
+test('Edit opens the shot form on the shot; "Save changes" returns to it', async () => {
   await rows().first().click();
   const brewed = await page.getByText(/^Today \d\d:\d\d$/).textContent();
   await page.getByRole('link', { name: 'Edit' }).click();
@@ -239,7 +239,7 @@ test('D-57, D-113: Edit opens the shot form on the shot; "Save changes" returns 
   await expect(page.getByRole('region', { name: 'Notes' })).toContainText('Ran fast');
 });
 
-test('D-113: editing, another bean keeps the values entered', async () => {
+test('editing, another bean keeps the values entered', async () => {
   const db = new Database(DATABASE);
   const owner = db.prepare('select owner_id as o from bean limit 1').get() as { o: string };
   const now = Date.now();
@@ -270,7 +270,7 @@ test('D-113: editing, another bean keeps the values entered', async () => {
   await expect(page.getByRole('region', { name: 'Bean and setup' })).toContainText('Kiambu AA');
 });
 
-test('D-116: a shot is deleted from the edit form, after a confirmation', async () => {
+test('a shot is deleted from the edit form, after a confirmation', async () => {
   await page.getByRole('link', { name: 'Back to Journal' }).click();
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
   await expect(rows().first()).toBeVisible();
@@ -309,7 +309,7 @@ test('D-116: a shot is deleted from the edit form, after a confirmation', async 
   expect(bar.y + bar.height).toBeCloseTo(page.viewportSize()!.height, 0);
 });
 
-test('D-116, D-117: after deleting, the Journal keeps its filters', async () => {
+test('after deleting, the Journal keeps its filters', async () => {
   const chip = page.getByRole('button', { name: /^Unrated · \d+$/ });
   const unrated = Number((await chip.textContent())!.match(/\d+/)![0]);
   await chip.click();

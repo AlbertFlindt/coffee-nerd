@@ -22,7 +22,7 @@ function reset(path: string, input: string) {
 }
 
 describe('scripts/reset-password.mjs', () => {
-  it('D-87: sets a new password and signs out every device', async () => {
+  it('sets a new password and signs out every device', async () => {
     const path = join(dir, 'reset.db');
     const db = openDatabase(path);
     const userId = await createAccount(
@@ -40,7 +40,7 @@ describe('scripts/reset-password.mjs', () => {
     expect(db.select().from(session).all()).toHaveLength(0);
   });
 
-  it('D-87: changes nothing when the two passwords differ or are too short', async () => {
+  it('changes nothing when the two passwords differ or are too short', async () => {
     const path = join(dir, 'unchanged.db');
     const db = openDatabase(path);
     await createAccount(db, { name: 'Albert', password: 'old-password', timeZone: 'UTC' }, T0);
@@ -51,7 +51,7 @@ describe('scripts/reset-password.mjs', () => {
     );
   });
 
-  it('D-87: says so when there is no account yet', () => {
+  it('says so when there is no account yet', () => {
     const path = join(dir, 'empty.db');
     openDatabase(path);
     const result = reset(path, 'new-password\nnew-password\n');

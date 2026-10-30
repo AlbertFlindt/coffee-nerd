@@ -45,7 +45,7 @@ function shot(
 }
 
 describe('loadInsights', () => {
-  it('D-208, D-207: the header counts every shot and bean with a shot; every card says what it needs', () => {
+  it('the header counts every shot and bean with a shot; every card says what it needs', () => {
     const db = openDatabase(join(dir, 'insights.db'));
     const ids = seedReferenceSetup(db, { now: T0, name: 'Demo', passwordHash: 'x' });
     const empty = loadInsights(db, ids.userId, T0);
@@ -101,7 +101,7 @@ describe('loadInsights', () => {
       'Brew 8 more shots of your best Guji Hambela recipe to see its shot times.'
     );
   });
-  it('D-208, D-212: the weekly line ends with this week in the user time zone and spans 12 weeks', () => {
+  it('the weekly line ends with this week in the user time zone and spans 12 weeks', () => {
     const db = openDatabase(join(dir, 'weeks.db'));
     const ids = seedReferenceSetup(db, { now: T0, name: 'Demo', passwordHash: 'x' });
     // Monday 19 October, 00:30 in Copenhagen, is still Sunday in UTC.
@@ -118,7 +118,7 @@ describe('loadInsights', () => {
     expect(points.filter((p) => p.stats !== null)).toHaveLength(4);
   });
 
-  it('D-205: the bell curve uses the recipe Home calls best', () => {
+  it('the bell curve uses the recipe Home calls best', () => {
     const db = openDatabase(join(dir, 'best.db'));
     const ids = seedReferenceSetup(db, { now: T0, name: 'Demo', passwordHash: 'x' });
     for (const [grind, score] of [

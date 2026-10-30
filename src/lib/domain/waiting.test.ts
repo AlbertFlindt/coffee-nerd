@@ -59,12 +59,12 @@ const queue = (...changes: Parameters<typeof applyChange>[1][]) =>
   changes.reduce<WaitingEntry[]>((all, c, i) => applyChange(all, c, ME, 1000 + i), []);
 
 describe('applyChange', () => {
-  it('D-220: a new shot waits with the time it was saved on the phone', () => {
+  it('a new shot waits with the time it was saved on the phone', () => {
     const [entry] = queue({ kind: 'new', shot: shot('s1'), brewedAt: 500, show });
     expect(entry).toMatchObject({ kind: 'new', brewedAt: 500, status: 'waiting', ownerId: ME });
   });
 
-  it('D-231: changing a waiting shot keeps it new, with its brew time, and the latest values win', () => {
+  it('changing a waiting shot keeps it new, with its brew time, and the latest values win', () => {
     const entries = queue(
       { kind: 'new', shot: shot('s1'), brewedAt: 500, show },
       { kind: 'new', shot: shot('s1', { grind: 1700 }), brewedAt: 900, show, fromWaiting: true }
@@ -74,7 +74,7 @@ describe('applyChange', () => {
     expect(entries[0].shot!.grind).toBe(1700);
   });
 
-  it('D-231: a change to a waiting shot that reached the server meanwhile is sent as an edit', () => {
+  it('a change to a waiting shot that reached the server meanwhile is sent as an edit', () => {
     const [entry] = queue({
       kind: 'new',
       shot: shot('s1'),
@@ -85,7 +85,7 @@ describe('applyChange', () => {
     expect(entry.kind).toBe('edit');
   });
 
-  it('D-223: a score given to a waiting shot goes into that shot', () => {
+  it('a score given to a waiting shot goes into that shot', () => {
     const entries = queue(
       { kind: 'new', shot: shot('s1'), brewedAt: 500, show },
       { kind: 'rate', shotId: 's1', score: 8, brewedAt: 500 }
@@ -95,7 +95,7 @@ describe('applyChange', () => {
     expect(entries[0].shot!.taste.score).toBe(8);
   });
 
-  it('D-223: a score for a saved shot waits on its own; a second score replaces it', () => {
+  it('a score for a saved shot waits on its own; a second score replaces it', () => {
     const entries = queue(
       { kind: 'rate', shotId: 's1', score: 6, brewedAt: 500 },
       { kind: 'rate', shotId: 's1', score: 7, brewedAt: 500 }
@@ -103,7 +103,7 @@ describe('applyChange', () => {
     expect(entries).toEqual([expect.objectContaining({ kind: 'rate', score: 7, revision: 2 })]);
   });
 
-  it('D-223: an edit after a waiting score keeps the score when the edit has none', () => {
+  it('an edit after a waiting score keeps the score when the edit has none', () => {
     const entries = queue(
       { kind: 'rate', shotId: 's1', score: 6, brewedAt: 500 },
       { kind: 'edit', shot: shot('s1', { grind: 1500 }), brewedAt: 500, show }
@@ -112,7 +112,7 @@ describe('applyChange', () => {
     expect(entries[0].shot!.taste.score).toBe(6);
   });
 
-  it('D-224: changing a refused shot makes it wait again', () => {
+  it('changing a refused shot makes it wait again', () => {
     const [refused] = queue({ kind: 'new', shot: shot('s1'), brewedAt: 500, show });
     const entries = applyChange(
       [{ ...refused, status: 'refused' }],
@@ -125,7 +125,7 @@ describe('applyChange', () => {
 });
 
 describe('sendOrder and queueRequest', () => {
-  it('D-220: waiting shots are sent in the order they were brewed, only for their own account', () => {
+  it('waiting shots are sent in the order they were brewed, only for their own account', () => {
     const entries = [
       ...queue(
         { kind: 'new', shot: shot('late'), brewedAt: 900, show },
@@ -136,12 +136,12 @@ describe('sendOrder and queueRequest', () => {
     expect(sendOrder(entries, ME).map((e) => e.shotId)).toEqual(['early', 'late']);
   });
 
-  it('D-224: a refused shot is not sent again until it is fixed', () => {
+  it('a refused shot is not sent again until it is fixed', () => {
     const [entry] = queue({ kind: 'new', shot: shot('s1'), brewedAt: 500, show });
     expect(sendOrder([{ ...entry, status: 'refused' }], ME)).toEqual([]);
   });
 
-  it('D-220, D-223: a new shot sends its brew time; an edit and a score leave it to the server', () => {
+  it('a new shot sends its brew time; an edit and a score leave it to the server', () => {
     const [created, edited, rated] = queue(
       { kind: 'new', shot: shot('s1'), brewedAt: 500, show },
       { kind: 'edit', shot: shot('s2'), brewedAt: 400, show },
@@ -177,7 +177,7 @@ const row = (id: string, brewedAt: number, over: Partial<JournalLike> = {}): Jou
 describe('journalWithWaiting', () => {
   const all = { beanId: null, recipeId: null, unrated: false };
 
-  it('D-221: a waiting shot shows in the Journal at once, newest first, and opens its form', () => {
+  it('a waiting shot shows in the Journal at once, newest first, and opens its form', () => {
     const entries = queue({ kind: 'new', shot: shot('w1'), brewedAt: 3000, show });
     const rows = journalWithWaiting([row('s1', 2000)], entries, ME, all);
     expect(rows.map((r) => r.id)).toEqual(['w1', 's1']);
@@ -185,7 +185,7 @@ describe('journalWithWaiting', () => {
     expect(rows[1].waiting).toBeUndefined();
   });
 
-  it('D-223: a waiting score or edit shows on its row', () => {
+  it('a waiting score or edit shows on its row', () => {
     const entries = queue(
       { kind: 'rate', shotId: 's1', score: 7, brewedAt: 2000 },
       { kind: 'edit', shot: shot('s2', { grind: 1400 }), brewedAt: 1000, show }
@@ -199,20 +199,20 @@ describe('journalWithWaiting', () => {
     });
   });
 
-  it('D-221: a waiting shot the server already has (its answer was lost) shows once', () => {
+  it('a waiting shot the server already has (its answer was lost) shows once', () => {
     const entries = queue({ kind: 'new', shot: shot('s1', { grind: 1400 }), brewedAt: 2000, show });
     const rows = journalWithWaiting([row('s1', 2000)], entries, ME, all);
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ grind: 1400, waiting: { status: 'waiting' } });
   });
 
-  it('D-224: a refused shot shows as not saved', () => {
+  it('a refused shot shows as not saved', () => {
     const [entry] = queue({ kind: 'new', shot: shot('w1'), brewedAt: 3000, show });
     const rows = journalWithWaiting([], [{ ...entry, status: 'refused' }], ME, all);
     expect(rows[0].waiting!.status).toBe('refused');
   });
 
-  it('D-221: the filters apply to waiting shots; a recipe filter leaves them out', () => {
+  it('the filters apply to waiting shots; a recipe filter leaves them out', () => {
     const entries = queue(
       { kind: 'new', shot: shot('guji'), brewedAt: 3000, show },
       { kind: 'new', shot: shot('kenya', { beanId: BEAN_2 }), brewedAt: 3100, show },
@@ -230,7 +230,7 @@ describe('journalWithWaiting', () => {
     expect(ids({ beanId: BEAN, recipeId: 'r1', unrated: false })).toEqual([]);
   });
 
-  it('D-225: shots of another account are not shown', () => {
+  it('shots of another account are not shown', () => {
     const entries = applyChange([], { kind: 'new', shot: shot('w1'), brewedAt: 1, show }, OTHER, 1);
     expect(journalWithWaiting([], entries, ME, all)).toEqual([]);
   });
@@ -246,14 +246,14 @@ describe('lastShotWithWaiting', () => {
     recipeTag: { kind: 'reused' as const, shotCount: 1 }
   };
 
-  it("D-221, D-233: a waiting shot of Home's bean is the Last shot, with its values", () => {
+  it("a waiting shot of Home's bean is the Last shot, with its values", () => {
     const entries = queue({ kind: 'new', shot: shot('w1'), brewedAt: 3000, show });
     const card = lastShotWithWaiting(last, BEAN, entries, ME)!;
     expect(card).toMatchObject({ id: 'w1', brewedAt: 3000, waiting: { status: 'waiting' } });
     expect(card.values.left[0]).toEqual({ label: 'Grind', value: '1.6' });
   });
 
-  it("D-233: a waiting shot of another bean leaves Home's Last shot as it is", () => {
+  it("a waiting shot of another bean leaves Home's Last shot as it is", () => {
     const entries = queue({
       kind: 'new',
       shot: shot('w1', { beanId: BEAN_2 }),
@@ -263,7 +263,7 @@ describe('lastShotWithWaiting', () => {
     expect(lastShotWithWaiting(last, BEAN, entries, ME)).toBe(last);
   });
 
-  it('D-223: a waiting score shows on the Last shot', () => {
+  it('a waiting score shows on the Last shot', () => {
     const entries = queue({ kind: 'rate', shotId: 's1', score: 9, brewedAt: 2000 });
     expect(lastShotWithWaiting(last, BEAN, entries, ME)).toMatchObject({
       id: 's1',
@@ -273,7 +273,7 @@ describe('lastShotWithWaiting', () => {
   });
 });
 
-describe('D-222: the next shot starts from a waiting shot', () => {
+describe('the next shot starts from a waiting shot', () => {
   const form = (): FormStart & { openBeans: { id: string }[] } => ({
     prefill: {
       source: 'last_shot',
@@ -295,7 +295,7 @@ describe('D-222: the next shot starts from a waiting shot', () => {
     lastShot: null
   });
 
-  it('D-222, D-11: the form starts from the newest waiting shot of the bean, without its taste', () => {
+  it('the form starts from the newest waiting shot of the bean, without its taste', () => {
     const entries = queue(
       { kind: 'new', shot: shot('w1', { grind: 1600 }), brewedAt: 3000, show },
       {
@@ -311,7 +311,7 @@ describe('D-222: the next shot starts from a waiting shot', () => {
     expect(start.lastShot).toMatchObject({ recipe: { grind: 1700 }, time: 29000 });
   });
 
-  it('D-222, D-16: the recipe tag counts waiting shots as the server will', () => {
+  it('the recipe tag counts waiting shots as the server will', () => {
     const entries = queue(
       { kind: 'new', shot: shot('w1'), brewedAt: 3000, show },
       { kind: 'new', shot: shot('w2', { taste: { ...noTaste, score: 6 } }), brewedAt: 4000, show }
@@ -327,7 +327,7 @@ describe('D-222: the next shot starts from a waiting shot', () => {
     ]);
   });
 
-  it('D-222: a refused shot, a shot of another bean and an edit change nothing', () => {
+  it('a refused shot, a shot of another bean and an edit change nothing', () => {
     const [refused] = queue({ kind: 'new', shot: shot('w1'), brewedAt: 3000, show });
     const other = queue({
       kind: 'new',
@@ -344,7 +344,7 @@ describe('D-222: the next shot starts from a waiting shot', () => {
     ).toBe(editing);
   });
 
-  it('D-222, D-32: "+" opens the bean of the newest waiting shot, unless a bean was chosen', () => {
+  it('"+" opens the bean of the newest waiting shot, unless a bean was chosen', () => {
     const entries = queue({
       kind: 'new',
       shot: shot('w1', { beanId: BEAN_2 }),
@@ -358,7 +358,7 @@ describe('D-222: the next shot starts from a waiting shot', () => {
 });
 
 describe('the form of a waiting shot', () => {
-  it('D-231: opens on the page the phone keeps for its bean, the shot named in the fragment', () => {
+  it('opens on the page the phone keeps for its bean, the shot named in the fragment', () => {
     const query = waitingFormQuery('0199-a', BEAN, 'journal');
     expect(query).toBe(`?bean=${BEAN}&from=journal#waiting=0199-a`);
     expect(waitingFormQuery('0199-a', BEAN, 'home')).toBe(`?bean=${BEAN}#waiting=0199-a`);
@@ -370,11 +370,11 @@ describe('the form of a waiting shot', () => {
 describe('afterSend', () => {
   const [entry] = queue({ kind: 'new', shot: shot('s1'), brewedAt: 500, show });
 
-  it('D-61: a shot the server has is gone from the phone', () => {
+  it('a shot the server has is gone from the phone', () => {
     expect(afterSend([entry], entry, { kind: 'sent' })).toEqual({ entries: [], stop: false });
   });
 
-  it('D-237: a refused shot keeps the reasons the server gave, and the next one is sent', () => {
+  it('a refused shot keeps the reasons the server gave, and the next one is sent', () => {
     const { entries, stop } = afterSend([entry], entry, {
       kind: 'refused',
       problems: ['No grinder']
@@ -383,7 +383,7 @@ describe('afterSend', () => {
     expect(stop).toBe(false);
   });
 
-  it('D-237: after three server errors in a row the shot is "Not saved" and the next one is sent', () => {
+  it('after three server errors in a row the shot is "Not saved" and the next one is sent', () => {
     let entries = [entry];
     for (const tries of [1, 2]) {
       const result = afterSend(entries, entries[0], { kind: 'failed' });
@@ -401,7 +401,7 @@ describe('afterSend', () => {
     });
   });
 
-  it('D-61: a change made while the shot was on its way is kept, and its count starts again', () => {
+  it('a change made while the shot was on its way is kept, and its count starts again', () => {
     const [changed] = applyChange(
       [entry],
       { kind: 'new', shot: shot('s1', { grind: 1700 }), brewedAt: 500, show },
@@ -426,7 +426,7 @@ describe('afterSend', () => {
   });
 });
 
-describe('D-239: the edit page starts from what waits for the shot', () => {
+describe('the edit page starts from what waits for the shot', () => {
   const saved = shot('s1', { grind: 1500, taste: { ...noTaste, score: 6 } });
 
   it('a waiting edit gives its values', () => {

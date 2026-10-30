@@ -65,7 +65,7 @@ const save = async () => {
   await expect(page.getByRole('status')).toContainText('Shot saved');
 };
 
-test('D-38, D-72, D-77, D-99: a bean’s first shot starts from My setup, with an empty time', async () => {
+test('a bean’s first shot starts from My setup, with an empty time', async () => {
   await page.getByRole('link', { name: 'New shot' }).click();
 
   await expect(page.getByRole('heading', { name: 'New shot' })).toBeVisible();
@@ -93,13 +93,13 @@ test('D-38, D-72, D-77, D-99: a bean’s first shot starts from My setup, with a
   await expectNoPageScroll();
 });
 
-test('D-91: the first shot is saved with an empty time; D-10: tap a score', async () => {
+test('the first shot is saved with an empty time; tap a score', async () => {
   await page.getByRole('radio', { name: '8' }).click();
   await expect(page.getByRole('radio', { name: '8' })).toHaveAttribute('aria-checked', 'true');
   await save();
 });
 
-test('D-03, D-16, D-12: the next shot copies the last one; its recipe is reused', async () => {
+test('the next shot copies the last one; its recipe is reused', async () => {
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(recipeTag()).toHaveText('Recipe reused 1x');
   await expect(page.getByText('Last with this recipe: 8')).toBeVisible();
@@ -126,7 +126,7 @@ test('Main: a reused recipe with its earlier score', async () => {
   await screenshot('Main');
 });
 
-test('RecipeChanged, D-15, D-16: a finer grind is a new recipe, named, with deltas', async () => {
+test('RecipeChanged: a finer grind is a new recipe, named, with deltas', async () => {
   await card('Grind').getByRole('button', { name: 'Grind minus 0.1' }).click();
   await typeValue('Time', '31');
 
@@ -140,7 +140,7 @@ test('RecipeChanged, D-15, D-16: a finer grind is a new recipe, named, with delt
   await save();
 });
 
-test('M3 acceptance, D-16: going back to the first grind says "Recipe reused"', async () => {
+test('RecipeReused: going back to the first grind says "Recipe reused"', async () => {
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(card('Grind')).toContainText('1.5');
   await expect(recipeTag()).toHaveText('Recipe reused 1x');
@@ -152,7 +152,7 @@ test('M3 acceptance, D-16: going back to the first grind says "Recipe reused"', 
   await save();
 });
 
-test('Rated, D-15, D-186: changed results and a score; 0.1 g more is the same recipe', async () => {
+test('Rated: changed results and a score; 0.1 g more is the same recipe', async () => {
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(recipeTag()).toHaveText('Recipe reused 3x');
   // D-186: a dose within 0.2 g keeps the recipe; 0.3 g away is a new one.
@@ -177,7 +177,7 @@ test('Rated, D-15, D-186: changed results and a score; 0.1 g more is the same re
   await screenshot('Rated');
 });
 
-test('MoreSetup, D-21, D-24, D-90, D-189: the Setup sheet; a changed value turns sage', async () => {
+test('MoreSetup: the Setup sheet; a changed value turns sage', async () => {
   await page.getByRole('button', { name: 'Setup', exact: true }).click();
   const sheet = page.getByRole('region', { name: 'Setup', exact: true });
   // D-189: the sheet has no tabs.
@@ -210,7 +210,7 @@ test('MoreSetup, D-21, D-24, D-90, D-189: the Setup sheet; a changed value turns
   await expect(sheet).toBeHidden();
 });
 
-test('MoreTasting, D-23, D-96, D-97, D-101, D-190, D-192: the Tasting sheet, balance first', async () => {
+test('MoreTasting: the Tasting sheet, balance first', async () => {
   await page.getByRole('button', { name: 'Tasting', exact: true }).click();
   const sheet = page.getByRole('region', { name: 'Tasting', exact: true });
   await expect(sheet.getByRole('slider').first()).toHaveAccessibleName('Balance, sour to bitter');
@@ -288,7 +288,7 @@ test('MoreTasting, D-23, D-96, D-97, D-101, D-190, D-192: the Tasting sheet, bal
   });
 });
 
-test('BrewNext, D-43: a recipe marked Brew next is where "+" starts, until cleared', async () => {
+test('BrewNext: a recipe marked Brew next is where "+" starts, until cleared', async () => {
   // The mark is set with the recipe's button on the bean detail page (D-42).
   await page.goto('/library/beans');
   await page.locator('.card', { hasText: 'Guji Hambela' }).click();
@@ -309,7 +309,7 @@ test('BrewNext, D-43: a recipe marked Brew next is where "+" starts, until clear
   await expect(card('Grind')).toContainText('1.6');
 });
 
-test('D-94: the bean card lists the open beans', async () => {
+test('the bean card lists the open beans', async () => {
   await page
     .getByRole('button', { name: /choose another bean/ })
     .click({ position: { x: 22, y: 10 } });
@@ -324,7 +324,7 @@ test('D-94: the bean card lists the open beans', async () => {
   await expect(sheet).toBeHidden();
 });
 
-test('D-40, D-95: a shot that uses up the bag finishes the bean, with Undo', async () => {
+test('a shot that uses up the bag finishes the bean, with Undo', async () => {
   const db = new Database(DATABASE);
   const used = db
     .prepare('select sum(r.dose) as d from shot s join recipe r on r.id = s.recipe_id')
@@ -353,7 +353,7 @@ test('D-40, D-95: a shot that uses up the bag finishes the bean, with Undo', asy
 // in Chrome with its address bar (about 412 × 780), and the Tasting sheet still fits above Save.
 test.describe('a shorter screen', () => {
   for (const height of [780, 700]) {
-    test(`D-36, D-21: at 412 × ${height} nothing overlaps Save and the sheet fits`, async () => {
+    test(`at 412 × ${height} nothing overlaps Save and the sheet fits`, async () => {
       await page.setViewportSize({ width: 412, height });
       await page.goto('/shot/new');
       const save = page.getByRole('button', { name: 'Save shot' });
@@ -391,7 +391,7 @@ test.describe('a shorter screen', () => {
   }
 });
 
-test('D-106, D-107, D-108: empty sliders show a handle, buttons flash when pressed, the sheet drags closed', async () => {
+test('empty sliders show a handle, buttons flash when pressed, the sheet drags closed', async () => {
   await page.setViewportSize({ width: 412, height: 915 });
   await page.goto('/shot/new');
 
@@ -457,7 +457,7 @@ test('D-106, D-107, D-108: empty sliders show a handle, buttons flash when press
   await page.mouse.up();
 });
 
-test('D-108: the sheet slides; with reduced motion it just appears; saving with it open leaves one page', async () => {
+test('the sheet slides; with reduced motion it just appears; saving with it open leaves one page', async () => {
   await page.goto('/shot/new');
   await page.getByRole('button', { name: 'Setup', exact: true }).click();
   expect(
@@ -486,7 +486,7 @@ test('D-108: the sheet slides; with reduced motion it just appears; saving with 
   await page.emulateMedia({ reducedMotion: null });
 });
 
-test('D-191: Flavor notes folds away, and stays folded on this phone', async () => {
+test('Flavor notes folds away, and stays folded on this phone', async () => {
   await page.goto('/shot/new');
   await page.getByRole('button', { name: 'Tasting', exact: true }).click();
   const sheet = page.getByRole('region', { name: 'Tasting', exact: true });

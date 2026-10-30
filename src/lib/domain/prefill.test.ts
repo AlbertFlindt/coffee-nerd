@@ -113,7 +113,7 @@ const context = (overrides: Partial<PrefillContext> = {}): PrefillContext => ({
 const emptyTaste = { score: null, balance: null, body: null, sweetness: null, aftertaste: null };
 
 describe('prefill', () => {
-  it('D-03: a new shot copies the bean’s latest shot: its recipe, yield and time', () => {
+  it('a new shot copies the bean’s latest shot: its recipe, yield and time', () => {
     const latest = recipe({ grind: 1700 });
     const result = prefill(
       context({ latestShotOfBean: { recipe: latest, shot: { yield: 38500, time: 25500 } } })
@@ -133,7 +133,7 @@ describe('prefill', () => {
     expect(result.setup).toEqual(latest.setup);
   });
 
-  it('D-11: taste is never prefilled, whatever the source', () => {
+  it('taste is never prefilled, whatever the source', () => {
     for (const ctx of [
       context(),
       context({ latestShotOfBean: { recipe: recipe(), shot: { yield: 36000, time: 28000 } } }),
@@ -143,7 +143,7 @@ describe('prefill', () => {
     }
   });
 
-  it('D-11: changing one prefill’s taste never leaks into the next prefill', () => {
+  it('changing one prefill’s taste never leaks into the next prefill', () => {
     const first = prefill(context());
     first.taste.score = 9;
     first.setup.routine!.steps[0].value = 99000;
@@ -153,7 +153,7 @@ describe('prefill', () => {
     expect(routineSnapshot.steps[0].value).toBe(20000);
   });
 
-  it('D-43: Brew next comes first: that recipe’s bean, values and setup; yield and time from its latest shot', () => {
+  it('Brew next comes first: that recipe’s bean, values and setup; yield and time from its latest shot', () => {
     const chosen = recipe({ beanId: 'bean-other', grind: 1400, dose: 18500 });
     const result = prefill(
       context({
@@ -171,12 +171,12 @@ describe('prefill', () => {
     });
   });
 
-  it('D-43: a Brew next recipe without shots starts with empty yield and time', () => {
+  it('a Brew next recipe without shots starts with empty yield and time', () => {
     const result = prefill(context({ brewNext: { recipe: recipe(), latestShot: null } }));
     expect(result).toMatchObject({ source: 'brew_next', yield: null, time: null });
   });
 
-  it('D-41, D-73: a re-buy starts from the earlier bag’s best recipe, as a recipe for this bag', () => {
+  it('a re-buy starts from the earlier bag’s best recipe, as a recipe for this bag', () => {
     const earlierBest = recipe({ beanId: EARLIER_BAG, grind: 1500 });
     const result = prefill(
       context({
@@ -198,7 +198,7 @@ describe('prefill', () => {
     });
   });
 
-  it('D-73: a re-buy follows the chain back to the nearest earlier bag with shots', () => {
+  it('a re-buy follows the chain back to the nearest earlier bag with shots', () => {
     const oldestBest = recipe({ beanId: OLDEST_BAG, grind: 1300 });
     const result = prefill(
       context({
@@ -215,7 +215,7 @@ describe('prefill', () => {
     expect(result).toMatchObject({ source: 'rebuy', beanId: BEAN, grind: 1300, yield: 36500 });
   });
 
-  it('D-74: an earlier bag with shots but none rated gives its latest shot', () => {
+  it('an earlier bag with shots but none rated gives its latest shot', () => {
     const latest = recipe({ beanId: EARLIER_BAG, grind: 1450 });
     const result = prefill(
       context({
@@ -242,14 +242,14 @@ describe('prefill', () => {
     });
   });
 
-  it('D-73: a re-buy whose earlier bags have no shots starts from My setup', () => {
+  it('a re-buy whose earlier bags have no shots starts from My setup', () => {
     const result = prefill(
       context({ rebuyChain: [{ beanId: EARLIER_BAG, best: null, latest: null }] })
     );
     expect(result.source).toBe('my_setup');
   });
 
-  it('D-03: the bean’s own shots win over the re-buy', () => {
+  it('the bean’s own shots win over the re-buy', () => {
     const result = prefill(
       context({
         latestShotOfBean: { recipe: recipe({ grind: 1800 }), shot: { yield: 36000, time: 28000 } },
@@ -265,7 +265,7 @@ describe('prefill', () => {
     expect(result).toMatchObject({ source: 'last_shot', grind: 1800 });
   });
 
-  it('D-38, D-72: no shots yet: My setup’s gear and values, with the current bean and an empty time', () => {
+  it('no shots yet: My setup’s gear and values, with the current bean and an empty time', () => {
     const result = prefill(context());
     expect(result).toMatchObject({
       source: 'my_setup',
@@ -282,7 +282,7 @@ describe('prefill', () => {
     expect(result.setup.routine).toEqual(routineSnapshot);
   });
 
-  it('D-38, D-44: My setup’s features follow the machine: only enabled ones, missing ones switched off', () => {
+  it('My setup’s features follow the machine: only enabled ones, missing ones switched off', () => {
     const result = prefill(
       context({ machines: { [BIANCA]: biancaSpec({ low_bar_start: false, low_bar_end: true }) } })
     );
@@ -294,7 +294,7 @@ describe('prefill', () => {
     });
   });
 
-  it('D-03, D-38: a feature switched on since the copied shot starts from My setup', () => {
+  it('a feature switched on since the copied shot starts from My setup', () => {
     const result = prefill(
       context({
         latestShotOfBean: { recipe: recipe(), shot: { yield: 36000, time: 28000 } },
@@ -309,7 +309,7 @@ describe('prefill', () => {
     });
   });
 
-  it('D-03, D-38: a feature switched on since, without a My setup value, starts switched off', () => {
+  it('a feature switched on since, without a My setup value, starts switched off', () => {
     const result = prefill(
       context({
         latestShotOfBean: { recipe: recipe(), shot: { yield: 36000, time: 28000 } },
@@ -319,7 +319,7 @@ describe('prefill', () => {
     expect(result.setup.features.low_bar_end).toEqual({ label: 'Low bar end', on: false });
   });
 
-  it('D-02, D-44: a feature since switched off on the machine is left out', () => {
+  it('a feature since switched off on the machine is left out', () => {
     const result = prefill(
       context({
         latestShotOfBean: { recipe: recipe(), shot: { yield: 36000, time: 28000 } },
@@ -329,7 +329,7 @@ describe('prefill', () => {
     expect(result.setup.features).not.toHaveProperty('preinfusion');
   });
 
-  it('D-65: copied values take the feature’s current label and unit', () => {
+  it('copied values take the feature’s current label and unit', () => {
     const renamed = biancaSpec();
     renamed.features[0] = { ...renamed.features[0], label: 'Brew temperature' };
     const result = prefill(
@@ -346,7 +346,7 @@ describe('prefill', () => {
     });
   });
 
-  it('D-78: a copied shot without a value for a feature with no off switch leaves it on and empty', () => {
+  it('a copied shot without a value for a feature with no off switch leaves it on and empty', () => {
     const copied = recipe();
     delete copied.setup.features.flat_pressure;
     const result = prefill(
@@ -362,7 +362,7 @@ describe('prefill', () => {
     });
   });
 
-  it('D-78: a feature without an off switch and without a value starts on, waiting for a value', () => {
+  it('a feature without an off switch and without a value starts on, waiting for a value', () => {
     const result = prefill(
       context({ mySetup: { ...mySetup, features: {} }, machines: { [BIANCA]: biancaSpec() } })
     );
@@ -373,7 +373,7 @@ describe('prefill', () => {
     });
   });
 
-  it('D-186: a shot started from a recipe takes the dose of its last shot', () => {
+  it('a shot started from a recipe takes the dose of its last shot', () => {
     const fromLast = prefill(
       context({
         latestShotOfBean: { recipe: recipe(), shot: { dose: 18100, yield: 36000, time: 28000 } }
@@ -390,7 +390,7 @@ describe('prefill', () => {
     expect(unbrewed.dose).toBe(recipe().dose);
   });
 
-  it('D-75: an archived grinder or basket is swapped for My setup’s; the rest is copied', () => {
+  it('an archived grinder or basket is swapped for My setup’s; the rest is copied', () => {
     const result = prefill(
       context({
         latestShotOfBean: {
@@ -403,7 +403,7 @@ describe('prefill', () => {
     expect(result).toMatchObject({ grinderId: GRINDER, basketId: BASKET, grind: 1700 });
   });
 
-  it('D-75: an archived machine is swapped for My setup’s, with features fitted to that machine', () => {
+  it('an archived machine is swapped for My setup’s, with features fitted to that machine', () => {
     const result = prefill(
       context({
         latestShotOfBean: {
@@ -422,7 +422,7 @@ describe('prefill', () => {
     });
   });
 
-  it('D-75: an archived routine is swapped for My setup’s routine as it is now', () => {
+  it('an archived routine is swapped for My setup’s routine as it is now', () => {
     const result = prefill(
       context({
         latestShotOfBean: {
@@ -446,7 +446,7 @@ describe('prefill', () => {
     expect(result.setup.routine).toEqual(routineSnapshot);
   });
 
-  it('D-187: a routine just chosen for new shots replaces the copied one, as it is now', () => {
+  it('a routine just chosen for new shots replaces the copied one, as it is now', () => {
     const result = prefill(
       context({
         latestShotOfBean: { recipe: recipe(), shot: { yield: 36000, time: 28000 } },
@@ -458,7 +458,7 @@ describe('prefill', () => {
     expect(result).toMatchObject({ source: 'last_shot', grind: recipe().grind });
   });
 
-  it('D-187: a re-buy starts with the routine just chosen for new shots too', () => {
+  it('a re-buy starts with the routine just chosen for new shots too', () => {
     const result = prefill(
       context({
         rebuyChain: [
@@ -474,7 +474,7 @@ describe('prefill', () => {
     expect(result.routineId).toBe(OTHER_ROUTINE);
   });
 
-  it('D-187: Brew next keeps its own routine, and an archived chosen routine is ignored', () => {
+  it('Brew next keeps its own routine, and an archived chosen routine is ignored', () => {
     const marked = prefill(
       context({
         brewNext: { recipe: recipe(), latestShot: null },
@@ -492,7 +492,7 @@ describe('prefill', () => {
     expect(archived.routineId).toBe(ROUTINE);
   });
 
-  it('D-76: a routine edited since starts as it is now, keeping copied values for steps still there', () => {
+  it('a routine edited since starts as it is now, keeping copied values for steps still there', () => {
     const WDT = '0199f3a2-0000-7000-8000-00000000e001';
     const TAMP = '0199f3a2-0000-7000-8000-00000000e002';
     const SCREEN = '0199f3a2-0000-7000-8000-00000000e003';
@@ -528,7 +528,7 @@ describe('prefill', () => {
     });
   });
 
-  it('D-178: a copied step value outside its step’s range now starts at the nearest end; a removed option at the routine’s value', () => {
+  it('a copied step value outside its step’s range now starts at the nearest end; a removed option at the routine’s value', () => {
     const WDT = '0199f3a2-0000-7000-8000-00000000e001';
     const FILTER = '0199f3a2-0000-7000-8000-00000000e004';
     const copied = {
@@ -568,7 +568,7 @@ describe('prefill', () => {
     expect(result.setup.routine?.steps.map((s) => s.value)).toEqual([25000, 'paper']);
   });
 
-  it('D-76: a step used twice keeps each copied value in order', () => {
+  it('a step used twice keeps each copied value in order', () => {
     const WDT = '0199f3a2-0000-7000-8000-00000000e001';
     const twice = {
       name: 'Double WDT',
@@ -596,14 +596,14 @@ describe('prefill', () => {
     expect(result.setup.routine?.steps.map((step) => step.value)).toEqual([15000, 25000]);
   });
 
-  it('D-02: fails clearly when the machine is unknown', () => {
+  it('fails clearly when the machine is unknown', () => {
     expect(() => prefill(context({ machines: {} }))).toThrow(/machine/);
     expect(() => prefill(context({ routines: {} }))).toThrow(/routine/);
   });
 });
 
 describe('reconcileFeatures', () => {
-  it('D-153: switching the machine keeps the values both machines share and takes the rest from My setup', () => {
+  it('switching the machine keeps the values both machines share and takes the rest from My setup', () => {
     const lever = {
       features: [
         feature('temperature', 'Temperature', true, false, {

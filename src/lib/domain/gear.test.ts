@@ -26,7 +26,7 @@ const feature = (key: string, label: string, enabled: boolean, switchable = true
   }) as FeatureDefinition;
 
 describe('machineSummary', () => {
-  it('D-38: the type, then the switched-on phases and custom features in sentence case', () => {
+  it('the type, then the switched-on phases and custom features in sentence case', () => {
     const features = [
       feature('temperature', 'Temperature', true, false),
       feature('preinfusion', 'Preinfusion', true),
@@ -39,13 +39,13 @@ describe('machineSummary', () => {
     );
   });
 
-  it('D-38: just the type when nothing is switched on', () => {
+  it('just the type when nothing is switched on', () => {
     expect(machineSummary({ type: 'lever', features: [] })).toBe('Lever');
   });
 });
 
 describe('grinderSummary', () => {
-  it('D-38, D-48: dial mode and step', () => {
+  it('dial mode and step', () => {
     const dial = { mode: 'stepless' as const, step: 100, finest: 0, coarsest: 16000 };
     expect(grinderSummary({ type: 'electric', burrs: 'flat', dial })).toBe(
       'Stepless · steps of 0.1'
@@ -61,7 +61,7 @@ describe('grinderSummary', () => {
 });
 
 describe('basketName', () => {
-  it('D-150: brand · size, or the brand alone', () => {
+  it('brand · size, or the brand alone', () => {
     expect(basketName({ brand: 'VST', sizeG: 18000 })).toBe('VST · 18 g');
     expect(basketName({ brand: 'IMS', sizeG: 18500 })).toBe('IMS · 18.5 g');
     expect(basketName({ brand: 'Stock double' })).toBe('Stock double');
@@ -69,7 +69,7 @@ describe('basketName', () => {
 });
 
 describe('basketSummary', () => {
-  it('D-38, D-49: type · diameter', () => {
+  it('type · diameter', () => {
     expect(
       basketSummary({ brand: 'VST', type: 'precision', shotSize: 'double', diameterMm: 58000 })
     ).toBe('Precision · 58 mm');
@@ -83,7 +83,7 @@ describe('basketSummary', () => {
 });
 
 describe('fitsMachines', () => {
-  it('D-49: the machines whose group size matches the basket', () => {
+  it('the machines whose group size matches the basket', () => {
     const machines = [
       { name: 'Lelit Bianca', groupSizeMm: 58000 },
       { name: 'Flair', groupSizeMm: 46000 },
@@ -96,7 +96,7 @@ describe('fitsMachines', () => {
 });
 
 describe('builtInFeatures', () => {
-  it('D-184: a machine offers temperature, flat pressure and preinfusion, not the low bar phases', () => {
+  it('a machine offers temperature, flat pressure and preinfusion, not the low bar phases', () => {
     expect(builtInFeatures().map((f) => f.key)).toEqual([
       'temperature',
       'flat_pressure',
@@ -109,7 +109,7 @@ describe('builtInFeatures', () => {
     ]);
   });
 
-  it('D-184: a low bar phase that is switched on stays, with its pressure', () => {
+  it('a low bar phase that is switched on stays, with its pressure', () => {
     const features = builtInFeatures({ low_bar_start: true });
     expect(features.map((f) => f.key)).toEqual([
       'temperature',
@@ -123,7 +123,7 @@ describe('builtInFeatures', () => {
 });
 
 describe('withoutRetiredPhases', () => {
-  it('D-184: low bar phases leave a machine once they are switched off; everything else stays', () => {
+  it('low bar phases leave a machine once they are switched off; everything else stays', () => {
     const features = [
       feature('preinfusion', 'Preinfusion', false),
       feature('low_bar_start', 'Low bar start', true),
@@ -139,7 +139,7 @@ describe('withoutRetiredPhases', () => {
 });
 
 describe('NEW_GEAR', () => {
-  it('D-158: new gear starts from common values that pass its schema (the basket once it has a brand)', () => {
+  it('new gear starts from common values that pass its schema (the basket once it has a brand)', () => {
     expect(machineSpecSchema.parse(NEW_GEAR.machine())).toMatchObject({
       type: 'semi_auto',
       groupSizeMm: 58000
@@ -163,7 +163,7 @@ describe('NEW_GEAR', () => {
 });
 
 describe('trimmed', () => {
-  it('D-79: sizes without trailing zeros', () => {
+  it('sizes without trailing zeros', () => {
     expect(trimmed(58000, 'mm')).toBe('58 mm');
     expect(trimmed(58500, 'mm')).toBe('58.5 mm');
     expect(trimmed(63250)).toBe('63.25');
@@ -171,7 +171,7 @@ describe('trimmed', () => {
 });
 
 describe('readQuantity', () => {
-  it('D-46: reads the number at the start of what was typed, with or without a unit', () => {
+  it('reads the number at the start of what was typed, with or without a unit', () => {
     expect(readQuantity('1 s')).toBe(1000);
     expect(readQuantity('0,5')).toBe(500);
     expect(readQuantity(' 2.25 ml ')).toBe(2250);
@@ -181,7 +181,7 @@ describe('readQuantity', () => {
 });
 
 describe('readRange', () => {
-  it('D-46: an empty range is optional, a typed one runs from low to high', () => {
+  it('an empty range is optional, a typed one runs from low to high', () => {
     expect(readRange('')).toEqual({});
     expect(readRange('  ')).toEqual({});
     expect(readRange('0–30 s')).toEqual({ min: 0, max: 30000 });
@@ -189,7 +189,7 @@ describe('readRange', () => {
     expect(readRange('0.5 – 2.5 bar')).toEqual({ min: 500, max: 2500 });
   });
 
-  it('D-46: a range that is not low to high, or not a range, is refused', () => {
+  it('a range that is not low to high, or not a range, is refused', () => {
     expect(readRange('30–0')).toBeNull();
     expect(readRange('30')).toBeNull();
     expect(readRange('abc')).toBeNull();

@@ -27,7 +27,7 @@ test.beforeAll(async ({ browser }) => {
 
 test.afterAll(() => context.close());
 
-test('D-236: while a new version waits, the copies for offline use stay current', async () => {
+test('while a new version waits, the copies for offline use stay current', async () => {
   // A newer server: every copy the version on the phone takes says it comes from another version.
   const pages = (url: URL) => !url.pathname.startsWith('/_app/');
   await context.route(pages, async (route) => {

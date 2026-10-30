@@ -46,7 +46,7 @@ const rowOf = (db: ReturnType<typeof seeded>['db'], id: string) =>
   db.select().from(shot).where(eq(shot.id, id)).get();
 
 describe('receiveQueued', () => {
-  it('D-220, D-61: a waiting shot keeps its brew time and is saved once, however often it is sent', () => {
+  it('a waiting shot keeps its brew time and is saved once, however often it is sent', () => {
     const { db, ids, values } = seeded();
     const request = { ownerId: ids.userId, kind: 'new', shot: values, brewedAt: T0 + 1000 };
     expect(outcome(db, ids.userId, request, T0 + 60_000)).toBe('saved');
@@ -55,7 +55,7 @@ describe('receiveQueued', () => {
     expect(rowOf(db, values.id)!.brewedAt).toBe(T0 + 1000);
   });
 
-  it('D-220: a phone clock ahead of the server does not brew in the future', () => {
+  it('a phone clock ahead of the server does not brew in the future', () => {
     const { db, ids, values } = seeded();
     outcome(
       db,
@@ -66,7 +66,7 @@ describe('receiveQueued', () => {
     expect(rowOf(db, values.id)!.brewedAt).toBe(T0);
   });
 
-  it('D-223, D-113: an edit and a score keep the brew time; the latest change wins', () => {
+  it('an edit and a score keep the brew time; the latest change wins', () => {
     const { db, ids, values } = seeded();
     outcome(db, ids.userId, { ownerId: ids.userId, kind: 'new', shot: values, brewedAt: T0 }, T0);
     const edit = { ...values, time: 31000 };
@@ -84,7 +84,7 @@ describe('receiveQueued', () => {
     expect(rowOf(db, values.id)).toMatchObject({ brewedAt: T0, time: 31000, score: 8 });
   });
 
-  it('D-237: a refused shot comes back with the reasons the server gave', () => {
+  it('a refused shot comes back with the reasons the server gave', () => {
     const { db, ids, values } = seeded();
     const bad = { ...values, grinderId: 'no-such-grinder' };
     const result = receiveQueued(
@@ -109,7 +109,7 @@ describe('receiveQueued', () => {
     ).toEqual({ outcome: 'saved', problems: [] });
   });
 
-  it('D-224: a shot the server cannot take is refused and nothing is written', () => {
+  it('a shot the server cannot take is refused and nothing is written', () => {
     const { db, ids, values } = seeded();
     const bad = { ...values, grinderId: 'no-such-grinder' };
     expect(
@@ -119,7 +119,7 @@ describe('receiveQueued', () => {
     expect(db.select().from(shot).all()).toHaveLength(0);
   });
 
-  it('D-225: a shot of another account is not saved under this one', () => {
+  it('a shot of another account is not saved under this one', () => {
     const { db, ids, values } = seeded();
     expect(
       outcome(
@@ -147,7 +147,7 @@ describe('receiveQueued', () => {
     ).toBe('gone');
   });
 
-  it('D-223, D-61: a new shot sent again with changes made while it was on its way is one shot, changed', () => {
+  it('a new shot sent again with changes made while it was on its way is one shot, changed', () => {
     const { db, ids, values } = seeded();
     outcome(db, ids.userId, { ownerId: ids.userId, kind: 'new', shot: values, brewedAt: T0 }, T0);
     const changed = { ...values, taste: { ...values.taste, score: 8 } };

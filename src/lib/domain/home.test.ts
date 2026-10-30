@@ -14,7 +14,7 @@ const now = Date.UTC(2026, 9, 17, 7, 0);
 const at = (day: number, hour: number, minute = 0) => Date.UTC(2026, 9, day, hour, minute);
 
 describe('thisWeek', () => {
-  it('D-194: counts the shots since Monday in the user’s time zone, their average and how many are rated', () => {
+  it('counts the shots since Monday in the user’s time zone, their average and how many are rated', () => {
     const shots = [
       { brewedAt: at(17, 5), score: 8 },
       { brewedAt: at(15, 6), score: null },
@@ -24,7 +24,7 @@ describe('thisWeek', () => {
     expect(thisWeek(shots, now, copenhagen)).toEqual({ shots: 3, rated: 2, average: 7.5 });
   });
 
-  it('D-11: no rated shot gives no average, never 0', () => {
+  it('no rated shot gives no average, never 0', () => {
     expect(thisWeek([{ brewedAt: at(17, 5), score: null }], now, copenhagen)).toEqual({
       shots: 1,
       rated: 0,
@@ -34,21 +34,21 @@ describe('thisWeek', () => {
 });
 
 describe('thisWeekText', () => {
-  it('D-32: "9 shots" with "avg 7.2 · 8 of 9 rated"', () => {
+  it('"9 shots" with "avg 7.2 · 8 of 9 rated"', () => {
     expect(thisWeekText({ shots: 9, rated: 8, average: 7.24 })).toEqual({
       value: '9 shots',
       detail: 'avg 7.2 · 8 of 9 rated'
     });
   });
 
-  it('D-11: without a rated shot there is no average', () => {
+  it('without a rated shot there is no average', () => {
     expect(thisWeekText({ shots: 1, rated: 0, average: null })).toEqual({
       value: '1 shot',
       detail: '0 of 1 rated'
     });
   });
 
-  it('D-198: a week without shots says only "0 shots"', () => {
+  it('a week without shots says only "0 shots"', () => {
     expect(thisWeekText({ shots: 0, rated: 0, average: null })).toEqual({
       value: '0 shots',
       detail: null
@@ -57,13 +57,13 @@ describe('thisWeekText', () => {
 });
 
 describe('bestScoreOutOfTen', () => {
-  it('D-197, D-135: the average with one decimal once the recipe has 3 rated shots', () => {
+  it('the average with one decimal once the recipe has 3 rated shots', () => {
     expect(
       bestScoreOutOfTen({ recipeId: 'r', basis: 'average', score: 23 / 3, ratedShots: 3 })
     ).toBe('7.7 / 10');
   });
 
-  it('D-197, D-135: otherwise the highest single score', () => {
+  it('otherwise the highest single score', () => {
     expect(bestScoreOutOfTen({ recipeId: 'r', basis: 'single', score: 8, ratedShots: 2 })).toBe(
       '8 / 10'
     );
@@ -71,11 +71,11 @@ describe('bestScoreOutOfTen', () => {
 });
 
 describe('freshnessDetail', () => {
-  it('D-32: "since roast"', () => {
+  it('"since roast"', () => {
     expect(freshnessDetail(null)).toBe('since roast');
   });
 
-  it('D-35: grams left only when a bag weight was entered', () => {
+  it('grams left only when a bag weight was entered', () => {
     expect(freshnessDetail('120 g left')).toBe('since roast · 120 g left');
   });
 });
@@ -88,7 +88,7 @@ describe('lastShotValues', () => {
     right: v.right.map((x) => x.label)
   });
 
-  it('D-32: grind, in and ratio on the left; time, out and taste on the right', () => {
+  it('grind, in and ratio on the left; time, out and taste on the right', () => {
     expect(lastShotValues(shot, steps)).toEqual({
       left: [
         { label: 'Grind', value: '1.6' },
@@ -103,14 +103,14 @@ describe('lastShotValues', () => {
     });
   });
 
-  it('D-91: without a time, the right column closes up and the left one stays', () => {
+  it('without a time, the right column closes up and the left one stays', () => {
     expect(labels(lastShotValues({ ...shot, time: null }, steps))).toEqual({
       left: ['Grind', 'In', 'Ratio'],
       right: ['Out', 'Taste']
     });
   });
 
-  it('D-91, D-11: a missing yield, time or balance is left out', () => {
+  it('a missing yield, time or balance is left out', () => {
     expect(
       labels(lastShotValues({ ...shot, yield: null, time: null, balance: null }, steps))
     ).toEqual({ left: ['Grind', 'In'], right: [] });
@@ -120,7 +120,7 @@ describe('lastShotValues', () => {
 describe('dialInProgress', () => {
   const shot = (score: number | null, recipeId = 'a') => ({ score, recipeId });
 
-  it('D-196: the last 12 rated shots, oldest first; unrated shots are left out, never 0', () => {
+  it('the last 12 rated shots, oldest first; unrated shots are left out, never 0', () => {
     const newestFirst = [
       shot(7),
       shot(null),
@@ -132,21 +132,21 @@ describe('dialInProgress', () => {
     expect(graph.points.every((p) => p.score > 0)).toBe(true);
   });
 
-  it('D-196: a recipe change is marked on the first shot drawn of the new recipe', () => {
+  it('a recipe change is marked on the first shot drawn of the new recipe', () => {
     const graph = dialInProgress([shot(8, 'b'), shot(7, 'b'), shot(6, 'a'), shot(5, 'a')])!;
     expect(graph.points.map((p) => p.newRecipe)).toEqual([false, false, true, false]);
   });
 
-  it('D-196: compared with the shot drawn before it, so an unrated shot of another recipe in between marks nothing', () => {
+  it('compared with the shot drawn before it, so an unrated shot of another recipe in between marks nothing', () => {
     const graph = dialInProgress([shot(8, 'a'), shot(null, 'b'), shot(6, 'a')])!;
     expect(graph.points.map((p) => p.newRecipe)).toEqual([false, false]);
   });
 
-  it('D-196: fewer than 2 rated shots give no graph', () => {
+  it('fewer than 2 rated shots give no graph', () => {
     expect(dialInProgress([shot(8), shot(null)])).toBeNull();
   });
 
-  it('D-196: three whole-number grid lines around the scores, within 0 to 10', () => {
+  it('three whole-number grid lines around the scores, within 0 to 10', () => {
     expect(dialInProgress([shot(8), shot(5)])!.ticks).toEqual([5, 7, 9]);
     expect(dialInProgress([shot(10), shot(10)])!.ticks).toEqual([8, 9, 10]);
     expect(dialInProgress([shot(10), shot(1)])!.ticks).toEqual([0, 5, 10]);

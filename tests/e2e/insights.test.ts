@@ -34,7 +34,7 @@ async function expectNoPageScroll() {
 const card = (title: string | RegExp) =>
   page.getByRole('article').filter({ has: page.getByRole('heading', { name: title }) });
 
-test('Insights, D-55, D-208, D-69: the tab bar opens it on What I like with the data basis', async () => {
+test('Insights: the tab bar opens it on What I like with the data basis', async () => {
   const external: string[] = [];
   page.on('request', (r) => {
     if (new URL(r.url()).host !== 'localhost:4175') external.push(r.url());
@@ -74,7 +74,7 @@ test('Insights, D-55, D-208, D-69: the tab bar opens it on What I like with the 
   expect(external).toEqual([]);
 });
 
-test('D-56: tapping a row shows its exact numbers, tapping again hides them', async () => {
+test('tapping a row shows its exact numbers, tapping again hides them', async () => {
   const process = card('Naturals are your thing');
   const natural = process.getByRole('button', { name: /^Natural: median 8/ });
   await natural.click();
@@ -90,7 +90,7 @@ test('D-56: tapping a row shows its exact numbers, tapping again hides them', as
   );
 });
 
-test('D-36: only the card list scrolls', async () => {
+test('only the card list scrolls', async () => {
   const main = page.locator('main');
   const scrolls = await main.evaluate((el) => getComputedStyle(el).overflowY);
   expect(scrolls).toBe('auto');
@@ -103,7 +103,7 @@ async function openTopic(name: string) {
   await expect(tab).toHaveAttribute('aria-selected', 'true');
 }
 
-test('InsightsProgress, D-56, D-212: Progress shows the weekly average score with its band', async () => {
+test('InsightsProgress: Progress shows the weekly average score with its band', async () => {
   await openTopic('Progress');
   // The only card under Progress. Its title and sentence follow the seeded history, which is drawn
   // back from the time the test runs: early in the week (a Monday) this week has fewer than 2 rated
@@ -129,7 +129,7 @@ test('InsightsProgress, D-56, D-212: Progress shows the weekly average score wit
   await page.screenshot({ path: 'screenshots/InsightsProgress.png' });
 });
 
-test('InsightsDialIn, D-201, D-205: Dial-in shows the shot time of the best Guji recipe', async () => {
+test('InsightsDialIn: Dial-in shows the shot time of the best Guji recipe', async () => {
   await openTopic('Dial-in');
   const bell = card('Your shot time is under control');
   await expect(bell).toContainText(
@@ -146,7 +146,7 @@ test('InsightsDialIn, D-201, D-205: Dial-in shows the shot time of the best Guji
   await page.screenshot({ path: 'screenshots/InsightsDialIn.png' });
 });
 
-test('InsightsCompare, D-204, D-210, D-211: Comparisons shows routines and the steadiest beans', async () => {
+test('InsightsCompare: Comparisons shows routines and the steadiest beans', async () => {
   await openTopic('Comparisons');
   const routines = card('Daily routine is more repeatable');
   await expect(routines).toContainText(
@@ -166,7 +166,7 @@ test('InsightsCompare, D-204, D-210, D-211: Comparisons shows routines and the s
   await page.screenshot({ path: 'screenshots/InsightsCompare.png' });
 });
 
-test('D-208: Insights opens on What I like each time', async () => {
+test('Insights opens on What I like each time', async () => {
   await page.goto('/insights');
   await expect(page.getByRole('tab', { name: 'What I like' })).toHaveAttribute(
     'aria-selected',
@@ -174,7 +174,7 @@ test('D-208: Insights opens on What I like each time', async () => {
   );
 });
 
-test('D-208: saving a shot updates the header', async () => {
+test('saving a shot updates the header', async () => {
   await page.getByRole('link', { name: 'New shot' }).click();
   await page.getByRole('button', { name: 'Save shot' }).click();
   await expect(page.getByRole('status')).toContainText('Shot saved');
@@ -182,7 +182,7 @@ test('D-208: saving a shot updates the header', async () => {
   await expect(page.getByText('From 215 shots · 9 beans')).toBeVisible();
 });
 
-test('D-11, D-111: rating a shot updates the score cards', async () => {
+test('rating a shot updates the score cards', async () => {
   await page.goto('/journal?unrated=1');
   await page
     .getByRole('button', { name: /^Rate the shot at / })

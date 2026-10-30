@@ -41,7 +41,7 @@ async function screenshot(name: string) {
   await page.screenshot({ path: `screenshots/${name}.png` });
 }
 
-test('Beans, D-156: the Library tab opens Library, and Beans is one of its doors', async () => {
+test('Beans: the Library tab opens Library, and Beans is one of its doors', async () => {
   const bar = page.getByRole('navigation', { name: 'Main' });
   await bar.getByRole('link', { name: 'Library' }).click();
   await expect(page.getByRole('heading', { name: 'Library', level: 1 })).toBeVisible();
@@ -68,7 +68,7 @@ test('Beans, D-156: the Library tab opens Library, and Beans is one of its doors
   await screenshot('Beans');
 });
 
-test('AddBean, D-41: name and roast date are required', async () => {
+test('AddBean: name and roast date are required', async () => {
   await page.getByRole('link', { name: 'Add bean' }).click();
   await expect(page.getByRole('heading', { name: 'Add bean', level: 1 })).toBeVisible();
   await expect(page.getByText('Not set')).toHaveCount(2); // country and roast date (D-138)
@@ -77,7 +77,7 @@ test('AddBean, D-41: name and roast date are required', async () => {
   await expectNoPageScroll();
 });
 
-test('AddBean, D-141: tapping the chosen process or roast level again clears it', async () => {
+test('AddBean: tapping the chosen process or roast level again clears it', async () => {
   const washed = page.getByRole('button', { name: 'Washed' });
   await washed.click();
   await expect(washed).toHaveAttribute('aria-pressed', 'true');
@@ -90,7 +90,7 @@ test('AddBean, D-141: tapping the chosen process or roast level again clears it'
   await expect(dark).toHaveAttribute('aria-checked', 'false');
 });
 
-test('AddBean, D-133: Country opens a sheet with a search', async () => {
+test('AddBean: Country opens a sheet with a search', async () => {
   await page.getByRole('button', { name: /Country, not set/ }).click();
   // Screen 32: countries A–Z under a rounded search field; the chosen one is ticked.
   await expect(page.getByRole('button', { name: 'Afghanistan' })).toBeVisible();
@@ -100,7 +100,7 @@ test('AddBean, D-133: Country opens a sheet with a search', async () => {
   await expect(page.getByRole('button', { name: /Country, Kenya/ })).toBeVisible();
 });
 
-test('AddBean, D-126, D-139: "Same as before" fills the form from an earlier bean', async () => {
+test('AddBean: "Same as before" fills the form from an earlier bean', async () => {
   await page.getByRole('button', { name: /Same as before/ }).click();
   await expect(page.getByRole('heading', { name: 'Same as before' })).toBeVisible();
   await screenshot('BeanSameAsBefore');
@@ -141,7 +141,7 @@ test('AddBean, D-126, D-139: "Same as before" fills the form from an earlier bea
   await screenshot('AddBean');
 });
 
-test('D-73, D-140: the re-buy is added, and its first shot starts from the earlier bag’s best recipe', async () => {
+test('the re-buy is added, and its first shot starts from the earlier bag’s best recipe', async () => {
   await page.getByRole('button', { name: 'Add bean' }).click();
   // D-140: the new bean's page opens; it has no shots yet (D-131).
   await expect(page.getByRole('heading', { name: 'Guji Hambela', level: 1 })).toBeVisible();
@@ -194,7 +194,7 @@ test('D-73, D-140: the re-buy is added, and its first shot starts from the earli
   await page.goBack();
 });
 
-test('D-130: Edit bean is the form filled in, without "Same as before"', async () => {
+test('Edit bean is the form filled in, without "Same as before"', async () => {
   const db = new Database(DATABASE, { readonly: true });
   const latest = db
     .prepare("select id from bean where name = 'Guji Hambela' order by created_at desc limit 1")
@@ -217,7 +217,7 @@ test('D-130: Edit bean is the form filled in, without "Same as before"', async (
   await expect(page.getByRole('main').locator('.card', { hasText: '1000 g left' })).toHaveCount(1);
 });
 
-test('D-145: a bean without shots can be deleted; one with shots cannot', async () => {
+test('a bean without shots can be deleted; one with shots cannot', async () => {
   const db = new Database(DATABASE, { readonly: true });
   const [earliest, latest] = (
     db.prepare("select id from bean where name = 'Guji Hambela' order by created_at").all() as {
@@ -251,7 +251,7 @@ test('D-145: a bean without shots can be deleted; one with shots cannot', async 
 
 const earliestGuji = () => page.locator('.card', { hasText: 'Guji Hambela' }).last();
 
-test('BeanDetail, D-42: about, numbers and recipes best first', async () => {
+test('BeanDetail: about, numbers and recipes best first', async () => {
   await earliestGuji().click();
   await expect(page.getByRole('heading', { name: 'Guji Hambela', level: 1 })).toBeVisible();
   const about = page.getByRole('region', { name: 'About this bean' });
@@ -267,7 +267,7 @@ test('BeanDetail, D-42: about, numbers and recipes best first', async () => {
   await expectNoPageScroll();
 });
 
-test('D-43: Brew next marks one recipe; tapping again clears it', async () => {
+test('Brew next marks one recipe; tapping again clears it', async () => {
   const first = page.locator('.recipe').first();
   await first.getByRole('button', { name: 'Brew this recipe next' }).click();
   await expect(first).toContainText('Next shot starts here');
@@ -277,7 +277,7 @@ test('D-43: Brew next marks one recipe; tapping again clears it', async () => {
   await expect(first).not.toContainText('Next shot starts here');
 });
 
-test('D-125: a recipe opens the Journal filtered to it', async () => {
+test('a recipe opens the Journal filtered to it', async () => {
   const title = (await page.locator('.recipe .title').first().innerText()).trim();
   await page.locator('.recipe-open').first().click();
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
@@ -288,7 +288,7 @@ test('D-125: a recipe opens the Journal filtered to it', async () => {
   await page.goBack();
 });
 
-test('D-40, D-127: finish by hand, Undo, finish again and Reopen', async () => {
+test('finish by hand, Undo, finish again and Reopen', async () => {
   await page.getByRole('button', { name: 'Mark as finished' }).click();
   await expect(page.getByRole('status')).toContainText('Guji Hambela is finished');
   await screenshot('BeanFinished');
@@ -303,7 +303,7 @@ test('D-40, D-127: finish by hand, Undo, finish again and Reopen', async () => {
   await expect(page.getByRole('button', { name: 'Mark as finished' })).toBeVisible();
 });
 
-test('D-129: Brew next on a finished bean reopens it', async () => {
+test('Brew next on a finished bean reopens it', async () => {
   await page.getByRole('button', { name: 'Mark as finished' }).click();
   await expect(page.getByRole('button', { name: 'Reopen' })).toBeVisible();
   const first = page.locator('.recipe').first();
@@ -315,7 +315,7 @@ test('D-129: Brew next on a finished bean reopens it', async () => {
   await first.getByRole('button', { name: 'Brewing next. Tap to undo' }).click();
 });
 
-test('Library, D-50: four doors', async () => {
+test('Library: four doors', async () => {
   await page.goto('/library');
   await expect(page.getByText('The nerdy basement')).toBeVisible();
   await expect(page.getByRole('link', { name: /^Beans .*open/ })).toBeVisible();
@@ -326,7 +326,7 @@ test('Library, D-50: four doors', async () => {
   await screenshot('Library');
 });
 
-test('Equipment, D-38: My setup on top, gear by kind with the Default chip', async () => {
+test('Equipment: My setup on top, gear by kind with the Default chip', async () => {
   await page.getByRole('link', { name: /^Gear/ }).click();
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
   const setup = page.getByRole('region', { name: 'My setup' });
@@ -342,7 +342,7 @@ test('Equipment, D-38: My setup on top, gear by kind with the Default chip', asy
   await screenshot('Equipment');
 });
 
-test('GearDetail, D-44: switching a feature off changes what the machine can do', async () => {
+test('GearDetail: switching a feature off changes what the machine can do', async () => {
   await page.getByRole('link', { name: /^Lelit Bianca/ }).click();
   await expect(page.getByRole('heading', { name: 'Machine', level: 1 })).toBeVisible();
   await expect(page.getByText('Used in My setup · choose another default first')).toBeVisible();
@@ -364,7 +364,7 @@ test('GearDetail, D-44: switching a feature off changes what the machine can do'
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
 });
 
-test('GrinderDetail, D-48: the dial and its preview', async () => {
+test('GrinderDetail: the dial and its preview', async () => {
   await page.getByRole('link', { name: /^Timemore 064S/ }).click();
   await expect(page.getByRole('heading', { name: 'Grinder', level: 1 })).toBeVisible();
   await expect(page.getByText('Shot form › Grind')).toBeVisible();
@@ -382,7 +382,7 @@ test('GrinderDetail, D-48: the dial and its preview', async () => {
   await page.getByRole('link', { name: 'Back to Gear' }).click();
 });
 
-test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then archive it', async () => {
+test('BasketDetail: add a basket by brand and size, then archive it', async () => {
   await page.getByRole('link', { name: /^VST · 18 g/ }).click();
   await expect(page.getByRole('heading', { name: 'Basket', level: 1 })).toBeVisible();
   await expect(page.getByLabel('Brand')).toHaveValue('VST');
@@ -451,7 +451,7 @@ test('BasketDetail, D-147, D-150, D-148: add a basket by brand and size, then ar
   await expect(page.getByRole('link', { name: /^IMS/ })).toHaveCount(0);
 });
 
-test('D-46, D-02: your own feature appears on More › Setup', async () => {
+test('your own feature appears on More › Setup', async () => {
   await page.goto('/library/gear');
   await page.getByRole('link', { name: /^Lelit Bianca/ }).click();
   await page.getByRole('button', { name: 'Add your own feature' }).click();
@@ -503,7 +503,7 @@ test('D-46, D-02: your own feature appears on More › Setup', async () => {
   await expect(page.getByRole('link', { name: /^Lelit Bianca/ })).not.toContainText('Water');
 });
 
-test('D-45, D-38: a new bean’s first shot starts from the edited My setup', async () => {
+test('a new bean’s first shot starts from the edited My setup', async () => {
   await page.goto('/library/gear/setup');
   await page.getByRole('button', { name: 'Dose minus 0.1 gram' }).click();
   await page.getByRole('button', { name: 'Save setup' }).click();

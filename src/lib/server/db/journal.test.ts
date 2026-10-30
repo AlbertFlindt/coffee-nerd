@@ -77,7 +77,7 @@ function secondBean(): string {
 }
 
 describe('loadJournal', () => {
-  it('D-54: every shot, newest first, with its bean, values and taste', () => {
+  it('every shot, newest first, with its bean, values and taste', () => {
     save(shotAt(T0 - 4 * DAY));
     save(
       shotAt(T0 - DAY, {
@@ -102,7 +102,7 @@ describe('loadJournal', () => {
     expect(journal.steps).toEqual({ dose: 100, yield: 100, time: 1000 });
   });
 
-  it('D-16, D-54: each row says how often its recipe had been brewed before it', () => {
+  it('each row says how often its recipe had been brewed before it', () => {
     save(shotAt(T0 - 3 * DAY)); // new recipe
     save(shotAt(T0 - 2 * DAY, { grind: 1500 })); // new recipe
     save(shotAt(T0 - DAY)); // reused 1x
@@ -116,7 +116,7 @@ describe('loadJournal', () => {
     ]);
   });
 
-  it('D-12, D-111: each row knows its recipe’s last score before it', () => {
+  it('each row knows its recipe’s last score before it', () => {
     const unrated = { score: null, balance: null, body: null, sweetness: null, aftertaste: null };
     save(shotAt(T0 - 3 * DAY)); // 8
     save(shotAt(T0 - 2 * DAY, { taste: unrated }));
@@ -130,14 +130,14 @@ describe('loadJournal', () => {
     ]);
   });
 
-  it('D-54: "9 shots this week" counts from Monday, in the user’s time zone', () => {
+  it('"9 shots this week" counts from Monday, in the user’s time zone', () => {
     save(shotAt(T0 - MINUTE)); // Saturday
     save(shotAt(Date.UTC(2026, 9, 11, 22, 30))); // Monday 00:30 in Copenhagen
     save(shotAt(Date.UTC(2026, 9, 11, 21, 30))); // Sunday 23:30 in Copenhagen
     expect(loadJournal(db, ids.userId, {}, T0).shotsThisWeek).toBe(2);
   });
 
-  it('D-54: filter by bean; the bean list holds the beans that have shots', () => {
+  it('filter by bean; the bean list holds the beans that have shots', () => {
     const kiambu = secondBean();
     save(shotAt(T0 - 2 * DAY));
     save(shotAt(T0 - DAY, { beanId: kiambu }));
@@ -148,7 +148,7 @@ describe('loadJournal', () => {
     expect(filtered.beanId).toBe(kiambu);
   });
 
-  it('D-112: with a bean chosen, its recipes, most recently brewed first, filter the list', () => {
+  it('with a bean chosen, its recipes, most recently brewed first, filter the list', () => {
     const kiambu = secondBean();
     save(shotAt(T0 - 4 * DAY)); // recipe A
     save(shotAt(T0 - 3 * DAY, { grind: 1500 })); // recipe B
@@ -171,7 +171,7 @@ describe('loadJournal', () => {
     expect(onlyB.shots.map((s) => s.grind)).toEqual([1500]);
   });
 
-  it('D-121: recipes that differ only in setup say which value tells them apart', () => {
+  it('recipes that differ only in setup say which value tells them apart', () => {
     const at94 = shotAt(T0 - 2 * DAY);
     at94.setup.features = {
       ...at94.setup.features,
@@ -188,7 +188,7 @@ describe('loadJournal', () => {
     ]);
   });
 
-  it('D-170: recipes that differ only in a step value name it', () => {
+  it('recipes that differ only in a step value name it', () => {
     const longer = shotAt(T0 - 2 * DAY);
     longer.setup.routine = {
       ...longer.setup.routine!,
@@ -207,13 +207,13 @@ describe('loadJournal', () => {
     ]);
   });
 
-  it('D-112: a recipe filter needs its bean; without one it is ignored', () => {
+  it('a recipe filter needs its bean; without one it is ignored', () => {
     save(shotAt(T0 - DAY));
     const recipeId = loadJournal(db, ids.userId, { beanId: ids.beanId }, T0).recipes[0].id;
     expect(loadJournal(db, ids.userId, { recipeId }, T0)).toMatchObject({ recipeId: null });
   });
 
-  it('D-54: "Unrated · N" counts the unrated shots and filters to them', () => {
+  it('"Unrated · N" counts the unrated shots and filters to them', () => {
     const unrated = { score: null, balance: -1, body: null, sweetness: null, aftertaste: null };
     save(shotAt(T0 - 3 * DAY));
     save(shotAt(T0 - 2 * DAY, { taste: unrated }));
@@ -225,7 +225,7 @@ describe('loadJournal', () => {
     expect(only.shots.every((s) => s.score === null)).toBe(true);
   });
 
-  it('D-54: the unrated count follows the bean filter', () => {
+  it('the unrated count follows the bean filter', () => {
     const kiambu = secondBean();
     const unrated = { score: null, balance: null, body: null, sweetness: null, aftertaste: null };
     save(shotAt(T0 - 2 * DAY, { taste: unrated }));
@@ -233,7 +233,7 @@ describe('loadJournal', () => {
     expect(loadJournal(db, ids.userId, { beanId: kiambu }, T0).unratedCount).toBe(1);
   });
 
-  it('D-60: shows only the signed-in user’s shots; an unknown bean filter shows all', () => {
+  it('shows only the signed-in user’s shots; an unknown bean filter shows all', () => {
     save(shotAt(T0 - DAY));
     const otherId = otherUser();
     expect(loadJournal(db, otherId, {}, T0).shots).toEqual([]);
@@ -242,7 +242,7 @@ describe('loadJournal', () => {
 });
 
 describe('loadShotDetail', () => {
-  it('D-109: the recipe’s shot count and its other shots, without this one', () => {
+  it('the recipe’s shot count and its other shots, without this one', () => {
     save(shotAt(T0 - 3 * DAY, { time: 28000 }));
     save(shotAt(T0 - 2 * DAY, { grind: 1500 })); // another recipe
     save(
@@ -260,7 +260,7 @@ describe('loadShotDetail', () => {
     ]);
   });
 
-  it('D-57: the bean, roast age, gear, routine, setup, values, taste, flavor notes and notes', () => {
+  it('the bean, roast age, gear, routine, setup, values, taste, flavor notes and notes', () => {
     const berry = db.select().from(tag).where(eq(tag.name, 'Berry')).get()!;
     save(shotAt(T0 - DAY));
     const id = save(
@@ -290,7 +290,7 @@ describe('loadShotDetail', () => {
     });
   });
 
-  it('D-118: a recipe’s first shot names what changed since the bean’s shot before it', () => {
+  it('a recipe’s first shot names what changed since the bean’s shot before it', () => {
     const first = save(shotAt(T0 - 2 * DAY));
     const second = save(shotAt(T0 - DAY, { grind: 1500, dose: 18500 }));
     expect(loadShotDetail(db, ids.userId, first)!.recipeTag).toEqual({ kind: 'new', changes: [] });
@@ -300,7 +300,7 @@ describe('loadShotDetail', () => {
     });
   });
 
-  it('D-60: another user’s shot, or an unknown one, is not found', () => {
+  it('another user’s shot, or an unknown one, is not found', () => {
     const id = save(shotAt(T0 - DAY));
     const otherId = otherUser();
     expect(loadShotDetail(db, otherId, id)).toBeNull();

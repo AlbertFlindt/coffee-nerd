@@ -12,7 +12,7 @@ afterAll(() => rmSync(dir, { recursive: true, force: true }));
 const T0 = Date.UTC(2026, 9, 17, 6, 0);
 
 describe('seedReferenceSetup', () => {
-  it('M2: the seed runs on an empty database and creates the reference setup', () => {
+  it('the seed runs on an empty database and creates the reference setup', () => {
     const db = openDatabase(join(dir, 'seed.db'));
     const ids = seedReferenceSetup(db, { now: T0, name: 'Demo', passwordHash: 'x' });
 
@@ -47,7 +47,7 @@ describe('seedReferenceSetup', () => {
     expect(db.select().from(appState).get()?.currentBeanId).toBe(ids.beanId);
   });
 
-  it('D-44, D-48, D-49, D-51, D-52: the seeded gear, steps and routine pass their schemas', () => {
+  it('the seeded gear, steps and routine pass their schemas', () => {
     const db = openDatabase(join(dir, 'valid.db'));
     seedReferenceSetup(db, { now: T0, name: 'Demo', passwordHash: 'x' });
     for (const row of db.select().from(gear).all())
@@ -57,7 +57,7 @@ describe('seedReferenceSetup', () => {
     expect(routineStepsSchema.safeParse(db.select().from(routine).get()?.steps).success).toBe(true);
   });
 
-  it('D-89: dose, yield and time steps default to 0.1 g, 0.1 g and 1 s per user', () => {
+  it('dose, yield and time steps default to 0.1 g, 0.1 g and 1 s per user', () => {
     const db = openDatabase(join(dir, 'steps.db'));
     seedReferenceSetup(db, { now: T0, name: 'Demo', passwordHash: 'x' });
     expect(db.select().from(userSettings).get()).toMatchObject({
@@ -67,7 +67,7 @@ describe('seedReferenceSetup', () => {
     });
   });
 
-  it('D-88: the seed refuses a database that already has an account', () => {
+  it('the seed refuses a database that already has an account', () => {
     const db = openDatabase(join(dir, 'twice.db'));
     seedReferenceSetup(db, { now: T0, name: 'Demo', passwordHash: 'x' });
     expect(() => seedReferenceSetup(db, { now: T0, name: 'Demo', passwordHash: 'x' })).toThrow(

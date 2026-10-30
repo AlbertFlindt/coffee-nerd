@@ -8,13 +8,13 @@ const bg = JSON.parse(readFileSync('design-system/tokens.json', 'utf8')).color.t
 ).value.dark;
 
 describe('installable app colors', () => {
-  it('D-217: the manifest uses the page background', () => {
+  it('the manifest uses the page background', () => {
     const manifest = JSON.parse(readFileSync('static/manifest.webmanifest', 'utf8'));
     expect(manifest.background_color).toBe(bg);
     expect(manifest.theme_color).toBe(bg);
   });
 
-  it('D-217: the theme color in app.html is the page background', () => {
+  it('the theme color in app.html is the page background', () => {
     expect(readFileSync('src/app.html', 'utf8')).toContain(
       `<meta name="theme-color" content="${bg}" />`
     );

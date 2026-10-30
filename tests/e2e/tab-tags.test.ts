@@ -51,7 +51,7 @@ async function addTag(name: string, family: string) {
   return sheet;
 }
 
-test('Tags, D-53, D-174: notes by family; "Add tag" asks a name and a family', async () => {
+test('Tags: notes by family; "Add tag" asks a name and a family', async () => {
   await page.goto('/library');
   await page.getByRole('link', { name: /^Tags/ }).click();
   await expect(page.getByRole('heading', { name: 'Tags', level: 1 })).toBeVisible();
@@ -78,7 +78,7 @@ test('Tags, D-53, D-174: notes by family; "Add tag" asks a name and a family', a
   ).toBeVisible();
 });
 
-test('D-53, D-173, D-180: the "Same tag twice?" card merges into the more used note', async () => {
+test('the "Same tag twice?" card merges into the more used note', async () => {
   await expect(card()).toContainText('Same tag twice?');
   await expect(card()).toContainText('"Dark choclate" (0 shots) looks like "Dark chocolate"');
   await expectNoPageScroll();
@@ -94,7 +94,7 @@ test('D-53, D-173, D-180: the "Same tag twice?" card merges into the more used n
   await expect(chip('Dark chocolate')).toBeVisible();
 });
 
-test('D-173: "Keep both" is remembered for that pair', async () => {
+test('"Keep both" is remembered for that pair', async () => {
   await (await addTag('Carmel', 'Sweet')).getByRole('button', { name: 'Add tag' }).click();
   await expect(card()).toContainText('"Carmel"');
   await card().getByRole('button', { name: 'Keep both' }).click();
@@ -142,7 +142,7 @@ test('D-173: "Keep both" is remembered for that pair', async () => {
   await expect(chip('Carmel')).toHaveCount(0);
 });
 
-test('D-172: a built-in note can be renamed but keeps its family', async () => {
+test('a built-in note can be renamed but keeps its family', async () => {
   await chip('Berry').click();
   const sheet = page.getByRole('region', { name: 'Edit Berry' });
   await expect(sheet.getByRole('radiogroup', { name: 'Family' })).toHaveCount(0);
@@ -164,7 +164,7 @@ test('D-172: a built-in note can be renamed but keeps its family', async () => {
   await expect(chip('Berry')).toBeVisible();
 });
 
-test('D-171: a note a shot used is removed from the page and the chips, and stays on its shot', async () => {
+test('a note a shot used is removed from the page and the chips, and stays on its shot', async () => {
   // Brew a shot with a new note, added in the Tasting sheet (D-101).
   await page.goto('/shot/new');
   await page.getByRole('button', { name: 'Tasting', exact: true }).click();

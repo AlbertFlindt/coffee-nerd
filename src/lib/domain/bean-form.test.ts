@@ -17,7 +17,7 @@ const text = (overrides: Partial<BeanFormText> = {}): BeanFormText => ({
 });
 
 describe('readBeanForm', () => {
-  it('D-41: what was typed becomes a bean; empty fields are not set', () => {
+  it('what was typed becomes a bean; empty fields are not set', () => {
     expect(readBeanForm(text())).toEqual({
       bean: {
         name: 'Guji Hambela',
@@ -36,13 +36,13 @@ describe('readBeanForm', () => {
     });
   });
 
-  it('D-41, D-138: name and roast date are required, in plain words', () => {
+  it('name and roast date are required, in plain words', () => {
     expect(readBeanForm(text({ name: ' ', roastDate: '' }))).toEqual({
       problems: ['Name is required', 'Roast date is required']
     });
   });
 
-  it('D-35, D-41: an altitude or bag weight that cannot be read says so', () => {
+  it('an altitude or bag weight that cannot be read says so', () => {
     expect(readBeanForm(text({ altitude: 'high', bagWeight: 'lots' }))).toEqual({
       problems: ['Altitude: write it like 1,900–2,100 m', 'Bag weight: write it in grams, like 250']
     });
@@ -51,7 +51,7 @@ describe('readBeanForm', () => {
     });
   });
 
-  it('D-142: numbers the international way; a comma only between groups of three digits', () => {
+  it('numbers the international way; a comma only between groups of three digits', () => {
     const grams = (bagWeight: string) => {
       const read = readBeanForm(text({ bagWeight }));
       return 'bean' in read ? read.bean.bagWeight : read.problems;
@@ -63,7 +63,7 @@ describe('readBeanForm', () => {
     expect(grams('250,5')).toEqual(['Bag weight: write it in grams, like 250']);
   });
 
-  it('D-41: an altitude of 0 m says how to write it, never a field name', () => {
+  it('an altitude of 0 m says how to write it, never a field name', () => {
     expect(readBeanForm(text({ altitude: '0' }))).toEqual({
       problems: ['Altitude: write it like 1,900–2,100 m']
     });
@@ -71,13 +71,13 @@ describe('readBeanForm', () => {
 });
 
 describe('beanFormText', () => {
-  it('D-130: a saved bean back as the form shows it', () => {
+  it('a saved bean back as the form shows it', () => {
     const read = readBeanForm(text());
     if (!('bean' in read)) throw new Error('not read');
     expect(beanFormText({ ...read.bean, roastDate: read.bean.roastDate })).toEqual(text());
   });
 
-  it('D-130: a weight with grams to three decimals survives an untouched edit', () => {
+  it('a weight with grams to three decimals survives an untouched edit', () => {
     const read = readBeanForm(text({ bagWeight: '250.25' }));
     if (!('bean' in read)) throw new Error('not read');
     const again = readBeanForm(beanFormText(read.bean));
@@ -85,7 +85,7 @@ describe('beanFormText', () => {
     expect(beanFormText({ ...read.bean, bagWeight: 1000000 }).bagWeight).toBe('1,000');
   });
 
-  it('D-138: no roast date yet stays empty', () => {
+  it('no roast date yet stays empty', () => {
     expect(
       beanFormText({
         name: 'Guji Hambela',

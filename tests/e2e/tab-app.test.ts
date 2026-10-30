@@ -23,7 +23,7 @@ test.beforeAll(async ({ browser }) => {
 
 test.afterAll(() => context.close());
 
-test('D-217, D-228: the manifest names the app, opens it standalone and uses the logo as icon', async ({
+test('the manifest names the app, opens it standalone and uses the logo as icon', async ({
   request
 }) => {
   const href = await page.locator('link[rel="manifest"]').getAttribute('href');
@@ -59,7 +59,7 @@ test('D-217, D-228: the manifest names the app, opens it standalone and uses the
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#2E2522');
 });
 
-test("D-61: the service worker keeps the app's own files and answers for them", async () => {
+test("the service worker keeps the app's own files and answers for them", async () => {
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload();
   expect(await page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
@@ -83,7 +83,7 @@ test("D-61: the service worker keeps the app's own files and answers for them", 
   );
 });
 
-test('D-219: on the first visit the app is ready offline without opening it again', async ({
+test('on the first visit the app is ready offline without opening it again', async ({
   browser
 }) => {
   const fresh = await browser.newContext();
@@ -105,7 +105,7 @@ test('D-219: on the first visit the app is ready offline without opening it agai
   await fresh.close();
 });
 
-test('D-36: in a browser tab the screen does not stretch or pull down past the end of a list', async () => {
+test('in a browser tab the screen does not stretch or pull down past the end of a list', async () => {
   await page.goto('/journal');
   for (const element of ['html', 'body'])
     await expect(page.locator(element)).toHaveCSS('overscroll-behavior-y', 'none');
@@ -115,7 +115,7 @@ test('D-36: in a browser tab the screen does not stretch or pull down past the e
   expect(pageMoves).toBe(false);
 });
 
-test('D-227, D-229: a new version waits until the app is closed, then takes over', async () => {
+test('a new version waits until the app is closed, then takes over', async () => {
   // A shot in progress: the form is open and a value was entered.
   await page.goto('/shot/new');
   await page.getByRole('radio', { name: '7' }).click();

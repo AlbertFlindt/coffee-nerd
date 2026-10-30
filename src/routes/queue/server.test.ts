@@ -10,7 +10,7 @@ vi.mock('#lib/server/queue.ts', () => ({
 const { POST } = await import('./+server');
 
 describe('the shot queue', () => {
-  it('D-237: an error of the app answers as JSON, so the phone counts it as a failed try', async () => {
+  it('an error of the app answers as JSON, so the phone counts it as a failed try', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const request = new Request('http://localhost/queue', { method: 'POST', body: '{}' });
     const response = await POST({ locals: { user: { id: 'u1' } }, request } as never);

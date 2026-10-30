@@ -5,7 +5,7 @@ const post = (headers: Record<string, string>, method = 'POST') =>
   new Request('http://ignored.example/login', { method, headers });
 
 describe('isCrossSiteWrite', () => {
-  it('D-60: a form sent from the page it came from is allowed, over http or https', () => {
+  it('a form sent from the page it came from is allowed, over http or https', () => {
     expect(
       isCrossSiteWrite(post({ host: '192.168.1.20:3000', origin: 'http://192.168.1.20:3000' }))
     ).toBe(false);
@@ -14,7 +14,7 @@ describe('isCrossSiteWrite', () => {
     );
   });
 
-  it('D-60: behind a proxy, the forwarded host counts', () => {
+  it('behind a proxy, the forwarded host counts', () => {
     expect(
       isCrossSiteWrite(
         post({
@@ -26,7 +26,7 @@ describe('isCrossSiteWrite', () => {
     ).toBe(false);
   });
 
-  it('D-60: a form sent from another site, or without an origin, is refused', () => {
+  it('a form sent from another site, or without an origin, is refused', () => {
     expect(isCrossSiteWrite(post({ host: 'coffee.home', origin: 'https://evil.example' }))).toBe(
       true
     );
@@ -34,7 +34,7 @@ describe('isCrossSiteWrite', () => {
     expect(isCrossSiteWrite(post({ host: 'coffee.home', origin: 'null' }))).toBe(true);
   });
 
-  it('D-60: reading pages is never blocked', () => {
+  it('reading pages is never blocked', () => {
     expect(isCrossSiteWrite(new Request('http://x/', { headers: { host: 'coffee.home' } }))).toBe(
       false
     );
@@ -42,7 +42,7 @@ describe('isCrossSiteWrite', () => {
 });
 
 describe('isHttps', () => {
-  it('D-86: the cookie is marked secure only when a proxy says the visit used https', () => {
+  it('the cookie is marked secure only when a proxy says the visit used https', () => {
     expect(isHttps(new Request('http://x/', { headers: { 'x-forwarded-proto': 'https' } }))).toBe(
       true
     );

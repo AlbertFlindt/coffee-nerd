@@ -70,15 +70,15 @@ function openBean() {
     .run();
 }
 
-describe('the step-by-step start (D-157)', () => {
-  it('D-157: five steps in order: machine, grinder, basket, My setup, first bean', () => {
+describe('the step-by-step start', () => {
+  it('five steps in order: machine, grinder, basket, My setup, first bean', () => {
     expect(GUIDE_STEPS).toEqual(['machine', 'grinder', 'basket', 'setup', 'bean']);
     expect(stepUrl('machine')).toBe('/library/gear/new?kind=machine&guide=1');
     expect(stepUrl('setup')).toBe('/library/gear/setup?guide=1');
     expect(stepUrl('bean')).toBe('/library/beans/new?guide=1');
   });
 
-  it('D-157: a new account starts at the machine, and each step done moves on', () => {
+  it('a new account starts at the machine, and each step done moves on', () => {
     expect(firstStep(db, userId)).toBe('machine');
     const m = machine();
     expect(firstStep(db, userId)).toBe('grinder');
@@ -92,20 +92,20 @@ describe('the step-by-step start (D-157)', () => {
     expect(firstStep(db, userId)).toBeNull();
   });
 
-  it('D-157: the basket can be skipped, and is not asked again', () => {
+  it('the basket can be skipped, and is not asked again', () => {
     machine();
     grinder();
     skipBasketStep(db, userId, T0);
     expect(firstStep(db, userId)).toBe('setup');
   });
 
-  it('D-157: leaving halfway resumes at the first missing step, archived gear does not count', () => {
+  it('leaving halfway resumes at the first missing step, archived gear does not count', () => {
     const m = machine();
     archiveGear(db, userId, m, T0);
     expect(firstStep(db, userId)).toBe('machine');
   });
 
-  it('D-157: after a step, the guide goes to the next missing one, then to the shot form', () => {
+  it('after a step, the guide goes to the next missing one, then to the shot form', () => {
     const m = machine();
     const g = grinder();
     skipBasketStep(db, userId, T0);
@@ -115,7 +115,7 @@ describe('the step-by-step start (D-157)', () => {
     expect(guideNext(db, userId)).toBe('/shot/new');
   });
 
-  it('D-157: skipping twice is the same as once', () => {
+  it('skipping twice is the same as once', () => {
     skipBasketStep(db, userId, T0);
     skipBasketStep(db, userId, T0 + 1);
     machine();
@@ -123,14 +123,14 @@ describe('the step-by-step start (D-157)', () => {
     expect(firstStep(db, userId)).toBe('setup');
   });
 
-  it('D-157, D-155: a complete My setup without a basket skips the basket step', () => {
+  it('a complete My setup without a basket skips the basket step', () => {
     const m = machine();
     const g = grinder();
     mySetup(m, g);
     expect(firstStep(db, userId)).toBe('bean');
   });
 
-  it('D-157: when every bean is finished, "+" goes to the bean step', () => {
+  it('when every bean is finished, "+" goes to the bean step', () => {
     const m = machine();
     const g = grinder();
     basket();

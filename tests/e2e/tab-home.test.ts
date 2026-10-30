@@ -57,7 +57,7 @@ const pill = () => page.getByRole('button', { name: /, choose another bean$/ });
 const openCount = () =>
   sql<{ n: number }>("select count(*) as n from bean where status = 'open'").n;
 
-test('Home, D-32, D-34: banner, bean pill, last shot, quick numbers and best recipe', async () => {
+test('Home: banner, bean pill, last shot, quick numbers and best recipe', async () => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Coffee Nerd', level: 1 })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Settings' })).toBeVisible();
@@ -86,7 +86,7 @@ test('Home, D-32, D-34: banner, bean pill, last shot, quick numbers and best rec
   await screenshot('Home');
 });
 
-test('D-196: with more rated shots, recipe changes are marked on the graph', async () => {
+test('with more rated shots, recipe changes are marked on the graph', async () => {
   // Rate the bean's unrated shots for this test only; the shot-* files brewed several recipes.
   const db = new Database(DATABASE);
   const unrated = db
@@ -113,7 +113,7 @@ test('D-196: with more rated shots, recipe changes are marked on the graph', asy
   }
 });
 
-test('D-36: on a shorter screen the graph gives up height, and Home still fits', async () => {
+test('on a shorter screen the graph gives up height, and Home still fits', async () => {
   await page.setViewportSize({ width: 412, height: 780 });
   try {
     await expect(
@@ -125,20 +125,20 @@ test('D-36: on a shorter screen the graph gives up height, and Home still fits',
   }
 });
 
-test('D-197: the last shot opens its detail, and Back returns to Home', async () => {
+test('the last shot opens its detail, and Back returns to Home', async () => {
   await lastShot().getByRole('link').click();
   await expect(page.getByRole('heading', { name: 'Shot', level: 1 })).toBeVisible();
   await page.getByRole('link', { name: 'Back to Home' }).click();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd', level: 1 })).toBeVisible();
 });
 
-test('D-197: the best recipe opens the bean page', async () => {
+test('the best recipe opens the bean page', async () => {
   await best().getByRole('link').click();
   await expect(page.getByRole('heading', { name: 'Guji Hambela', level: 1 })).toBeVisible();
   await page.goto('/');
 });
 
-test('D-197, D-111: an unrated last shot has a Rate block that saves its score', async () => {
+test('an unrated last shot has a Rate block that saves its score', async () => {
   const shot = sql<{ id: string; score: number | null }>(
     'select id, score from shot order by brewed_at desc, id desc limit 1'
   );
@@ -158,7 +158,7 @@ test('D-197, D-111: an unrated last shot has a Rate block that saves its score',
   }
 });
 
-test('D-195: switching the bean on Home changes every card and the bean "+" starts from', async () => {
+test('switching the bean on Home changes every card and the bean "+" starts from', async () => {
   const guji = sql<{ id: string }>("select id from bean where name = 'Guji Hambela'").id;
   const now = Date.now();
   sql(
@@ -203,7 +203,7 @@ test('D-195: switching the bean on Home changes every card and the bean "+" star
   }
 });
 
-test('D-198: with no open bean, Home offers Add bean', async () => {
+test('with no open bean, Home offers Add bean', async () => {
   const db = new Database(DATABASE);
   const open = db.prepare("select id from bean where status = 'open'").all() as { id: string }[];
   db.close();
@@ -223,7 +223,7 @@ test('D-198: with no open bean, Home offers Add bean', async () => {
   }
 });
 
-test('D-199: the gear opens Settings with Sign out, and Back returns to Home', async () => {
+test('the gear opens Settings with Sign out, and Back returns to Home', async () => {
   await page.goto('/');
   await page.getByRole('link', { name: 'Settings' }).click();
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
@@ -271,7 +271,7 @@ async function deleteNewestShot() {
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
 }
 
-test('D-200: "Save shot" from Home returns to Home, with "Shot saved" just above the tab bar', async () => {
+test('"Save shot" from Home returns to Home, with "Shot saved" just above the tab bar', async () => {
   await page.goto('/');
   await page.getByRole('link', { name: 'New shot' }).click();
   await withSavedShot(async () => {
@@ -288,7 +288,7 @@ test('D-200: "Save shot" from Home returns to Home, with "Shot saved" just above
   });
 });
 
-test('D-200, D-95: "+" on the Journal returns there, with Back and with "Save shot"', async () => {
+test('"+" on the Journal returns there, with Back and with "Save shot"', async () => {
   await page.goto('/journal');
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(page).toHaveURL(/\/shot\/new\?from=journal$/);
@@ -311,7 +311,7 @@ test('D-200, D-95: "+" on the Journal returns there, with Back and with "Save sh
   });
 });
 
-test('D-197: a shot opened from Home still returns to Home after Edit and "Save changes"', async () => {
+test('a shot opened from Home still returns to Home after Edit and "Save changes"', async () => {
   await page.goto('/');
   await lastShot().getByRole('link').click();
   await page.getByRole('link', { name: 'Edit' }).click();
@@ -321,7 +321,7 @@ test('D-197: a shot opened from Home still returns to Home after Edit and "Save 
   await expect(page.getByRole('heading', { name: 'Coffee Nerd', level: 1 })).toBeVisible();
 });
 
-test('D-200, D-40: Undo after a shot from the Journal finished the bean stays on the Journal', async () => {
+test('Undo after a shot from the Journal finished the bean stays on the Journal', async () => {
   const guji = sql<{ id: string; bag: number | null }>(
     "select id, bag_weight as bag from bean where name = 'Guji Hambela'"
   );

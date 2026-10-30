@@ -43,7 +43,7 @@ async function openMachine() {
   await expect(page.getByRole('heading', { name: 'Machine', level: 1 })).toBeVisible();
 }
 
-test('CustomFeature, D-46, D-185: a new feature is added from the machine page', async () => {
+test('CustomFeature: a new feature is added from the machine page', async () => {
   await openMachine();
   await page.getByRole('button', { name: 'Add your own feature' }).click();
   const sheet = page.getByRole('region', { name: 'Add your own feature' });
@@ -77,7 +77,7 @@ test('CustomFeature, D-46, D-185: a new feature is added from the machine page',
   await expect(page.getByRole('switch', { name: 'Bloom pause' })).toBeVisible();
 });
 
-test('CustomFeature, D-152: a list needs at least two options', async () => {
+test('CustomFeature: a list needs at least two options', async () => {
   await page.getByRole('button', { name: 'Add your own feature' }).click();
   const sheet = page.getByRole('region', { name: 'Add your own feature' });
   await sheet.getByLabel('Name').fill('Water');
@@ -102,7 +102,7 @@ test('CustomFeature, D-152: a list needs at least two options', async () => {
   await expect(sheet).toHaveCount(0);
 });
 
-test('CustomFeature, D-151: an unused feature is renamed or deleted from its own sheet', async () => {
+test('CustomFeature: an unused feature is renamed or deleted from its own sheet', async () => {
   await page.getByRole('button', { name: 'Edit Bloom pause' }).click();
   const sheet = page.getByRole('region', { name: 'Edit Bloom pause' });
   await expect(sheet.getByRole('button', { name: 'Save feature' })).toBeVisible();

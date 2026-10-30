@@ -16,16 +16,14 @@ async function expectNoPageScroll(page: Page) {
   expect(overflow).toEqual([0, 0]);
 }
 
-test('D-59: /health reports the app and its database as ok, without signing in', async ({
-  request
-}) => {
+test('/health reports the app and its database as ok, without signing in', async ({ request }) => {
   const response = await request.get('/health');
 
   expect(response.status()).toBe(200);
   expect(await response.json()).toEqual({ status: 'ok' });
 });
 
-test('D-88: on first run every page leads to creating the account', async ({ page }) => {
+test('on first run every page leads to creating the account', async ({ page }) => {
   await page.goto('/');
 
   await expect(page).toHaveURL(/\/welcome$/);
@@ -33,7 +31,7 @@ test('D-88: on first run every page leads to creating the account', async ({ pag
   await expectNoPageScroll(page);
 });
 
-test('D-18, D-69: the app uses the design system and self-hosted Figtree, with no external requests', async ({
+test('the app uses the design system and self-hosted Figtree, with no external requests', async ({
   page
 }) => {
   const external: string[] = [];
@@ -50,7 +48,7 @@ test('D-18, D-69: the app uses the design system and self-hosted Figtree, with n
   expect(external).toEqual([]);
 });
 
-test('D-85: the two passwords must match', async ({ page }) => {
+test('the two passwords must match', async ({ page }) => {
   await page.goto('/welcome');
   await page.getByLabel('Name').fill(NAME);
   await page.getByLabel('Password · at least 8 characters').fill(PASSWORD);
@@ -61,7 +59,7 @@ test('D-85: the two passwords must match', async ({ page }) => {
   await expect(page.getByLabel('Name')).toHaveValue(NAME);
 });
 
-test('D-85, D-86: creating the account signs you in', async ({ page }) => {
+test('creating the account signs you in', async ({ page }) => {
   await page.goto('/welcome');
   await page.getByLabel('Name').fill(NAME);
   await page.getByLabel('Password · at least 8 characters').fill(PASSWORD);
@@ -76,7 +74,7 @@ test('D-85, D-86: creating the account signs you in', async ({ page }) => {
   await page.screenshot({ path: 'screenshots/GuideMachine.png' });
 });
 
-test('D-157: step by step from the machine to a ready shot form; leaving halfway resumes', async ({
+test('step by step from the machine to a ready shot form; leaving halfway resumes', async ({
   page
 }) => {
   await page.goto('/login');
@@ -180,7 +178,7 @@ test('D-157: step by step from the machine to a ready shot form; leaving halfway
   await expect(page.getByRole('button', { name: 'Save shot' })).toBeVisible();
 });
 
-test('D-60: after first run, signed-out visits lead to sign-in, and /welcome is gone', async ({
+test('after first run, signed-out visits lead to sign-in, and /welcome is gone', async ({
   page
 }) => {
   await page.goto('/welcome');
@@ -190,7 +188,7 @@ test('D-60: after first run, signed-out visits lead to sign-in, and /welcome is 
   await expectNoPageScroll(page);
 });
 
-test('D-85: a wrong password does not sign in', async ({ page }) => {
+test('a wrong password does not sign in', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('Name').fill(NAME);
   await page.getByLabel('Password').fill('wrong-password');
@@ -200,7 +198,7 @@ test('D-85: a wrong password does not sign in', async ({ page }) => {
   await expect(page).toHaveURL(/\/login$/);
 });
 
-test('D-203, D-207, D-208: with its first shot, a new account sees on Insights what each card needs', async ({
+test('with its first shot, a new account sees on Insights what each card needs', async ({
   page
 }) => {
   await page.goto('/login');
@@ -221,7 +219,7 @@ test('D-203, D-207, D-208: with its first shot, a new account sees on Insights w
   await expect(page.getByRole('img')).toHaveCount(0);
 });
 
-test('D-86: sign in, stay signed in, sign out', async ({ page, context }) => {
+test('sign in, stay signed in, sign out', async ({ page, context }) => {
   await page.goto('/login');
   await page.getByLabel('Name').fill(NAME.toLowerCase());
   await page.getByLabel('Password').fill(PASSWORD);

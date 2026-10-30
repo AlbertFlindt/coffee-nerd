@@ -85,7 +85,7 @@ function lightRoast(): string {
 }
 
 describe('loadPuckPrep', () => {
-  it('D-51: routines with their steps in order, then your steps with their unit', () => {
+  it('routines with their steps in order, then your steps with their unit', () => {
     const page = loadPuckPrep(db, ids.userId);
     expect(page.routines).toEqual([
       {
@@ -106,7 +106,7 @@ describe('loadPuckPrep', () => {
     ]);
   });
 
-  it('D-51: shots and the average score of the rated ones', () => {
+  it('shots and the average score of the rated ones', () => {
     brew(1, 7);
     brew(2, 8);
     brew(3, null);
@@ -114,7 +114,7 @@ describe('loadPuckPrep', () => {
     expect(daily).toMatchObject({ shots: 3, averageScore: 7.5 });
   });
 
-  it('D-163: "In use" on My setup’s routine and on the last shot’s routine', () => {
+  it('"In use" on My setup’s routine and on the last shot’s routine', () => {
     const light = lightRoast();
     expect(loadPuckPrep(db, ids.userId).routines.map((r) => [r.name, r.inUse])).toEqual([
       ['Daily routine', true],
@@ -132,13 +132,13 @@ describe('loadPuckPrep', () => {
     expect(loadPuckPrep(db, ids.userId).routines.map((r) => r.inUse)).toEqual([false, true]);
   });
 
-  it('D-60, D-148: only your own, and archived ones are left out', () => {
+  it('only your own, and archived ones are left out', () => {
     db.update(prepStep).set({ archivedAt: T0 }).where(eq(prepStep.id, ids.stepIds[3])).run();
     expect(loadPuckPrep(db, ids.userId).steps).toHaveLength(3);
     expect(loadPuckPrep(db, 'someone-else')).toEqual({ routines: [], steps: [] });
   });
 
-  it('D-169: a step knows the routines that contain it', () => {
+  it('a step knows the routines that contain it', () => {
     lightRoast();
     const wdt = loadPuckPrep(db, ids.userId).steps[0];
     expect(wdt.routines).toEqual(['Daily routine', 'Light roast']);
@@ -146,13 +146,13 @@ describe('loadPuckPrep', () => {
 });
 
 describe('addStep and saveStep', () => {
-  it('D-52: a new step is saved with its setting', () => {
+  it('a new step is saved with its setting', () => {
     const id = addStep(db, ids.userId, { name: ' RDT ', setting: sprays }, T0);
     const step = loadPuckPrep(db, ids.userId).steps.find((s) => s.id === id);
     expect(step).toMatchObject({ name: 'RDT', unit: 'sprays', used: false, routines: [] });
   });
 
-  it('D-52: a name and a valid setting are required', () => {
+  it('a name and a valid setting are required', () => {
     expect(() => addStep(db, ids.userId, { name: ' ', setting: { kind: 'none' } }, T0)).toThrow(
       StepRejected
     );
@@ -166,7 +166,7 @@ describe('addStep and saveStep', () => {
     ).toThrow(StepRejected);
   });
 
-  it('D-168: an unused step can change anything', () => {
+  it('an unused step can change anything', () => {
     const id = addStep(db, ids.userId, { name: 'RDT', setting: sprays }, T0);
     saveStep(db, ids.userId, id, { name: 'Spritz', setting: { kind: 'none' } }, T0);
     expect(loadPuckPrep(db, ids.userId).steps.find((s) => s.id === id)).toMatchObject({
@@ -175,7 +175,7 @@ describe('addStep and saveStep', () => {
     });
   });
 
-  it('D-168: a used step keeps its kind of setting and its unit; name, step, range and start can change', () => {
+  it('a used step keeps its kind of setting and its unit; name, step, range and start can change', () => {
     brew(1, null);
     const tamp = ids.stepIds[2];
     const setting = { kind: 'number', unit: 'kg', step: 500, startsAt: 15000 } as const;
@@ -203,7 +203,7 @@ describe('addStep and saveStep', () => {
     ).toThrow(new StepRejected(['setting: used']));
   });
 
-  it('D-168: a used list step keeps its options and can get new ones', () => {
+  it('a used list step keeps its options and can get new ones', () => {
     const list: PrepStepSetting = {
       kind: 'choice',
       options: [
@@ -242,7 +242,7 @@ describe('addStep and saveStep', () => {
     ).toThrow(new StepRejected(['setting: used']));
   });
 
-  it('D-175: a change that would break a routine is refused, naming the routine', () => {
+  it('a change that would break a routine is refused, naming the routine', () => {
     const tamp = ids.stepIds[2];
     const setting = { kind: 'number', unit: 'kg', step: 500, startsAt: 5000 } as const;
     expect(() =>
@@ -271,7 +271,7 @@ describe('addStep and saveStep', () => {
     );
   });
 
-  it('D-175: removing a list option a routine uses is refused', () => {
+  it('removing a list option a routine uses is refused', () => {
     const list: PrepStepSetting = {
       kind: 'choice',
       options: [
@@ -301,7 +301,7 @@ describe('addStep and saveStep', () => {
     );
   });
 
-  it('D-60: not another user’s step', () => {
+  it('not another user’s step', () => {
     expect(() =>
       saveStep(db, 'someone-else', ids.stepIds[0], { name: 'X', setting: { kind: 'none' } }, T0)
     ).toThrow(new StepRejected(['step: not found']));
@@ -309,13 +309,13 @@ describe('addStep and saveStep', () => {
 });
 
 describe('removeStep', () => {
-  it('D-168: a step no shot used is deleted', () => {
+  it('a step no shot used is deleted', () => {
     const id = addStep(db, ids.userId, { name: 'RDT', setting: sprays }, T0);
     expect(removeStep(db, ids.userId, id, T0)).toBe('deleted');
     expect(db.select().from(prepStep).where(eq(prepStep.id, id)).get()).toBeUndefined();
   });
 
-  it('D-176: an unused step is deleted, and taken out of an archived routine that holds it', () => {
+  it('an unused step is deleted, and taken out of an archived routine that holds it', () => {
     const id = addStep(db, ids.userId, { name: 'RDT', setting: sprays }, T0);
     const old = newId(T0);
     db.insert(routine)
@@ -338,12 +338,12 @@ describe('removeStep', () => {
     ]);
   });
 
-  it('D-169: a step a routine contains stays', () => {
+  it('a step a routine contains stays', () => {
     expect(removeStep(db, ids.userId, ids.stepIds[0], T0)).toBe('in_routine');
     expect(loadPuckPrep(db, ids.userId).steps).toHaveLength(4);
   });
 
-  it('D-168: a step a shot used is archived, once no routine contains it', () => {
+  it('a step a shot used is archived, once no routine contains it', () => {
     brew(1, null);
     const puckScreen = ids.stepIds[3];
     db.update(routine)
@@ -356,18 +356,18 @@ describe('removeStep', () => {
     );
   });
 
-  it('D-60: not another user’s step', () => {
+  it('not another user’s step', () => {
     expect(removeStep(db, 'someone-else', ids.stepIds[0], T0)).toBeNull();
   });
 });
 
-describe('routines (D-51, D-167)', () => {
+describe('routines', () => {
   const steps = () => [
     { stepId: ids.stepIds[0], value: 25000 },
     { stepId: ids.stepIds[2], value: 15000 }
   ];
 
-  it('D-51: a new routine is saved with its steps in order', () => {
+  it('a new routine is saved with its steps in order', () => {
     const id = addRoutine(db, ids.userId, { name: ' Light roast ', steps: steps() }, T0);
     expect(loadRoutine(db, ids.userId, id)).toMatchObject({
       name: 'Light roast',
@@ -381,7 +381,7 @@ describe('routines (D-51, D-167)', () => {
     ]);
   });
 
-  it('D-51: a name, at least one step and fitting values are required', () => {
+  it('a name, at least one step and fitting values are required', () => {
     expect(() => addRoutine(db, ids.userId, { name: ' ', steps: steps() }, T0)).toThrow(
       new RoutineRejected(['name: required'])
     );
@@ -398,13 +398,13 @@ describe('routines (D-51, D-167)', () => {
     ).toThrow(RoutineRejected);
   });
 
-  it('D-164: the same step may appear twice', () => {
+  it('the same step may appear twice', () => {
     const twice = [...steps(), { stepId: ids.stepIds[0], value: 10000 }];
     const id = addRoutine(db, ids.userId, { name: 'Two WDT', steps: twice }, T0);
     expect(loadRoutine(db, ids.userId, id)?.steps).toEqual(twice);
   });
 
-  it('D-60, D-148: only your own steps that are not archived', () => {
+  it('only your own steps that are not archived', () => {
     db.update(prepStep).set({ archivedAt: T0 }).where(eq(prepStep.id, ids.stepIds[3])).run();
     expect(() =>
       addRoutine(
@@ -419,7 +419,7 @@ describe('routines (D-51, D-167)', () => {
     );
   });
 
-  it('D-51, D-65: saving a routine changes it for future shots', () => {
+  it('saving a routine changes it for future shots', () => {
     saveRoutine(db, ids.userId, ids.routineId, { name: 'Morning', steps: steps() }, T0);
     expect(loadRoutine(db, ids.userId, ids.routineId)).toMatchObject({
       name: 'Morning',
@@ -431,12 +431,12 @@ describe('routines (D-51, D-167)', () => {
     ).toThrow(new RoutineRejected(['routine: not found']));
   });
 
-  it('D-167, D-83: My setup’s routine is neither archived nor deleted', () => {
+  it('My setup’s routine is neither archived nor deleted', () => {
     expect(archiveRoutine(db, ids.userId, ids.routineId, T0)).toBe('in_my_setup');
     expect(deleteRoutine(db, ids.userId, ids.routineId)).toBe('in_my_setup');
   });
 
-  it('D-167: a routine no shot used can be deleted; one a shot used is archived instead', () => {
+  it('a routine no shot used can be deleted; one a shot used is archived instead', () => {
     const unused = addRoutine(db, ids.userId, { name: 'Unused', steps: steps() }, T0);
     expect(deleteRoutine(db, ids.userId, unused)).toBe('deleted');
     expect(loadRoutine(db, ids.userId, unused)).toBeNull();
@@ -450,15 +450,15 @@ describe('routines (D-51, D-167)', () => {
     expect(loadPuckPrep(db, ids.userId).routines.map((r) => r.name)).toEqual(['Daily routine']);
   });
 
-  it('D-60: not another user’s routine', () => {
+  it('not another user’s routine', () => {
     expect(loadRoutine(db, 'someone-else', ids.routineId)).toBeNull();
     expect(archiveRoutine(db, 'someone-else', ids.routineId, T0)).toBeNull();
     expect(deleteRoutine(db, 'someone-else', ids.routineId)).toBeNull();
   });
 });
 
-describe('useForNewShots (D-187)', () => {
-  it('D-187: Yes makes the routine My setup’s, and the next shot starts with it once', () => {
+describe('useForNewShots', () => {
+  it('Yes makes the routine My setup’s, and the next shot starts with it once', () => {
     brew(0, 7);
     const id = lightRoast();
     expect(useForNewShots(db, ids.userId, id, T0 + 60_000)).toBe(true);
@@ -481,7 +481,7 @@ describe('useForNewShots (D-187)', () => {
     expect(after.prefill.routineId).toBe(ids.routineId);
   });
 
-  it('D-187: not for an archived routine or someone else’s', () => {
+  it('not for an archived routine or someone else’s', () => {
     const id = lightRoast();
     expect(useForNewShots(db, 'someone-else', id, T0)).toBe(false);
     archiveRoutine(db, ids.userId, id, T0);

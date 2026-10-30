@@ -36,7 +36,7 @@ async function screenshot(name: string) {
   await page.screenshot({ path: `screenshots/${name}.png` });
 }
 
-test('PuckPrep, D-51, D-163: routines with their flow, "In use", and your steps', async () => {
+test('PuckPrep: routines with their flow, "In use", and your steps', async () => {
   await page.goto('/library');
   await page.getByRole('link', { name: /^Puck prep/ }).click();
   await expect(page.getByRole('heading', { name: 'Puck prep', level: 1 })).toBeVisible();
@@ -52,7 +52,7 @@ test('PuckPrep, D-51, D-163: routines with their flow, "In use", and your steps'
   await screenshot('PuckPrep');
 });
 
-test('NewStep, D-52, D-185: a new step with a number setting', async () => {
+test('NewStep: a new step with a number setting', async () => {
   await page.getByRole('button', { name: 'New step' }).click();
   const sheet = page.getByRole('region', { name: 'New step' });
   await sheet.getByLabel('Name').fill('RDT');
@@ -70,7 +70,7 @@ test('NewStep, D-52, D-185: a new step with a number setting', async () => {
   await expect(page.getByRole('button', { name: 'RDT · sprays' })).toBeVisible();
 });
 
-test('D-52, D-152: a list step starts on the option whose circle is tapped (screen 52)', async () => {
+test('a list step starts on the option whose circle is tapped (screen 52)', async () => {
   await page.getByRole('button', { name: 'New step' }).click();
   const sheet = page.getByRole('region', { name: 'New step' });
   await sheet.getByLabel('Name').fill('Paper filter');
@@ -95,7 +95,7 @@ test('D-52, D-152: a list step starts on the option whose circle is tapped (scre
   await expect(page.getByRole('button', { name: 'Paper filter', exact: true })).toHaveCount(0);
 });
 
-test('D-168: a step can be renamed, and deleted while no shot used it', async () => {
+test('a step can be renamed, and deleted while no shot used it', async () => {
   await page.getByRole('button', { name: 'RDT · sprays' }).click();
   const sheet = page.getByRole('region', { name: 'Edit RDT' });
   await sheet.getByLabel('Name').fill('Spritz');
@@ -110,7 +110,7 @@ test('D-168: a step can be renamed, and deleted while no shot used it', async ()
   await expect(page.getByRole('button', { name: /^Spritz/ })).toHaveCount(0);
 });
 
-test('D-169: a step in a routine stays', async () => {
+test('a step in a routine stays', async () => {
   await page.getByRole('button', { name: 'Tamp · kg' }).click();
   const sheet = page.getByRole('region', { name: 'Edit Tamp' });
   await expect(sheet).toContainText('Used in Daily routine');
@@ -134,7 +134,7 @@ test('D-169: a step in a routine stays', async () => {
   await expect(sheet).toHaveCount(0);
 });
 
-test('RoutineBuilder, D-51, D-167: a routine opens in the builder; My setup’s stays', async () => {
+test('RoutineBuilder: a routine opens in the builder; My setup’s stays', async () => {
   await page.getByRole('link', { name: /^Daily routine/ }).click();
   await expect(page.getByRole('heading', { name: 'Routine', level: 1 })).toBeVisible();
   await expect(page.getByLabel('Name')).toHaveValue('Daily routine');
@@ -150,7 +150,7 @@ test('RoutineBuilder, D-51, D-167: a routine opens in the builder; My setup’s 
   await expect(page.getByRole('heading', { name: 'Puck prep', level: 1 })).toBeVisible();
 });
 
-test('D-164, D-165, D-51: build a routine, set a value, reorder, and add a new step on the way', async () => {
+test('build a routine, set a value, reorder, and add a new step on the way', async () => {
   await page.getByRole('link', { name: 'New routine' }).click();
   // A name and a step are needed.
   await page.getByRole('button', { name: 'Save routine' }).click();
@@ -225,7 +225,7 @@ test('D-164, D-165, D-51: build a routine, set a value, reorder, and add a new s
   await screenshot('PuckPrepNew');
 });
 
-test('D-167: a routine no shot used offers Delete', async () => {
+test('a routine no shot used offers Delete', async () => {
   await page.getByRole('link', { name: /^Light roast/ }).click();
   await expect(page.getByRole('button', { name: 'Delete routine' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Archive', exact: true })).toHaveCount(0);
@@ -242,7 +242,7 @@ test('D-167: a routine no shot used offers Delete', async () => {
   await page.getByRole('link', { name: 'Close without saving' }).click();
 });
 
-test('D-166: a step’s value changes for one shot, as a recipe change in sage', async () => {
+test('a step’s value changes for one shot, as a recipe change in sage', async () => {
   await page.goto('/shot/new');
   await page.getByRole('button', { name: 'Setup', exact: true }).click();
   const more = page.getByRole('region', { name: 'Setup', exact: true });
@@ -261,7 +261,7 @@ test('D-166: a step’s value changes for one shot, as a recipe change in sage',
   await expect(more.getByRole('button', { name: /Puck prep/ })).toBeVisible();
 });
 
-test('D-167, D-168: once a shot used it, the routine is archived, and so is its step', async () => {
+test('once a shot used it, the routine is archived, and so is its step', async () => {
   // Brew one shot with Light roast.
   await page.goto('/shot/new');
   await page.getByRole('button', { name: 'Setup', exact: true }).click();

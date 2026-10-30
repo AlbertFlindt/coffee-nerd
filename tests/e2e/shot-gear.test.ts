@@ -37,7 +37,7 @@ async function screenshot(name: string) {
   await page.screenshot({ path: `screenshots/${name}.png` });
 }
 
-test('D-153: the gear line switches the grinder for this shot; the grind control follows', async () => {
+test('the gear line switches the grinder for this shot; the grind control follows', async () => {
   await page.goto('/library/gear');
   await page.getByRole('button', { name: 'Add gear' }).click();
   await page.getByRole('button', { name: 'Grinder' }).click();
@@ -75,7 +75,7 @@ test('D-153: the gear line switches the grinder for this shot; the grind control
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
 });
 
-test('D-153: switching the machine brings its own features; values both have stay', async () => {
+test('switching the machine brings its own features; values both have stay', async () => {
   await page.goto('/library/gear');
   await page.getByRole('button', { name: 'Add gear' }).click();
   await page.getByRole('button', { name: 'Machine' }).click();
@@ -102,7 +102,7 @@ test('D-153: switching the machine brings its own features; values both have sta
   await expect(more.getByText('Flat')).toBeVisible();
 });
 
-test('D-154: a dose outside the basket’s range shows a gentle hint, never a block', async () => {
+test('a dose outside the basket’s range shows a gentle hint, never a block', async () => {
   await page.goto('/shot/new');
   await expect(page.getByText(/holds 17\.0–19\.0 g/)).toHaveCount(0);
   await page.getByRole('button', { name: /^Dose, .*tap to type$/ }).click();
@@ -114,7 +114,7 @@ test('D-154: a dose outside the basket’s range shows a gentle hint, never a bl
   await screenshot('ShotDoseHint');
 });
 
-test('D-155: the basket and puck prep pickers start with leaving them out', async () => {
+test('the basket and puck prep pickers start with leaving them out', async () => {
   await page.goto('/shot/new');
   await page.getByRole('button', { name: 'Setup', exact: true }).click();
   const sheet = page.getByRole('region', { name: 'Setup', exact: true });

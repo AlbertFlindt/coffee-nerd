@@ -49,7 +49,7 @@ async function doseOnCard(): Promise<string> {
   return /Dose (\d+\.\d) g/.exec(text)![1];
 }
 
-test('EditSetup, D-45: a full-screen form that starts from My setup', async () => {
+test('EditSetup: a full-screen form that starts from My setup', async () => {
   await openEditSetup();
   await expect(page.getByText('Starting point for new beans')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Gear', level: 2 })).toBeVisible();
@@ -72,7 +72,7 @@ test('EditSetup, D-45: a full-screen form that starts from My setup', async () =
   await screenshot('EditSetup');
 });
 
-test('EditSetup, D-45: the machine picker ticks the chosen machine (screen 44)', async () => {
+test('EditSetup: the machine picker ticks the chosen machine (screen 44)', async () => {
   await page.getByRole('button', { name: /^Machine,/ }).click();
   await expect(page.getByRole('button', { name: 'Lelit Bianca', exact: true })).toHaveAttribute(
     'aria-pressed',
@@ -82,7 +82,7 @@ test('EditSetup, D-45: the machine picker ticks the chosen machine (screen 44)',
   await page.keyboard.press('Escape');
 });
 
-test('EditSetup, D-155: the basket and puck prep pickers start with "No basket" and "No puck prep"', async () => {
+test('EditSetup: the basket and puck prep pickers start with "No basket" and "No puck prep"', async () => {
   await page.getByRole('button', { name: /^Basket,/ }).click();
   await expect(page.getByRole('button', { name: 'No basket', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'VST · 18 g', exact: true })).toHaveAttribute(
@@ -101,7 +101,7 @@ test('EditSetup, D-155: the basket and puck prep pickers start with "No basket" 
   await expect(page.getByRole('button', { name: 'No puck prep', exact: true })).toHaveCount(0);
 });
 
-test('EditSetup, D-24: the pressure profile opens the phase rows', async () => {
+test('EditSetup: the pressure profile opens the phase rows', async () => {
   await page.getByRole('button', { name: /^Pressure profile/ }).click();
   await expect(page.getByRole('switch', { name: 'Preinfusion' })).toBeVisible();
   await expect(page.getByRole('switch', { name: 'Low bar start' })).toBeVisible();
@@ -109,7 +109,7 @@ test('EditSetup, D-24: the pressure profile opens the phase rows', async () => {
   await page.keyboard.press('Escape');
 });
 
-test('EditSetup, D-45, D-149: a new dose is saved and shows on My setup', async () => {
+test('EditSetup: a new dose is saved and shows on My setup', async () => {
   await page.goto('/library/gear');
   const before = await doseOnCard();
   const after = (Number(before) + 0.1).toFixed(1);
