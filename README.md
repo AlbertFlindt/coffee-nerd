@@ -1,26 +1,125 @@
-<p align="center"><img src="design-system/logo/coffee-nerd-mark.svg" width="64" height="64" alt=""></p>
+<p align="center">
+  <img src="design-system/logo/coffee-nerd-mark.svg" alt="" width="128">
+</p>
 
-# Coffee Nerd
+<h1 align="center">Coffee Nerd</h1>
 
-**Data that backs up the home barista.** A self-hosted, privacy-friendly espresso journal: log a shot in seconds at the brew station, see what changed, and learn over time which beans, recipes and routines you actually like.
+<p align="center">
+  Data that backs up the home barista. A self-hosted espresso journal for your phone:<br>
+  log a shot in seconds at the machine, see what changed, and learn which beans and recipes you like.
+</p>
 
-- Runs on your own server as one Docker container; your data stays in one SQLite file.
-- Installable as an app on your phone or tablet (PWA); opens offline, and shots saved offline are sent when you're back online.
-- Built for coffee nerds: recipe matching across your whole history, σ and distributions in Insights, any machine described by hand.
+<p align="center">
+  <a href="https://github.com/AlbertFlindt/coffee-nerd/releases/latest"><img src="https://img.shields.io/github/v/release/AlbertFlindt/coffee-nerd?label=release" alt="Latest release"></a>
+  <a href="https://github.com/AlbertFlindt/coffee-nerd/actions/workflows/ci.yml"><img src="https://github.com/AlbertFlindt/coffee-nerd/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="#license"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="License: AGPL-3.0"></a>
+</p>
 
-> **Status:** the shot form, the Journal, the shot detail, the whole Library (Beans, Gear, Puck prep, Tags), My setup, Home and Insights work, with a step-by-step start after creating the account (milestones M3 to M9). The app can be installed on a phone's home screen over https, opens offline and keeps shots saved offline until they can be sent (M10). Settings has the dose, yield and time steps, a backup and exports as CSV and JSON (M11). Not ready for daily use yet. Private for now; it will become open source once it is mature.
+<p align="center">
+  <a href="#features">Features</a> ·
+  <a href="#requirements">Requirements</a> ·
+  <a href="#installation">Installation</a> ·
+  <a href="#back-up-and-restore">Back up and restore</a> ·
+  <a href="#running-from-source">Running from source</a>
+</p>
 
-## Try the latest build on your server (Dockge)
+<p align="center">
+  <img src="docs/screens/Rated.png" alt="The shot form with grind, dose, yield and time, the changed values in green, and a score of 7" width="260">
+  <img src="docs/screens/Journal.png" alt="The Journal with this week's shots grouped by day, their scores and recipe tags" width="260">
+  <img src="docs/screens/Insights.png" alt="Insights showing score by process as box plots and origins as average ± standard deviation" width="260">
+</p>
 
-Every merge to `main` is published as the image `ghcr.io/albertflindt/coffee-nerd:main`. For trying it out, not yet for daily use: the full install guide comes with the release (milestone M12).
+| Feature | What it does |
+|---|---|
+| **Shot form** | Starts from your best recipe, so a shot is a few taps. Shows what changed and whether you reused a recipe. |
+| **Journal** | Every shot by day, filtered by bean, recipe or unrated. Open one to see, edit or delete it. |
+| **Library** | Your beans, gear (machines, grinders, baskets), puck prep routines and flavor tags. |
+| **Home** | The last shot, bean freshness, this week, the best recipe for your bean and your dial-in progress. |
+| **Insights** | What you like, your progress, dial-in and fair comparisons, with σ and distributions. |
+| **Offline** | Install it on your phone's home screen. It opens offline and sends shots saved offline later. |
+| **Your data** | A full backup in one file, and exports as CSV and JSON. |
 
-1. **Once: let the server pull the private image.** On GitHub, create a personal access token (classic) with only the `read:packages` scope. On the server run `docker login ghcr.io -u AlbertFlindt` and paste the token as the password. Dockge uses the server's Docker, so this is enough.
-2. **Create the stack.** In Dockge choose **+ Compose**, name it `coffee-nerd`, paste this and press **Deploy**:
+Coffee Nerd stores everything on your own server and makes no outside requests.
+
+## Features
+
+### Shot form
+
+Each new shot starts from where you are: the recipe marked Brew next, otherwise this bean's best
+recipe, otherwise your My setup defaults. Grind, dose, yield and time change with −/+ in the steps
+your gear uses. Values that differ from the last shot turn green, and the recipe tag says
+"Recipe reused 2x" or "New recipe · grind changed". Rate it 1–10 and set the balance, or leave
+taste for later: it is never filled in for you. Setup holds the machine's features (temperature,
+preinfusion, pressure profile, your own) and the puck prep routine; Tasting holds body, sweetness,
+aftertaste, flavor notes and your own notes.
+
+### Journal and shot detail
+
+Shots grouped by day with score, recipe and taste. Filter by bean, by recipe or to the unrated
+ones, and rate a shot right from the list. A shot's page shows everything about it and how it
+compares with its recipe's other shots.
+
+### Library
+
+- **Beans:** roaster, origin, process, roast date and bag weight. "Same as before" picks up a re-buy
+  where the last bag left off. Grams left count down with each shot, and a used-up bag finishes itself.
+- **Gear:** machines, grinders and baskets, described by hand, so any machine fits. Add your own
+  features (a number, an on/off switch or a list) and they appear on the shot form.
+- **Puck prep:** steps (WDT, a puck screen, a tamp pressure) put together into routines.
+- **Tags:** flavor notes by family, with a finder for near-duplicates and a merge.
+- **My setup:** the gear, routine and values every new bean starts from.
+
+Archived gear, routines and tags leave the lists, but past shots keep them.
+
+### Home
+
+The bean you are on, the last shot, how fresh the bean is, this week's shots and average, the best
+recipe for this bean, and a graph of your score per shot while you dial in.
+
+### Insights
+
+Four tabs: **What I like** (your score by process and by origin), **Progress** (your weekly score
+with its spread), **Dial-in** (how steady your shot time is on the best recipe, as a bell curve) and
+**Comparisons** (your puck prep routines compared with the rest of the recipe held constant, and
+your most consistent beans). Every card
+opens with a finding in plain words, then the chart and how many shots it rests on.
+
+### Getting started
+
+After you create your account, the app walks you through your machine, grinder, basket, My setup
+and first bean, one step at a time.
+
+### Installable and offline
+
+Over https, add Coffee Nerd to your phone's home screen and it runs like an app. Home, the Journal
+and the shot form open without a connection, and shots saved offline wait on the phone until the
+server answers.
+
+### Settings
+
+The −/+ steps for dose, yield and time, the backup, the exports and sign-out. Open it from the gear
+on Home.
+
+## Requirements
+
+- A server with Docker (any small Linux box or NAS is enough; the image is Linux x86-64).
+- For installing on a phone and using it offline: https, usually through a reverse proxy.
+
+## Installation
+
+Coffee Nerd is one container with one data volume. Each release is published as
+`ghcr.io/albertflindt/coffee-nerd:<version>` and `:latest`; every merge to `main` as `:main`.
+
+1. **Once: let the server pull the image.** The image is private for now. On GitHub, create a
+   personal access token (classic) with only the `read:packages` scope, run
+   `docker login ghcr.io -u <your GitHub name>` on the server and paste the token as the password.
+2. **Start it.** Save this as `compose.yaml` (or paste it into Dockge as a new stack called
+   `coffee-nerd`) and run `docker compose up -d`:
 
    ```yaml
    services:
      coffee-nerd:
-       image: ghcr.io/albertflindt/coffee-nerd:main
+       image: ghcr.io/albertflindt/coffee-nerd:latest
        ports:
          - '3000:3000'
        volumes:
@@ -31,21 +130,35 @@ Every merge to `main` is published as the image `ghcr.io/albertflindt/coffee-ner
      data:
    ```
 
-   Do steps 3 and 4 right away: until the seed has run, anyone who can reach the server can claim the app, and until you set your own password the published Demo password works.
+3. **Create your account right away** at `http://<server>:3000`. Until then, anyone who can reach
+   the server can claim the app. The app then walks you through your gear and first bean.
 
-3. **Fill it with the reference setup before signing in.** The seed gives you a ready setup to try (Lelit Bianca, Timemore 064S, VST 18 g, Daily routine, one bean). In Dockge open the stack's terminal (`sh`) and run `node scripts/seed.mjs`. It only works while the app has no account yet. To use your own gear instead, skip steps 3 and 4: create your account at `http://<server>:3000` and the app walks you through your machine, grinder, basket, My setup and first bean.
-4. **Sign in** at `http://<server>:3000` as **Demo** with the password **coffee-nerd**. Then set your own password in the same terminal with `node scripts/reset-password.mjs`.
-5. **Update to the latest build:** press **Update** on the stack. Dockge pulls the new image and restarts it; your shots stay in the `data` volume, and database changes are applied when the app starts.
+**Trying it with sample data instead:** before creating an account, run
+`docker compose exec coffee-nerd node scripts/seed.mjs` (in Dockge, the stack's terminal). It fills
+an empty app with a reference setup (Lelit Bianca, Timemore 064S, VST 18 g, a Daily routine, one
+bean). Sign in as **Demo** with the password **coffee-nerd**, then set your own password at once.
 
-To start over, stop the stack and delete its `data` volume (`docker volume rm coffee-nerd_data`), then deploy and seed again.
+**Password:** `docker compose exec coffee-nerd node scripts/reset-password.mjs` sets a new one and
+signs out every device.
+
+**Behind a reverse proxy** with https, forward `X-Forwarded-Proto` (and `X-Forwarded-Host` if the
+proxy changes the host), so the sign-in cookie is marked secure and forms are accepted.
+
+**Update:** `docker compose pull && docker compose up -d` (in Dockge, **Update**). Your shots stay in
+the `data` volume, and database changes are applied when the app starts.
+
+**Start over:** stop the stack and delete its `data` volume (`docker volume rm coffee-nerd_data`).
 
 ## Back up and restore
 
-**Back up** in the app: Home's gear › **Download backup** saves the whole database as one file, `coffee-nerd-backup-<date>.db` (D-251). Keep it somewhere private: it holds everything, including your password in scrambled form. **Export shots** (a CSV for spreadsheets) and **Export everything** (JSON) sit next to it (D-252).
+**Back up** in the app: Settings › **Download backup** saves the whole database as one file,
+`coffee-nerd-backup-<date>.db`. Keep it somewhere private: it holds everything, including your
+password in scrambled form. **Export shots** (a CSV for spreadsheets) and **Export everything**
+(JSON) sit next to it.
 
 **Restore** on the server, as a deliberate step: it replaces all data in the app with the backup.
 
-1. Stop the stack (in Dockge: **Stop**).
+1. Stop the stack (`docker compose stop`, or **Stop** in Dockge).
 2. Put the backup file in a folder on the server, open a terminal there and run, with your file's name:
 
    ```sh
@@ -56,23 +169,30 @@ To start over, stop the stack and delete its `data` volume (`docker volume rm co
    ```
 
    Removing the `-wal` and `-shm` files matters: they belong to the old database.
-3. Start the stack again. A backup from an older version is brought up to date when the app starts. Every device signs in again.
+3. Start the stack again. A backup from an older version is brought up to date when the app starts.
+   Every device signs in again.
 
-## Documentation
+## Running from source
 
-| Document | What it is |
-|---|---|
-| [`docs/ux-decision-log.md`](docs/ux-decision-log.md) | Every product and technical decision (D-01 …), with the reasons |
-| [`docs/SPEC.md`](docs/SPEC.md) | Entities, recipe matching, prefill and the Insights query system |
-| [`docs/roadmap.md`](docs/roadmap.md) | Build order and acceptance criteria per milestone |
-| [`docs/screens/`](docs/screens/) | All designed screens at 412 × 915 |
-| [`design-system/`](design-system/) | Tokens, component CSS and guidelines, logo |
-| [`CLAUDE.md`](CLAUDE.md) | Instructions for Claude Code, which writes the code |
+Needs Node 22.
 
-## How this project is built
+```sh
+npm ci
+npm run db:seed        # optional: the reference setup (Demo / coffee-nerd)
+npm run dev            # http://localhost:5173
+npm run check && npm run lint && npm test && npm run test:e2e
+docker compose up --build   # the production image on port 3000
+```
 
-The owner designs and decides; [Claude Code](https://code.claude.com/docs) writes all the code (D-62). Decisions are recorded in the decision log before code depends on them, every pull request has to pass CI (type checks, lint, tests, build), and a separate review pass checks each change against the decision log.
+SvelteKit (Svelte 5, TypeScript), SQLite with Drizzle ORM, Vitest and Playwright. How the app works
+inside, from the data model to recipe matching and Insights, is in [docs/SPEC.md](docs/SPEC.md).
 
-## Tech stack
+## Changes
 
-SvelteKit (Svelte 5, TypeScript) · SQLite with Drizzle ORM · Vitest and Playwright · Docker (D-59).
+See [CHANGELOG.md](CHANGELOG.md) and the [releases](https://github.com/AlbertFlindt/coffee-nerd/releases).
+
+## License
+
+Coffee Nerd is free software, licensed under the GNU Affero General Public License, version 3
+only (AGPL-3.0-only). If you run a changed version for others over a network, you must offer them
+its source. The full text is in [LICENSE](LICENSE).
