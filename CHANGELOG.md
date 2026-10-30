@@ -9,6 +9,15 @@ All notable changes to Coffee Nerd. Each version is a tag and a GitHub release.
   welcome you, each password field has a button that shows what you typed, and a line under the
   button says how to reset a forgotten password or that everything stays on your server.
 
+## 1.0.1 (2026-10-30)
+
+### Changed
+- **Installing:** the Docker image is public, so the server pulls it without signing in to GitHub.
+  The README's install guide now covers creating your account right away, a reverse proxy with
+  https (Caddy and nginx examples) and updating.
+- **No sample setup in the Docker image:** `scripts/seed.mjs` and its Demo account are no longer in
+  the image. They stay in the source for development (`npm run db:seed`).
+
 ## 1.0.0 (2026-10-30)
 
 The first release: a self-hosted espresso journal for your phone.
