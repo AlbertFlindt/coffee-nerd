@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Shot detail (screen 26): bean and setup card, core values and ratio, taste, "Compared with this
+  // Shot detail (screen 26): bean, setup and puck prep card, core values and ratio, taste, "Compared with this
   // recipe", notes, and Edit.
   import { resolve } from '$app/paths';
   import { recipeTagText } from '#lib/domain/fingerprint.ts';
@@ -125,6 +125,7 @@
     </div>
     <span class="soft">{shot.gear}</span>
     {#if shot.setup}<span class="soft">{shot.setup}</span>{/if}
+    {#if shot.prep}<span class="soft">{shot.prep}</span>{/if}
     <span class="cn-tag" class:cn-tag--new={shot.recipeTag.kind === 'new'}
       >{tagMain}{#if tagRest.length}<span class="tag-detail">{` · ${tagRest.join(' · ')}`}</span
         >{/if}</span
