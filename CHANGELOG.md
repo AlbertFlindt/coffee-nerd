@@ -2,6 +2,13 @@
 
 All notable changes to Coffee Nerd. Each version is a tag and a GitHub release.
 
+## 1.0.2 (2026-10-30)
+
+### Changed
+- **Sign in and Create your account** have their own design: the logo, the name and the tagline
+  welcome you, each password field has a button that shows what you typed, and a line under the
+  button says how to reset a forgotten password or that everything stays on your server.
+
 ## 1.0.0 (2026-10-30)
 
 The first release: a self-hosted espresso journal for your phone.
