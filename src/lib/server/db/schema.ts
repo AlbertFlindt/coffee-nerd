@@ -227,7 +227,7 @@ export const shot = sqliteTable(
   (t) => [index('shot_owner_brewed').on(t.ownerId, t.brewedAt), index('shot_recipe').on(t.recipeId)]
 );
 
-/** Flavor notes in fixed families. Names are unique per owner, ignoring case. */
+/** Flavor notes in fixed families. Names are unique per account, ignoring case. */
 export const tag = sqliteTable(
   'tag',
   {

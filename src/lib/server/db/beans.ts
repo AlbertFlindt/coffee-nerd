@@ -1,5 +1,5 @@
 // The Beans overview and its numbers, and adding and editing a bean. Every query is
-// scoped by the owner.
+// scoped to the signed-in account.
 import { and, desc, eq } from 'drizzle-orm';
 import {
   bestScoreText,

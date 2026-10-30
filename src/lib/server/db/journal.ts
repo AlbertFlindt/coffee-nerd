@@ -1,4 +1,4 @@
-// The Journal and the shot detail. Every query is scoped by the owner.
+// The Journal and the shot detail. Every query is scoped to the signed-in account.
 import { and, asc, desc, eq, inArray, lt, or } from 'drizzle-orm';
 import { describeChange, type RecipeMatch } from '../../domain/fingerprint';
 import { recipeFilterLabel, setupDifferences, shotsThisWeek } from '../../domain/journal';

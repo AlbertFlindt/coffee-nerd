@@ -474,7 +474,7 @@ export const INSIGHTS: readonly InsightDefinition[] = [
   consistentBeans
 ];
 
-/** Every card, in the order of the registry above, from the owner's shot facts. */
+/** Every card, in the order of the registry above, from the account's shot facts. */
 export function evaluateInsights(
   facts: readonly ShotFact[],
   dimensions: DimensionContext,

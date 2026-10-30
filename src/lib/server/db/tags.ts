@@ -1,5 +1,5 @@
 // Library › Tags: your flavor notes by family, with the duplicate finder. Every query is
-// scoped by the owner. A note shots used is archived, not deleted.
+// scoped to the signed-in account. A note shots used is archived, not deleted.
 import { and, asc, count, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { duplicatePairs, FAMILIES, keptKey, type Family } from '../../domain/tags';
 import type { Db, Queryable } from './client';

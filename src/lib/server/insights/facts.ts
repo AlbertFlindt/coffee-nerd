@@ -1,4 +1,4 @@
-// Shot facts (docs/SPEC.md §5): the `shot_facts` view read for one owner, with what needs the user's
+// Shot facts (docs/SPEC.md §5): the `shot_facts` view read for one account, with what needs the user's
 // time zone or the units module added: the ratio, the local day, the week and the roast age.
 import { and, asc, eq, getViewSelectedFields, gte, lt, type SQL } from 'drizzle-orm';
 import { localDate, ratio, roastAgeDays } from '../../domain/bean';
@@ -58,14 +58,14 @@ export type FactFilters = {
   to?: number;
 };
 
-/** The owner's shots as facts, oldest first. Another owner's shots never appear. */
+/** The account's shots as facts, oldest first. Another account's shots never appear. */
 export function loadShotFacts(
   db: Queryable,
   ownerId: string,
   timeZone: string,
   filters: FactFilters = {}
 ): ShotFact[] {
-  // The owner is the filter, not a fact.
+  // The account is the filter, not a fact.
   const { ownerId: owner, ...columns } = getViewSelectedFields(shotFacts);
   const where: SQL[] = [eq(owner, ownerId)];
   if (filters.beanId !== undefined) where.push(eq(shotFacts.beanId, filters.beanId));

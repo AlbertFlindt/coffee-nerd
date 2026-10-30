@@ -1,5 +1,5 @@
 // Library › Puck prep: your routines and the steps they are built from. Every query is scoped
-// by the owner. A step a shot used keeps what its recorded values mean; a step in a routine
+// to the signed-in account. A step a shot used keeps what its recorded values mean; a step in a routine
 // stays.
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {

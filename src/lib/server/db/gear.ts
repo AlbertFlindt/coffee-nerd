@@ -1,5 +1,5 @@
 // Gear: the Gear page, the gear pages, archiving, and the Library summaries.
-// Every query is scoped by the owner.
+// Every query is scoped to the signed-in account.
 import { and, asc, count, desc, eq, isNull } from 'drizzle-orm';
 import { roastAgeDays } from '../../domain/bean';
 import {

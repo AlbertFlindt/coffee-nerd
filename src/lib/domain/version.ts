@@ -1,4 +1,4 @@
-// The version line in Settings: when the app on the phone was built, so the owner can tell
+// The version line in Settings: when the app on the phone was built, so you can tell
 // whether the phone has taken the newest version.
 
 /** "Version of 26 October 2026, 13:19" from the build's version (the time it was built, in milliseconds). */

@@ -1,6 +1,6 @@
 // Everything the shot form needs (docs/SPEC.md §4.1, §4.2): the prefill, the bean's recipes for matching in
 // the browser, the bean's last shot for deltas, and the choices its pickers offer. Every query
-// is scoped by the owner.
+// is scoped to the signed-in account.
 import { and, asc, desc, eq, inArray, isNull, lt, or, sql, type SQL } from 'drizzle-orm';
 import { roastAgeDays } from '../../domain/bean';
 import { bestRecipe } from '../../domain/best-recipe';

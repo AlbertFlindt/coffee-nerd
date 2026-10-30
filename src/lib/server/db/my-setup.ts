@@ -1,5 +1,5 @@
 // Edit My setup (screen 13): the form's current values and choices, and saving them. My setup is the
-// only place the default gear is chosen. Every chosen id must be one of this owner's items that is
+// only place the default gear is chosen. Every chosen id must be one of this account's items that is
 // not archived; anything else is refused and nothing is saved.
 import { and, asc, eq, isNotNull, isNull, ne } from 'drizzle-orm';
 import { z } from 'zod';

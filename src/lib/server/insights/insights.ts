@@ -1,4 +1,4 @@
-// The Insights page (screens 23–25): the data basis for the header and every card, for one owner.
+// The Insights page (screens 23–25): the data basis for the header and every card, for one account.
 import { eq } from 'drizzle-orm';
 import { localDate } from '../../domain/bean';
 import { recipeTitle } from '../../domain/bean-detail';

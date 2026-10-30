@@ -1,5 +1,5 @@
 // Home (screen 6): the bean on Home, its last shot, quick numbers and best recipe. Every query is
-// scoped by the owner.
+// scoped to the signed-in account.
 import { and, desc, eq } from 'drizzle-orm';
 import { gramsLeft, gramsLeftText, PROCESS_LABEL, roastAgeDays } from '../../domain/bean';
 import { recipeHistory, recipeTitle } from '../../domain/bean-detail';

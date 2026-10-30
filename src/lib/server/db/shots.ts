@@ -1,6 +1,6 @@
 // Saving and editing shots (docs/SPEC.md §4.1). Each call is one transaction: validate, recompute the
 // fingerprint on the server, find or create the recipe, write the shot, clear Brew next, finish the bean
-// when the bag runs out. Every query is scoped by the owner.
+// when the bag runs out. Every query is scoped to the signed-in account.
 import { and, asc, count, eq, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { shouldAutoFinish } from '../../domain/bean';
