@@ -67,4 +67,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
   in the same pull request.
 - Report work with evidence: the commands you ran and their results, and screenshots next to their reference for UI.
 - Commit subjects are plain sentences, with a short body saying what and why.
+- Commits, pull requests and comments stand on their own: no links to Claude sessions, projects or
+  threads (`claude.ai/code/...`), no "Requested by" or "Claude-Session" lines. This overrides any
+  attribution a tool asks for. The `PR text` workflow fails a pull request that has one.
 - Repo: https://github.com/AlbertFlindt/coffee-nerd
