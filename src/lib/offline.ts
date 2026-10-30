@@ -59,3 +59,10 @@ export function waitsOffline(url: URL): boolean {
   if (url.search === '?/rate') return url.pathname === '/' || url.pathname === '/journal';
   return false;
 }
+
+/** The files Settings hands out (D-251, D-252): they change nothing, so the kept pages need no refresh. */
+export function isDownload(url: URL): boolean {
+  return ['/settings/backup', '/settings/export-shots', '/settings/export-everything'].includes(
+    url.pathname
+  );
+}

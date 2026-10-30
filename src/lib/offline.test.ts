@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   dataUrl,
+  isDownload,
   isKeptPage,
   pageKey,
   pagePath,
@@ -74,5 +75,16 @@ describe('waitsOffline', () => {
     expect(waits('/journal/0199/edit?/delete')).toBe(false);
     expect(waits('/library/beans/new?/save')).toBe(false);
     expect(waits('/logout')).toBe(false);
+  });
+});
+
+describe('isDownload', () => {
+  it('D-251, D-252: the backup and the exports are downloads, which need a connection and change nothing', () => {
+    const at = (path: string) => new URL(path, 'https://cn.example');
+    expect(isDownload(at('/settings/backup'))).toBe(true);
+    expect(isDownload(at('/settings/export-shots'))).toBe(true);
+    expect(isDownload(at('/settings/export-everything'))).toBe(true);
+    expect(isDownload(at('/settings?/steps'))).toBe(false);
+    expect(waitsOffline(at('/settings/backup'))).toBe(false);
   });
 });

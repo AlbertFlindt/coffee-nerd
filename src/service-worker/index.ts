@@ -5,6 +5,7 @@ import { assets, immutable } from '$app/manifest';
 import { self as sw } from '$app/service-worker';
 import {
   dataUrl,
+  isDownload,
   isKeptPage,
   NO_CHANGE_ACTION_DATA,
   OFFLINE_COPY_HEADER,
@@ -243,7 +244,7 @@ async function change(event: FetchEvent, url: URL): Promise<Response> {
     reached(true);
     if (url.pathname === '/logout') await forget();
     // The kept pages follow the change at once, also when the page does not move (a score given).
-    else event.waitUntil(keep(true).catch(() => {}));
+    else if (!isDownload(url)) event.waitUntil(keep(true).catch(() => {}));
     return response;
   } catch (failure) {
     reached(false);
