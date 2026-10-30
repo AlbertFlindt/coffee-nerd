@@ -1,6 +1,6 @@
 # Progress / handoff
 
-**Last updated:** 2026-10-30. **Latest release:** 1.1.1 (details in `CHANGELOG.md`).
+**Last updated:** 2026-10-30. **Latest release:** 1.2.1 (details in `CHANGELOG.md`).
 How things work: `docs/SPEC.md`.
 
 ## Current state
@@ -45,7 +45,8 @@ request template.
   (2026-10-30): the logo above the name and tagline, a show/hide button on password fields, one
   caption under the button. `docs/screens/` doesn't draw them yet.
 - Home: the Last shot card without the values not entered, empty states, the Dial-in progress
-  graph's captions, grid and short-history states.
+  graph's captions, grid and short-history states, and the chevron in a point's tooltip: tapping
+  the highlighted point again opens that shot, whose Back returns to Home.
 - Confirmations as dialogs in the middle of the screen with the red delete choice; the screens
   still draw bottom sheets.
 - The "Shot saved" bar, and the messages when a shot or a score could not be saved.

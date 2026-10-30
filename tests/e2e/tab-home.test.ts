@@ -108,6 +108,16 @@ test('with more rated shots, recipe changes are marked on the graph', async () =
     await expect(graph.getByText(`Score ${score}`, { exact: true })).toBeVisible();
     await expectNoPageScroll();
     await screenshot('HomeDialIn');
+    // Tapping it again opens that shot, and its Back returns to Home.
+    const last = sql<{ id: string }>(
+      `select s.id from shot s join recipe r on r.id = s.recipe_id join bean b on b.id = r.bean_id
+       where b.name = 'Guji Hambela' and s.score is not null
+       order by s.brewed_at desc, s.id desc limit 1`
+    );
+    await graph.getByRole('button', { name: /, tap again to open it$/ }).click();
+    await expect(page).toHaveURL(new RegExp(`/journal/${last.id}\\?from=home$`));
+    await page.getByRole('link', { name: 'Back to Home' }).click();
+    await expect(page.getByRole('region', { name: 'Dial-in progress' })).toBeVisible();
   } finally {
     for (const { id } of unrated) sql('update shot set score = null where id = ?', id);
   }

@@ -118,7 +118,12 @@ describe('lastShotValues', () => {
 });
 
 describe('dialInProgress', () => {
-  const shot = (score: number | null, recipeId = 'a') => ({ score, recipeId });
+  let n = 0;
+  const shot = (score: number | null, recipeId = 'a') => ({
+    shotId: `shot-${++n}`,
+    score,
+    recipeId
+  });
 
   it('the last 12 rated shots, oldest first; unrated shots are left out, never 0', () => {
     const newestFirst = [
@@ -140,6 +145,15 @@ describe('dialInProgress', () => {
   it('compared with the shot drawn before it, so an unrated shot of another recipe in between marks nothing', () => {
     const graph = dialInProgress([shot(8, 'a'), shot(null, 'b'), shot(6, 'a')])!;
     expect(graph.points.map((p) => p.newRecipe)).toEqual([false, false]);
+  });
+
+  it('each point knows its shot, so tapping it can open that shot', () => {
+    const newestFirst = [shot(8), shot(null), shot(6)];
+    const graph = dialInProgress(newestFirst)!;
+    expect(graph.points.map((p) => p.shotId)).toEqual([
+      newestFirst[2].shotId,
+      newestFirst[0].shotId
+    ]);
   });
 
   it('fewer than 2 rated shots give no graph', () => {

@@ -2,13 +2,19 @@
 
 All notable changes to Coffee Nerd. Each version is a tag and a GitHub release.
 
-## 1.1.1 (2026-10-30)
+## 1.2.1 (2026-10-30)
 
 ### Fixed
 - **Leaving a sheet:** the phone's back gesture closes an open sheet or confirmation instead of
   leaving the page, so it no longer throws away the shot you are logging. From a list inside the
   Setup sheet (Basket, Puck prep) it goes back to Setup first. A sheet also closes when you swipe
   it down anywhere, not only by its handle, as long as its content is scrolled to the top.
+
+## 1.2.0 (2026-10-30)
+
+### Added
+- **Home:** on the score per shot graph, tapping the highlighted point again opens that shot. Its
+  Back returns to Home.
 
 ## 1.1.0 (2026-10-30)
 
