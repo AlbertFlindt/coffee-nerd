@@ -1,0 +1,37 @@
+name: PR text
+
+# Commits and pull requests stand on their own: no links to Claude sessions, projects or threads.
+# Runs again when the description is edited, without the full CI.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    name: No Claude session links
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check the description and the commit messages
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BODY: ${{ github.event.pull_request.body }}
+          BASE: origin/${{ github.base_ref }}
+        run: |
+          pattern='claude\.ai/code|claude-projects-attribution|Claude-Session:|Requested by \*\*'
+          failed=0
+          if printf '%s\n%s\n' "$TITLE" "$BODY" | grep -Ein "$pattern"; then
+            echo "::error::The pull request description links to a Claude session or project. Remove it."
+            failed=1
+          fi
+          if git log --format='%h %B' "$BASE"..HEAD | grep -Ei "$pattern"; then
+            echo "::error::A commit message links to a Claude session or project. Reword the commit."
+            failed=1
+          fi
+          exit $failed
