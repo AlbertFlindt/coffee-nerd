@@ -95,10 +95,10 @@ export const featureDefinitionSchema = z
       const rule = BUILT_IN_RULES[f.key] ?? CUSTOM_RULE;
       return f.switchable === rule.switchable && rule.kinds.includes(f.value.kind);
     },
-    { message: 'This feature has a fixed kind of value and off switch (data-model §3)' }
+    { message: 'This feature has a fixed kind of value and off switch' }
   )
   .refine((f) => f.value.kind !== 'choice' || f.value.options.length >= 2, {
-    message: 'A list needs at least two options (D-152)',
+    message: 'A list needs at least two options',
     path: ['value', 'options']
   });
 export type FeatureDefinition = z.infer<typeof featureDefinitionSchema>;
@@ -170,7 +170,7 @@ export const prepStepSettingSchema = z
   ])
   .refine((s) => !('min' in s) || rangeIsOrdered(s), RANGE_MESSAGE)
   .refine((s) => s.kind !== 'choice' || s.options.length >= 2, {
-    message: 'A list needs at least two options (D-52, D-152)',
+    message: 'A list needs at least two options',
     path: ['options']
   })
   .refine(

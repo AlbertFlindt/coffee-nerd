@@ -263,7 +263,7 @@ describe('saveShot', () => {
     });
   });
 
-  it('Undo does not reopen a bean that was finished by hand, or another owner’s', () => {
+  it('Undo does not reopen a bean that was finished by hand, or another account’s', () => {
     db.update(bean)
       .set({ status: 'finished', finishedAt: T0 })
       .where(eq(bean.id, ids.beanId))
@@ -351,7 +351,7 @@ describe('saveShot', () => {
     );
   });
 
-  it('another owner’s bean, gear or tags cannot be used, and their rows stay untouched', () => {
+  it('another account’s bean, gear or tags cannot be used, and their rows stay untouched', () => {
     const other = seedOtherAccount();
     expect(() => save(input({ beanId: other.beanId }))).toThrow(/bean/);
     expect(() => save(input({ machineId: other.machineId }))).toThrow(/machine/);
@@ -510,7 +510,7 @@ describe('editShot', () => {
     expect(db.select().from(recipe).where(eq(recipe.id, recipeId)).get()).toBeUndefined();
   });
 
-  it('a shot of another owner cannot be edited', () => {
+  it('a shot of another account cannot be edited', () => {
     const { shotId } = save(input({}, 1));
     const other = seedOtherAccount();
     expect(() => editShot(db, other.userId, shotId, input({}, 1), T0)).toThrow(/shot/);

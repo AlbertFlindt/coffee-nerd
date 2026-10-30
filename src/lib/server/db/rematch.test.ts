@@ -154,7 +154,7 @@ describe('migration 0007 and the merge, on a database from before doses were mat
 });
 
 describe('rematchRecipesByDose, more cases', () => {
-  it('owners are matched apart', () => {
+  it('accounts are matched apart', () => {
     const other = newId(T0);
     db.$client
       .prepare(

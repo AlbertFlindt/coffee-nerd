@@ -164,7 +164,7 @@ describe('saveTag', () => {
     expect(named('BERRY').id).toBe(berry);
   });
 
-  it('is scoped by owner', () => {
+  it('is scoped to the account', () => {
     expect(
       saveTag(db, 'someone-else', named('Berry').id, { name: 'X', family: 'fruity' }, T0)
     ).toBe(false);
@@ -242,7 +242,7 @@ describe('removeTag', () => {
   });
 });
 
-describe('owner scoping', () => {
+describe('account scoping', () => {
   it('another account sees none of your notes and cannot remove or merge them', () => {
     const berry = named('Berry').id;
     expect(loadTags(db, 'someone-else').total).toBe(0);
