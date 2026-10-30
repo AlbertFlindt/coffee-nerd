@@ -1,4 +1,4 @@
-// Statistics for Insights and shot detail (D-56, D-57), on plain numbers (convert from thousandths first).
+// Statistics for Insights and shot detail, on plain numbers (convert from thousandths first).
 // Conventions:
 // - σ is the sample standard deviation, divided by n − 1.
 // - Quantiles use linear interpolation between order statistics: the "R-7" method, R's default and
@@ -121,7 +121,7 @@ export function normalCurve(
   });
 }
 
-/** How many σ `value` lies from the mean of `values` (negative = below). Null without a spread (D-57). */
+/** How many σ `value` lies from the mean of `values` (negative = below). Null without a spread. */
 export function sigmaDistance(value: number, values: readonly number[]): number | null {
   const sigma = standardDeviation(values);
   if (sigma === null || sigma === 0) return null;
@@ -130,7 +130,7 @@ export function sigmaDistance(value: number, values: readonly number[]): number 
 
 /**
  * σ within groups, pooled: √(Σ (nᵢ − 1)·sᵢ² / Σ (nᵢ − 1)). Used to compare fairly while holding something
- * constant (D-55). Groups with fewer than two values add nothing.
+ * constant. Groups with fewer than two values add nothing.
  */
 export function pooledStandardDeviation(groups: readonly (readonly number[])[]): number | null {
   let sumSquares = 0;

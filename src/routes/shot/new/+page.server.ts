@@ -10,9 +10,9 @@ import { bean } from '#lib/server/db/schema.ts';
 import { and, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 
-// New shot (screens 1–5 and 11): "+" opens it prefilled (D-03, D-31); ?bean= picks another open bean (D-94).
-// With nothing to brew with yet, "+" resumes the step-by-step start at the first missing step (D-157).
-// ?from=journal when "+" was pressed on the Journal: Back and Save return there (D-95, D-200).
+// New shot (screens 1–5 and 11): "+" opens it prefilled; ?bean= picks another open bean.
+// With nothing to brew with yet, "+" resumes the step-by-step start at the first missing step.
+// ?from=journal when "+" was pressed on the Journal: Back and Save return there.
 const NOT_SAVED = 'The shot could not be saved. Nothing was changed.';
 
 export const load: PageServerLoad = ({ locals, url, cookies }) => {
@@ -21,7 +21,7 @@ export const load: PageServerLoad = ({ locals, url, cookies }) => {
   const form = loadShotForm(db, locals.user.id, url.searchParams.get('bean') ?? undefined);
   if (form.state === 'empty') redirect(303, guideNext(db, locals.user.id));
   return {
-    // D-61, D-225: whose shots wait on the phone.
+    // Whose shots wait on the phone.
     userId: locals.user.id,
     form,
     origin: { from: originOf(url.searchParams.get('from')), filters: journalFilters(cookies) }
@@ -44,7 +44,7 @@ export const actions: Actions = {
     const db = getDb();
     const now = Date.now();
     try {
-      // The server recomputes the fingerprint and finds or creates the recipe (data-model §4.1).
+      // The server recomputes the fingerprint and finds or creates the recipe (docs/SPEC.md §4.1).
       const result = saveShot(db, locals.user.id, { ...parsed.data, brewedAt: now }, now);
       if (result.autoFinished) {
         const finished = db
@@ -60,17 +60,17 @@ export const actions: Actions = {
       } else setFlash(cookies, request, { kind: 'saved' });
     } catch (e) {
       if (e instanceof ShotRejected) {
-        // The details are for the server log; the form says it in plain words (D-20).
+        // The details are for the server log; the form says it in plain words.
         console.error('Shot rejected:', e.problems.join('; '));
         return fail(400, { problems: [NOT_SAVED] });
       }
       throw e;
     }
-    // D-95, D-200: back to where "+" was pressed, which shows the "Shot saved" bar.
+    // Back to where "+" was pressed, which shows the "Shot saved" bar.
     redirect(303, originPath(originOf(String(data.get('from') ?? '')), cookies));
   },
 
-  // D-43: "Use last shot recipe" clears the mark; the form starts from the last shot again.
+  // "Use last shot recipe" clears the mark; the form starts from the last shot again.
   useLastShot: async ({ locals, request }) => {
     if (!locals.user) error(401);
     const from = originOf(String((await request.formData()).get('from') ?? ''));

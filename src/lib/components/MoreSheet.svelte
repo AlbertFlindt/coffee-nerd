@@ -1,8 +1,8 @@
 <script lang="ts">
-  // The Setup or the Tasting sheet, each opened by its own button on the shot form (D-21, D-189). Setup:
-  // temperature, pressure profile, basket, puck prep (D-22, D-24, D-25), changes since the last shot in
-  // sage (D-90). Tasting: balance, body, sweetness, aftertaste (D-190), flavor notes that fold away
-  // (D-191) and notes (D-23, D-27, D-97, D-101); all start empty (D-11). Tasting scrolls as a whole.
+  // The Setup or the Tasting sheet, each opened by its own button on the shot form. Setup:
+  // temperature, pressure profile, basket, puck prep, changes since the last shot in
+  // sage. Tasting: balance, body, sweetness, aftertaste, flavor notes that fold away
+  // and notes; all start empty. Tasting scrolls as a whole.
   import BottomSheet from './BottomSheet.svelte';
   import ChoiceRow from './ChoiceRow.svelte';
   import PickRow from './PickRow.svelte';
@@ -31,19 +31,19 @@
     baskets: { id: string; name: string }[];
     routines: { id: string; name: string; routine: RoutineNow }[];
     gearNames: Record<string, string>;
-    /** Each puck prep step's setting, for changing a step's value for this shot (D-166). */
+    /** Each puck prep step's setting, for changing a step's value for this shot. */
     stepSettings: Record<string, PrepStepSetting>;
     tags: { id: string; name: string }[];
     changes: SetupChanges;
     onclose: () => void;
   } = $props();
 
-  /** A view inside the Setup tab: a picker, or the routine's steps with their values (D-166). */
+  /** A view inside the Setup tab: a picker, or the routine's steps with their values. */
   let picking: 'basket' | 'routine' | 'prep' | null = $state(null);
   let adding = $state(false);
   let newName = $state('');
 
-  // D-191: whether Flavor notes is folded is remembered on this phone. Storage can be missing or blocked
+  // Whether Flavor notes is folded is remembered on this phone. Storage can be missing or blocked
   // (a private window): it then starts open and is simply not remembered.
   const FOLDED_KEY = 'coffee-nerd:flavor-notes-folded';
   // The sheet only opens after a tap in the browser, so storage is read at once and it never jumps.
@@ -98,7 +98,7 @@
     };
   }
 
-  /** What the basket or puck prep picker offers; each starts with leaving it out (D-155). */
+  /** What the basket or puck prep picker offers; each starts with leaving it out. */
   const choices = $derived(
     picking === 'basket'
       ? [
@@ -130,7 +130,7 @@
             name: r.name,
             chosen: shot.routineId === r.id,
             pick: () => {
-              // D-76: a routine is used as it is now.
+              // A routine is used as it is now.
               shot.routineId = r.id;
               shot.setup.routine = structuredClone(r.routine);
             }
@@ -138,7 +138,7 @@
         ]
   );
 
-  /** D-166: a step's value for this shot only; a change turns sage like any other (D-90). */
+  /** A step's value for this shot only; a change turns sage like any other. */
   function setStep(index: number, value: number | string) {
     const routine = shot.setup.routine;
     if (!routine) return;
@@ -259,7 +259,7 @@
               chosen={item.chosen}
               onclick={() => {
                 item.pick();
-                // From the puck prep view, a chosen routine shows its steps again (D-166).
+                // From the puck prep view, a chosen routine shows its steps again.
                 picking = picking === 'routine' && shot.setup.routine ? 'prep' : null;
               }}
             />
@@ -271,7 +271,7 @@
           </p>
         {/if}
         <!-- Screen 28: the list ends with a way back to Setup, at the foot of the sheet (the routine
-             list too, which screen 28 does not draw; docs/open-items.md). -->
+             list too, which screen 28 does not draw). -->
         <div class="spacer"></div>
         <button type="button" class="cn-btn-quiet cn-tap" onclick={() => (picking = null)}
           >Back to Setup</button
@@ -425,7 +425,7 @@
               >
             {/each}
           </div>
-          <!-- Outside the scrolling chips, so it is always in reach (D-97, D-101). -->
+          <!-- Outside the scrolling chips, so it is always in reach. -->
           <div class="add">
             {#if adding}
               <!-- svelte-ignore a11y_autofocus -->
@@ -592,7 +592,7 @@
 
   .tasting {
     gap: var(--space-4);
-    /* D-191: the whole sheet scrolls when it does not fit, so the flavor notes get their room. */
+    /* The whole sheet scrolls when it does not fit, so the flavor notes get their room. */
     overflow-y: auto;
     --taste-rail: var(--bg);
     --taste-behind: var(--surface-sheet);
@@ -695,7 +695,7 @@
     color: var(--ink-muted);
   }
 
-  /* D-36: tighter on shorter screens. */
+  /* Tighter on shorter screens. */
   @media (max-height: 880px) {
     .tasting,
     .sliders {

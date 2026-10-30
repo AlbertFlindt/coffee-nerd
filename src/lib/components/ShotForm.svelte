@@ -1,15 +1,15 @@
 <script lang="ts">
-  // The shot form (D-14): bean card, the four core values, ratio, score, Setup and Tasting side by side
-  // (D-189, D-190), Save. The recipe tag, deltas and earlier score are worked out in the browser on every
-  // change (data-model §4.1).
-  // With `data.edit` it edits a saved shot (D-57, D-113): "Save changes", back to the shot, and the bean
+  // The shot form: bean card, the four core values, ratio, score, Setup and Tasting side by side,
+  // Save. The recipe tag, deltas and earlier score are worked out in the browser on every
+  // change (docs/SPEC.md §4.1).
+  // With `data.edit` it edits a saved shot: "Save changes", back to the shot, and the bean
   // card moves the shot to another bean while keeping the values.
   // `origin` is where "+" was pressed, or for an edit whether the shot was opened from Home: Back and
-  // Save return there (D-95, D-197, D-200).
-  // With `waiting` it changes a shot still on the phone (D-224, D-231): Save keeps it waiting with the
-  // change, Delete removes it from the phone, and "Discard change" drops a waiting edit (D-238). With
-  // `pending`, the edit page starts from the change waiting for the shot (D-239). Without a connection, Save keeps the shot or the edit on the
-  // phone and returns as online (D-61, D-232).
+  // Save return there.
+  // With `waiting` it changes a shot still on the phone: Save keeps it waiting with the
+  // change, Delete removes it from the phone, and "Discard change" drops a waiting edit. With
+  // `pending`, the edit page starts from the change waiting for the shot. Without a connection, Save keeps the shot or the edit on the
+  // phone and returns as online.
   import { enhance } from '$app/forms';
   import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
   import { resolve } from '$app/paths';
@@ -66,7 +66,7 @@
   const NOT_SAVED_WAITING =
     'Not saved: the server did not take this shot. Change it and save again, or delete it.';
 
-  /** "Natural · 12 days" after a bean's name in the bean list (D-134). */
+  /** "Natural · 12 days" after a bean's name in the bean list. */
   function beanDetail(b: ShotFormData['openBeans'][number]): string {
     const age = `${b.roastAgeDays} ${b.roastAgeDays === 1 ? 'day' : 'days'}`;
     return b.process ? `${PROCESS_LABEL[b.process]} · ${age}` : age;
@@ -77,7 +77,7 @@
     return startWithPending(saved(), data.edit ? pending : null);
   }
 
-  // D-226: what is being entered is kept on the phone as a draft, for this form: a new shot from its
+  // What is being entered is kept on the phone as a draft, for this form: a new shot from its
   // bean and prefill, or one shot's own form.
   function draftOf() {
     return {
@@ -91,9 +91,9 @@
     return ownerId ? openDraft(ownerId, form, basis, start) : null;
   }
   let draftEnded = false;
-  // Another bean while editing stays in the same form, with its draft (D-113).
+  // Another bean while editing stays in the same form, with its draft.
   let switchingBean = false;
-  // D-226: leaving the form ends the draft, also with the phone's own back gesture; closing the app or
+  // Leaving the form ends the draft, also with the phone's own back gesture; closing the app or
   // reloading keeps it.
   beforeNavigate(({ type }) => {
     if (type !== 'leave' && !switchingBean) endDraft();
@@ -105,7 +105,7 @@
     const { ownerId, form, basis } = draftOf();
     if (ownerId) saveDraft(ownerId, form, basis, $state.snapshot(shot), start);
   });
-  /** Save and Back end the draft (D-226). */
+  /** Save and Back end the draft. */
   function endDraft() {
     draftEnded = true;
     const { ownerId, form } = draftOf();
@@ -116,7 +116,7 @@
     const p = data.prefill;
     const edit = data.edit;
     return {
-      // D-61: the id is made here, so sending the same shot twice saves it once.
+      // The id is made here, so sending the same shot twice saves it once.
       id: edit?.shotId ?? v7(),
       beanId: p.beanId,
       machineId: p.machineId,
@@ -144,10 +144,10 @@
     const { ownerId, form, basis } = draftOf();
     if (ownerId && !draftEnded) saveDraft(ownerId, form, basis, now, start);
   });
-  // D-224, D-237: a change the server did not take says so, with the server's reasons.
+  // A change the server did not take says so, with the server's reasons.
   const refused = $derived([waiting, pending].find((e) => e?.status === 'refused') ?? null);
   const notSaved = $derived(refused ? [NOT_SAVED_WAITING, ...(refused.problems ?? [])] : []);
-  // D-238: a change to a saved shot that waits or was not saved can be dropped from the phone.
+  // A change to a saved shot that waits or was not saved can be dropped from the phone.
   const discardable = $derived(waiting?.kind === 'edit' ? waiting : data.edit ? pending : null);
   const back = $derived(
     data.edit
@@ -161,14 +161,14 @@
         : resolve('/')
   );
 
-  // D-113: in edit mode another bean keeps the values; the page loads that bean's recipes to compare with.
+  // In edit mode another bean keeps the values; the page loads that bean's recipes to compare with.
   $effect(() => {
     if (data.edit || waiting) shot.beanId = data.bean.id;
   });
   function chooseBeanForEdit(beanId: string) {
     sheet = null;
     switchingBean = true;
-    // The draft goes with the new bean: a waiting shot's form opens again for it (D-113, D-226).
+    // The draft goes with the new bean: a waiting shot's form opens again for it.
     const { ownerId, form, basis } = draftOf();
     if (ownerId) saveDraft(ownerId, form, basis, { ...$state.snapshot(shot), beanId }, start);
     if (waiting) {
@@ -208,7 +208,7 @@
       last
         ? {
             grind: last.recipe.grind,
-            // D-186: compared with the dose the last shot was brewed with.
+            // Compared with the dose the last shot was brewed with.
             dose: last.dose ?? last.recipe.dose,
             yield: last.yield,
             time: last.time
@@ -218,7 +218,7 @@
   );
   const setup = $derived(setupChanges(identity, last?.recipe ?? null));
 
-  /** What the Journal and Home show of the shot while it waits on the phone (D-221). */
+  /** What the Journal and Home show of the shot while it waits on the phone. */
   function waitingShow(): WaitingShow {
     return {
       beanName: data.bean.name,
@@ -233,7 +233,7 @@
   }
   const ratio = $derived(formatRatio(shot.yield, shot.dose));
   const lastRatio = $derived(last ? formatRatio(last.yield, last.dose ?? last.recipe.dose) : null);
-  // D-153: the machine and grinder can be switched for this shot; features and grind control follow.
+  // The machine and grinder can be switched for this shot; features and grind control follow.
   const machine = $derived(data.machines.find((m) => m.id === shot.machineId) ?? data.machines[0]);
   const grinder = $derived(data.grinders.find((g) => g.id === shot.grinderId) ?? data.grinders[0]);
   const dial = $derived(grinder.dial);
@@ -243,7 +243,7 @@
     if (id === shot.machineId) return;
     const next = data.machines.find((m) => m.id === id)!;
     shot.machineId = id;
-    // Values both machines share stay; new features start from My setup (data-model §4.2).
+    // Values both machines share stay; new features start from My setup (docs/SPEC.md §4.2).
     shot.setup.features = reconcileFeatures(next, shot.setup.features, data.defaultFeatures);
   }
 
@@ -252,7 +252,7 @@
     shot.grinderId = id;
   }
 
-  // D-154: a gentle hint while the dose is outside the basket's dose range; it never blocks saving.
+  // A gentle hint while the dose is outside the basket's dose range; it never blocks saving.
   const basket = $derived(data.baskets.find((b) => b.id === shot.basketId));
   const doseHint = $derived.by(() => {
     const range = basket?.doseRange;
@@ -263,7 +263,7 @@
     Math.max(at_least, value === null ? 0 : decimalsFor(value, step));
 
   onMount(() => {
-    // A shot's draft made with another bean opens with that bean again (D-113, D-226).
+    // A shot's draft made with another bean opens with that bean again.
     if (
       draft &&
       (data.edit || waiting) &&
@@ -271,7 +271,7 @@
       data.openBeans.some((b) => b.id === draft.beanId)
     )
       chooseBeanForEdit(draft.beanId);
-    // Context of use: the screen stays awake while brewing (decision log §2).
+    // Context of use: the screen stays awake while brewing.
     let lock: WakeLockSentinel | null = null;
     const keepAwake = async () => {
       try {
@@ -290,14 +290,14 @@
   });
 
   function check(): boolean {
-    // A switched-on feature needs its value (D-78); everything else may stay empty (D-11, D-91).
+    // A switched-on feature needs its value; everything else may stay empty.
     const spec = { type: 'semi_auto' as const, features: machine.features };
     localProblems = validateSetupAgainstMachine(shot.setup, spec)
       .filter((p) => p.problem === 'value_missing' || p.problem === 'pressure_missing')
       .map(
         (p) => `Set ${p.problem === 'pressure_missing' ? 'the pressure for ' : ''}${p.label} first.`
       );
-    // D-153: after switching the grinder, the grind may be outside its range (as Edit My setup says).
+    // After switching the grinder, the grind may be outside its range (as Edit My setup says).
     if (
       shot.grind < Math.min(dial.finest, dial.coarsest) ||
       shot.grind > Math.max(dial.finest, dial.coarsest)
@@ -397,7 +397,7 @@
       </div>
       {#if doseHint}<p class="dose-hint">{doseHint}</p>{/if}
 
-      <!-- D-190: balance lives in the Tasting sheet; the form keeps the score. -->
+      <!-- Balance lives in the Tasting sheet; the form keeps the score. -->
       <section class="taste" aria-label="Taste">
         <ScoreRow
           value={shot.taste.score}
@@ -406,7 +406,7 @@
         />
       </section>
 
-      <!-- D-189: Setup and Tasting side by side, each opening its own sheet. -->
+      <!-- Setup and Tasting side by side, each opening its own sheet. -->
       <div class="sheets">
         {#each [['setup', 'Setup'], ['tasting', 'Tasting']] as const as [key, label] (key)}
           <button
@@ -452,7 +452,7 @@
       >
         <h2 class="sheet-title">Open beans</h2>
         {#if data.edit || waiting}
-          <!-- D-113, D-231: editing, another bean keeps the values entered. -->
+          <!-- Editing, another bean keeps the values entered. -->
           <div class="beans">
             {#each data.openBeans as b (b.id)}
               <button
@@ -466,7 +466,7 @@
             {/each}
           </div>
         {:else}
-          <!-- D-94: picking a bean opens the form for it, from its own starting values. -->
+          <!-- Picking a bean opens the form for it, from its own starting values. -->
           <form class="beans" method="GET" action={resolve('/shot/new')}>
             {#if origin.from === 'journal'}<input type="hidden" name="from" value="journal" />{/if}
             {#each data.openBeans as b (b.id)}
@@ -485,7 +485,7 @@
         {/if}
       </BottomSheet>
     {:else if sheet === 'gear'}
-      <!-- D-153: another machine or grinder for this shot (screen 27). -->
+      <!-- Another machine or grinder for this shot (screen 27). -->
       <BottomSheet
         short
         label="Choose machine and grinder"
@@ -514,7 +514,7 @@
         </div>
       </BottomSheet>
     {:else if sheet === 'delete'}
-      <!-- D-116, D-241: deleting asks first, in a dialog built ahead of the canvas (docs/open-items.md). -->
+      <!-- Deleting asks first, in a dialog built ahead of the canvas. -->
       <ConfirmDialog
         label="Delete this shot"
         closeLabel="Keep the shot"
@@ -532,10 +532,10 @@
           onsubmit={async (event) => {
             deleting = true;
             // A saved shot's delete is sent as a page of its own: its draft stays until signing out, and
-            // its edit page no longer opens (docs/open-items.md). Offline it changes nothing.
+            // its edit page no longer opens. Offline it changes nothing.
             if (!waiting) return;
             endDraft();
-            // D-231: a shot that is only on the phone is removed from it.
+            // A shot that is only on the phone is removed from it.
             event.preventDefault();
             await deleteWaiting(waiting.shotId);
             await goto(back);
@@ -562,11 +562,11 @@
       data-waits
       use:enhance={async ({ cancel }) => {
         if (!check()) return cancel();
-        // D-220: a shot kept on the phone is brewed when Save is pressed.
+        // A shot kept on the phone is brewed when Save is pressed.
         const brewedAt = Date.now();
         const ownerId = page.data.userId;
         if (waiting) {
-          // D-231: a shot still on the phone stays there with the change, and keeps its brew time.
+          // A shot still on the phone stays there with the change, and keeps its brew time.
           cancel();
           if (!ownerId) return;
           saving = true;
@@ -577,13 +577,13 @@
           return;
         }
         saving = true;
-        // D-239: the form holds the change that waited, so it is dropped first, once any send of it is
+        // The form holds the change that waited, so it is dropped first, once any send of it is
         // done; without a connection it waits again with this change, and as it was if refused.
         const dropped = data.edit ? await dropWaiting(shot.id) : null;
         return async ({ result, update }) => {
           if (unreached(result) && ownerId) {
-            // D-61, D-232: no connection, so the shot waits on the phone; the page returns as online.
-            // An edit keeps the shot's brew time, so it is sent in brew order (D-220).
+            // No connection, so the shot waits on the phone; the page returns as online.
+            // An edit keeps the shot's brew time, so it is sent in brew order.
             const kind = data.edit ? ('edit' as const) : ('new' as const);
             const at = data.edit ? data.edit.brewedAt : brewedAt;
             await keepWaiting({ kind, shot, brewedAt: at, show: waitingShow() }, ownerId);
@@ -611,7 +611,7 @@
         >{data.edit || waiting ? 'Save changes' : 'Save shot'}</button
       >
       {#if discardable}
-        <!-- D-238: the shot stays as the server has it; it can be deleted once the change is gone. -->
+        <!-- The shot stays as the server has it; it can be deleted once the change is gone. -->
         <button
           class="cn-btn-quiet delete cn-tap"
           type="button"
@@ -624,7 +624,7 @@
           }}>Discard change</button
         >
       {:else if data.edit || waiting?.kind === 'new'}
-        <!-- D-116: the edit form ends with "Delete shot"; a waiting edit of a saved shot is deleted
+        <!-- The edit form ends with "Delete shot"; a waiting edit of a saved shot is deleted
              on the shot's own page. -->
         <button class="cn-btn-quiet delete cn-tap" type="button" onclick={() => (sheet = 'delete')}
           >Delete shot</button
@@ -642,7 +642,7 @@
 {/snippet}
 
 <style>
-  /* D-116: a quiet action next to Save; it asks before deleting. */
+  /* A quiet action next to Save; it asks before deleting. */
   .delete {
     margin-top: var(--space-1);
   }
@@ -707,7 +707,7 @@
     flex-direction: column;
     gap: var(--space-4);
     padding: 4px var(--space-5) var(--space-4);
-    /* Last resort on very short screens: the form scrolls inside its area, never over Save (D-36). */
+    /* Last resort on very short screens: the form scrolls inside its area, never over Save. */
     overflow-y: auto;
   }
 
@@ -846,7 +846,7 @@
   }
 
   /*
-   * D-36: screens adapt to the device. The reference is 412 × 915; a phone browser with its address bar
+   * Screens adapt to the device. The reference is 412 × 915; a phone browser with its address bar
    * leaves less (a Pixel 8a in Chrome: about 412 × 780), so spacing tightens in two steps.
    */
   @media (max-height: 880px) {

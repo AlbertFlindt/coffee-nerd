@@ -6,7 +6,7 @@
 
   let { data, form }: PageProps = $props();
 
-  // D-239: an edit or a score still waiting on the phone for this shot is where the form starts. It is
+  // An edit or a score still waiting on the phone for this shot is where the form starts. It is
   // read once the phone's shots are, so the form never shows the server's values first.
   const shotId = $derived(data.form.state === 'ready' ? data.form.edit?.shotId : undefined);
   let pending: WaitingEntry | null = $state.raw(null);
@@ -21,7 +21,7 @@
 
 <svelte:head><title>Edit shot · Coffee Nerd</title></svelte:head>
 
-<!-- No key on the bean: switching it while editing keeps the values entered (D-113). -->
+<!-- No key on the bean: switching it while editing keeps the values entered. -->
 {#if ready}
   <ShotForm data={data.form} problems={form?.problems} origin={data.origin} {pending} />
 {/if}

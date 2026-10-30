@@ -1,4 +1,4 @@
-// Shots that waited on the phone (D-61, D-220, D-223, D-224): each change is saved once, however often
+// Shots that waited on the phone: each change is saved once, however often
 // the phone sends it, and a new shot keeps the time it was brewed on the phone.
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
@@ -24,12 +24,12 @@ export const queueRequestSchema = z.discriminatedUnion('kind', [
 
 /**
  * What the phone does with its entry: `saved` (also when it was saved before) and `gone` (the shot was
- * deleted meanwhile) end it; `refused` keeps it as "Not saved" (D-224); `other-account` keeps it waiting
+ * deleted meanwhile) end it; `refused` keeps it as "Not saved"; `other-account` keeps it waiting
  * for its own account.
  */
 export type QueueOutcome = 'saved' | 'gone' | 'refused' | 'other-account';
 
-/** The outcome, with the server's reasons when it refused the change (D-237). */
+/** The outcome, with the server's reasons when it refused the change. */
 export type QueueResult = { outcome: QueueOutcome; problems: string[] };
 
 const done = (outcome: QueueOutcome): QueueResult => ({ outcome, problems: [] });
@@ -48,14 +48,14 @@ export function receiveQueued(db: Db, ownerId: string, body: unknown, now: numbe
       .where(and(eq(shot.id, request.shot.id), eq(shot.ownerId, ownerId)))
       .get();
     if (request.kind === 'new' && !existing) {
-      // D-220: the phone's time at Save; a phone clock ahead of the server never brews in the future.
+      // The phone's time at Save; a phone clock ahead of the server never brews in the future.
       saveShot(db, ownerId, { ...request.shot, brewedAt: Math.min(request.brewedAt, now) }, now);
       return done('saved');
     }
     // A new shot the server already has (its answer was lost, or it was changed on the phone while it
-    // was being sent) is saved as an edit: the latest values win, and it is still one shot (D-61, D-223).
+    // was being sent) is saved as an edit: the latest values win, and it is still one shot.
     if (!existing) return done('gone');
-    // D-113, D-220: an edit keeps the shot's brew time.
+    // An edit keeps the shot's brew time.
     editShot(db, ownerId, request.shot.id, { ...request.shot, brewedAt: existing.brewedAt }, now);
     return done('saved');
   } catch (e) {

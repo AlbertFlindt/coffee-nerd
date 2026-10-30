@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 import { expect, test, type Page } from '@playwright/test';
 import { bestRecipe } from '../../src/lib/domain/best-recipe';
 
-// The Library tab (roadmap M5) on the shots logged by shot-form.test.ts and shot-journal.test.ts, which run
+// The Library tab on the shots logged by shot-form.test.ts and shot-journal.test.ts, which run
 // first (files run in name order, one worker). Each designed screen is saved to screenshots/ for comparing
 // with docs/screens/.
 test.describe.configure({ mode: 'serial' });
@@ -50,7 +50,7 @@ test('Beans: the Library tab opens Library, and Beans is one of its doors', asyn
   await expect(bar.getByRole('link', { name: 'Library' })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('link', { name: 'Back to Library' })).toBeVisible();
 
-  // D-37: open beans as cards with their roast age, origin and numbers (D-132); shot-form.test.ts added
+  // Open beans as cards with their roast age, origin and numbers; shot-form.test.ts added
   // a second open bean.
   const cards = page.getByRole('main').locator('.card');
   await expect(page.getByRole('heading', { name: `Open · ${await cards.count()}` })).toBeVisible();
@@ -59,7 +59,7 @@ test('Beans: the Library tab opens Library, and Beans is one of its doors', asyn
   await expect(card).toContainText('days');
   await expect(card).toContainText('since roast');
   await expect(card).toContainText('Nordlys Roasters · Ethiopia · Natural');
-  // D-132, D-135: dots between the numbers, then grams left (shot-form.test.ts gives the bean a bag weight).
+  // Dots between the numbers, then grams left (shot-form.test.ts gives the bean a bag weight).
   await expect(card.locator('.numbers')).toHaveText(
     /^(Best \d+(\.\d)?|Not rated yet)\s*·\s*Recipes \d+\s*·\s*Shots \d+(\s*·\s*\d+ g left)?\s*$/
   );
@@ -71,7 +71,7 @@ test('Beans: the Library tab opens Library, and Beans is one of its doors', asyn
 test('AddBean: name and roast date are required', async () => {
   await page.getByRole('link', { name: 'Add bean' }).click();
   await expect(page.getByRole('heading', { name: 'Add bean', level: 1 })).toBeVisible();
-  await expect(page.getByText('Not set')).toHaveCount(2); // country and roast date (D-138)
+  await expect(page.getByText('Not set')).toHaveCount(2); // country and roast date
   await page.getByRole('button', { name: 'Add bean' }).click();
   await expect(page.getByRole('alert')).toHaveText(['Name is required', 'Roast date is required']);
   await expectNoPageScroll();
@@ -107,7 +107,7 @@ test('AddBean: "Same as before" fills the form from an earlier bean', async () =
   await page.getByRole('button', { name: /Guji Hambela/ }).click();
   await expect(page.getByText('Same as Guji Hambela')).toBeVisible();
   await expect(page.getByLabel('Name')).toHaveValue('Guji Hambela');
-  // D-139: the × undoes the choice, then it is picked again.
+  // The × undoes the choice, then it is picked again.
   await page.getByRole('link', { name: 'Not a re-buy' }).click();
   await expect(page.getByText('Same as before')).toBeVisible();
   await expect(page.getByLabel('Name')).toHaveValue('');
@@ -120,9 +120,9 @@ test('AddBean: "Same as before" fills the form from an earlier bean', async () =
     'aria-pressed',
     'true'
   );
-  // Roast date and bag weight are new (D-41).
+  // Roast date and bag weight are new.
   await expect(page.getByLabel('Bag weight')).toHaveValue('');
-  // Screen 33, D-139: a refused save keeps the re-buy and what was typed.
+  // Screen 33: a refused save keeps the re-buy and what was typed.
   await page.getByLabel('Region').fill('Guji Hambela');
   await page.getByRole('button', { name: 'Add bean' }).click();
   await expect(page.getByText('Roast date is required')).toBeVisible();
@@ -143,14 +143,14 @@ test('AddBean: "Same as before" fills the form from an earlier bean', async () =
 
 test('the re-buy is added, and its first shot starts from the earlier bag’s best recipe', async () => {
   await page.getByRole('button', { name: 'Add bean' }).click();
-  // D-140: the new bean's page opens; it has no shots yet (D-131).
+  // The new bean's page opens; it has no shots yet.
   await expect(page.getByRole('heading', { name: 'Guji Hambela', level: 1 })).toBeVisible();
   await expect(page.getByText('No shots yet')).toBeVisible();
   await expect(page.getByRole('region', { name: 'Numbers' })).toContainText('Not rated yet');
   await page.getByRole('link', { name: 'Back to Beans' }).click();
   await expect(page.getByRole('main').locator('.card', { hasText: 'Guji Hambela' })).toHaveCount(2);
 
-  // The earlier bag's best recipe (D-66), worked out from the test database.
+  // The earlier bag's best recipe, worked out from the test database.
   const db = new Database(DATABASE, { readonly: true });
   const earlier = db
     .prepare("select id from bean where name = 'Guji Hambela' order by created_at limit 1")
@@ -174,20 +174,20 @@ test('the re-buy is added, and its first shot starts from the earlier bag’s be
     .filter((s) => s.recipeId === best.recipeId)
     .sort((a, b) => b.brewedAt - a.brewedAt);
   const { grind, time } = ofBest[0];
-  expect(time).not.toBeNull(); // From My setup the time would be empty (D-72), so this tells them apart.
+  expect(time).not.toBeNull(); // From My setup the time would be empty, so this tells them apart.
 
   await page.getByRole('link', { name: 'New shot' }).click();
   await page
     .getByRole('button', { name: /choose another bean/ })
     .click({ position: { x: 22, y: 10 } });
-  // The newest bean comes first (D-137): the re-buy.
+  // The newest bean comes first: the re-buy.
   await page.locator('.bean', { hasText: 'Guji Hambela' }).first().click();
   await expect(
     page
       .getByRole('region', { name: 'Core values' })
       .locator('.cn-value-card', { hasText: 'Grind' })
   ).toContainText((grind / 1000).toFixed(1));
-  // D-73: yield and time from that recipe's latest shot.
+  // Yield and time from that recipe's latest shot.
   await expect(
     page.getByRole('region', { name: 'Core values' }).locator('.cn-value-card', { hasText: 'Time' })
   ).toContainText((time! / 1000).toFixed(1));
@@ -205,15 +205,15 @@ test('Edit bean is the form filled in, without "Same as before"', async () => {
   await expect(page.getByRole('button', { name: /Same as before/ })).toHaveCount(0);
   await expect(page.getByLabel('Name')).toHaveValue('Guji Hambela');
   await expect(page.getByText('2 days ago')).toBeVisible();
-  // D-145: this bag has no shots yet, so it can be deleted.
+  // This bag has no shots yet, so it can be deleted.
   await expect(page.getByRole('button', { name: 'Delete bean' })).toBeVisible();
   await expectNoPageScroll();
   await page.getByLabel('Bag weight').fill('1,000');
   await page.getByRole('button', { name: 'Save changes' }).click();
-  // D-130: back to the bean's page.
+  // Back to the bean's page.
   await expect(page.getByRole('heading', { name: 'Guji Hambela', level: 1 })).toBeVisible();
   await page.getByRole('link', { name: 'Back to Beans' }).click();
-  // D-142: "1,000" is a thousand grams (shown without a separator, like other quantities).
+  // "1,000" is a thousand grams (shown without a separator, like other quantities).
   await expect(page.getByRole('main').locator('.card', { hasText: '1000 g left' })).toHaveCount(1);
 });
 
@@ -232,7 +232,7 @@ test('a bean without shots can be deleted; one with shots cannot', async () => {
   await page.goto(`/library/beans/${latest}/edit`);
   await page.getByRole('button', { name: 'Delete bean' }).click();
   await expect(page.getByRole('heading', { name: 'Delete this bean?' })).toBeVisible();
-  // D-241: deleting is red, keeping amber, and the dialog has a line outline.
+  // Deleting is red, keeping amber, and the dialog has a line outline.
   const confirm = page.getByRole('dialog', { name: 'Delete this bean' });
   await expect(confirm.getByRole('button', { name: 'Delete bean' })).toHaveClass(/cn-btn-danger/);
   await expect(confirm.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);
@@ -349,7 +349,7 @@ test('GearDetail: switching a feature off changes what the machine can do', asyn
   await expect(page.getByRole('button', { name: 'Archive' })).toHaveCount(0);
   await expectNoPageScroll();
   await screenshot('GearDetail');
-  // A low bar phase switched off would leave the machine for good (D-184), so this uses Preinfusion.
+  // A low bar phase switched off would leave the machine for good, so this uses Preinfusion.
   await page.getByRole('switch', { name: 'Preinfusion' }).click();
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
@@ -372,7 +372,7 @@ test('GrinderDetail: the dial and its preview', async () => {
   await expect(page.getByLabel('Step interval')).toHaveValue('0.1');
   await expectNoPageScroll();
   await screenshot('GrinderDetail');
-  // D-159: any typed step interval is what − and + move by.
+  // Any typed step interval is what − and + move by.
   await page.getByLabel('Step interval').fill('0.25');
   await page.getByLabel('Step interval').blur();
   await expect(page.locator('.cn-step__amt').first()).toHaveText('0.25');
@@ -399,7 +399,7 @@ test('BasketDetail: add a basket by brand and size, then archive it', async () =
   await expect(page.getByRole('heading', { name: 'Add basket', level: 1 })).toBeVisible();
   // Screen 39: adding is a task with × to close.
   await expect(page.getByRole('link', { name: 'Close without saving' })).toBeVisible();
-  // D-158: a new basket starts as a precision double for 58 mm.
+  // A new basket starts as a precision double for 58 mm.
   await expect(page.getByRole('radio', { name: 'Precision' })).toHaveAttribute(
     'aria-checked',
     'true'
@@ -419,7 +419,7 @@ test('BasketDetail: add a basket by brand and size, then archive it', async () =
   await ims.click();
   await page.getByRole('button', { name: 'Archive' }).click();
   await expect(page.getByRole('heading', { name: 'Archive this basket?' })).toBeVisible();
-  // D-241: archiving is red, keeping amber.
+  // Archiving is red, keeping amber.
   const archive = page.getByRole('dialog', { name: 'Archive this basket' });
   await expect(archive.getByRole('button', { name: 'Archive' })).toHaveClass(/cn-btn-danger/);
   await expect(archive.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);
@@ -431,7 +431,7 @@ test('BasketDetail: add a basket by brand and size, then archive it', async () =
   await expect(page.getByRole('heading', { name: 'Gear', level: 1 })).toBeVisible();
   await expect(page.getByRole('link', { name: /^IMS/ })).toHaveCount(0);
 
-  // D-188: the Archived row lists it, and Restore brings it back.
+  // The Archived row lists it, and Restore brings it back.
   await page.getByRole('link', { name: /^Archived · \d+/ }).click();
   await expect(page.getByRole('heading', { name: 'Archived', level: 1 })).toBeVisible();
   await expect(page.getByRole('main')).toContainText('IMS · 20 g');
@@ -472,26 +472,26 @@ test('your own feature appears on More › Setup', async () => {
   await page.getByRole('button', { name: 'Setup', exact: true }).click();
   const more = page.getByRole('region', { name: 'Setup', exact: true });
   await expect(more.getByRole('switch', { name: 'Bloom pause' })).toBeVisible();
-  // Screen 29, D-78: a list feature switched on without an option asks for one before saving.
+  // Screen 29: a list feature switched on without an option asks for one before saving.
   await more.getByRole('switch', { name: 'Water' }).click();
   await page.getByRole('button', { name: 'Save shot' }).click();
   await expect(page.getByText('Set Water first.')).toBeVisible();
   await screenshot('MoreOwnFeatures');
 
-  // D-161: Edit My setup shows it too, so a new bean can start with it.
+  // Edit My setup shows it too, so a new bean can start with it.
   await page.goto('/library/gear/setup');
   await expect(page.getByRole('switch', { name: 'Bloom pause' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Bloom pause plus 1 s' })).toHaveCount(0);
   await page.getByRole('switch', { name: 'Bloom pause' }).click();
   await expect(page.getByRole('button', { name: 'Bloom pause plus 1 s' })).toBeVisible();
   await expectNoPageScroll();
-  // Screen 43, D-78: a list feature switched on without an option asks for one before saving.
+  // Screen 43: a list feature switched on without an option asks for one before saving.
   await page.getByRole('switch', { name: 'Water', exact: true }).click();
   await page.getByRole('button', { name: 'Save setup' }).click();
   await expect(page.getByText('Set Water first.')).toBeVisible();
   await screenshot('SetupFeatures');
 
-  // No shot used it, so it can be deleted again (D-151), leaving the reference setup as it was.
+  // No shot used it, so it can be deleted again, leaving the reference setup as it was.
   await page.goto('/library/gear');
   await page.getByRole('link', { name: /^Lelit Bianca/ }).click();
   await page.getByRole('button', { name: 'Edit Bloom pause' }).click();

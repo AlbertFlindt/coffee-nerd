@@ -1,4 +1,4 @@
-// Shot facts (data-model §5, D-64): the `shot_facts` view read for one owner, with what needs the user's
+// Shot facts (docs/SPEC.md §5): the `shot_facts` view read for one owner, with what needs the user's
 // time zone or the units module added: the ratio, the local day, the week and the roast age.
 import { and, asc, eq, getViewSelectedFields, gte, lt, type SQL } from 'drizzle-orm';
 import { localDate, ratio, roastAgeDays } from '../../domain/bean';
@@ -23,12 +23,12 @@ export type ShotFact = {
   routineId: string | null;
   routineName: string | null;
   brewedAt: number;
-  /** "2026-10-17" in the user's time zone (data-model §1.8). */
+  /** "2026-10-17" in the user's time zone (docs/SPEC.md §1.8). */
   localDay: string;
-  /** The Monday that starts the shot's week, "2026-10-12", in the user's time zone (D-208). */
+  /** The Monday that starts the shot's week, "2026-10-12", in the user's time zone. */
   week: string;
   roastAgeDays: number;
-  /** Taste: null when not rated or not set, never 0 (D-11). */
+  /** Taste: null when not rated or not set, never 0. */
   score: number | null;
   balance: number | null;
   body: number | null;
@@ -44,7 +44,7 @@ export type ShotFact = {
   countryCode: string | null;
   roaster: string | null;
   roastLevel: 'light' | 'medium_light' | 'medium' | 'dark' | null;
-  /** How many shots the recipe has, for "reused recipes only" (D-203). */
+  /** How many shots the recipe has, for "reused recipes only". */
   recipeShots: number;
   setup: SetupSnapshot;
 };
@@ -58,7 +58,7 @@ export type FactFilters = {
   to?: number;
 };
 
-/** The owner's shots as facts, oldest first. Another owner's shots never appear (D-60). */
+/** The owner's shots as facts, oldest first. Another owner's shots never appear. */
 export function loadShotFacts(
   db: Queryable,
   ownerId: string,
@@ -90,7 +90,7 @@ export function loadShotFacts(
   });
 }
 
-/** The Monday on or before a calendar date; weeks start on Monday (data-model §1.8). */
+/** The Monday on or before a calendar date; weeks start on Monday (docs/SPEC.md §1.8). */
 export function mondayOf(isoDate: string): string {
   const [year, month, day] = isoDate.split('-').map(Number);
   const date = new Date(Date.UTC(year, month - 1, day));

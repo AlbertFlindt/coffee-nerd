@@ -1,5 +1,5 @@
-// Recipe identity (D-16, D-63, D-65): the fingerprint decides whether two shots share a recipe.
-// It runs in the browser while the form changes and again on the server on save (data-model §4.1).
+// Recipe identity: the fingerprint decides whether two shots share a recipe.
+// It runs in the browser while the form changes and again on the server on save (docs/SPEC.md §4.1).
 import { sha256 } from '@noble/hashes/sha2.js';
 import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils.js';
 import type { FeatureValue, SetupSnapshot } from './schemas';
@@ -16,10 +16,10 @@ export type RecipeIdentity = {
   setup: SetupSnapshot;
 };
 
-/** A dose this close to a recipe's dose is that recipe's dose (D-186): 0.2 g. */
+/** A dose this close to a recipe's dose is that recipe's dose: 0.2 g. */
 export const DOSE_REACH: Thousandths = 200;
 
-/** True when two doses count as the same recipe (D-186). */
+/** True when two doses count as the same recipe. */
 export function sameDose(a: Thousandths, b: Thousandths): boolean {
   return Math.abs(a - b) <= DOSE_REACH;
 }
@@ -27,9 +27,9 @@ export function sameDose(a: Thousandths, b: Thousandths): boolean {
 /**
  * SHA-256 of a canonical list of grinder, basket, routine, grind, each feature's key with its
  * on/value/pressure/choice (sorted by key), and each routine step's id and value in order. Labels, units
- * and names are left out (D-65); a switched-off feature counts only as "off". Bean and machine are the
- * matching scope and are not included (D-16). The dose is left out too: a recipe is its fingerprint plus a
- * dose, matched within 0.2 g (D-186). Changing what goes in here changes recipe identity.
+ * and names are left out; a switched-off feature counts only as "off". Bean and machine are the
+ * matching scope and are not included. The dose is left out too: a recipe is its fingerprint plus a
+ * dose, matched within 0.2 g. Changing what goes in here changes recipe identity.
  */
 export function recipeFingerprint(recipe: RecipeIdentity): string {
   const features = Object.keys(recipe.setup.features)
@@ -56,7 +56,7 @@ function stepIdentity(recipe: RecipeIdentity): unknown[] {
 }
 
 /**
- * What differs between this recipe and the last shot's recipe, as words for the recipe tag (D-16), in a
+ * What differs between this recipe and the last shot's recipe, as words for the recipe tag, in a
  * fixed order: grind, dose, machine, grinder, basket, routine, then features by their current label.
  */
 export function describeChange(current: RecipeIdentity, last: RecipeIdentity): string[] {
@@ -98,7 +98,7 @@ function lowercaseLabel(label: string): string {
 export type RecipeMatch =
   { kind: 'reused'; shotCount: number } | { kind: 'new'; changes: string[] };
 
-/** The recipe tag on the bean card (D-16, D-71). */
+/** The recipe tag on the bean card. */
 export function recipeTagText(match: RecipeMatch): string {
   if (match.kind === 'reused') return `Recipe reused ${match.shotCount}x`;
   const { changes } = match;

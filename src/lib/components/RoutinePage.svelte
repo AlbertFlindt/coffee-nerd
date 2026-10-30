@@ -1,6 +1,6 @@
 <script lang="ts">
   // The routine builder's page (screen 19): the builder, and the step sheet for "New step" from its insert
-  // sheet (D-164). A step made there is inserted where the + was tapped.
+  // sheet. A step made there is inserted where the + was tapped.
   import RoutineBuilder from '#lib/components/RoutineBuilder.svelte';
   import StepSheet from '#lib/components/StepSheet.svelte';
   import type { RoutineItem, StepItem } from '#lib/server/db/puck-prep.ts';

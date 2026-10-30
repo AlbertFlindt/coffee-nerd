@@ -1,4 +1,4 @@
-// Flavor notes (D-53): the duplicate finder of the Tags page (D-173).
+// Flavor notes: the duplicate finder of the Tags page.
 
 /** Lower case, without accents. */
 function plain(s: string): string {
@@ -35,8 +35,8 @@ function distance(a: string, b: string): number {
 }
 
 /**
- * D-173: two notes look alike when their names are the same ignoring case, spaces and accents, or
- * differ in one or two letters while both are five letters or longer and, D-179, start with the
+ * Two notes look alike when their names are the same ignoring case, spaces and accents, or
+ * differ in one or two letters while both are five letters or longer and start with the
  * same letter.
  */
 export function looksAlike(a: string, b: string): boolean {
@@ -46,7 +46,7 @@ export function looksAlike(a: string, b: string): boolean {
   return Math.min(x.length, y.length) >= 5 && x[0] === y[0] && distance(x, y) <= 2;
 }
 
-/** The key of a pair kept after "Keep both" (D-173): the lower id first, as `tag_pair_kept` stores it. */
+/** The key of a pair kept after "Keep both": the lower id first, as `tag_pair_kept` stores it. */
 export function keptKey(a: string, b: string): string {
   return a < b ? `${a} ${b}` : `${b} ${a}`;
 }
@@ -58,8 +58,8 @@ export interface NoteUse {
 }
 
 /**
- * The pairs the "Same tag twice?" card suggests, in list order: each merges into the more used note
- * (D-53), the one listed first on equal use. Pairs kept with "Keep both" are left out (D-173).
+ * The pairs the "Same tag twice?" card suggests, in list order: each merges into the more used note,
+ * the one listed first on equal use. Pairs kept with "Keep both" are left out.
  */
 export function duplicatePairs<T extends NoteUse>(
   notes: readonly T[],
@@ -75,7 +75,7 @@ export function duplicatePairs<T extends NoteUse>(
   return pairs;
 }
 
-/** The five fixed flavor families, in the Tags page's order (D-53). */
+/** The five fixed flavor families, in the Tags page's order. */
 export const FAMILIES = [
   { family: 'fruity', label: 'Fruity' },
   { family: 'sweet', label: 'Sweet' },

@@ -1,5 +1,5 @@
-// The reference setup (roadmap M2) for development, tests and screenshots; not part of a real
-// installation (D-88). Values follow the designed screens: GearDetail, GrinderDetail, BasketDetail,
+// The reference setup for development, tests and screenshots; not part of a real
+// installation. Values follow the designed screens: GearDetail, GrinderDetail, BasketDetail,
 // PuckPrep, RoutineBuilder, EditSetup and BeanDetail.
 import { localDate } from '../../domain/bean';
 import { builtInFeatures } from '../../domain/gear';
@@ -18,7 +18,7 @@ import { appState, bean, gear, prepStep, routine, user, userSettings } from './s
 const DAY = 86_400_000;
 const TIME_ZONE = 'Europe/Copenhagen';
 
-// The reference machine can do all five built-in features (D-44).
+// The reference machine can do all five built-in features.
 const machineFeatures = builtInFeatures({
   temperature: true,
   flat_pressure: true,

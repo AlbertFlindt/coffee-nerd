@@ -1,6 +1,6 @@
 <script lang="ts">
-  // The machine page (screen 12): edit a machine (D-44) or add one (D-147, D-158). Switched-on features
-  // are exactly what the shot form shows (D-02). Group size takes decimals (D-79).
+  // The machine page (screen 12): edit a machine or add one. Switched-on features
+  // are exactly what the shot form shows. Group size takes decimals.
   import { untrack } from 'svelte';
   import type { Guide } from '#lib/domain/guide.ts';
   import CustomFeature from '#lib/components/CustomFeature.svelte';
@@ -19,19 +19,19 @@
     problems = []
   }: {
     name?: string;
-    /** Without a spec the page adds a machine (D-147). */
+    /** Without a spec the page adds a machine. */
     spec?: MachineSpec;
     isDefault?: boolean;
-    /** Keys of features some shot used: those cannot be deleted (D-151). */
+    /** Keys of features some shot used: those cannot be deleted. */
     usedFeatures?: string[];
-    /** A step of the step-by-step start (D-157). */
+    /** A step of the step-by-step start. */
     guide?: Guide | null;
     problems?: string[];
   } = $props();
 
   const adding = untrack(() => initialSpec === undefined);
   let name = $state(untrack(() => initialName));
-  // D-184: a low bar phase this machine has switched off is no longer offered.
+  // A low bar phase this machine has switched off is no longer offered.
   let spec: MachineSpec = $state(
     untrack(() =>
       initialSpec
@@ -47,7 +47,7 @@
     ['manual', 'Manual']
   ] as const;
 
-  // The sheet for your own feature (D-46): null closed, 'new' to add, or the key being edited.
+  // The sheet for your own feature: null closed, 'new' to add, or the key being edited.
   let sheet: 'new' | string | null = $state(null);
   const editing = $derived(spec.features.find((f) => f.key === sheet));
 
@@ -63,7 +63,7 @@
     sheet = null;
   }
 
-  const GROUP_STEP = 500; // D-79: 0.5 mm
+  const GROUP_STEP = 500; // 0.5 mm
 
   function detail({ value }: FeatureDefinition): string {
     switch (value.kind) {
@@ -81,7 +81,7 @@
   }
 
   function stepGroup(direction: '+' | '-') {
-    // Not set yet: the first tap starts at the most common size (D-158).
+    // Not set yet: the first tap starts at the most common size.
     if (spec.groupSizeMm === undefined) {
       spec.groupSizeMm = 58000;
       return;
@@ -130,7 +130,7 @@
             <span class="detail">{detail(feature)}</span>
           </div>
         {:else}
-          <!-- Your own feature: tap to rename, change or delete it (D-151). -->
+          <!-- Your own feature: tap to rename, change or delete it. -->
           <button
             type="button"
             class="text edit cn-tap"

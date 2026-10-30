@@ -1,5 +1,5 @@
-// Drizzle schema: exactly docs/data-model.md §3. A change here is a change to that document too.
-// Quantities are whole thousandths (data-model §1.4), times are UTC milliseconds, ids are UUID v7 text.
+// Drizzle schema: exactly docs/SPEC.md §3. A change here is a change to that document too.
+// Quantities are whole thousandths (docs/SPEC.md §1.4), times are UTC milliseconds, ids are UUID v7 text.
 // JSON columns are checked with the Zod schemas in src/lib/domain/schemas.ts before they are written.
 import { sql } from 'drizzle-orm';
 import {
@@ -30,7 +30,7 @@ const owner = () =>
   text('owner_id')
     .notNull()
     .references(() => user.id);
-/** Library items: owned, shareable later (D-60), archived instead of deleted (data-model §1.7). */
+/** Library items: owned, shareable later, archived instead of deleted (docs/SPEC.md §1.7). */
 const libraryItem = () => ({
   ownerId: owner(),
   shared: integer('shared', { mode: 'boolean' }).notNull().default(false),
@@ -40,12 +40,12 @@ const libraryItem = () => ({
 export const user = sqliteTable('user', {
   id: id(),
   name: text('name').notNull(),
-  email: text('email'), // optional, unused for now (D-85)
+  email: text('email'), // optional, unused for now
   passwordHash: text('password_hash').notNull(),
   ...timestamps
 });
 
-/** Sign-in sessions (D-86). `id` is the SHA-256 of the cookie token; the token itself is never stored. */
+/** Sign-in sessions. `id` is the SHA-256 of the cookie token; the token itself is never stored. */
 export const session = sqliteTable(
   'session',
   {
@@ -59,7 +59,7 @@ export const session = sqliteTable(
   (t) => [index('session_user').on(t.userId)]
 );
 
-/** My setup (D-38, D-45): starting values for a bean's first shot. Empty until set up (D-88). */
+/** My setup: starting values for a bean's first shot. Empty until set up. */
 export const userSettings = sqliteTable('user_settings', {
   userId: text('user_id')
     .primaryKey()
@@ -76,14 +76,14 @@ export const userSettings = sqliteTable('user_settings', {
     .notNull()
     .default(sql`'{}'`),
   timeZone: text('time_zone').notNull(),
-  /** −/+ steps on the shot form and Edit My setup, per user (D-89): 0.1 g, 0.1 g and 1 s by default. */
+  /** −/+ steps on the shot form and Edit My setup, per user: 0.1 g, 0.1 g and 1 s by default. */
   doseStep: integer('dose_step').notNull().default(100),
   yieldStep: integer('yield_step').notNull().default(100),
   timeStep: integer('time_step').notNull().default(1000),
   ...timestamps
 });
 
-/** Fast-changing state: Home's bean, Brew next (one column, so only one mark, D-43), last graph. */
+/** Fast-changing state: Home's bean, Brew next (one column, so only one mark), last graph. */
 export const appState = sqliteTable('app_state', {
   userId: text('user_id')
     .primaryKey()
@@ -91,10 +91,10 @@ export const appState = sqliteTable('app_state', {
   currentBeanId: text('current_bean_id').references(() => bean.id),
   brewNextRecipeId: text('brew_next_recipe_id').references(() => recipe.id),
   homeGraph: text('home_graph'),
-  /** The step-by-step start's basket step was skipped (D-157), so it is not asked again. */
+  /** The step-by-step start's basket step was skipped, so it is not asked again. */
   basketStepSkipped: integer('basket_step_skipped', { mode: 'boolean' }).notNull().default(false),
   /**
-   * A routine just chosen for new shots (D-187): the next shot starts with it; saving a shot clears it.
+   * A routine just chosen for new shots: the next shot starts with it; saving a shot clears it.
    * No foreign key, so deleting the routine never fails on it; prefill ignores one that is gone.
    */
   nextRoutineId: text('next_routine_id'),
@@ -131,7 +131,7 @@ export const bean = sqliteTable(
   (t) => [index('bean_owner').on(t.ownerId)]
 );
 
-/** Machines, grinders and baskets in one table, each with a spec for its kind (D-39, D-68). */
+/** Machines, grinders and baskets in one table, each with a spec for its kind. */
 export const gear = sqliteTable(
   'gear',
   {
@@ -157,7 +157,7 @@ export const prepStep = sqliteTable(
   (t) => [index('prep_step_owner').on(t.ownerId)]
 );
 
-/** A straight line of steps with their values (D-51). */
+/** A straight line of steps with their values. */
 export const routine = sqliteTable(
   'routine',
   {
@@ -170,7 +170,7 @@ export const routine = sqliteTable(
   (t) => [index('routine_owner').on(t.ownerId)]
 );
 
-/** What you set (D-13, D-63). Never edited; the database allows one recipe per identical setup. */
+/** What you set. Never edited; the database allows one recipe per identical setup. */
 export const recipe = sqliteTable(
   'recipe',
   {
@@ -191,7 +191,7 @@ export const recipe = sqliteTable(
     basketId: text('basket_id').references(() => gear.id),
     routineId: text('routine_id').references(() => routine.id),
     grind: integer('grind').notNull(),
-    /** The recipe's dose; a shot within 0.2 g of it is this recipe (D-186). */
+    /** The recipe's dose; a shot within 0.2 g of it is this recipe. */
     dose: integer('dose').notNull(),
     setup: text('setup', { mode: 'json' }).$type<SetupSnapshot>().notNull(),
     fingerprint: text('fingerprint').notNull(),
@@ -202,20 +202,20 @@ export const recipe = sqliteTable(
   ]
 );
 
-/** What you got (D-13). Taste is null when not rated or not set, never 0 (D-11). */
+/** What you got. Taste is null when not rated or not set, never 0. */
 export const shot = sqliteTable(
   'shot',
   {
-    id: id(), // may be made on the phone (offline queue, D-61)
+    id: id(), // may be made on the phone (offline queue)
     ownerId: owner(),
     recipeId: text('recipe_id')
       .notNull()
       .references(() => recipe.id),
     brewedAt: integer('brewed_at').notNull(),
-    /** The exact dose brewed, for ratio and grams used; its recipe's dose is within 0.2 g (D-186). */
+    /** The exact dose brewed, for ratio and grams used; its recipe's dose is within 0.2 g. */
     dose: integer('dose').notNull().default(0),
-    yield: integer('yield'), // empty = not set; a shot may be saved without it (D-82, D-91)
-    time: integer('time'), // empty = not set; a shot may be saved without it (D-72, D-91)
+    yield: integer('yield'), // empty = not set; a shot may be saved without it
+    time: integer('time'), // empty = not set; a shot may be saved without it
     score: integer('score'),
     balance: integer('balance'),
     body: integer('body'),
@@ -227,7 +227,7 @@ export const shot = sqliteTable(
   (t) => [index('shot_owner_brewed').on(t.ownerId, t.brewedAt), index('shot_recipe').on(t.recipeId)]
 );
 
-/** Flavor notes in fixed families (D-53). Names are unique per owner, ignoring case. */
+/** Flavor notes in fixed families. Names are unique per owner, ignoring case. */
 export const tag = sqliteTable(
   'tag',
   {
@@ -239,14 +239,14 @@ export const tag = sqliteTable(
       enum: ['fruity', 'sweet', 'floral', 'nutty_roasty', 'other']
     }).notNull(),
     builtIn: integer('built_in', { mode: 'boolean' }).notNull().default(false),
-    /** Removed while shots used it (D-171): off the Tasting chips and the Tags page, kept on its shots. */
+    /** Removed while shots used it: off the Tasting chips and the Tags page, kept on its shots. */
     archivedAt: integer('archived_at'),
     ...timestamps
   },
   (t) => [uniqueIndex('tag_owner_name').on(t.ownerId, sql`lower(${t.name})`)]
 );
 
-/** Two notes the duplicate finder no longer suggests merging, after "Keep both" (D-173); lower id first. */
+/** Two notes the duplicate finder no longer suggests merging, after "Keep both"; lower id first. */
 export const tagPairKept = sqliteTable(
   'tag_pair_kept',
   {
@@ -262,8 +262,8 @@ export const tagPairKept = sqliteTable(
 );
 
 /**
- * A note merged into another (D-53): kept so a shot saved later with the old id gets the note it went
- * into (D-182). No foreign key: the merged note is gone, and the kept one may be merged in turn.
+ * A note merged into another: kept so a shot saved later with the old id gets the note it went
+ * into. No foreign key: the merged note is gone, and the kept one may be merged in turn.
  */
 export const tagMerged = sqliteTable('tag_merged', {
   tagId: text('tag_id').primaryKey(),
@@ -285,10 +285,10 @@ export const shotTag = sqliteTable(
 );
 
 /**
- * One wide row per shot for Insights and Home's graph (data-model §5, D-64): the shot, its recipe, bean
+ * One wide row per shot for Insights and Home's graph (docs/SPEC.md §5): the shot, its recipe, bean
  * and gear. Values stay as stored (thousandths, UTC milliseconds); the ratio, local day, week and roast
  * age need the user's time zone or the units module, so `src/lib/server/insights/facts.ts` adds them.
- * Archived gear and routines still count: their shots happened (data-model §1.7).
+ * Archived gear and routines still count: their shots happened (docs/SPEC.md §1.7).
  *
  * Not created by a migration: SQLite cannot rebuild a table (the way drizzle-kit changes a column) while
  * a view reads it. `openDatabase` drops the view before migrating and creates it again from

@@ -1,9 +1,9 @@
 <script lang="ts">
-  // The frame every gear page shares (screens 12, 15, 16; D-44, D-48, D-49): back to Gear, the kind as
-  // title with the Default chip (D-38), the page's own fields, then Save. A quiet "Archive" with a
-  // confirmation (D-148), or, for an item My setup uses, "Used in My setup · choose another default
-  // first" (D-83). Adding (D-147) titles the page "Add machine" and its button the same. As a step of the
-  // step-by-step start (D-157) it shows "Step 1 of 5" under the title and "Next"; the basket can be skipped.
+  // The frame every gear page shares (screens 12, 15, 16): back to Gear, the kind as
+  // title with the Default chip, the page's own fields, then Save. A quiet "Archive" with a
+  // confirmation, or, for an item My setup uses, "Used in My setup · choose another default
+  // first". Adding titles the page "Add machine" and its button the same. As a step of the
+  // step-by-step start it shows "Step 1 of 5" under the title and "Next"; the basket can be skipped.
   import type { Snippet } from 'svelte';
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
@@ -31,7 +31,7 @@
 
   const NOUN = { machine: 'Machine', grinder: 'Grinder', basket: 'Basket' };
   let confirm = $state(false);
-  // Adding keeps ?kind= (and the guide) in the URL, so the page can show what to fix (D-147).
+  // Adding keeps ?kind= (and the guide) in the URL, so the page can show what to fix.
   const query = $derived(adding ? `?kind=${kind}${guide ? '&guide=1' : ''}&` : '?');
   let archiving = $state(false);
 </script>
@@ -80,7 +80,7 @@
     >
   </form>
   {#if guide && kind === 'basket'}
-    <!-- D-157: the basket step can be skipped. -->
+    <!-- The basket step can be skipped. -->
     <form method="POST" action="{query}/skip">
       <button class="cn-btn-quiet cn-tap skip">Skip</button>
     </form>
@@ -97,7 +97,7 @@
 </footer>
 
 {#if confirm}
-  <!-- D-148: archiving asks first, like deleting a bean (D-145). -->
+  <!-- Archiving asks first, like deleting a bean. -->
   <ConfirmDialog
     label="Archive this {kind}"
     closeLabel="Keep the {kind}"
@@ -175,7 +175,7 @@
     flex-direction: column;
     gap: var(--space-3);
     padding: var(--space-1) var(--space-5) var(--space-3);
-    /* D-36: a long feature list scrolls inside the page; the header and Save stay. */
+    /* A long feature list scrolls inside the page; the header and Save stay. */
     overflow-y: auto;
   }
 

@@ -1,4 +1,4 @@
-// The values the shot form edits; sent to the server as one JSON object on Save (data-model §4.1).
+// The values the shot form edits; sent to the server as one JSON object on Save (docs/SPEC.md §4.1).
 import type { SetupSnapshot, Taste } from '../domain/schemas';
 import type { Thousandths } from '../domain/units';
 
@@ -16,7 +16,7 @@ export type ShotState = {
   time: Thousandths | null;
   taste: Taste;
   tagIds: string[];
-  /** Flavor notes added with "Add your own", created on save (D-101). */
+  /** Flavor notes added with "Add your own", created on save. */
   newTagNames: string[];
   notes: string | null;
 };

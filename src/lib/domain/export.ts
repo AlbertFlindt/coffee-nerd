@@ -1,10 +1,10 @@
-// Backup and export (D-251, D-252): the file names, the shots as CSV and the decimals the exports use.
+// Backup and export: the file names, the shots as CSV and the decimals the exports use.
 // Pure, so it is tested without a database; the server gathers the rows (src/lib/server/db/export.ts).
 import { localDate } from './bean';
 import { clockTime } from './journal';
 import { formatRatio, fromThousandths, type Thousandths } from './units';
 
-/** One saved shot as the CSV has it: names as the shot detail shows them (D-57), quantities in thousandths. */
+/** One saved shot as the CSV has it: names as the shot detail shows them, quantities in thousandths. */
 export type ShotExportRow = {
   brewedAt: number;
   beanName: string;
@@ -56,7 +56,7 @@ export const SHOT_COLUMNS = [
 
 /**
  * Thousandths as a plain decimal with a point and as many decimals as it has ("18", "36.5"); empty when
- * not set (D-11). The division is exact for the three decimals a stored value can have.
+ * not set. The division is exact for the three decimals a stored value can have.
  */
 export function decimal(value: Thousandths | null): string {
   return value === null ? '' : String(fromThousandths(value));
@@ -83,7 +83,7 @@ export function csvText(rows: readonly (readonly string[])[]): string {
 
 const whole = (value: number | null) => (value === null ? '' : String(value));
 
-/** D-252: the shots, oldest first as given, one row each, dates and times in the account's time zone. */
+/** The shots, oldest first as given, one row each, dates and times in the account's time zone. */
 export function shotsCsv(shots: readonly ShotExportRow[], timeZone: string): string {
   return csvText([
     SHOT_COLUMNS,
@@ -116,7 +116,7 @@ export function shotsCsv(shots: readonly ShotExportRow[], timeZone: string): str
 
 const EXTENSIONS = { backup: 'db', shots: 'csv', everything: 'json' } as const;
 
-/** D-251, D-252: "coffee-nerd-backup-2026-10-30.db", named by the day in the account's time zone. */
+/** "coffee-nerd-backup-2026-10-30.db", named by the day in the account's time zone. */
 export function exportFileName(
   kind: keyof typeof EXTENSIONS,
   now: number,

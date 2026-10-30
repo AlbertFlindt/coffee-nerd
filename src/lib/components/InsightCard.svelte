@@ -1,7 +1,7 @@
 <script lang="ts">
-  // InsightCard (design-system/components.md, D-55, D-56): the finding as a title and a sentence, its
+  // InsightCard (design-system/components.md): the finding as a title and a sentence, its
   // chart, and its basis. Without enough data the chart is left out and the sentence says what is
-  // missing (D-203, built without a design, D-207).
+  // missing (built without a design).
   import type { InsightCard } from '../domain/insights';
   import BellCurve from './BellCurve.svelte';
   import BoxPlot from './BoxPlot.svelte';

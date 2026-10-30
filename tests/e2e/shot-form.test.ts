@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
-// The shot form on the reference seed (roadmap M3): Lelit Bianca, Timemore 064S, VST · 18 g, Daily
+// The shot form on the reference seed: Lelit Bianca, Timemore 064S, VST · 18 g, Daily
 // routine, one open bean. The steps run in order and build on each other's shots. Each designed state is
 // saved to screenshots/ for comparing with docs/screens/.
 test.describe.configure({ mode: 'serial' });
@@ -21,7 +21,7 @@ test.beforeAll(async ({ browser }) => {
 
 test.afterAll(() => page.close());
 
-/** Sheets slide in and out (D-108); measure once they are in place. */
+/** Sheets slide in and out; measure once they are in place. */
 const settled = () =>
   page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
 
@@ -52,7 +52,7 @@ async function typeValue(label: string, value: string) {
 
 async function setSlider(name: string, value: number, min: number, max: number) {
   const slider = page.getByRole('slider', { name });
-  // A sheet may still be sliding in, or need scrolling to the slider (D-191).
+  // A sheet may still be sliding in, or need scrolling to the slider.
   await slider.scrollIntoViewIfNeeded();
   await settled();
   const box = (await slider.boundingBox())!;
@@ -71,7 +71,7 @@ test('a bean’s first shot starts from My setup, with an empty time', async () 
   await expect(page.getByRole('heading', { name: 'New shot' })).toBeVisible();
   await expect(page.getByText('Guji Hambela · Natural')).toBeVisible();
   await expect(page.getByText('Lelit Bianca · Timemore 064S')).toBeVisible();
-  // D-100: switched-on phases, then the temperature.
+  // Switched-on phases, then the temperature.
   await expect(page.getByText('Preinfusion 4 s · Low bar start 5 s · 93 °C')).toBeVisible();
   await expect(recipeTag()).toHaveText('New recipe');
   await expect(card('Grind')).toContainText('1.6');
@@ -79,10 +79,10 @@ test('a bean’s first shot starts from My setup, with an empty time', async () 
   await expect(card('Yield')).toContainText('36.0 g');
   await expect(card('Time')).toContainText('— s');
   await expect(page.getByText('No earlier score')).toBeVisible();
-  // D-11: taste starts empty. D-190: balance is in the Tasting sheet, not on the form.
+  // Taste starts empty. Balance is in the Tasting sheet, not on the form.
   await expect(page.getByRole('slider', { name: 'Balance, sour to bitter' })).toHaveCount(0);
   await expect(page.getByRole('radio', { checked: true })).toHaveCount(0);
-  // D-189: Setup and Tasting sit side by side where More was.
+  // Setup and Tasting sit side by side where More was.
   const setupBox = (await page.getByRole('button', { name: 'Setup', exact: true }).boundingBox())!;
   const tastingBox = (await page
     .getByRole('button', { name: 'Tasting', exact: true })
@@ -103,12 +103,12 @@ test('the next shot copies the last one; its recipe is reused', async () => {
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(recipeTag()).toHaveText('Recipe reused 1x');
   await expect(page.getByText('Last with this recipe: 8')).toBeVisible();
-  // D-80: + on an empty time counts from 0; then the time is typed (D-06).
+  // + on an empty time counts from 0; then the time is typed.
   await card('Time').getByRole('button', { name: 'Time plus 1 second' }).click();
   await expect(card('Time')).toContainText('1.0 s');
   await typeValue('Time', '28');
   await expect(card('Time')).toContainText('28.0 s');
-  // D-98: tapping the chosen score again clears it, so the shot stays not rated.
+  // Tapping the chosen score again clears it, so the shot stays not rated.
   await page.getByRole('radio', { name: '7' }).click();
   await page.getByRole('radio', { name: '7' }).click();
   await expect(page.getByRole('radio', { checked: true })).toHaveCount(0);
@@ -155,7 +155,7 @@ test('RecipeReused: going back to the first grind says "Recipe reused"', async (
 test('Rated: changed results and a score; 0.1 g more is the same recipe', async () => {
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(recipeTag()).toHaveText('Recipe reused 3x');
-  // D-186: a dose within 0.2 g keeps the recipe; 0.3 g away is a new one.
+  // A dose within 0.2 g keeps the recipe; 0.3 g away is a new one.
   const dosePlus = card('Dose').getByRole('button', { name: 'Dose plus 0.1 gram' });
   const doseMinus = card('Dose').getByRole('button', { name: 'Dose minus 0.1 gram' });
   await dosePlus.click();
@@ -180,7 +180,7 @@ test('Rated: changed results and a score; 0.1 g more is the same recipe', async 
 test('MoreSetup: the Setup sheet; a changed value turns sage', async () => {
   await page.getByRole('button', { name: 'Setup', exact: true }).click();
   const sheet = page.getByRole('region', { name: 'Setup', exact: true });
-  // D-189: the sheet has no tabs.
+  // The sheet has no tabs.
   await expect(sheet.getByRole('tab')).toHaveCount(0);
   await expect(sheet.getByText('Pressure profile')).toBeVisible();
   await expect(sheet.getByRole('switch', { name: 'Low bar end' })).toHaveAttribute(
@@ -188,7 +188,7 @@ test('MoreSetup: the Setup sheet; a changed value turns sage', async () => {
     'false'
   );
   await expect(sheet.getByText('Daily routine')).toBeVisible();
-  // D-21: Save stays visible and usable under the sheet.
+  // Save stays visible and usable under the sheet.
   await expect(page.getByRole('button', { name: 'Save shot' })).toBeVisible();
   await expectNoPageScroll();
   // At the reference size the whole Setup sheet fits inside the sheet, down to puck prep.
@@ -214,7 +214,7 @@ test('MoreTasting: the Tasting sheet, balance first', async () => {
   await page.getByRole('button', { name: 'Tasting', exact: true }).click();
   const sheet = page.getByRole('region', { name: 'Tasting', exact: true });
   await expect(sheet.getByRole('slider').first()).toHaveAccessibleName('Balance, sour to bitter');
-  // D-192: every slider has balance's centre mark and a middle word.
+  // Every slider has balance's centre mark and a middle word.
   await expect(sheet.locator('.middle')).toHaveCount(4);
   await expect(sheet.locator('.ends')).toHaveText([
     'SourBalancedBitter',
@@ -226,7 +226,7 @@ test('MoreTasting: the Tasting sheet, balance first', async () => {
     'aria-valuetext',
     'Not set'
   );
-  // D-96: the balance in words.
+  // The balance in words.
   await setSlider('Balance, sour to bitter', -3, -10, 10);
   await expect(sheet.getByRole('slider', { name: 'Balance, sour to bitter' })).toHaveAttribute(
     'aria-valuetext',
@@ -255,14 +255,14 @@ test('MoreTasting: the Tasting sheet, balance first', async () => {
     'aria-pressed',
     'true'
   );
-  // D-98: a set slider can be cleared.
+  // A set slider can be cleared.
   await sheet.getByRole('button', { name: 'Clear sweetness' }).click();
   await expect(sheet.getByRole('slider', { name: 'Sweetness, low to high' })).toHaveAttribute(
     'aria-valuetext',
     'Not set'
   );
 
-  // D-21: tapping the dimmed form closes the sheet.
+  // Tapping the dimmed form closes the sheet.
   await page.getByRole('button', { name: 'Close Tasting' }).click({ position: { x: 200, y: 40 } });
   await expect(sheet).toBeHidden();
   await save();
@@ -289,7 +289,7 @@ test('MoreTasting: the Tasting sheet, balance first', async () => {
 });
 
 test('BrewNext: a recipe marked Brew next is where "+" starts, until cleared', async () => {
-  // The mark is set with the recipe's button on the bean detail page (D-42).
+  // The mark is set with the recipe's button on the bean detail page.
   await page.goto('/library/beans');
   await page.locator('.card', { hasText: 'Guji Hambela' }).click();
   const row = page.locator('.recipe', { hasText: 'Grind 1.5' });
@@ -338,18 +338,18 @@ test('a shot that uses up the bag finishes the bean, with Undo', async () => {
   await expect(page.getByRole('status')).toContainText(
     'Guji Hambela is finished: its bag is used up.'
   );
-  // D-200: with Undo the bar stays 10 seconds, past the 4 of "Shot saved".
+  // With Undo the bar stays 10 seconds, past the 4 of "Shot saved".
   await page.waitForTimeout(5000);
   await expect(page.getByRole('button', { name: 'Undo' })).toBeVisible();
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect(page.getByRole('status')).toContainText('Guji Hambela is open again');
-  // D-200: "… is open again" fades like "Shot saved".
+  // "… is open again" fades like "Shot saved".
   await expect(page.getByRole('status')).toHaveText('', { timeout: 6000 });
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(page.getByText('Guji Hambela · Natural')).toBeVisible();
 });
 
-// D-36: the form adapts to a phone whose browser leaves less height than the reference, e.g. a Pixel 8a
+// The form adapts to a phone whose browser leaves less height than the reference, e.g. a Pixel 8a
 // in Chrome with its address bar (about 412 × 780), and the Tasting sheet still fits above Save.
 test.describe('a shorter screen', () => {
   for (const height of [780, 700]) {
@@ -376,7 +376,7 @@ test.describe('a shorter screen', () => {
 
       await page.getByRole('button', { name: 'Tasting', exact: true }).click();
       const sheet = page.getByRole('region', { name: 'Tasting', exact: true });
-      // D-191: the sheet scrolls as a whole, so the flavor chips can be reached.
+      // The sheet scrolls as a whole, so the flavor chips can be reached.
       await sheet.getByRole('button', { name: 'Berry' }).scrollIntoViewIfNeeded();
       await expect(sheet.getByRole('button', { name: 'Berry' })).toBeInViewport();
       await screenshot(`MoreTasting-${height}`);
@@ -395,14 +395,14 @@ test('empty sliders show a handle, buttons flash when pressed, the sheet drags c
   await page.setViewportSize({ width: 412, height: 915 });
   await page.goto('/shot/new');
 
-  // D-106: an empty slider shows a hollow dashed handle in the middle.
+  // An empty slider shows a hollow dashed handle in the middle.
   await page.getByRole('button', { name: 'Tasting', exact: true }).click();
   const balance = page.getByRole('slider', { name: 'Balance, sour to bitter' });
   await expect(balance.locator('.cn-slider-handle--empty')).toHaveCSS('border-top-style', 'dashed');
   await page.getByRole('button', { name: 'Close Tasting' }).click({ position: { x: 200, y: 20 } });
   await expect(balance).toBeHidden();
 
-  // D-107: a −/+ button turns amber while it is held down.
+  // A −/+ button turns amber while it is held down.
   const plus = page.getByRole('button', { name: 'Dose plus 0.1 gram' });
   const box = (await plus.boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
@@ -411,7 +411,7 @@ test('empty sliders show a handle, buttons flash when pressed, the sheet drags c
   await page.mouse.up();
   await expect(plus).not.toHaveCSS('background-color', 'rgb(231, 169, 85)');
 
-  // D-108: a short drag on the handle springs back; a longer one closes the sheet.
+  // A short drag on the handle springs back; a longer one closes the sheet.
   await page.getByRole('button', { name: 'Setup', exact: true }).click();
   const sheet = page.getByRole('region', { name: 'Setup', exact: true });
   await expect(sheet).toBeVisible();
@@ -447,7 +447,7 @@ test('empty sliders show a handle, buttons flash when pressed, the sheet drags c
   await drag(200);
   await expect(sheet).toBeHidden();
 
-  // D-107: an amber button presses in while held.
+  // An amber button presses in while held.
   const save = page.getByRole('button', { name: 'Save shot' });
   const saveBox = (await save.boundingBox())!;
   await page.mouse.move(saveBox.x + saveBox.width / 2, saveBox.y + saveBox.height / 2);
@@ -465,7 +465,7 @@ test('the sheet slides; with reduced motion it just appears; saving with it open
   ).toBeGreaterThan(0);
   await expect(page.getByRole('region', { name: 'Setup', exact: true })).toBeVisible();
 
-  // D-21: Save works with the sheet open, and the form leaves at once (no sheet sliding out over Home).
+  // Save works with the sheet open, and the form leaves at once (no sheet sliding out over Home).
   await page.getByRole('button', { name: 'Save shot' }).click();
   await expect(page.getByRole('status')).toContainText('Shot saved');
   await expect(page.getByRole('heading', { name: 'New shot' })).toHaveCount(0);

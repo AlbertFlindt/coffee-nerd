@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Add gear (D-147): the kind's page, empty; a step of the step-by-step start with a guide (D-157).
+  // Add gear: the kind's page, empty; a step of the step-by-step start with a guide.
   import BasketForm from '#lib/components/BasketForm.svelte';
   import GrinderForm from '#lib/components/GrinderForm.svelte';
   import MachineForm from '#lib/components/MachineForm.svelte';

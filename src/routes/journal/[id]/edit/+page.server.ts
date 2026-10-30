@@ -7,8 +7,8 @@ import { shot } from '#lib/server/db/schema.ts';
 import { and, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 
-// Editing a shot (D-57, D-113): the shot form in edit mode; ?bean= moves the shot to another open bean.
-// ?from=home when the shot was opened from Home, so that its Back still returns there afterwards (D-197).
+// Editing a shot: the shot form in edit mode; ?bean= moves the shot to another open bean.
+// ?from=home when the shot was opened from Home, so that its Back still returns there afterwards.
 const NOT_SAVED = 'The shot could not be saved. Nothing was changed.';
 
 export const load: PageServerLoad = ({ locals, params, url }) => {
@@ -21,7 +21,7 @@ export const load: PageServerLoad = ({ locals, params, url }) => {
   );
   if (!form) error(404, 'Shot not found');
   return {
-    // D-61: an edit saved without a connection waits on the phone, for this account.
+    // An edit saved without a connection waits on the phone, for this account.
     userId: locals.user.id,
     form,
     origin: {
@@ -53,7 +53,7 @@ export const actions: Actions = {
       .get();
     if (!existing) error(404, 'Shot not found');
     try {
-      // D-113: the brewing time stays as it was; the server finds or creates the recipe (data-model §4.1).
+      // The brewing time stays as it was; the server finds or creates the recipe (docs/SPEC.md §4.1).
       editShot(
         db,
         locals.user.id,
@@ -68,11 +68,11 @@ export const actions: Actions = {
       }
       throw e;
     }
-    // D-113: "Save changes" returns to the shot, still knowing whether it was opened from Home (D-197).
+    // "Save changes" returns to the shot, still knowing whether it was opened from Home.
     redirect(303, `/journal/${params.id}${data.get('from') === 'home' ? '?from=home' : ''}`);
   },
 
-  // D-116: delete after the confirmation; back to the Journal as you left it (D-117).
+  // Delete after the confirmation; back to the Journal as you left it.
   delete: ({ locals, params, cookies }) => {
     if (!locals.user) error(401);
     // A second tap finds the shot already gone: the Journal is still the right place to land.

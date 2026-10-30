@@ -1,6 +1,6 @@
 <script lang="ts">
-  // Insights (screens 23–25, D-55): the data basis, the topic chips and the cards of the chosen topic.
-  // It opens on What I like each time (D-208); only the card list scrolls (D-36).
+  // Insights (screens 23–25): the data basis, the topic chips and the cards of the chosen topic.
+  // It opens on What I like each time; only the card list scrolls.
   import InsightCard from '#lib/components/InsightCard.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
   import { count, TOPICS, type Topic } from '#lib/domain/insights.ts';
@@ -15,7 +15,7 @@
 
 <header>
   <h1 class="cn-type-display">Insights</h1>
-  <!-- D-207: with no shots the header says so; built without a design. -->
+  <!-- With no shots the header says so; built without a design. -->
   <span class="basis"
     >{insights.shots === 0
       ? 'No shots yet'
@@ -83,7 +83,7 @@
     flex: 1;
     min-height: 0;
     padding: 0 var(--space-5) var(--space-4);
-    /* D-36: the card list is the scrolling region. */
+    /* The card list is the scrolling region. */
     overflow-y: auto;
   }
 

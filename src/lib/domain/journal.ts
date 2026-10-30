@@ -1,10 +1,10 @@
-// The Journal and the shot detail (D-54, D-57): days, times and the short texts on a shot's row.
+// The Journal and the shot detail: days, times and the short texts on a shot's row.
 import { localDate, roastAgeDays } from './bean';
 import { mean, standardDeviation } from './statistics';
 import { tasteWords } from './taste';
 import { decimalsFor, formatQuantity, type Thousandths } from './units';
 
-/** "Today", "Yesterday", then "Tue 13 Oct"; a date in another year names the year (D-54). */
+/** "Today", "Yesterday", then "Tue 13 Oct"; a date in another year names the year. */
 export function dayLabel(brewedAt: number, now: number, timeZone: string): string {
   const day = dayNumber(localDate(brewedAt, timeZone));
   const today = dayNumber(localDate(now, timeZone));
@@ -33,7 +33,7 @@ export function clockTime(brewedAt: number, timeZone: string): string {
   }).format(brewedAt);
 }
 
-/** Shots in the order given (newest first), one group per calendar day (D-54). */
+/** Shots in the order given (newest first), one group per calendar day. */
 export function groupByDay<T extends { brewedAt: number }>(
   shots: readonly T[],
   now: number,
@@ -49,12 +49,12 @@ export function groupByDay<T extends { brewedAt: number }>(
   return groups.map(({ label, shots }) => ({ label, shots }));
 }
 
-/** How many shots were brewed since Monday of this week; weeks start on Monday (data-model §1.8). */
+/** How many shots were brewed since Monday of this week; weeks start on Monday (docs/SPEC.md §1.8). */
 export function shotsThisWeek(brewedAts: readonly number[], now: number, timeZone: string): number {
   return brewedAts.filter((b) => isThisWeek(b, now, timeZone)).length;
 }
 
-/** Brewed since Monday of this week, in the user's time zone (data-model §1.8). */
+/** Brewed since Monday of this week, in the user's time zone (docs/SPEC.md §1.8). */
 export function isThisWeek(brewedAt: number, now: number, timeZone: string): boolean {
   const today = dayNumber(localDate(now, timeZone));
   // Day 0 (1 Jan 1970) was a Thursday: Monday is 0 after shifting by 3.
@@ -71,8 +71,8 @@ export type CoreValues = {
 };
 
 /**
- * "1.6 · 18.0 → 38.5 g · 25.5 s" (D-54). Decimals as on the shot form: the grind follows its dial, dose,
- * yield and time keep at least one (D-07). A missing yield or time is left out (D-91).
+ * "1.6 · 18.0 → 38.5 g · 25.5 s". Decimals as on the shot form: the grind follows its dial, dose,
+ * yield and time keep at least one. A missing yield or time is left out.
  */
 export function coreValuesText(
   values: CoreValues,
@@ -90,13 +90,13 @@ export function coreValuesText(
   return parts.join(' · ');
 }
 
-/** The taste on a Journal row: the balance in words, "Not rated" for an unrated shot without one (D-11, D-54). */
+/** The taste on a Journal row: the balance in words, "Not rated" for an unrated shot without one. */
 export function journalTasteText(score: number | null, balance: number | null): string {
   if (balance !== null) return tasteWords('balance', balance);
   return score === null ? 'Not rated' : '';
 }
 
-/** "12 days since roast": the roast age on the day of the shot (D-17, D-57). */
+/** "12 days since roast": the roast age on the day of the shot. */
 export function roastAgeText(roastDate: string, brewedAt: number, timeZone: string): string {
   const days = roastAgeDays(roastDate, brewedAt, timeZone);
   return `${days} ${days === 1 ? 'day' : 'days'} since roast`;
@@ -109,7 +109,7 @@ export type RecipeComparison =
   | { kind: 'compared'; mean: number; sigmas: number | null };
 
 /**
- * "Compared with this recipe" (D-57, D-109): this shot's value against the recipe's other shots, never
+ * "Compared with this recipe": this shot's value against the recipe's other shots, never
  * itself. Needs two other shots with a value; σ is the sample standard deviation (n − 1).
  */
 export function compareWithRecipe(
@@ -128,7 +128,7 @@ export function compareWithRecipe(
   };
 }
 
-/** "Within normal range" within one σ; further away "1.7σ faster than usual" and the like (D-110). */
+/** "Within normal range" within one σ; further away "1.7σ faster than usual" and the like. */
 export function comparisonText(measure: 'time' | 'score', sigmas: number | null): string | null {
   if (sigmas === null) return null;
   // Compared as shown, to one decimal, so a sentence never reads "1.0σ faster than usual".
@@ -139,14 +139,14 @@ export function comparisonText(measure: 'time' | 'score', sigmas: number | null)
   return `${shown.toFixed(1)}σ ${words} than usual`;
 }
 
-/** A recipe in the Journal's recipe filter (D-112): "1.6 · 18.0 g · Daily routine · 3 shots". */
+/** A recipe in the Journal's recipe filter: "1.6 · 18.0 g · Daily routine · 3 shots". */
 export function recipeFilterLabel(
   recipe: {
     grind: Thousandths;
     dose: Thousandths;
     routine: string | null;
     shotCount: number;
-    /** Setup values that tell it apart from a recipe with the same values (D-121). */
+    /** Setup values that tell it apart from a recipe with the same values. */
     differences?: readonly string[];
   },
   steps: { grind: Thousandths; dose: Thousandths }
@@ -166,7 +166,7 @@ export function recipeFilterLabel(
 
 /**
  * For each recipe, the setup values in which it differs from the recipes with the same `values`
- * (grind, dose and routine), in the order given; empty when no other recipe has its values (D-121).
+ * (grind, dose and routine), in the order given; empty when no other recipe has its values.
  */
 export function setupDifferences(
   recipes: readonly { values: string; setup: readonly { key: string; text: string }[] }[]

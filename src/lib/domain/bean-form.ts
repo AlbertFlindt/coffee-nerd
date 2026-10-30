@@ -1,4 +1,4 @@
-// The Add bean form (D-41) as text, the way it is typed and shown, and reading it back into a bean.
+// The Add bean form as text, the way it is typed and shown, and reading it back into a bean.
 import { altitudeText, parseAltitude } from './bean';
 import { beanInputSchema, type BeanInput } from './schemas';
 import { fromThousandths, toThousandths } from './units';
@@ -18,7 +18,7 @@ export type BeanFormText = {
   rebuyOfId: string;
 };
 
-/** A bean as the form starts from it; a new form or a re-buy has no roast date yet (D-138). */
+/** A bean as the form starts from it; a new form or a re-buy has no roast date yet. */
 export type BeanFormValues = Omit<BeanInput, 'roastDate'> & { roastDate: string | null };
 
 const PROBLEM: Record<string, string> = {
@@ -32,7 +32,7 @@ const PROBLEM: Record<string, string> = {
 const FIELD_OF: Record<string, string> = { altitudeMinM: 'altitude', altitudeMaxM: 'altitude' };
 
 /**
- * Grams written the international way (D-142): "250.5", "1,000 g"; a comma only between groups of three
+ * Grams written the international way: "250.5", "1,000 g"; a comma only between groups of three
  * digits. Null when it cannot be read.
  */
 function parseGrams(typed: string): number | null {
@@ -99,7 +99,7 @@ export function beanFormText(values: BeanFormValues): BeanFormText {
   };
 }
 
-/** "250", "250.25", "1,000": up to three decimals, none trailing (D-130, D-142). */
+/** "250", "250.25", "1,000": up to three decimals, none trailing. */
 function gramsText(grams: number): string {
   const decimals = [0, 1, 2, 3].find((d) => grams % 10 ** (3 - d) === 0) ?? 3;
   return fromThousandths(grams).toLocaleString('en-US', {

@@ -1,7 +1,7 @@
-// A shot history for Insights' screenshots and tests (screens 23–25, roadmap M9): 214 shots on 9 beans
+// A shot history for Insights' screenshots and tests (screens 23–25): 214 shots on 9 beans
 // over the last 13 weeks, 96 of them rated, shaped like the designed numbers (more rated naturals and
 // Ethiopians, scores rising and steadying over time, a Light roast routine on Guji's best recipe).
-// Development and screenshots only, like the reference setup (D-88). Deterministic: the same `now`
+// Development and screenshots only, like the reference setup. Deterministic: the same `now`
 // always gives the same history.
 import { localDate } from '../../domain/bean';
 import type { SetupSnapshot } from '../../domain/schemas';

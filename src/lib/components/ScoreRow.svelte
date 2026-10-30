@@ -1,7 +1,7 @@
 <script lang="ts">
-  // Score 1–10 (D-09): tap to choose, slide to refine (D-10), tap the chosen score again to clear it
-  // (D-98). Starts empty (D-11). The last score with this recipe is a dashed cherry outline that sets
-  // nothing (D-12).
+  // Score 1–10: tap to choose, slide to refine, tap the chosen score again to clear it.
+  // Starts empty. The last score with this recipe is a dashed cherry outline that sets
+  // nothing.
   let {
     value,
     previous,

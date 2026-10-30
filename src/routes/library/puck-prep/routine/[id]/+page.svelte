@@ -1,5 +1,5 @@
 <script lang="ts">
-  // A routine in the builder (screen 19, D-51, D-167).
+  // A routine in the builder (screen 19).
   import RoutinePage from '#lib/components/RoutinePage.svelte';
   import type { PageProps } from './$types';
 

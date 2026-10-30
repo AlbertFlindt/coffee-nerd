@@ -148,7 +148,7 @@ describe('score by origin (screen 23)', () => {
     ]);
     expect(result.title).toBe('No clear favorite origin');
     expect(result.sentence).toBe('Your top origins average within half a point of each other.');
-    // D-206: no row is painted amber as a winner.
+    // No row is painted amber as a winner.
     expect(result.chart).toMatchObject({ rows: [{ top: false }, { top: false }] });
   });
 
@@ -315,7 +315,7 @@ describe('shot time by routine (screen 25)', () => {
       ...times([25, 28, 31, 28, 30], light),
       // Another grind is another recipe: not compared.
       ...times([20, 40], { grind: 1500, recipeId: 'recipe-fine' }),
-      // Another bean: not compared (D-210).
+      // Another bean: not compared.
       ...times([20, 40, 20, 40, 20], { ...light, beanId: 'bean-other', recipeId: 'recipe-o' })
     ]);
     expect(result.title).toBe('Daily routine is more repeatable');
@@ -392,7 +392,7 @@ describe('most consistent beans (screen 25)', () => {
         [9, 9, 8]
       ]),
       ...bean('Huila', [[5, 7, 9, 6, 8]]),
-      // A recipe brewed once does not count (D-203).
+      // A recipe brewed once does not count.
       ...bean('Cerrado', [[9], [2], [5], [7], [1]])
     ]);
     expect(result.title).toBe('Most consistent beans');

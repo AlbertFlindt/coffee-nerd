@@ -1,8 +1,8 @@
 <script lang="ts">
-  // Settings (D-199, D-248): opened by the gear on Home. The dose, yield and time steps (D-249), the
-  // backup and the exports (D-251, D-252), "Sign out", which ends this device's session (D-86), and the
-  // version (D-234). Built without a design (docs/open-items.md).
-  // D-225: signing out clears the phone, and asks first while shots wait to be sent.
+  // Settings: opened by the gear on Home. The dose, yield and time steps, the
+  // backup and the exports, "Sign out", which ends this device's session, and the
+  // version. Built without a design.
+  // Signing out clears the phone, and asks first while shots wait to be sent.
   import { version } from '$app/env';
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
@@ -109,7 +109,7 @@
 
   <section aria-labelledby="data-title">
     <h2 id="data-title" class="cn-label">Your data</h2>
-    <!-- D-251, D-252: plain forms, so the browser saves the file and the page stays. -->
+    <!-- Plain forms, so the browser saves the file and the page stays. -->
     {#each DATA as { action, name, line } (action)}
       <form method="POST" {action}>
         <button class="data cn-tap" type="submit">
@@ -127,7 +127,7 @@
 </main>
 
 {#if asking}
-  <!-- D-225: not designed yet; the wording is approved by screenshot (docs/open-items.md). -->
+  <!-- Not designed yet; the wording is approved by screenshot. -->
   <ConfirmDialog label="Sign out" closeLabel="Stay signed in" onclose={() => (asking = false)}>
     <h2 class="cn-type-heading sheet-title">
       {count === 1 ? '1 shot is' : `${count} shots are`} still waiting to send
@@ -232,7 +232,7 @@
     color: var(--ink-muted);
   }
 
-  /* D-234: the version sits at the bottom of the page. */
+  /* The version sits at the bottom of the page. */
   .version {
     margin: auto 0 0;
     color: var(--ink-muted);

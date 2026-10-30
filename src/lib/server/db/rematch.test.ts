@@ -23,7 +23,7 @@ beforeEach(() => {
   ids = seedReferenceSetup(db, { now: T0, name: 'Demo', passwordHash: 'x' });
 });
 
-/** A recipe as saved before D-186, with an old-style fingerprint that held the dose, and one shot. */
+/** A recipe as saved before doses were matched within 0.2 g, with an old-style fingerprint that held the dose, and one shot. */
 function oldRecipe(dose: number, minutes: number, ownerId = ids.userId): string {
   const now = T0 + minutes * 60_000;
   const id = newId(now);

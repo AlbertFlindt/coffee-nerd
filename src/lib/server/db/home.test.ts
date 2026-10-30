@@ -127,7 +127,7 @@ describe('loadHome', () => {
 
   it('this week counts only this bean’s shots since Monday', () => {
     const other = secondBean();
-    // Saved first: saving a shot makes its bean Home's bean (data-model §4.4).
+    // Saved first: saving a shot makes its bean Home's bean (docs/SPEC.md §4.4).
     save(shotAt(T0 - 30 * MINUTE, { beanId: other, taste: taste(3) }));
     save(shotAt(T0 - 10 * MINUTE, { taste: taste(8) }));
     save(shotAt(T0 - 20 * MINUTE, { taste: taste(null) }));

@@ -1,5 +1,5 @@
-// The Beans overview (D-37) and its numbers, and adding and editing a bean (D-41, D-130). Every query is
-// scoped by the owner (D-60).
+// The Beans overview and its numbers, and adding and editing a bean. Every query is
+// scoped by the owner.
 import { and, desc, eq } from 'drizzle-orm';
 import {
   bestScoreText,
@@ -23,20 +23,20 @@ import { clearMark, markedRecipe } from './shots';
 export type BeanSummary = {
   id: string;
   name: string;
-  /** "Nordlys Roasters · Ethiopia · Natural" (D-37). */
+  /** "Nordlys Roasters · Ethiopia · Natural". */
   origin: string;
   roastAgeDays: number;
-  /** The best score as shown (D-135); null when no shot is rated ("Not rated yet"). */
+  /** The best score as shown; null when no shot is rated ("Not rated yet"). */
   best: string | null;
   recipes: number;
   shots: number;
-  /** "120 g left" (D-132); null without a bag weight. */
+  /** "120 g left"; null without a bag weight. */
   gramsLeft: string | null;
 };
 
 export type Beans = { open: BeanSummary[]; finished: BeanSummary[] };
 
-/** Open beans newest first, then finished beans, most recently finished first (D-37, D-137). */
+/** Open beans newest first, then finished beans, most recently finished first. */
 export function loadBeans(db: Queryable, ownerId: string, now: number): Beans {
   const beans = db
     .select()
@@ -113,7 +113,7 @@ export class BeanRejected extends Error {
   }
 }
 
-/** Your time zone, for today's date (D-138). */
+/** Your time zone, for today's date. */
 export function timeZoneOf(db: Queryable, ownerId: string): string {
   return (
     db
@@ -132,7 +132,7 @@ function ownBean(db: Queryable, ownerId: string, id: string) {
     .get();
 }
 
-/** D-138: a bag cannot be roasted after today, in your time zone. */
+/** A bag cannot be roasted after today, in your time zone. */
 function checkRoastDate(db: Queryable, ownerId: string, roastDate: string, now: number): void {
   if (roastDate > localDate(now, timeZoneOf(db, ownerId)))
     throw new BeanRejected(['roastDate: after today']);
@@ -152,7 +152,7 @@ const fields = (input: BeanInput) => ({
   bagWeight: input.bagWeight
 });
 
-/** Adds an open bean (D-41). It does not become the current bean; a shot does that (D-140). */
+/** Adds an open bean. It does not become the current bean; a shot does that. */
 export function addBean(db: Db, ownerId: string, input: BeanInput, now: number): string {
   return db.transaction((tx) => {
     checkRoastDate(tx, ownerId, input.roastDate, now);
@@ -174,7 +174,7 @@ export function addBean(db: Db, ownerId: string, input: BeanInput, now: number):
   });
 }
 
-/** Saves an edited bean (D-130). Its re-buy link and status stay as they are. */
+/** Saves an edited bean. Its re-buy link and status stay as they are. */
 export function updateBean(
   db: Db,
   ownerId: string,
@@ -209,14 +209,14 @@ function formOf(row: typeof bean.$inferSelect): BeanForm {
   };
 }
 
-/** The Edit bean form, filled in from the bean (D-130); null when it is not yours. */
+/** The Edit bean form, filled in from the bean; null when it is not yours. */
 export function loadBeanForm(db: Queryable, ownerId: string, id: string): BeanForm | null {
   const row = ownBean(db, ownerId, id);
   return row ? formOf(row) : null;
 }
 
 /**
- * "Same as before" (D-126): every earlier bean once, newest first. Bags with the same name and roaster
+ * "Same as before": every earlier bean once, newest first. Bags with the same name and roaster
  * count as one bean, shown as its latest bag.
  */
 export function rebuyChoices(
@@ -241,7 +241,7 @@ export function rebuyChoices(
 }
 
 /**
- * A re-buy of an earlier bag (D-41, D-139): everything copied except roast date and bag weight, linked
+ * A re-buy of an earlier bag: everything copied except roast date and bag weight, linked
  * to that bag. Null when the bag is not yours.
  */
 export function rebuyFields(db: Queryable, ownerId: string, id: string): BeanForm | null {
@@ -254,29 +254,29 @@ export type BeanDetail = {
   name: string;
   status: 'open' | 'finished';
   roastAgeDays: number;
-  /** The about card's lines (D-42); the first is the roaster when `roaster` is set. */
+  /** The about card's lines; the first is the roaster when `roaster` is set. */
   about: string[];
   roaster: boolean;
-  /** The best score as shown (D-135); null when no shot is rated. */
+  /** The best score as shown; null when no shot is rated. */
   best: string | null;
   recipeCount: number;
   shotCount: number;
-  /** Best first (D-135). */
+  /** Best first. */
   recipes: {
     id: string;
-    /** "Grind 1.6 · 18.0 g → 36.0 g" (D-143). */
+    /** "Grind 1.6 · 18.0 g → 36.0 g". */
     title: string;
-    /** "Preinfusion 4 s · 93 °C · avg 28.0 s" (D-128). */
+    /** "Preinfusion 4 s · 93 °C · avg 28.0 s". */
     detail: string;
     history: { text: string; reused: boolean };
-    /** The recipe's highest single score, "8 best" (D-135); null when none is rated. */
+    /** The recipe's highest single score, "8 best"; null when none is rated. */
     best: number | null;
-    /** Marked Brew next (D-43). */
+    /** Marked Brew next. */
     marked: boolean;
   }[];
 };
 
-/** The bean detail page (D-42); null when the bean is not yours. */
+/** The bean detail page; null when the bean is not yours. */
 export function loadBeanDetail(
   db: Queryable,
   ownerId: string,
@@ -317,7 +317,7 @@ export function loadBeanDetail(
   const byRecipe = recipes.map((r) => ({ recipeId: r.id, shots: ofRecipe(r.id) }));
   const order = rankRecipes(byRecipe);
   const today = localDate(now, settings.timeZone);
-  // D-144: the rows name the temperature only when the bean's recipes do not all share it.
+  // The rows name the temperature only when the bean's recipes do not all share it.
   // Compared as the rows would show them, not as stored (label or key order do not count).
   const temperatures = new Set(
     recipes.map((r) => {
@@ -367,8 +367,8 @@ export function loadBeanDetail(
 }
 
 /**
- * The Brew next button (D-43): marks this recipe, moving the mark from another; tapping the marked one
- * clears it. On a finished bean, marking reopens the bean (D-129). Null when the recipe is not one of
+ * The Brew next button: marks this recipe, moving the mark from another; tapping the marked one
+ * clears it. On a finished bean, marking reopens the bean. Null when the recipe is not one of
  * yours on this bean.
  */
 export function toggleBrewNext(
@@ -379,7 +379,7 @@ export function toggleBrewNext(
   now: number
 ): 'marked' | 'cleared' | 'reopened' | null {
   return db.transaction((tx) => {
-    // Only a recipe of the bean whose page this is (D-42).
+    // Only a recipe of the bean whose page this is.
     const r = tx
       .select({ id: recipe.id, beanId: recipe.beanId })
       .from(recipe)
@@ -390,7 +390,7 @@ export function toggleBrewNext(
       clearMark(tx, ownerId, now);
       return 'cleared';
     }
-    // A recipe that only the old mark kept goes with it (data-model §4.1).
+    // A recipe that only the old mark kept goes with it (docs/SPEC.md §4.1).
     clearMark(tx, ownerId, now);
     tx.update(appState)
       .set({ brewNextRecipeId: recipeId, updatedAt: now })
@@ -409,7 +409,7 @@ function reopen(tx: Queryable, ownerId: string, beanId: string, now: number): bo
   return result.changes > 0;
 }
 
-/** "Mark as finished" (D-40, D-127). True when an open bean of yours was finished. */
+/** "Mark as finished". True when an open bean of yours was finished. */
 export function finishBean(db: Db, ownerId: string, beanId: string, now: number): boolean {
   const result = db
     .update(bean)
@@ -419,15 +419,15 @@ export function finishBean(db: Db, ownerId: string, beanId: string, now: number)
   return result.changes > 0;
 }
 
-/** "Reopen", and the Undo after finishing by hand (D-40, D-127). True when a bean was reopened. */
+/** "Reopen", and the Undo after finishing by hand. True when a bean was reopened. */
 export function reopenBean(db: Db, ownerId: string, beanId: string, now: number): boolean {
   return reopen(db, ownerId, beanId, now);
 }
 
 /**
- * Deletes a bean that has no shots (D-145), for a bag added by mistake; a bean with shots is finished,
- * never deleted. A recipe kept only by its Brew next mark goes too, with the mark (data-model §4.1), Home
- * stops pointing at it (D-32), and a later re-buy links to the bag before it instead (D-73).
+ * Deletes a bean that has no shots, for a bag added by mistake; a bean with shots is finished,
+ * never deleted. A recipe kept only by its Brew next mark goes too, with the mark (docs/SPEC.md §4.1), Home
+ * stops pointing at it, and a later re-buy links to the bag before it instead.
  */
 export function deleteBean(
   db: Db,
@@ -471,7 +471,7 @@ export function deleteBean(
   });
 }
 
-/** True when any shot was brewed with this bean (D-145: only a bean without shots can be deleted). */
+/** True when any shot was brewed with this bean (only a bean without shots can be deleted). */
 export function beanHasShots(db: Queryable, ownerId: string, beanId: string): boolean {
   return (
     db

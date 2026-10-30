@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Edit My setup (screen 13, D-45).
+  // Edit My setup (screen 13).
   import MySetupForm from '#lib/components/MySetupForm.svelte';
   import type { PageProps } from './$types';
 

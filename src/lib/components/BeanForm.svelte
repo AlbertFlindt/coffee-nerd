@@ -1,7 +1,7 @@
 <script lang="ts">
-  // The Add bean form (screen 9, D-41), also used to edit a bean (D-130). It fits the screen (D-36).
-  // "Same as before" (D-126, D-139) and Country (D-133) open sheets; Roast date opens the device's own
-  // date picker (D-138).
+  // The Add bean form (screen 9), also used to edit a bean. It fits the screen.
+  // "Same as before" and Country open sheets; Roast date opens the device's own
+  // date picker.
   import { untrack } from 'svelte';
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
@@ -27,18 +27,18 @@
     problems = []
   }: {
     mode: 'add' | 'edit';
-    /** The bean being edited: closing goes back to its page (D-130). */
+    /** The bean being edited: closing goes back to its page. */
     beanId?: string;
-    /** Editing a bean without shots: it can be deleted (D-145). */
+    /** Editing a bean without shots: it can be deleted. */
     deletable?: boolean;
     text: BeanFormText;
-    /** Today in your time zone, "YYYY-MM-DD": no roast date after it (D-138). */
+    /** Today in your time zone, "YYYY-MM-DD": no roast date after it. */
     today: string;
-    /** The name of the bean this re-buy repeats (D-139). */
+    /** The name of the bean this re-buy repeats. */
     rebuy?: { name: string } | null;
-    /** "Same as before" choices (D-126); picking one opens the form filled from it (?rebuy=). */
+    /** "Same as before" choices; picking one opens the form filled from it (?rebuy=). */
     choices?: { id: string; name: string; origin: string }[];
-    /** The last step of the step-by-step start (D-157): "Step 5 of 5" and "Next". */
+    /** The last step of the step-by-step start: "Step 5 of 5" and "Next". */
     guide?: Guide | null;
     problems?: string[];
   } = $props();
@@ -57,7 +57,7 @@
     ['dark', 'Dark']
   ] as const;
   // The action keeps the page's query (?rebuy=, ?guide=): with another query, a refused save would load
-  // the page again and start the form over, losing what was typed (D-139).
+  // the page again and start the form over, losing what was typed.
   const saveAction = $derived.by(() => {
     const query = page.url.searchParams.toString();
     return `?${query ? `${query}&` : ''}/save`;
@@ -261,7 +261,7 @@
   </fieldset>
 
   <div class="pair">
-    <!-- D-138: the date input lies over the field, so a tap opens the device's own picker. -->
+    <!-- The date input lies over the field, so a tap opens the device's own picker. -->
     <label class="field date cn-tap">
       <span class="cn-caption label">Roast date <span>Required</span></span>
       {#if roast}
@@ -299,7 +299,7 @@
     {guide ? 'Next' : mode === 'add' ? 'Add bean' : 'Save changes'}
   </button>
   {#if mode === 'edit' && deletable}
-    <!-- D-145: only a bean without shots can be deleted; a confirmation asks first. -->
+    <!-- Only a bean without shots can be deleted; a confirmation asks first. -->
     <button class="cn-btn-quiet cn-tap" type="button" onclick={() => (sheet = 'delete')}
       >Delete bean</button
     >
@@ -309,7 +309,7 @@
 {#if sheet === 'rebuy'}
   <BottomSheet label="Same as before" closeLabel="Close bean list" onclose={() => (sheet = null)}>
     <h2 class="sheet-title">Same as before</h2>
-    <!-- D-126: picking a bean opens the form filled from it (?rebuy=), like the shot form's bean list. -->
+    <!-- Picking a bean opens the form filled from it (?rebuy=), like the shot form's bean list. -->
     <form
       class="list"
       method="GET"
@@ -331,7 +331,7 @@
     </form>
   </BottomSheet>
 {:else if sheet === 'delete'}
-  <!-- D-145, D-241: the confirmation dialog, as for a shot (D-116). -->
+  <!-- The confirmation dialog, as for a shot. -->
   <ConfirmDialog label="Delete this bean" closeLabel="Keep the bean" onclose={() => (sheet = null)}>
     <h2 class="sheet-title">Delete this bean?</h2>
     <p class="cn-type-body note">It has no shots yet. This cannot be undone.</p>
@@ -351,7 +351,7 @@
     onclose={() => (sheet = null)}
   >
     <h2 class="sheet-title">Country</h2>
-    <!-- Screen 32: a rounded search field, then the countries A–Z (D-133). -->
+    <!-- Screen 32: a rounded search field, then the countries A–Z. -->
     <div class="search">
       <svg
         width="18"

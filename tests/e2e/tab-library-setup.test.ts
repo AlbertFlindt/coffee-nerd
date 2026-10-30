@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// Edit My setup (roadmap M6, screen 13, D-45) on the reference setup. Each designed screen is saved to
+// Edit My setup (screen 13) on the reference setup. Each designed screen is saved to
 // screenshots/ for comparing with docs/screens/. The setup is left as it was.
 test.describe.configure({ mode: 'serial' });
 
@@ -58,7 +58,7 @@ test('EditSetup: a full-screen form that starts from My setup', async () => {
   await expect(page.getByRole('button', { name: 'Grinder, Timemore 064S' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Basket, VST · 18 g' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Puck prep, Daily routine' })).toBeVisible();
-  // D-89: the steps are the ones in settings, 0.1 g by default.
+  // The steps are the ones in settings, 0.1 g by default.
   await expect(page.getByRole('button', { name: 'Dose plus 0.1 gram' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Yield plus 0.1 gram' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Temperature plus 1 degree' })).toBeVisible();

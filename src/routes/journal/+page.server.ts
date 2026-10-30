@@ -6,8 +6,8 @@ import { takeFlash } from '#lib/server/flash.ts';
 import { rememberJournalFilters } from '#lib/server/journal-filters.ts';
 import type { Actions, PageServerLoad } from './$types';
 
-// Journal (screen 22, D-54): every shot, newest first; ?bean=, ?recipe= and ?unrated=1 filter it. After a
-// shot saved from the Journal's "+", it shows the "Shot saved" bar (D-200).
+// Journal (screen 22): every shot, newest first; ?bean=, ?recipe= and ?unrated=1 filter it. After a
+// shot saved from the Journal's "+", it shows the "Shot saved" bar.
 export const load: PageServerLoad = ({ locals, url, cookies, request }) => {
   if (!locals.user) error(401);
   const now = Date.now();
@@ -21,9 +21,9 @@ export const load: PageServerLoad = ({ locals, url, cookies, request }) => {
     },
     now
   );
-  // D-117: remember the filters in effect; ids that no longer exist are dropped.
+  // Remember the filters in effect; ids that no longer exist are dropped.
   if (!locals.offlineCopy) rememberJournalFilters(cookies, journal, request);
-  // D-61, D-225: whose shots wait on the phone; they are only shown and sent for their own account.
+  // Whose shots wait on the phone; they are only shown and sent for their own account.
   return {
     userId: locals.user.id,
     now,
@@ -33,7 +33,7 @@ export const load: PageServerLoad = ({ locals, url, cookies, request }) => {
 };
 
 export const actions: Actions = {
-  // D-111: the Rate sheet sets the score of one shot.
+  // The Rate sheet sets the score of one shot.
   rate: async ({ locals, request }) => {
     if (!locals.user) error(401);
     const data = await request.formData();

@@ -240,7 +240,7 @@ describe('saveMySetup', () => {
     const shotForm = loadShotForm(db, ids.userId);
     if (shotForm.state !== 'ready') throw new Error('Expected a ready shot form');
     expect(shotForm.prefill.setup.features[key]).toMatchObject({ on: true, choice: 'hard' });
-    // Switched on without an option, it waits for one (D-78).
+    // Switched on without an option, it waits for one.
     expect(
       rejection({ ...input, features: { ...input.features, [key]: { label: 'Water', on: true } } })
     ).toEqual(['Set Water first.']);

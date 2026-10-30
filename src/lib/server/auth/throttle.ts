@@ -1,5 +1,5 @@
 // Slows down password guessing: after 5 wrong passwords within 15 minutes, sign-in waits a minute.
-// Kept in memory: one process serves the one account (D-59, D-60).
+// Kept in memory: one process serves the one account.
 
 const WINDOW = 15 * 60_000;
 const MAX_FAILURES = 5;

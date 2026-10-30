@@ -1,7 +1,7 @@
 <script lang="ts">
-  // Tags (screen 21, D-53): "Add tag", a search field, the cream "Same tag twice?" card with Merge (it asks
-  // first, D-180) and a quiet "Keep both" (D-173), then your notes as chips by family with their count and "custom" for the
-  // ones you added. A chip opens the tag sheet. Only the chip area scrolls (D-36).
+  // Tags (screen 21): "Add tag", a search field, the cream "Same tag twice?" card with Merge (it asks
+  // first) and a quiet "Keep both", then your notes as chips by family with their count and "custom" for the
+  // ones you added. A chip opens the tag sheet. Only the chip area scrolls.
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import ArchivedLink from '#lib/components/ArchivedLink.svelte';
@@ -20,7 +20,7 @@
   let sheet: 'new' | string | null = $state(null);
   const editing = $derived(everyNote.find((t) => t.id === sheet));
 
-  /** The "Same tag twice?" card's merge, waiting for its confirmation (D-180). */
+  /** The "Same tag twice?" card's merge, waiting for its confirmation. */
   let merging = $state(false);
   let search = $state('');
   const shown = $derived(
@@ -140,7 +140,7 @@
 <TabBar current="library" />
 
 {#if merging && duplicate}
-  <!-- D-180: the card's Merge asks first, as the sheet does. -->
+  <!-- The card's Merge asks first, as the sheet does. -->
   {#key duplicate.merge.id}
     <TagSheet tag={duplicate.merge} into={duplicate.keep} onclose={() => (merging = false)} />
   {/key}

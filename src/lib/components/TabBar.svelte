@@ -1,7 +1,7 @@
 <script lang="ts">
-  // The tab bar on tab screens (D-30): Home · Journal · + · Library · Insights. The amber + is the only way
-  // to add a shot (D-31). Library opens the Library page (D-156), Insights the Insights page (D-55). From
-  // the Journal, "+" says so, and Save and Back return there (D-200).
+  // The tab bar on tab screens: Home · Journal · + · Library · Insights. The amber + is the only way
+  // to add a shot. Library opens the Library page, Insights the Insights page. From
+  // the Journal, "+" says so, and Save and Back return there.
   import { resolve } from '$app/paths';
 
   let { current }: { current: 'home' | 'journal' | 'library' | 'insights' } = $props();
@@ -35,7 +35,7 @@
       aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg
     >Journal</a
   >
-  <!-- The prefill must be current when the form opens (D-03, D-43): load on tap, not on hover. -->
+  <!-- The prefill must be current when the form opens: load on tap, not on hover. -->
   <a
     class="cn-plus cn-tap-strong"
     href={current === 'journal' ? resolve('/shot/new?from=journal') : resolve('/shot/new')}

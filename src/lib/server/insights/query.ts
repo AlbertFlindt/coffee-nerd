@@ -1,4 +1,4 @@
-// The query runner (data-model §5, D-64): `{ measure, groupBy, filters, holdConstant }` over shot facts,
+// The query runner (docs/SPEC.md §5): `{ measure, groupBy, filters, holdConstant }` over shot facts,
 // returning each group's values. Statistics are left to `src/lib/domain/statistics.ts`.
 import { recipeFingerprint, sameDose } from '../../domain/fingerprint';
 import type { ShotFact } from './facts';
@@ -11,8 +11,8 @@ import {
 } from './registry';
 
 /**
- * What to hold constant for a fair comparison (D-55): the same bean, the same recipe, or the same
- * recipe apart from its routine, to compare routines with everything else equal (D-204).
+ * What to hold constant for a fair comparison: the same bean, the same recipe, or the same
+ * recipe apart from its routine, to compare routines with everything else equal.
  */
 export type HoldConstant = 'bean' | 'recipe' | 'recipe-apart-from-routine';
 
@@ -21,9 +21,9 @@ export type InsightQuery = {
   /** Without one, every shot falls in one group. */
   groupBy?: DimensionName;
   filters?: {
-    /** Only rated shots, also when the measure is not the score (D-11). */
+    /** Only rated shots, also when the measure is not the score. */
     ratedOnly?: boolean;
-    /** Only shots on recipes brewed more than once (D-203). */
+    /** Only shots on recipes brewed more than once. */
     reusedRecipesOnly?: boolean;
     beanId?: string;
     recipeId?: string;
@@ -34,11 +34,11 @@ export type InsightQuery = {
 export type QueryGroup = {
   key: string;
   label: string;
-  /** The measure's values, oldest shot first; shots without a value are left out (D-11). */
+  /** The measure's values, oldest shot first; shots without a value are left out. */
   values: number[];
-  /** With `holdConstant`: the same values split by what was held constant, for pooled σ (D-211). */
+  /** With `holdConstant`: the same values split by what was held constant, for pooled σ. */
   held: number[][];
-  /** What each of `held` holds constant, in the same order, to match strata across groups (D-204). */
+  /** What each of `held` holds constant, in the same order, to match strata across groups. */
   heldKeys: string[];
 };
 
@@ -94,10 +94,10 @@ function heldKeyFor(hold: HoldConstant, facts: readonly ShotFact[]): (fact: Shot
 }
 
 /**
- * Groups recipes that are equal apart from the routine (D-204): same bean, machine, grinder, grind,
- * basket and setup, and a dose within 0.2 g (D-186). "Within 0.2 g" is not transitive, so recipes are
+ * Groups recipes that are equal apart from the routine: same bean, machine, grinder, grind,
+ * basket and setup, and a dose within 0.2 g. "Within 0.2 g" is not transitive, so recipes are
  * taken from the most brewed down (the first brewed first on a tie), and each joins the closest anchor
- * within reach (D-215), as D-186 matches a dose to the closest recipe; one with none starts its own. Returns each
+ * within reach, as a shot's dose is matched to the closest recipe; one with none starts its own. Returns each
  * recipe's group key.
  */
 export function recipesApartFromRoutine(facts: readonly ShotFact[]): Map<string, string> {

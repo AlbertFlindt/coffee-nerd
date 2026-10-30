@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Library (screen 17, D-50): Beans, Gear, Puck prep and Tags, each with two live lines.
+  // Library (screen 17): Beans, Gear, Puck prep and Tags, each with two live lines.
   import { resolve } from '$app/paths';
   import TabBar from '#lib/components/TabBar.svelte';
   import type { PageProps } from './$types';

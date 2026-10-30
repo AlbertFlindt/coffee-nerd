@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// Library › Puck prep (roadmap M7) on the reference seed: the Daily routine and its four steps. A step
+// Library › Puck prep on the reference seed: the Daily routine and its four steps. A step
 // added here is deleted again, so the reference setup stays as it was.
 test.describe.configure({ mode: 'serial' });
 
@@ -59,7 +59,7 @@ test('NewStep: a new step with a number setting', async () => {
   await sheet.getByRole('radio', { name: 'Number with unit' }).click();
   await sheet.getByLabel('Unit').fill('sprays');
   await sheet.getByLabel('Starts at').fill('2');
-  // D-185: Range opens the number keypad.
+  // Range opens the number keypad.
   await expect(sheet.getByLabel('Range')).toHaveAttribute('inputmode', 'decimal');
   await expect(sheet.getByRole('region', { name: 'Preview' })).toContainText('RDT');
   await expect(sheet.getByRole('region', { name: 'Preview' })).toContainText('2 sprays');
@@ -115,12 +115,12 @@ test('a step in a routine stays', async () => {
   const sheet = page.getByRole('region', { name: 'Edit Tamp' });
   await expect(sheet).toContainText('Used in Daily routine');
   await expect(sheet.getByRole('button', { name: /Delete step|Archive step/ })).toHaveCount(0);
-  // D-168, screen 53: Tamp has been used by shots, so its kind and unit only show.
+  // Screen 53: Tamp has been used by shots, so its kind and unit only show.
   await expect(sheet).toContainText('Number with unit · kg');
   await expect(sheet.getByLabel('Unit')).toHaveCount(0);
   await expect(sheet.getByRole('radiogroup', { name: 'Setting' })).toHaveCount(0);
   await expectNoPageScroll();
-  // D-175: a range the routine's 15 kg falls outside is refused, naming the routine.
+  // A range the routine's 15 kg falls outside is refused, naming the routine.
   await sheet.getByLabel('Starts at').fill('5');
   await sheet.getByLabel('Range').fill('0–10');
   await sheet.getByRole('button', { name: 'Save step' }).click();
@@ -167,7 +167,7 @@ test('build a routine, set a value, reorder, and add a new step on the way', asy
     .getByRole('button', { name: /^Tamp/ })
     .click();
 
-  // D-165: the value sheet.
+  // The value sheet.
   await page.getByRole('button', { name: /^WDT setting, 20 s/ }).click();
   const value = page.getByRole('region', { name: 'WDT setting' });
   await screenshot('RoutineValue');
@@ -176,7 +176,7 @@ test('build a routine, set a value, reorder, and add a new step on the way', asy
   await value.getByRole('button', { name: 'Done' }).click();
   await expect(page.getByRole('button', { name: /^WDT setting, 22 s/ })).toBeVisible();
 
-  // D-51: reorder by dragging the handle, and with the arrow keys on it.
+  // Reorder by dragging the handle, and with the arrow keys on it.
   const order = () =>
     page
       .getByRole('button', { name: /^Drag to move/ })
@@ -194,7 +194,7 @@ test('build a routine, set a value, reorder, and add a new step on the way', asy
   await page.keyboard.press('ArrowUp');
   expect(await order()).toEqual(['Drag to move Tamp', 'Drag to move WDT']);
 
-  // D-164: "New step" from the insert sheet goes in where + was tapped.
+  // "New step" from the insert sheet goes in where + was tapped.
   await page.getByRole('button', { name: 'Insert a step after WDT' }).click();
   await screenshot('RoutineInsert');
   await page
@@ -209,7 +209,7 @@ test('build a routine, set a value, reorder, and add a new step on the way', asy
 
   await page.getByRole('button', { name: 'Save routine' }).click();
   await expect(page.getByRole('heading', { name: 'Puck prep', level: 1 })).toBeVisible();
-  // D-187: a new routine asks to be used for new shots; "Not now" keeps My setup's routine.
+  // A new routine asks to be used for new shots; "Not now" keeps My setup's routine.
   const ask = page.getByRole('region', { name: 'Use it for new shots' });
   await expect(ask.getByRole('heading', { name: 'Use it for new shots?' })).toBeVisible();
   await expect(ask).toContainText('Light roast becomes My setup’s routine');
@@ -220,7 +220,7 @@ test('build a routine, set a value, reorder, and add a new step on the way', asy
   await expect(
     page.getByRole('link', { name: /^Light roast/ }).getByLabel('Tamp, then WDT, then Paper filter')
   ).toBeVisible();
-  // Screen 50, D-163: a routine no shot used says so.
+  // Screen 50: a routine no shot used says so.
   await expect(page.getByRole('link', { name: /^Light roast/ })).toContainText('No shots yet');
   await screenshot('PuckPrepNew');
 });
@@ -231,7 +231,7 @@ test('a routine no shot used offers Delete', async () => {
   await expect(page.getByRole('button', { name: 'Archive', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Delete routine' }).click();
   await expect(page.getByRole('heading', { name: 'Delete this routine?' })).toBeVisible();
-  // D-241: deleting is red, keeping amber.
+  // Deleting is red, keeping amber.
   const confirm = page.getByRole('dialog', { name: 'Delete this routine' });
   await expect(confirm.getByRole('button', { name: 'Delete routine' })).toHaveClass(
     /cn-btn-danger/
@@ -291,7 +291,7 @@ test('once a shot used it, the routine is archived, and so is its step', async (
     .click();
   await expect(page.getByRole('button', { name: 'Paper filter' })).toHaveCount(0);
 
-  // D-188: both are listed under Archived; a step can be restored on its own.
+  // Both are listed under Archived; a step can be restored on its own.
   await page.getByRole('link', { name: 'Archived · 2' }).click();
   await expect(page.getByRole('main')).toContainText('Light roast');
   await expect(page.getByRole('main')).toContainText('Paper filter');

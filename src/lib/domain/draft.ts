@@ -1,4 +1,4 @@
-// The shot form's draft (D-226): what is being entered is kept on the phone, so a reload or closing the
+// The shot form's draft: what is being entered is kept on the phone, so a reload or closing the
 // app never loses it; opening the form again restores it. Save and Back end it. Pure: the form keeps the
 // list in the phone's storage (shot-draft.ts).
 import type { ShotState } from '../components/shot-state';
@@ -24,12 +24,12 @@ const sameValues = (a: ShotState, b: ShotState) =>
 
 /**
  * The values to open the form with, and the drafts after opening it. A new shot's draft from another
- * bean (D-94) or another prefill ("Use last shot recipe", D-43) is dropped: the form starts again. A
- * shot's own draft keeps its values with another bean (D-113), but only while the shot opens as it did
- * when the draft began: a change that waits for it since (a score given offline, D-239), or the shot
+ * bean or another prefill ("Use last shot recipe") is dropped: the form starts again. A
+ * shot's own draft keeps its values with another bean, but only while the shot opens as it did
+ * when the draft began: a change that waits for it since (a score given offline), or the shot
  * sent and saved meanwhile, starts the form from that instead. A new shot's draft opens with a new id
  * (`newId`): its Save may have reached the server just before the app closed, and the server keeps a
- * shot's id once (D-61), so the values entered again are saved as a shot of their own, never dropped.
+ * shot's id once, so the values entered again are saved as a shot of their own, never dropped.
  */
 export function restoreDraft(
   drafts: readonly Draft[],
@@ -40,7 +40,7 @@ export function restoreDraft(
   newId: () => string
 ): { shot: ShotState | null; drafts: Draft[] } {
   const draft = drafts.find((d) => same(d, ownerId, form));
-  // The bean is one of the values entered (D-113): the form opens on another bean with the same shot.
+  // The bean is one of the values entered: the form opens on another bean with the same shot.
   if (
     draft &&
     form !== 'new' &&
@@ -69,12 +69,12 @@ export function keepDraft(
   ];
 }
 
-/** Save and Back end the draft (D-226). */
+/** Save and Back end the draft. */
 export function endDraft(drafts: readonly Draft[], ownerId: string, form: string): Draft[] {
   return drafts.filter((d) => !same(d, ownerId, form));
 }
 
-/** D-225: signing out leaves nothing of the account on the phone. */
+/** Signing out leaves nothing of the account on the phone. */
 export function clearDrafts(drafts: readonly Draft[], ownerId: string): Draft[] {
   return drafts.filter((d) => d.ownerId !== ownerId);
 }

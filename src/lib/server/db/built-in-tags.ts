@@ -1,4 +1,4 @@
-// The built-in flavor tags every account starts with (D-53, D-88), as on the Tags screen.
+// The built-in flavor tags every account starts with, as on the Tags screen.
 import type { Queryable } from './client';
 import { newId } from './ids';
 import { tag } from './schema';

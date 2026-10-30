@@ -6,7 +6,7 @@ import { loadSettings } from '#lib/server/db/settings.ts';
 import { download } from '#lib/server/download.ts';
 import type { RequestHandler } from './$types';
 
-// D-251: "Download backup" in Settings: the whole database as one file, without sign-ins.
+// "Download backup" in Settings: the whole database as one file, without sign-ins.
 export const POST: RequestHandler = ({ locals }) => {
   if (!locals.user) error(401);
   const db = getDb();

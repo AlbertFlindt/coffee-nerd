@@ -1,6 +1,6 @@
 <script lang="ts">
-  // Journal (screen 22, D-54): header, filter chips, then the shots grouped by day. Only the list
-  // scrolls (D-36). Shots still on the phone show at once among them (D-221, D-224).
+  // Journal (screen 22): header, filter chips, then the shots grouped by day. Only the list
+  // scrolls. Shots still on the phone show at once among them.
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import JournalRow from '#lib/components/JournalRow.svelte';
@@ -21,7 +21,7 @@
       : journal.shots
   );
   const groups = $derived(groupByDay(shots, data.now, journal.timeZone));
-  // D-232: a shot just kept on the phone shows the usual "Shot saved" bar.
+  // A shot just kept on the phone shows the usual "Shot saved" bar.
   const savedOnPhone = takeSavedOnPhone();
   const beanName = $derived(journal.beans.find((b) => b.id === journal.beanId)?.name);
   const weekText = $derived(
@@ -31,7 +31,7 @@
   let recipeSheet = $state(false);
   const recipeLabel = $derived(journal.recipes.find((r) => r.id === journal.recipeId)?.label);
 
-  // D-111: the Rate sheet, opened from a row's Rate block.
+  // The Rate sheet, opened from a row's Rate block.
   let rating: (typeof shots)[number] | null = $state(null);
   const openRate = (shot: (typeof shots)[number]) => (rating = shot);
 </script>
@@ -78,7 +78,7 @@
       Unrated · {journal.unratedCount}
     </button>
   </form>
-  <!-- D-112: the recipe filter appears once a bean is chosen. -->
+  <!-- The recipe filter appears once a bean is chosen. -->
   {#if journal.beanId}
     <button
       type="button"
@@ -107,7 +107,7 @@
       {/each}
     </section>
   {:else}
-    <!-- Not designed yet (docs/open-items.md). -->
+    <!-- Not designed yet. -->
     <p class="empty">
       {#if journal.unrated}No unrated shots.{:else}No shots yet.{/if}
     </p>
@@ -121,7 +121,7 @@
     onclose={() => (beanSheet = false)}
   >
     <h2 class="cn-type-heading sheet-title">Beans</h2>
-    <!-- Not designed yet: a plain list of the beans that have shots (docs/open-items.md). -->
+    <!-- Not designed yet: a plain list of the beans that have shots. -->
     <form class="beans" method="GET" action={resolve('/journal')}>
       {#if journal.unrated}<input type="hidden" name="unrated" value="1" />{/if}
       <button
@@ -151,7 +151,7 @@
     onclose={() => (recipeSheet = false)}
   >
     <h2 class="cn-type-heading sheet-title">Recipes</h2>
-    <!-- Not designed yet: a plain list of the bean's recipes (D-112, docs/open-items.md). -->
+    <!-- Not designed yet: a plain list of the bean's recipes. -->
     <form class="beans" method="GET" action={resolve('/journal')}>
       <input type="hidden" name="bean" value={journal.beanId} />
       {#if journal.unrated}<input type="hidden" name="unrated" value="1" />{/if}
@@ -232,7 +232,7 @@
     flex-direction: column;
     gap: var(--space-4);
     padding: 0 var(--space-5) var(--space-4);
-    /* D-36: the list is the scrolling region. */
+    /* The list is the scrolling region. */
     overflow-y: auto;
   }
 

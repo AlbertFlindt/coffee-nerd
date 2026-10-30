@@ -1,4 +1,4 @@
-// Short texts about gear for the Gear page and the gear pages (D-38, D-48, D-49, D-150). Pure.
+// Short texts about gear for the Gear page and the gear pages. Pure.
 import type { BasketSpec, FeatureDefinition, GrinderSpec, MachineSpec } from './schemas';
 import {
   decimalsForStep,
@@ -16,14 +16,14 @@ const MACHINE_TYPE = {
 };
 const BASKET_TYPE = { precision: 'Precision', standard: 'Standard', pressurized: 'Pressurized' };
 
-/** A size or weight without trailing zeros: 58 mm, 58.5 mm, 18.5 g (D-79). */
+/** A size or weight without trailing zeros: 58 mm, 58.5 mm, 18.5 g. */
 export const trimmed = (value: Thousandths, unit?: string) =>
   formatQuantity(value, {
     decimals: value % 1000 === 0 ? 0 : value % 100 === 0 ? 1 : value % 10 === 0 ? 2 : 3,
     unit
   });
 
-/** "Semi-auto · Preinfusion, low bar start, low bar end": the switched-on phases and own features (D-38). */
+/** "Semi-auto · Preinfusion, low bar start, low bar end": the switched-on phases and own features. */
 export function machineSummary(
   spec: Pick<MachineSpec, 'type' | 'features'> & Partial<MachineSpec>
 ): string {
@@ -35,18 +35,18 @@ export function machineSummary(
     : MACHINE_TYPE[spec.type];
 }
 
-/** "Stepless · steps of 0.1" (D-38, D-48). */
+/** "Stepless · steps of 0.1". */
 export function grinderSummary(spec: Pick<GrinderSpec, 'dial'> & Partial<GrinderSpec>): string {
   const mode = spec.dial.mode === 'stepless' ? 'Stepless' : 'Stepped';
   return `${mode} · steps of ${formatNumber(spec.dial.step, decimalsForStep(spec.dial.step))}`;
 }
 
-/** "VST · 18 g", or the brand alone without a size (D-150). */
+/** "VST · 18 g", or the brand alone without a size. */
 export function basketName(spec: { brand: string; sizeG?: Thousandths }): string {
   return spec.sizeG === undefined ? spec.brand : `${spec.brand} · ${trimmed(spec.sizeG, 'g')}`;
 }
 
-/** "Precision · 58 mm" (D-38, D-49). */
+/** "Precision · 58 mm". */
 export function basketSummary(
   spec: Pick<BasketSpec, 'type' | 'diameterMm'> & Partial<BasketSpec>
 ): string {
@@ -55,7 +55,7 @@ export function basketSummary(
     : `${BASKET_TYPE[spec.type]} · ${trimmed(spec.diameterMm, 'mm')}`;
 }
 
-/** D-49: "Fits Lelit Bianca" for the machines whose group size matches; null without a diameter. */
+/** "Fits Lelit Bianca" for the machines whose group size matches; null without a diameter. */
 export function fitsMachines(
   diameterMm: Thousandths | undefined,
   machines: readonly { name: string; groupSizeMm?: Thousandths }[]
@@ -65,12 +65,12 @@ export function fitsMachines(
   return fits.length > 0 ? `Fits ${fits.join(', ')}` : 'Fits none of your machines';
 }
 
-/** Low bar start and end are no longer offered; a machine keeps one only while it is switched on (D-184). */
+/** Low bar start and end are no longer offered; a machine keeps one only while it is switched on. */
 const RETIRED_PHASES: readonly string[] = ['low_bar_start', 'low_bar_end'];
 
 /**
- * The built-in machine features (D-44, data-model §3), with their switch in "What it can do":
- * temperature, flat pressure and preinfusion, plus a low bar phase only when it is switched on (D-184).
+ * The built-in machine features (docs/SPEC.md §3), with their switch in "What it can do":
+ * temperature, flat pressure and preinfusion, plus a low bar phase only when it is switched on.
  */
 export function builtInFeatures(
   enabled: Partial<Record<string, boolean>> = {}
@@ -108,12 +108,12 @@ export function builtInFeatures(
   ]);
 }
 
-/** A machine's features without the low bar phases it has switched off (D-184). */
+/** A machine's features without the low bar phases it has switched off. */
 export function withoutRetiredPhases(features: FeatureDefinition[]): FeatureDefinition[] {
   return features.filter((f) => !RETIRED_PHASES.includes(f.key) || f.enabled);
 }
 
-/** What new gear starts with (D-158). */
+/** What new gear starts with. */
 export const NEW_GEAR = {
   machine: (): MachineSpec => ({
     type: 'semi_auto',
@@ -135,14 +135,14 @@ export const NEW_GEAR = {
 
 const NUMBER = String.raw`\d+(?:[.,]\d+)?`;
 
-/** The number at the start of typed text, "1 s" → 1000; null when there is none (D-46). */
+/** The number at the start of typed text, "1 s" → 1000; null when there is none. */
 export function readQuantity(text: string): Thousandths | null {
   const match = new RegExp(`^\\s*(${NUMBER}|[.,]\\d+)`).exec(text);
   return match ? toThousandths(match[1]) : null;
 }
 
 /**
- * The optional range of an own feature, typed "0–30 s" (D-46). Nothing typed is no range ({}); null when
+ * The optional range of an own feature, typed "0–30 s". Nothing typed is no range ({}); null when
  * the text is not "low–high" or runs the wrong way round.
  */
 export function readRange(text: string): { min?: Thousandths; max?: Thousandths } | null {

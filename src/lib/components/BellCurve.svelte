@@ -1,7 +1,7 @@
 <script lang="ts">
-  // The bell curve (screen 24, under Dial-in, D-201): a histogram of shot time on one recipe with the
-  // fitted normal curve, the average (μ) as a dashed line and the ± 1 σ zone behind it (D-56). Time is
-  // cream, bars secondary (D-56). Tapping a bar shows its count (D-56, built plainly, D-207).
+  // The bell curve (screen 24, under Dial-in): a histogram of shot time on one recipe with the
+  // fitted normal curve, the average (μ) as a dashed line and the ± 1 σ zone behind it. Time is
+  // cream, bars secondary. Tapping a bar shows its count (built plainly).
   import { decimalText, type Chart, type HistogramBin } from '../domain/insights';
   import { normalCurve } from '../domain/statistics';
 

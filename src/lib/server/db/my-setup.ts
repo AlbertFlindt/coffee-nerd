@@ -1,6 +1,6 @@
-// Edit My setup (screen 13, D-45): the form's current values and choices, and saving them. My setup is the
-// only place the default gear is chosen (D-149). Every chosen id must be one of this owner's items that is
-// not archived (D-60, D-148); anything else is refused and nothing is saved.
+// Edit My setup (screen 13): the form's current values and choices, and saving them. My setup is the
+// only place the default gear is chosen. Every chosen id must be one of this owner's items that is
+// not archived; anything else is refused and nothing is saved.
 import { and, asc, eq, isNotNull, isNull, ne } from 'drizzle-orm';
 import { z } from 'zod';
 import { reconcileFeatures } from '../../domain/prefill';
@@ -28,9 +28,9 @@ export type MySetupFormData = {
     yield: Thousandths | null;
     features: Record<string, FeatureValue>;
   };
-  /** −/+ steps for dose and yield (D-89). */
+  /** −/+ steps for dose and yield. */
   steps: { dose: Thousandths; yield: Thousandths };
-  /** Only items that are not archived (D-148, D-155). */
+  /** Only items that are not archived. */
   machines: { id: string; name: string; features: FeatureDefinition[] }[];
   grinders: { id: string; name: string; dial: GrinderSpec['dial'] }[];
   baskets: { id: string; name: string }[];
@@ -65,7 +65,7 @@ export function loadMySetupForm(db: Queryable, ownerId: string): MySetupFormData
     dial: (g.spec as GrinderSpec).dial
   }));
   const baskets = of('basket').map((b) => ({ id: b.id, name: b.name }));
-  // Archiving a default is refused (D-83), but an id that is not offered is never shown as chosen.
+  // Archiving a default is refused, but an id that is not offered is never shown as chosen.
   const chosen = (id: string | null | undefined, offered: { id: string }[]) =>
     id && offered.some((o) => o.id === id) ? id : null;
 
@@ -91,7 +91,7 @@ export function loadMySetupForm(db: Queryable, ownerId: string): MySetupFormData
 const id = z.string().min(1);
 const thousandths = z.number().int();
 
-/** What the form posts (D-45). Machine and grinder are required; basket and puck prep may be none (D-155). */
+/** What the form posts. Machine and grinder are required; basket and puck prep may be none. */
 export const mySetupSchema = z.object({
   machineId: id,
   grinderId: id,
@@ -104,7 +104,7 @@ export const mySetupSchema = z.object({
 });
 export type MySetupInput = z.infer<typeof mySetupSchema>;
 
-/** Plain words for the problems (D-20); a screen shows them above the button. */
+/** Plain words for the problems; a screen shows them above the button. */
 export class MySetupRejected extends Error {
   constructor(readonly problems: string[]) {
     super(`My setup rejected: ${problems.join('; ')}`);
@@ -139,8 +139,8 @@ function ownGear(
 }
 
 /**
- * Saves My setup (D-45). Refused, with problems in plain words and nothing saved, when a chosen item is not
- * yours or is archived (D-60, D-148), when temperature or flat pressure has no value (D-78), or when a
+ * Saves My setup. Refused, with problems in plain words and nothing saved, when a chosen item is not
+ * yours or is archived, when temperature or flat pressure has no value, or when a
  * switched-on phase lacks its value. Features follow the chosen machine: those it does not have are dropped.
  */
 export function saveMySetup(db: Db, ownerId: string, input: unknown, now: number): void {
@@ -186,7 +186,7 @@ export function saveMySetup(db: Db, ownerId: string, input: unknown, now: number
     if (problems.length > 0) throw new MySetupRejected(problems);
 
     // Defaults for features this machine does not have switched on stay, for when a shot switches to another
-    // machine (D-153); the chosen machine's own features are as checked above.
+    // machine; the chosen machine's own features are as checked above.
     const stored = tx
       .select({ features: userSettings.defaultFeatures })
       .from(userSettings)
@@ -209,7 +209,7 @@ export function saveMySetup(db: Db, ownerId: string, input: unknown, now: number
       defaultFeatures: { ...others, ...features },
       updatedAt: now
     };
-    // D-187: a routine chosen for the next shot gives way to another routine chosen here.
+    // A routine chosen for the next shot gives way to another routine chosen here.
     tx.update(appState)
       .set({ nextRoutineId: null, updatedAt: now })
       .where(

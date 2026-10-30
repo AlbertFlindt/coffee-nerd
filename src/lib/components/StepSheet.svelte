@@ -1,7 +1,7 @@
 <script lang="ts">
-  // The step sheet (screen 20, D-52): a bottom sheet on the Puck prep page. Adds a step, or edits one
-  // (D-168): once a shot used it the kind and unit stay and listed options cannot be removed. A step that
-  // a routine contains cannot be deleted or archived (D-169). It posts to the page's form actions.
+  // The step sheet (screen 20): a bottom sheet on the Puck prep page. Adds a step, or edits one:
+  // once a shot used it the kind and unit stay and listed options cannot be removed. A step that
+  // a routine contains cannot be deleted or archived. It posts to the page's form actions.
   import { enhance } from '$app/forms';
   import { untrack } from 'svelte';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
@@ -176,7 +176,7 @@
       <TextField label="Name" id="step-name" autocomplete="off" bind:value={name} />
 
       {#if used}
-        <!-- Screen 53, D-168: once a shot used the step, its kind of setting (and unit) only shows. -->
+        <!-- Screen 53: once a shot used the step, its kind of setting (and unit) only shows. -->
         <div class="fixed">
           <span class="cn-caption">Setting</span>
           <span class="fixed-value"
@@ -241,7 +241,7 @@
           />
         </div>
       {:else if kind === 'choice'}
-        <!-- D-152: one text row per option; at least two. The radio picks the option it starts on;
+        <!-- One text row per option; at least two. The radio picks the option it starts on;
              screen 52 puts the hint above the options. -->
         <p class="hint">Tap the circle of the option it starts on</p>
         <div class="options" role="radiogroup" aria-label="Starts at">
@@ -361,7 +361,6 @@
       </form>
 
       {#if editing && routines.length > 0}
-        <!-- D-169 -->
         <p class="in-use">Used in {routines.join(', ')}</p>
       {:else if editing}
         <form method="POST" action="?/removeStep" use:enhance={submit}>
@@ -462,7 +461,7 @@
     gap: 8px;
   }
 
-  /* Three options show; more scroll inside the group, so "Add option" stays in view (D-36). */
+  /* Three options show; more scroll inside the group, so "Add option" stays in view. */
   .option-list {
     display: flex;
     flex-direction: column;

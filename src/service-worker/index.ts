@@ -1,5 +1,5 @@
-// The service worker: makes the app installable and keeps on the phone what it needs to open offline
-// (D-61, D-217, D-219). Changes still need the server; a shot saved offline waits on the phone later (M10).
+// The service worker: makes the app installable and keeps on the phone what it needs to open offline.
+// Changes still need the server; a shot saved offline waits on the phone until it can be sent.
 import { version } from '$app/env';
 import { assets, immutable } from '$app/manifest';
 import { self as sw } from '$app/service-worker';
@@ -25,14 +25,14 @@ const ASSETS = new Set([...immutable, ...assets].map(({ path }) => `/${path}`));
 const NEVER_KEPT = new Set(['/login', '/welcome', '/logout', '/health', '/offline']);
 // Keeping the pages again at most this often while moving around; always after a change.
 const KEEP_EVERY = 60_000;
-// D-235: a server that has not answered by then counts as offline.
+// A server that has not answered by then counts as offline.
 const TIME_LIMIT = 4_000;
 
 sw.addEventListener('install', (event) => {
-  // D-227: no skipWaiting. A new version waits until every window of the app is closed, so it never
+  // No skipWaiting. A new version waits until every window of the app is closed, so it never
   // takes over a page that is in the middle of a shot.
   // Fetched past the browser's own cache, so an updated icon or manifest is never kept from an old copy.
-  // D-236: an update keeps fresh copies of the pages from the start, while it waits.
+  // An update keeps fresh copies of the pages from the start, while it waits.
   event.waitUntil(
     caches
       .open(CACHE)
@@ -46,7 +46,7 @@ sw.addEventListener('install', (event) => {
 sw.addEventListener('activate', (event) => {
   // The new version is in charge: the files and pages of earlier versions are no longer needed. It
   // also takes the open page on the first visit, so the app is ready offline at once; on an update no
-  // window is open by now (D-229), so this never takes over a shot in progress.
+  // window is open by now, so this never takes over a shot in progress.
   event.waitUntil(
     sw.clients
       .claim()
@@ -74,8 +74,8 @@ async function tell(message: unknown) {
   for (const client of await sw.clients.matchAll({ type: 'window' })) client.postMessage(message);
 }
 
-// D-225: signed out, nothing of the account stays on the phone, also in the copies of a version
-// that waits (D-236). A copy fetched before signing out and arriving after it is not kept.
+// Signed out, nothing of the account stays on the phone, also in the copies of a version
+// that waits. A copy fetched before signing out and arriving after it is not kept.
 let signOuts = 0;
 async function forget() {
   signOuts += 1;
@@ -86,14 +86,14 @@ async function forget() {
   );
 }
 
-/** The newer version waiting to take over (D-229), when this version is the one in charge. */
+/** The newer version waiting to take over, when this version is the one in charge. */
 function newer(): ServiceWorker | null {
   return sw.serviceWorker?.state === 'activated' ? sw.registration.waiting : null;
 }
 
 /**
  * The copy the phone kept of a page or its data. While an update waits there are two sets of copies,
- * this version's and the newer one's (D-236): the latest copy opens.
+ * this version's and the newer one's: the latest copy opens.
  */
 async function keptCopy(url: URL): Promise<Response | undefined> {
   const key = pageKey(url);
@@ -109,7 +109,7 @@ function takenAt(response: Response) {
   return Date.parse(response.headers.get('date') ?? '') || 0;
 }
 
-/** D-235: the server's answer, or a failure once it has taken too long. */
+/** The server's answer, or a failure once it has taken too long. */
 function inTime(answer: Promise<Response>): Promise<Response> {
   return new Promise((done, fail) => {
     const timer = setTimeout(
@@ -155,7 +155,7 @@ async function store(address: string, response: Response, since: number): Promis
 }
 
 /**
- * Keeps a page and its data, fetched as copies that change nothing (D-219). The shot form as the
+ * Keeps a page and its data, fetched as copies that change nothing. The shot form as the
  * Journal opens it keeps only its data: it is only ever opened from inside the app.
  */
 async function copy(path: string, since = signOuts) {
@@ -176,7 +176,7 @@ async function keepOpened(url: URL, response: Response, since: number) {
   await store(other, await fetch(other, { headers: { [OFFLINE_COPY_HEADER]: '1' } }), since);
 }
 
-/** A page or its data: from the server when it answers, else as the phone kept it (D-219). */
+/** A page or its data: from the server when it answers, else as the phone kept it. */
 async function page(event: FetchEvent, url: URL): Promise<Response> {
   const { request } = event;
   const answer = fetch(request);
@@ -216,7 +216,7 @@ async function page(event: FetchEvent, url: URL): Promise<Response> {
   }
 }
 
-/** D-235: a slow server counts as offline when the phone has a copy; without one, the page waits. */
+/** A slow server counts as offline when the phone has a copy; without one, the page waits. */
 async function answeredInTime(answer: Promise<Response>, url: URL): Promise<Response> {
   try {
     return await inTime(answer);
@@ -227,13 +227,13 @@ async function answeredInTime(answer: Promise<Response>, url: URL): Promise<Resp
 }
 
 /**
- * A change: it needs the server (D-219); without one, nothing changes and the page says so, or the page
- * keeps a shot waiting (D-61).
+ * A change: it needs the server; without one, nothing changes and the page says so, or the page
+ * keeps a shot waiting.
  */
 async function change(event: FetchEvent, url: URL): Promise<Response> {
   const { request } = event;
   const enhanced = request.headers.has('x-sveltekit-action');
-  // D-235: a shot, an edit or a score waits on the phone once the server is slow; other changes wait
+  // A shot, an edit or a score waits on the phone once the server is slow; other changes wait
   // for it, since a slow server may still make them. The shots on their way time out on their own.
   const answer = fetch(request);
   answer.catch(() => {});
@@ -248,7 +248,7 @@ async function change(event: FetchEvent, url: URL): Promise<Response> {
     return response;
   } catch (failure) {
     reached(false);
-    // A shot, an edit or a score waits on the phone instead (D-61, D-223): the page keeps it.
+    // A shot, an edit or a score waits on the phone instead: the page keeps it.
     if (url.pathname === '/queue') throw failure;
     if (!waitsOffline(url)) void tell({ type: 'needs-connection' });
     // The page stays as it is, and its "Offline" line says why.
@@ -266,7 +266,7 @@ let keeping: Promise<void> | null = null;
 let askedAgain = false;
 let forcedAgain = false;
 /**
- * Keeps Home, the Journal and the shot form for every open bean ready for offline use (D-219), one
+ * Keeps Home, the Journal and the shot form for every open bean ready for offline use, one
  * round at a time. Asked during a round, it keeps again after it when the round was not enough: a change
  * came in, or the round found the phone signed out (on the first visit, signing in may finish while the
  * round still sees the sign-in page).
@@ -309,7 +309,7 @@ async function keepOnce(force: boolean) {
     return;
   }
   for (const path of (await list.json()) as string[]) await copy(path);
-  // D-236: a newer version waiting to take over keeps its own copies, which this version cannot.
+  // A newer version waiting to take over keeps its own copies, which this version cannot.
   newer()?.postMessage({ type: 'keep', force });
 }
 
@@ -326,7 +326,7 @@ sw.addEventListener('fetch', (event) => {
   if (url.origin !== sw.location.origin) return;
   if (request.method === 'GET') {
     // The scripts of a newer version that waits are on the phone too: a page it kept may need them
-    // offline (D-236).
+    // offline.
     if (ASSETS.has(url.pathname) || url.pathname.startsWith('/_app/immutable/'))
       event.respondWith(
         caches

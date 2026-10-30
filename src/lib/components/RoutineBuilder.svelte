@@ -1,8 +1,8 @@
 <script lang="ts">
-  // The routine builder (screen 19; D-51, D-164, D-165, D-167): a name, then a straight line of steps between
-  // "Dose in basket" and "Lock in and brew". A small + between two items inserts a step from your steps
-  // (D-164), the amber value opens a small sheet to set it (D-165), the handle drags (or ArrowUp/ArrowDown
-  // moves) a step, × removes it. Only the flow scrolls (D-36). Archive or delete sits under Save (D-167).
+  // The routine builder (screen 19): a name, then a straight line of steps between
+  // "Dose in basket" and "Lock in and brew". A small + between two items inserts a step from your steps,
+  // the amber value opens a small sheet to set it, the handle drags (or ArrowUp/ArrowDown
+  // moves) a step, × removes it. Only the flow scrolls. Archive or delete sits under Save.
   import { untrack } from 'svelte';
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
@@ -288,7 +288,7 @@
 </footer>
 
 {#if sheet === 'archive' || sheet === 'delete'}
-  <!-- D-167, D-148, D-145, D-241: the confirmation dialog. -->
+  <!-- The confirmation dialog. -->
   <ConfirmDialog
     label={sheet === 'archive' ? 'Archive this routine' : 'Delete this routine'}
     closeLabel="Keep the routine"
@@ -436,7 +436,7 @@
     overflow: hidden;
   }
 
-  /* D-36: only the flow scrolls; no visible scrollbar. */
+  /* Only the flow scrolls; no visible scrollbar. */
   .flow {
     flex: 1;
     min-height: 0;

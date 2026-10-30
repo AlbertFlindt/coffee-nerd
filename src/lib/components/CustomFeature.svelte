@@ -1,7 +1,7 @@
 <script lang="ts">
-  // "Add your own feature" (screen 14, D-46): a bottom sheet on the machine page. Name, what kind of value,
+  // "Add your own feature" (screen 14): a bottom sheet on the machine page. Name, what kind of value,
   // the fields that kind needs, a preview of the row as the Setup sheet shows it, then the button. Opened on a
-  // feature of your own it edits that one (D-151): rename and re-step always, delete only while no shot
+  // feature of your own it edits that one: rename and re-step always, delete only while no shot
   // has used it. The machine page saves the machine; this sheet only hands back the feature.
   import { untrack } from 'svelte';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
@@ -23,7 +23,7 @@
   }: {
     /** The feature being edited; without one the sheet adds a feature. */
     feature?: FeatureDefinition;
-    /** A shot has used it: it cannot be deleted (D-151), nor lose an option. */
+    /** A shot has used it: it cannot be deleted, nor lose an option. */
     used?: boolean;
     onsave: (feature: FeatureDefinition) => void;
     ondelete: () => void;
@@ -97,7 +97,7 @@
 
   function definition(): FeatureDefinition {
     const base = {
-      // Stable forever; the label can be renamed freely (D-65).
+      // Stable forever; the label can be renamed freely.
       key: feature?.key ?? `custom-${randomId()}`,
       label: name.trim(),
       builtIn: false,
@@ -132,7 +132,7 @@
     return Math.min(max ?? Infinity, Math.max(min ?? 0, s * 6));
   });
   const previewName = $derived(name.trim() || 'Your feature');
-  // D-160, D-162: what a used feature can still change, by its kind.
+  // What a used feature can still change, by its kind.
   const usedNote = $derived(
     kind === 'number'
       ? 'its unit stays; you can rename it, switch it off or change its step and range.'
@@ -155,7 +155,7 @@
     <div class="heading">
       <h2>{editing ? feature?.label : 'Add your own feature'}</h2>
       {#if editing && used}
-        <!-- D-160, D-162, screen 42: a used feature keeps its kind, unit and options. -->
+        <!-- Screen 42: a used feature keeps its kind, unit and options. -->
         <p class="in-use">Used by shots · {usedNote}</p>
       {/if}
     </div>
@@ -221,7 +221,7 @@
         />
       {/if}
     {:else if kind === 'choice'}
-      <!-- D-152: one text row per option where Step and Range sit; at least two. -->
+      <!-- One text row per option where Step and Range sit; at least two. -->
       <div class="options">
         {#each options as o, i (o.id)}
           <div class="option">

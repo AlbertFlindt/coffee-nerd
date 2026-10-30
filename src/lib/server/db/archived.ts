@@ -1,6 +1,6 @@
-// What was archived, and Restore (D-188). Gear, Puck prep and Tags each end with an "Archived" row that opens
+// What was archived, and Restore. Gear, Puck prep and Tags each end with an "Archived" row that opens
 // a list of what was archived there: gear; routines and steps; flavor notes. Restore puts an item back in its
-// list and pickers. Past shots kept pointing to it all along (data-model §1).
+// list and pickers. Past shots kept pointing to it all along (docs/SPEC.md §1).
 import { and, asc, count, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { fitRoutine } from '../../domain/schemas';
 import { FAMILIES } from '../../domain/tags';
@@ -91,7 +91,7 @@ export function loadArchived(db: Queryable, ownerId: string, area: ArchiveArea):
   return groups.filter((g) => g.items.length > 0);
 }
 
-/** How many items an area has archived: its "Archived" row shows only when there are any (D-188). */
+/** How many items an area has archived: its "Archived" row shows only when there are any. */
 export function archivedCount(db: Queryable, ownerId: string, area: ArchiveArea): number {
   const of = (table: typeof gear | typeof routine | typeof prepStep | typeof tag) =>
     db
@@ -105,9 +105,9 @@ export function archivedCount(db: Queryable, ownerId: string, area: ArchiveArea)
 }
 
 /**
- * Restores an archived item (D-188): `restored`, or `fix` for a routine that no longer fit its steps and was
+ * Restores an archived item: `restored`, or `fix` for a routine that no longer fit its steps and was
  * brought into range (or lost its steps), so it opens in the routine builder. A routine brings back the
- * archived steps it holds, since a step in a routine stays (D-169). Null when it is not yours or not archived.
+ * archived steps it holds, since a step in a routine stays. Null when it is not yours or not archived.
  */
 export function restoreArchived(
   db: Db,
@@ -138,7 +138,7 @@ export function restoreArchived(
         .set(back)
         .where(and(eq(prepStep.ownerId, ownerId), inArray(prepStep.id, stepIds)))
         .run();
-    // While archived, its steps could change or go (D-175 and D-176 guard only routines in use).
+    // While archived, its steps could change or go (the step checks guard only routines in use).
     const settings = Object.fromEntries(
       tx
         .select({ id: prepStep.id, setting: prepStep.setting })

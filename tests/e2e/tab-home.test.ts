@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { expect, test, type Page } from '@playwright/test';
 
-// Home (screen 6, roadmap M8) on the shots logged by the shot-* files, which run first (files run in name
+// Home (screen 6) on the shots logged by the shot-* files, which run first (files run in name
 // order, one worker). Each test leaves the data as it found it: the bean added for switching is removed,
 // a score taken away is given back. The designed screen is saved to screenshots/ for comparing.
 test.describe.configure({ mode: 'serial' });
@@ -64,18 +64,18 @@ test('Home: banner, bean pill, last shot, quick numbers and best recipe', async 
   await expect(pill()).toHaveText('Guji Hambela · Natural');
   await expect(page.getByText(`${openCount()} open`, { exact: true })).toBeVisible();
   await expect(lastShot()).toContainText(/Today \d\d:\d\d/);
-  // D-91, D-11: what was not entered is left out; grind and dose always are.
+  // What was not entered is left out; grind and dose always are.
   await expect(lastShot()).toContainText(/Grind \d\.\d/);
   await expect(lastShot()).toContainText(/In \d+\.\d g/);
   await expect(lastShot().locator('.cn-tag')).toHaveText(/^(Recipe reused \d+x|New recipe)$/);
   await expect(numbers()).toContainText(/Bean freshness\s*\d+ days\s*since roast/);
-  // D-194: this bean's shots since Monday, their average and how many are rated.
+  // This bean's shots since Monday, their average and how many are rated.
   await expect(numbers()).toContainText(/This week\s*\d+ shots?/);
-  // D-197, D-135: the best recipe's score as on the Beans pages.
+  // The best recipe's score as on the Beans pages.
   await expect(best()).toContainText(/^Best recipe for this bean\s*\d+(\.\d)? \/ 10/);
   await expect(best()).toContainText(/Grind \d\.\d · \d+\.\d g/);
   await expect(best()).toContainText(/Reused \d+x|Tried once/);
-  // D-196: the score of the last rated shots, oldest first, as the only graph (D-193).
+  // The score of the last rated shots, oldest first, as the only graph.
   const graph = page.getByRole('region', { name: 'Dial-in progress' });
   await expect(graph).toContainText(/Score per shot · last \d+ rated shots/);
   await expect(graph.getByRole('img', { name: /^Score per shot, oldest first: / })).toBeVisible();
@@ -101,7 +101,7 @@ test('with more rated shots, recipe changes are marked on the graph', async () =
     await page.reload();
     const graph = page.getByRole('region', { name: 'Dial-in progress' });
     await expect(graph.getByRole('img', { name: /a new recipe at shot \d+/ })).toBeVisible();
-    // D-56: tapping a point shows its score.
+    // Tapping a point shows its score.
     const point = graph.getByRole('button', { name: /^Shot \d+ of \d+, score \d+$/ }).last();
     const score = (await point.getAttribute('aria-label'))!.match(/score (\d+)$/)![1];
     await point.click();
@@ -180,7 +180,7 @@ test('switching the bean on Home changes every card and the bean "+" starts from
     );
     await sheet.getByRole('button', { name: /Huila Pink Bourbon/ }).click();
     await expect(pill()).toHaveText('Huila Pink Bourbon · Washed');
-    // D-198: a bean without shots keeps the layout, with plain lines.
+    // A bean without shots keeps the layout, with plain lines.
     await expect(lastShot()).toContainText('No shots yet');
     await expect(numbers()).toContainText(/Bean freshness\s*5 days/);
     await expect(numbers()).toContainText(/This week\s*0 shots\s*No shots yet/);
@@ -236,8 +236,8 @@ test('the gear opens Settings with Sign out, and Back returns to Home', async ()
 const bar = () => page.getByRole('status');
 
 /**
- * Saves a shot from the page open now and runs `check`, then deletes the shot through the app (D-116). The
- * bag weight is taken away meanwhile, so that the shot cannot finish the bean (D-40); the shot-form tests
+ * Saves a shot from the page open now and runs `check`, then deletes the shot through the app. The
+ * bag weight is taken away meanwhile, so that the shot cannot finish the bean; the shot-form tests
  * cover that.
  */
 async function withSavedShot(check: () => Promise<void>) {
@@ -283,7 +283,7 @@ test('"Save shot" from Home returns to Home, with "Shot saved" just above the ta
     expect(tabs.y - (box.y + box.height)).toBeLessThan(16);
     await expectNoPageScroll();
     await screenshot('HomeShotSaved');
-    // D-200: it fades after 4 seconds.
+    // It fades after 4 seconds.
     await expect(bar()).toHaveText('', { timeout: 6000 });
   });
 });
@@ -292,7 +292,7 @@ test('"+" on the Journal returns there, with Back and with "Save shot"', async (
   await page.goto('/journal');
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(page).toHaveURL(/\/shot\/new\?from=journal$/);
-  // Another bean from the bean card keeps the way back (D-94).
+  // Another bean from the bean card keeps the way back.
   await page
     .getByRole('button', { name: /, choose another bean$/ })
     .click({ position: { x: 22, y: 10 } });

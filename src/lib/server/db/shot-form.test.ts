@@ -155,7 +155,7 @@ describe('loadShotForm', () => {
     expect(form.machines.map((m) => m.name)).toEqual(['Lelit Bianca']);
     expect(form.machines[0].features.every((f) => f.enabled)).toBe(true);
     expect(form.grinders.map((g) => g.name)).toEqual(['Comandante C40', 'Timemore 064S']);
-    // Switching the machine fills new features from My setup (D-38, D-153).
+    // Switching the machine fills new features from My setup.
     expect(form.defaultFeatures).toMatchObject({ temperature: { on: true, value: 93000 } });
   });
 

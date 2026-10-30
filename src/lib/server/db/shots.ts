@@ -1,6 +1,6 @@
-// Saving and editing shots (data-model §4.1). Each call is one transaction: validate, recompute the
+// Saving and editing shots (docs/SPEC.md §4.1). Each call is one transaction: validate, recompute the
 // fingerprint on the server, find or create the recipe, write the shot, clear Brew next, finish the bean
-// when the bag runs out. Every query is scoped by the owner (D-60).
+// when the bag runs out. Every query is scoped by the owner.
 import { and, asc, count, eq, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { shouldAutoFinish } from '../../domain/bean';
@@ -33,7 +33,7 @@ import {
 } from './schema';
 
 export type ShotInput = {
-  /** UUID v7; may be made on the phone (D-61). */
+  /** UUID v7; may be made on the phone. */
   id: string;
   beanId: string;
   machineId: string;
@@ -47,7 +47,7 @@ export type ShotInput = {
   time: Thousandths | null;
   taste: Taste;
   tagIds: string[];
-  /** Flavor notes added with "Add your own", created in "Other" when the shot is saved (D-101). */
+  /** Flavor notes added with "Add your own", created in "Other" when the shot is saved. */
   newTagNames?: string[];
   notes: string | null;
   brewedAt: number;
@@ -82,10 +82,10 @@ export type SaveResult = {
   status: 'saved' | 'duplicate';
   shotId: string;
   recipeId: string;
-  /** Shots on the recipe after saving, including this one (the form shows the count before saving, D-16). */
+  /** Shots on the recipe after saving, including this one (the form shows the count before saving). */
   recipeShotCount: number;
   newRecipe: boolean;
-  /** The bean was finished automatically by this shot; the app offers an undo (D-40). */
+  /** The bean was finished automatically by this shot; the app offers an undo. */
   autoFinished: boolean;
 };
 
@@ -97,7 +97,7 @@ export class ShotRejected extends Error {
   }
 }
 
-/** Saves a new shot. Saving the same id again changes nothing (D-61). */
+/** Saves a new shot. Saving the same id again changes nothing. */
 export function saveShot(db: Db, ownerId: string, input: ShotInput, now: number): SaveResult {
   return db.transaction((tx) => {
     // Looked up by id alone on purpose: an id another account already uses must be refused, not reused.
@@ -129,8 +129,8 @@ export function saveShot(db: Db, ownerId: string, input: ShotInput, now: number)
       })
       .run();
     writeTags(tx, input.id, tagIds);
-    // D-43: the mark is used up by the shot it started, as is a routine just chosen for new shots
-    // (D-187). D-32: Home follows the bean you last brewed.
+    // The mark is used up by the shot it started, as is a routine just chosen for new shots.
+    // Home follows the bean you last brewed.
     const marked = markedRecipe(tx, ownerId);
     tx.update(appState)
       .set({
@@ -156,8 +156,8 @@ export function saveShot(db: Db, ownerId: string, input: ShotInput, now: number)
 }
 
 /**
- * Saves changes to a shot (D-57). The shot may move to another recipe; a recipe left without shots is
- * deleted unless it is marked Brew next (data-model §4.1, step 6). Brew next and the bean's status are
+ * Saves changes to a shot. The shot may move to another recipe; a recipe left without shots is
+ * deleted unless it is marked Brew next (docs/SPEC.md §4.1, step 6). Brew next and the bean's status are
  * left alone: they belong to new shots.
  */
 export function editShot(
@@ -174,7 +174,7 @@ export function editShot(
       .where(and(eq(shot.id, shotId), eq(shot.ownerId, ownerId)))
       .get();
     if (!existing) throw new ShotRejected(['shot: not found']);
-    // D-113: a shot keeps its own bean (even when finished since) or moves to an open one.
+    // A shot keeps its own bean (even when finished since) or moves to an open one.
     const ownBean = tx
       .select({ beanId: recipe.beanId })
       .from(recipe)
@@ -223,7 +223,7 @@ export function editShot(
   });
 }
 
-/** A recipe left with no shots is removed, unless it is marked Brew next (data-model §4.1, step 6). */
+/** A recipe left with no shots is removed, unless it is marked Brew next (docs/SPEC.md §4.1, step 6). */
 function removeIfUnused(tx: Queryable, ownerId: string, recipeId: string): void {
   if (recipeShotCount(tx, ownerId, recipeId) > 0) return;
   const marked = tx
@@ -238,7 +238,7 @@ function removeIfUnused(tx: Queryable, ownerId: string, recipeId: string): void 
 }
 
 /**
- * Deletes a shot and its flavor notes (D-116); its recipe goes too when no shot is left on it, as when
+ * Deletes a shot and its flavor notes; its recipe goes too when no shot is left on it, as when
  * editing. True when the shot was found.
  */
 export function deleteShot(db: Db, ownerId: string, shotId: string): boolean {
@@ -276,13 +276,13 @@ function shotValues(input: ShotInput) {
 
 /**
  * Checks everything the shot points to and every value it carries; throws ShotRejected. Returns the
- * setup as checked, so only known fields reach the recipe snapshot (D-65).
+ * setup as checked, so only known fields reach the recipe snapshot.
  */
 function validate(
   tx: Queryable,
   ownerId: string,
   input: ShotInput,
-  /** The routine of the shot being edited, as it was brewed (D-178). */
+  /** The routine of the shot being edited, as it was brewed. */
   kept: SetupSnapshot['routine'] = null
 ): SetupSnapshot {
   const problems: string[] = [];
@@ -327,7 +327,7 @@ function validate(
       problems.push(`setup: ${p.label} ${p.problem.replaceAll('_', ' ')}`);
   }
 
-  // Puck prep: the routine and its snapshot go together (D-51); values fit their steps (D-52).
+  // Puck prep: the routine and its snapshot go together; values fit their steps.
   const routineSnapshot = setup.data.routine;
   if ((input.routineId === null) !== (routineSnapshot === null)) {
     problems.push('routine: puck prep does not match the routine');
@@ -350,7 +350,7 @@ function validate(
             .map((row) => [row.id, row.setting])
     );
     const steps = routineSnapshot.steps.map(({ stepId, value }) => ({ stepId, value }));
-    // D-178: editing a shot keeps the values it was brewed with, even if a step's range changed since.
+    // Editing a shot keeps the values it was brewed with, even if a step's range changed since.
     const brewedWith = (index: number) => {
       const before = kept?.steps[index];
       const step = steps[index];
@@ -383,7 +383,7 @@ function validate(
 
 /**
  * The recipe with this fingerprint for this bean and machine and a dose within 0.2 g, the closest winning,
- * or a new one (D-16, D-63, D-186).
+ * or a new one.
  */
 function findOrCreateRecipe(
   tx: Queryable,
@@ -441,8 +441,8 @@ const MAX_TAG_NAME = 40;
 
 /**
  * The ids of flavor notes added on the Tasting tab: an existing note with the same name (ignoring case
- * and surrounding spaces, D-53) is reused, and brought back if it was removed (D-171); otherwise a new
- * note is created in "Other" (D-101).
+ * and surrounding spaces) is reused, and brought back if it was removed; otherwise a new
+ * note is created in "Other".
  */
 function addTags(tx: Queryable, ownerId: string, names: string[], now: number): string[] {
   return names.map((raw) => {
@@ -469,7 +469,7 @@ function addTags(tx: Queryable, ownerId: string, names: string[], now: number): 
 }
 
 /**
- * D-182: the notes as they are now. A note merged since the form opened becomes the note it went into
+ * The notes as they are now. A note merged since the form opened becomes the note it went into
  * (following later merges too); one deleted since is left off.
  */
 function currentTags(tx: Queryable, ownerId: string, ids: string[]): string[] {
@@ -477,7 +477,7 @@ function currentTags(tx: Queryable, ownerId: string, ids: string[]): string[] {
   for (let id of ids) {
     // A merge chain is short; the limit only guards against a loop in bad data.
     for (let hops = 0; hops < 20; hops++) {
-      // Looked up by id alone: another account's note is kept, so that validate refuses it (D-60).
+      // Looked up by id alone: another account's note is kept, so that validate refuses it.
       const found = tx.select({ id: tag.id }).from(tag).where(eq(tag.id, id)).get();
       if (found) {
         current.add(id);
@@ -513,7 +513,7 @@ function recipeShotCount(tx: Queryable, ownerId: string, recipeId: string): numb
   );
 }
 
-/** D-40: when this shot's dose uses up an open bean's bag, mark the bean finished automatically. */
+/** When this shot's dose uses up an open bean's bag, mark the bean finished automatically. */
 function finishBeanIfUsedUp(
   tx: Queryable,
   ownerId: string,
@@ -550,8 +550,8 @@ function finishBeanIfUsedUp(
 }
 
 /**
- * The Journal's Rate sheet (D-111): sets only the score of one shot. True when the shot was found.
- * The recipe does not change: the score is a result, not part of the recipe (D-13).
+ * The Journal's Rate sheet: sets only the score of one shot. True when the shot was found.
+ * The recipe does not change: the score is a result, not part of the recipe.
  */
 export function rateShot(
   db: Db,
@@ -570,12 +570,12 @@ export function rateShot(
   return result.changes > 0;
 }
 
-/** "Use last shot recipe" (D-43): the next shot starts from the last shot again. */
+/** "Use last shot recipe": the next shot starts from the last shot again. */
 export function clearBrewNext(db: Db, ownerId: string, now: number): void {
   db.transaction((tx) => clearMark(tx, ownerId, now));
 }
 
-/** The recipe marked Brew next (D-43), if any. */
+/** The recipe marked Brew next, if any. */
 export function markedRecipe(tx: Queryable, ownerId: string): string | null {
   return (
     tx
@@ -587,7 +587,7 @@ export function markedRecipe(tx: Queryable, ownerId: string): string | null {
 }
 
 /**
- * Clears Brew next (D-43). A recipe that only the mark kept (no shots) goes with it (data-model §4.1,
+ * Clears Brew next. A recipe that only the mark kept (no shots) goes with it (docs/SPEC.md §4.1,
  * step 6).
  */
 export function clearMark(tx: Queryable, ownerId: string, now: number): void {
@@ -600,7 +600,7 @@ export function clearMark(tx: Queryable, ownerId: string, now: number): void {
 }
 
 /**
- * Undo after a shot finished the bean automatically (D-40, D-95): reopens the bean. Only a bean that was
+ * Undo after a shot finished the bean automatically: reopens the bean. Only a bean that was
  * finished automatically; one finished by hand stays finished. True when the bean was reopened.
  */
 export function reopenAutoFinishedBean(

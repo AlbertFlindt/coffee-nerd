@@ -1,5 +1,5 @@
-// Home (screen 6, D-32): the bean on Home, its last shot, quick numbers and best recipe. Every query is
-// scoped by the owner (D-60).
+// Home (screen 6): the bean on Home, its last shot, quick numbers and best recipe. Every query is
+// scoped by the owner.
 import { and, desc, eq } from 'drizzle-orm';
 import { gramsLeft, gramsLeftText, PROCESS_LABEL, roastAgeDays } from '../../domain/bean';
 import { recipeHistory, recipeTitle } from '../../domain/bean-detail';
@@ -24,7 +24,7 @@ import { appState, bean, gear, recipe, shot, userSettings } from './schema';
 export type HomeBean = {
   id: string;
   name: string;
-  /** "Natural · 12 days" after the name in the bean list, as on the shot form (D-134). */
+  /** "Natural · 12 days" after the name in the bean list, as on the shot form. */
   detail: string;
 };
 
@@ -32,11 +32,11 @@ export type HomeLastShot = {
   id: string;
   brewedAt: number;
   score: number | null;
-  /** The score of the recipe's latest rated shot before this one, the faint marker of the Rate sheet (D-12). */
+  /** The score of the recipe's latest rated shot before this one, the faint marker of the Rate sheet. */
   previousScore: number | null;
-  /** "Grind 1.6", "Time 25.5 s" … in two fixed columns (D-32). */
+  /** "Grind 1.6", "Time 25.5 s" … in two fixed columns. */
   values: { left: ShotValue[]; right: ShotValue[] };
-  /** The recipe tag as it was when the shot was brewed (D-16). */
+  /** The recipe tag as it was when the shot was brewed. */
   recipeTag: RecipeMatch;
 };
 
@@ -46,23 +46,23 @@ export type Home =
       state: 'ready';
       /** `label`: the bean pill, "Guji Hambela · Natural" as on the shot form's bean card. */
       bean: HomeBean & { label: string; roastAgeDays: number; gramsLeft: string | null };
-      /** Open beans for the bean pill, newest first (D-32, D-195). */
+      /** Open beans for the bean pill, newest first. */
       openBeans: HomeBean[];
       lastShot: HomeLastShot | null;
-      /** This bean's shots since Monday (D-194). */
+      /** This bean's shots since Monday. */
       week: Week;
-      /** The best recipe (D-66), its score as on the Beans pages (D-135, D-197); null without a rated shot. */
+      /** The best recipe, its score as on the Beans pages; null without a rated shot. */
       best: { score: string; title: string; detail: string } | null;
-      /** Dial-in progress (D-196); null with fewer than 2 rated shots. */
+      /** Dial-in progress; null with fewer than 2 rated shots. */
       graph: DialInGraph | null;
-      /** How many of this bean's shots are rated, for what the graph still needs (D-196). */
+      /** How many of this bean's shots are rated, for what the graph still needs. */
       ratedShots: number;
       timeZone: string;
     };
 
 /**
- * The open beans, newest first, and the bean Home and "+" share (D-195): the current bean while it is
- * open, otherwise the newest open bean. None without an open bean (D-198). Insights uses it too (D-205).
+ * The open beans, newest first, and the bean Home and "+" share: the current bean while it is
+ * open, otherwise the newest open bean. None without an open bean. Insights uses it too.
  */
 export function homeBeans(db: Queryable, ownerId: string) {
   const open = db
@@ -76,8 +76,8 @@ export function homeBeans(db: Queryable, ownerId: string) {
 }
 
 /**
- * Home for the bean Home and "+" share (D-195): the current bean while it is open, otherwise the newest
- * open bean, as on the shot form. With no open bean, Home has nothing to show for one (D-198).
+ * Home for the bean Home and "+" share: the current bean while it is open, otherwise the newest
+ * open bean, as on the shot form. With no open bean, Home has nothing to show for one.
  */
 export function loadHome(db: Queryable, ownerId: string, now: number): Home {
   const settings = db.select().from(userSettings).where(eq(userSettings.userId, ownerId)).get();
@@ -159,7 +159,7 @@ export function loadHome(db: Queryable, ownerId: string, now: number): Home {
     lastShot,
     week: thisWeek(shots, now, timeZone),
     best: bestOf(db, ownerId, current.id, shots, steps),
-    // Home's graphs read the same shot facts as Insights (data-model §5); newest first for D-196.
+    // Home's graphs read the same shot facts as Insights (docs/SPEC.md §5); newest first for the dial-in graph.
     graph: dialInProgress(loadShotFacts(db, ownerId, timeZone, { beanId: current.id }).reverse()),
     ratedShots: shots.filter((s) => s.score !== null).length,
     timeZone
@@ -167,8 +167,8 @@ export function loadHome(db: Queryable, ownerId: string, now: number): Home {
 }
 
 /**
- * "Grind 1.6 · 18.0 g → 36.0 g · 28.0 s" with yield and time from the recipe's latest shot (D-143), then
- * the setup line as on the bean card (D-100) and "Reused 4x" (D-42).
+ * "Grind 1.6 · 18.0 g → 36.0 g · 28.0 s" with yield and time from the recipe's latest shot, then
+ * the setup line as on the bean card and "Reused 4x".
  */
 type BeanShot = {
   recipeId: string;
@@ -230,7 +230,7 @@ function bestOf(
 }
 
 /**
- * The bean pill (D-195): one of your open beans becomes the bean Home shows and "+" starts from.
+ * The bean pill: one of your open beans becomes the bean Home shows and "+" starts from.
  * False when the bean is not one of your open beans.
  */
 export function chooseHomeBean(db: Db, ownerId: string, beanId: string, now: number): boolean {

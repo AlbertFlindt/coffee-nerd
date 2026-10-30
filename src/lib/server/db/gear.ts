@@ -1,5 +1,5 @@
-// Gear (D-38, D-44, D-48, D-49): the Gear page, the gear pages, archiving, and the Library summaries
-// (D-50). Every query is scoped by the owner (D-60).
+// Gear: the Gear page, the gear pages, archiving, and the Library summaries.
+// Every query is scoped by the owner.
 import { and, asc, count, desc, eq, isNull } from 'drizzle-orm';
 import { roastAgeDays } from '../../domain/bean';
 import {
@@ -23,7 +23,7 @@ import { bean, gear, prepStep, recipe, routine, shotTag, tag, userSettings } fro
 
 type Kind = 'machine' | 'grinder' | 'basket';
 
-/** What a gear page saves: a basket is named by its brand and size (D-150), so it has no name. */
+/** What a gear page saves: a basket is named by its brand and size, so it has no name. */
 export type GearInput =
   | { kind: 'machine'; name: string; spec: MachineSpec }
   | { kind: 'grinder'; name: string; spec: GrinderSpec }
@@ -34,7 +34,7 @@ export type GearItem = {
   kind: Kind;
   name: string;
   spec: MachineSpec | GrinderSpec | BasketSpec;
-  /** My setup uses it: the Default chip (D-38), and no Archive (D-83). */
+  /** My setup uses it: the Default chip, and no Archive. */
   isDefault: boolean;
   archived: boolean;
 };
@@ -42,7 +42,7 @@ export type GearItem = {
 export type GearRow = { id: string; name: string; summary: string; isDefault: boolean };
 
 export type GearPage = {
-  /** The My setup card (D-38); null until My setup has a machine and a grinder. */
+  /** The My setup card; null until My setup has a machine and a grinder. */
   mySetup: {
     machine: string;
     grinder: string;
@@ -83,7 +83,7 @@ export function summaryOf(kind: Kind, spec: unknown): string {
   return basketSummary(spec as BasketSpec);
 }
 
-/** The Gear page (D-38): My setup, then machines, grinders and baskets; archived gear is left out. */
+/** The Gear page: My setup, then machines, grinders and baskets; archived gear is left out. */
 export function loadGearPage(db: Queryable, ownerId: string): GearPage {
   const settings = settingsOf(db, ownerId);
   const defaults = defaultsOf(settings);
@@ -178,7 +178,7 @@ export function loadGear(db: Queryable, ownerId: string, id: string): GearItem |
   };
 }
 
-/** The input checked against its kind's schema (D-44, D-48, D-49); a basket's name comes from it (D-150). */
+/** The input checked against its kind's schema; a basket's name comes from it. */
 function checked(input: GearInput): { kind: Kind; name: string; spec: GearItem['spec'] } {
   // A basket's name is built after the check, from its trimmed brand and size; until then it only has to
   // pass the name rule, which a missing brand reports instead.
@@ -191,7 +191,7 @@ function checked(input: GearInput): { kind: Kind; name: string; spec: GearItem['
     : parsed.data;
 }
 
-/** Adds a machine, grinder or basket (D-147). */
+/** Adds a machine, grinder or basket. */
 export function addGear(db: Db, ownerId: string, input: GearInput, now: number): string {
   const item = checked(input);
   const id = newId(now);
@@ -209,7 +209,7 @@ export function addGear(db: Db, ownerId: string, input: GearInput, now: number):
   return id;
 }
 
-/** Feature keys any of your recipes has in its setup, i.e. features a shot used (D-151). */
+/** Feature keys any of your recipes has in its setup, i.e. features a shot used. */
 export function usedFeatureKeys(db: Queryable, ownerId: string): string[] {
   const keys = new Set<string>();
   for (const { setup } of db
@@ -222,7 +222,7 @@ export function usedFeatureKeys(db: Queryable, ownerId: string): string[] {
 }
 
 /**
- * D-151, D-160, D-162: a custom feature a shot used stays, with its kind of value, its unit and its list
+ * A custom feature a shot used stays, with its kind of value, its unit and its list
  * options, so the values recipes hold keep their meaning. It can still be renamed, switched off, given
  * new options, and a new step or range.
  */
@@ -234,7 +234,7 @@ function assertUsedFeaturesKept(db: Queryable, ownerId: string, id: string, spec
     if (f.builtIn) return false;
     const next = now.get(f.key);
     if (!next || next.kind !== f.value.kind) return true;
-    // D-162: the unit is what the stored numbers mean.
+    // The unit is what the stored numbers mean.
     if (f.value.kind === 'number' && next.kind === 'number' && next.unit !== f.value.unit)
       return true;
     if (f.value.kind !== 'choice' || next.kind !== 'choice') return false;
@@ -246,12 +246,12 @@ function assertUsedFeaturesKept(db: Queryable, ownerId: string, id: string, spec
   if (changed.some((f) => used.has(f.key))) throw new GearRejected(['spec.features: used']);
 }
 
-/** Saves a gear page (D-44, D-48, D-49). The kind never changes; archived gear is not saved (D-148). */
+/** Saves a gear page. The kind never changes; archived gear is not saved. */
 export function saveGear(db: Db, ownerId: string, id: string, input: GearInput, now: number): void {
   const item = checked(input);
   if (item.kind === 'machine') {
     assertUsedFeaturesKept(db, ownerId, id, item.spec as MachineSpec);
-    // D-184: a low bar phase switched off leaves the machine.
+    // A low bar phase switched off leaves the machine.
     const spec = item.spec as MachineSpec;
     item.spec = { ...spec, features: withoutRetiredPhases(spec.features) };
   }
@@ -271,8 +271,8 @@ export function saveGear(db: Db, ownerId: string, id: string, input: GearInput, 
 }
 
 /**
- * Archives gear (D-148): it leaves the Gear page and the pickers, past shots keep pointing to it. An item
- * My setup uses is not archived (D-83). Null when it is not yours.
+ * Archives gear: it leaves the Gear page and the pickers, past shots keep pointing to it. An item
+ * My setup uses is not archived. Null when it is not yours.
  */
 export function archiveGear(
   db: Db,
@@ -291,7 +291,7 @@ export function archiveGear(
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
-/** The Library page's two short lines per section (D-50, D-156). */
+/** The Library page's two short lines per section. */
 export function loadLibrary(
   db: Queryable,
   ownerId: string,
@@ -356,7 +356,7 @@ export function loadLibrary(
   };
 }
 
-/** Your machines (not archived) with their group size, for a basket's fit check (D-49). */
+/** Your machines (not archived) with their group size, for a basket's fit check. */
 export function loadMachineSizes(
   db: Queryable,
   ownerId: string

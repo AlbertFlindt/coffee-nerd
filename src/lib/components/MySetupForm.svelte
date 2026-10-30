@@ -1,9 +1,9 @@
 <script lang="ts">
-  // Edit My setup (screen 13, D-45): the starting point for new beans. Gear in a 2×2 grid of pickers, the
-  // default values as −/+ cards (steps from your settings and the grinder, D-07, D-89), the ratio, and the
-  // pressure profile as one row that opens the same phase rows as the Setup sheet (D-24), then your own
-  // features as their the Setup sheet rows (D-161). What shows follows the chosen machine's switched-on
-  // features and the grinder's dial. One Save at the bottom; it fits the screen (D-36). Basket and puck prep may be none (D-155). As step 4 of the step-by-step start (D-157) it
+  // Edit My setup (screen 13): the starting point for new beans. Gear in a 2×2 grid of pickers, the
+  // default values as −/+ cards (steps from your settings and the grinder), the ratio, and the
+  // pressure profile as one row that opens the same phase rows as the Setup sheet, then your own
+  // features as their the Setup sheet rows. What shows follows the chosen machine's switched-on
+  // features and the grinder's dial. One Save at the bottom; it fits the screen. Basket and puck prep may be none. As step 4 of the step-by-step start it
   // says so under the title and its button is "Next".
   import { untrack } from 'svelte';
   import { enhance } from '$app/forms';
@@ -44,7 +44,7 @@
 
   // The form keeps what you set; the page starts it again when it loads again.
   const start = untrack(() => {
-    // Nothing chosen yet (a new account, D-157): your only machine, grinder or basket is the choice.
+    // Nothing chosen yet (a new account): your only machine, grinder or basket is the choice.
     const only = <T extends { id: string }>(items: T[]) =>
       items.length === 1 ? items[0].id : null;
     const fresh = setup.current.machineId === null;
@@ -86,7 +86,7 @@
   const present = $derived((machine?.features ?? []).filter((f) => features[f.key]));
   const temperature = $derived(present.find((f) => f.key === 'temperature'));
   const pressure = $derived(present.filter((f) => PHASES.includes(f.key)));
-  // D-161: your own features have a default here too, as the same rows as the Setup sheet.
+  // Your own features have a default here too, as the same rows as the Setup sheet.
   const custom = $derived(present.filter((f) => !f.builtIn));
   const ratio = $derived(formatRatio(yieldAmount, dose));
   const dial = $derived(grinder?.dial);
@@ -119,7 +119,7 @@
     features[key] = { ...features[key], ...patch };
   }
 
-  /** D-45: the default values follow the new machine's switched-on features. */
+  /** The default values follow the new machine's switched-on features. */
   function chooseMachine(id: string) {
     const next = setup.machines.find((m) => m.id === id);
     machineId = id;
@@ -149,7 +149,7 @@
     };
   }
 
-  /** What the picker offers: the list for the picked kind, with "No basket" / "No puck prep" first (D-155). */
+  /** What the picker offers: the list for the picked kind, with "No basket" / "No puck prep" first. */
   const choices = $derived.by(() => {
     if (picking === 'machine')
       return setup.machines.map((m) => ({
@@ -209,7 +209,7 @@
   } as const;
 
   function check(): boolean {
-    // D-78: temperature and flat pressure cannot be switched off, so they wait for a value; the server
+    // Temperature and flat pressure cannot be switched off, so they wait for a value; the server
     // checks again. Screen 49 draws one of these lines; the others are in open items.
     const found: string[] = [];
     if (!machine) found.push('Choose a machine');
@@ -437,7 +437,6 @@
           </div>
         {/if}
         {#if choices.length > 0 && picking === 'routine'}
-          <!-- D-155 -->
           <p class="note">
             Shots are easier to repeat with a puck prep routine. Add one in Library › Puck prep.
           </p>
@@ -471,7 +470,7 @@
     flex-direction: column;
   }
 
-  /* The sheets stop above Save (D-21). */
+  /* The sheets stop above Save. */
   .above-save {
     position: relative;
     flex: 1;
@@ -517,7 +516,7 @@
     flex-direction: column;
     gap: var(--space-3);
     padding: var(--space-2) var(--space-5) var(--space-3);
-    /* D-36: it fits; only on a very short screen does it scroll inside the page. */
+    /* It fits; only on a very short screen does it scroll inside the page. */
     overflow-y: auto;
     scrollbar-width: none;
   }
@@ -679,7 +678,7 @@
     flex: none;
   }
 
-  /* A long list of baskets or routines scrolls inside its sheet (D-36). */
+  /* A long list of baskets or routines scrolls inside its sheet. */
   .list {
     flex: 0 1 auto;
     min-height: 0;

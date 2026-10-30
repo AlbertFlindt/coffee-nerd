@@ -1,5 +1,5 @@
-// Backup and export (D-251, D-252). The backup is the whole database without sign-ins; the exports
-// hold only the signed-in account's rows (D-60) and never the password or sign-ins.
+// Backup and export. The backup is the whole database without sign-ins; the exports
+// hold only the signed-in account's rows and never the password or sign-ins.
 import Database from 'better-sqlite3';
 import { and, asc, eq, inArray } from 'drizzle-orm';
 import { decimalsDeep, type ShotExportRow } from '../../domain/export';
@@ -22,7 +22,7 @@ import {
 } from './schema';
 
 /**
- * D-251: a copy of the whole database as one file, taken from a consistent snapshot while the app runs.
+ * A copy of the whole database as one file, taken from a consistent snapshot while the app runs.
  * Sign-ins are removed and the copy is compacted, so not even their freed pages are left in it.
  */
 export function backupDatabase(db: Db): Buffer {
@@ -40,7 +40,7 @@ export function backupDatabase(db: Db): Buffer {
   }
 }
 
-/** D-252: every saved shot of the account, oldest first, named as the shot detail names it (D-57). */
+/** Every saved shot of the account, oldest first, named as the shot detail names it. */
 export function exportShotRows(db: Queryable, ownerId: string): ShotExportRow[] {
   const rows = db
     .select({
@@ -114,7 +114,7 @@ const times = (row: { createdAt: number; updatedAt: number }) => ({
 });
 
 /**
- * D-252: everything the account holds, archived rows included, with quantities as decimals in their units
+ * Everything the account holds, archived rows included, with quantities as decimals in their units
  * and times in UTC (ISO 8601). Ids are kept so the links between rows hold.
  */
 export function exportEverything(db: Queryable, ownerId: string, now: number) {

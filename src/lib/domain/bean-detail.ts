@@ -1,4 +1,4 @@
-// The bean detail page's recipe rows (D-42, D-128, D-143). Pure, like the rest of the domain.
+// The bean detail page's recipe rows. Pure, like the rest of the domain.
 import { decimalsFor, decimalsForStep, formatQuantity, type Thousandths } from './units';
 import {
   altitudeText,
@@ -11,7 +11,7 @@ import { countryName } from './countries';
 
 type Steps = { grind: Thousandths; dose: Thousandths; yield: Thousandths };
 
-/** "Grind 1.6 · 18.0 g → 36.0 g": the yield is the latest shot's, left out without one (D-143). */
+/** "Grind 1.6 · 18.0 g → 36.0 g": the yield is the latest shot's, left out without one. */
 export function recipeTitle(
   recipe: { grind: Thousandths; dose: Thousandths; yield: Thousandths | null },
   steps: Steps
@@ -23,7 +23,7 @@ export function recipeTitle(
   return recipe.yield === null ? core : `${core} → ${grams(recipe.yield, steps.yield)}`;
 }
 
-/** The setup line (D-100), then the average of the times entered: "… · avg 28.0 s" (D-128). */
+/** The setup line, then the average of the times entered: "… · avg 28.0 s". */
 export function recipeRowDetail(
   setup: string,
   times: readonly (Thousandths | null)[],
@@ -32,7 +32,7 @@ export function recipeRowDetail(
   const entered = times.filter((t): t is Thousandths => t !== null);
   const parts = setup ? [setup] : [];
   if (entered.length > 0) {
-    // Shown to the time step's decimals (at least one), like the times themselves (D-07).
+    // Shown to the time step's decimals (at least one), like the times themselves.
     const decimals = Math.max(1, decimalsForStep(timeStep));
     const unit = 10 ** (3 - decimals);
     const average =
@@ -42,7 +42,7 @@ export function recipeRowDetail(
   return parts.join(' · ');
 }
 
-/** "Reused 4x" in cherry, "Tried once" with a hollow dot (D-42); "New recipe" without shots (D-128). */
+/** "Reused 4x" in cherry, "Tried once" with a hollow dot; "New recipe" without shots. */
 export function recipeHistory(shotCount: number): { text: string; reused: boolean } {
   if (shotCount === 0) return { text: 'New recipe', reused: false };
   if (shotCount === 1) return { text: 'Tried once', reused: false };
@@ -50,7 +50,7 @@ export function recipeHistory(shotCount: number): { text: string; reused: boolea
 }
 
 /**
- * The about card's lines (D-42): roaster; country · region · process; variety · altitude · roast level;
+ * The about card's lines: roaster; country · region · process; variety · altitude · roast level;
  * "Roasted 4 Oct · Open". What is not set is left out, and so is a line left empty.
  */
 export function aboutLines(

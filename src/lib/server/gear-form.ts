@@ -1,9 +1,9 @@
-// The gear pages' actions (D-44, D-48, D-49, D-147, D-148): the posted page as JSON, saved, or the
+// The gear pages' actions: the posted page as JSON, saved, or the
 // problems in plain words.
 import { fail } from '@sveltejs/kit';
 import { GearRejected, type GearInput } from '#lib/server/db/gear.ts';
 
-/** Plain words for the schema's paths (D-20); anything else gets a general line. */
+/** Plain words for the schema's paths; anything else gets a general line. */
 const PROBLEM: [RegExp, string][] = [
   [/^name/, 'Name is required'],
   [/^spec\.brand/, 'Brand is required'],
@@ -20,7 +20,7 @@ const PROBLEM: [RegExp, string][] = [
 ];
 
 export function gearProblems(problems: string[], kind?: string): string[] {
-  // A basket's name is built from its brand (D-150), so a missing name is the missing brand.
+  // A basket's name is built from its brand, so a missing name is the missing brand.
   const relevant = kind === 'basket' ? problems.filter((p) => !p.startsWith('name')) : problems;
   const words = relevant.map(
     (p) =>

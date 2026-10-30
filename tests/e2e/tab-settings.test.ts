@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import Database from 'better-sqlite3';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 
-// Settings (roadmap M11, D-248): the dose, yield and time steps (D-249), the backup (D-251) and the
-// exports (D-252). Each test leaves the steps as it found them. The page is saved to screenshots/.
+// Settings: the dose, yield and time steps, the backup and the
+// exports. Each test leaves the steps as it found them. The page is saved to screenshots/.
 test.describe.configure({ mode: 'serial' });
 
 const DATABASE = 'test-results/e2e-seeded.db';
@@ -46,7 +46,7 @@ test('Settings: steps, your data, Sign out and the version, on one screen', asyn
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Steps', level: 2 })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Your data', level: 2 })).toBeVisible();
-  // D-89: 0.1 g, 0.1 g and 1 s until changed.
+  // 0.1 g, 0.1 g and 1 s until changed.
   await expect(steps('Dose').getByRole('radio', { checked: true })).toHaveText('0.1 g');
   await expect(steps('Yield').getByRole('radio', { checked: true })).toHaveText('0.1 g');
   await expect(steps('Time').getByRole('radio', { checked: true })).toHaveText('1 s');

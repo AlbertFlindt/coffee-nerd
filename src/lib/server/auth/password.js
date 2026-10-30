@@ -1,5 +1,5 @@
 // Password hashing with scrypt (Node's crypto, no dependency). Plain JavaScript so that
-// scripts/reset-password.mjs can use it on the server without a build step (D-87).
+// scripts/reset-password.mjs can use it on the server without a build step.
 import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 
 // OWASP's current scrypt guidance (N = 2^17). Stored hashes carry their parameters, so they can change.

@@ -3,7 +3,7 @@ import { finishBean, loadBeanDetail, reopenBean, toggleBrewNext } from '#lib/ser
 import { getDb } from '#lib/server/db/connection.ts';
 import type { Actions, PageServerLoad } from './$types';
 
-// Bean detail (screen 10, D-42): about, numbers, recipes best first with Brew next, finish and reopen.
+// Bean detail (screen 10): about, numbers, recipes best first with Brew next, finish and reopen.
 export const load: PageServerLoad = ({ locals, params }) => {
   if (!locals.user) error(401);
   const bean = loadBeanDetail(getDb(), locals.user.id, params.id, Date.now());
@@ -12,7 +12,7 @@ export const load: PageServerLoad = ({ locals, params }) => {
 };
 
 export const actions: Actions = {
-  // D-43: mark or clear Brew next; on a finished bean, marking reopens it (D-129).
+  // Mark or clear Brew next; on a finished bean, marking reopens it.
   brewNext: async ({ locals, request, params }) => {
     if (!locals.user) error(401);
     const recipeId = String((await request.formData()).get('recipeId') ?? '');
@@ -20,7 +20,7 @@ export const actions: Actions = {
     if (!result) return fail(404);
     return { brewNext: result };
   },
-  // D-40, D-127: finish by hand; the page offers Undo.
+  // Finish by hand; the page offers Undo.
   finish: ({ locals, params }) => {
     if (!locals.user) error(401);
     if (!finishBean(getDb(), locals.user.id, params.id, Date.now())) return fail(409);

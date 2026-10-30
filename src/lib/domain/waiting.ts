@@ -1,4 +1,4 @@
-// Shots that wait on the phone until they reach the server (D-61, D-220 to D-224, D-231 to D-233). Pure:
+// Shots that wait on the phone until they reach the server. Pure:
 // the queue in the browser stores these entries, and the pages show them with what the server sent.
 import type { ShotState } from '../components/shot-state';
 import { recipeFingerprint, type RecipeIdentity, type RecipeMatch } from './fingerprint';
@@ -12,12 +12,12 @@ export type Steps = { dose: Thousandths; yield: Thousandths; time: Thousandths }
 /** What the Journal and Home show of a waiting shot, as the form knew it at Save. */
 export type WaitingShow = {
   beanName: string;
-  /** The grinder dial's step, for the grind's decimals (D-07). */
+  /** The grinder dial's step, for the grind's decimals. */
   grindStep: Thousandths;
   steps: Steps;
-  /** The recipe tag the form showed (D-16). */
+  /** The recipe tag the form showed. */
   recipeTag: RecipeMatch;
-  /** The score of the recipe's latest rated shot, the faint marker of the Rate sheet (D-12). */
+  /** The score of the recipe's latest rated shot, the faint marker of the Rate sheet. */
   previousScore: number | null;
 };
 
@@ -37,22 +37,22 @@ export type WaitingEntry = {
   show: WaitingShow | null;
   /** The score, for a score alone. */
   score: number | null;
-  /** A new shot: the phone's time at Save (D-220). An edit or a score: the shot's own brew time. */
+  /** A new shot: the phone's time at Save. An edit or a score: the shot's own brew time. */
   brewedAt: number;
   queuedAt: number;
   /** Goes up with every change, so a change made while sending is not lost. */
   revision: number;
-  /** Refused: the server did not take it; it stays until fixed or deleted (D-224). */
+  /** Refused: the server did not take it; it stays until fixed or deleted. */
   status: WaitingStatus;
-  /** Why it was not saved, as the server said (D-237). */
+  /** Why it was not saved, as the server said. */
   problems?: string[];
-  /** Server errors in a row on this change (D-237). */
+  /** Server errors in a row on this change. */
   failures?: number;
 };
 
 export type WaitingChange =
   /**
-   * `fromWaiting`: saved from the form of a waiting shot (D-231). Once that shot has reached the server,
+   * `fromWaiting`: saved from the form of a waiting shot. Once that shot has reached the server,
    * the change is sent as an edit.
    */
   | {
@@ -125,13 +125,13 @@ export function applyChange(
       status: 'waiting'
     };
   }
-  // A change starts again: its reasons and its count of server errors belong to the last one (D-237).
+  // A change starts again: its reasons and its count of server errors belong to the last one.
   next = { ...next, problems: [], failures: 0 };
   const position = existing ? entries.indexOf(existing) : rest.length;
   return [...rest.slice(0, position), next, ...rest.slice(position)];
 }
 
-/** What a shot the server kept failing on says (D-237). */
+/** What a shot the server kept failing on says. */
 export const SERVER_FAILED = 'The server could not save it.';
 const MAX_FAILURES = 3;
 
@@ -142,7 +142,7 @@ export type SendResult =
   | { kind: 'failed' };
 
 /**
- * The entries after sending one (D-61, D-237), unless it changed while it was on its way: then the
+ * The entries after sending one, unless it changed while it was on its way: then the
  * change waits to be sent. `stop`: the server is in trouble, so the next ones wait for the next try.
  */
 export function afterSend(
@@ -171,14 +171,14 @@ export function afterSend(
   };
 }
 
-/** D-239: a shot's edit page starts from the change that waits for it on the phone. */
+/** A shot's edit page starts from the change that waits for it on the phone. */
 export function startWithPending(saved: ShotState, pending: WaitingEntry | null): ShotState {
   if (!pending) return saved;
   if (pending.shot) return JSON.parse(JSON.stringify(pending.shot)) as ShotState;
   return { ...saved, taste: { ...saved.taste, score: pending.score } };
 }
 
-/** What is sent for this account, in the order the shots were brewed (D-220); refused ones wait for a fix. */
+/** What is sent for this account, in the order the shots were brewed; refused ones wait for a fix. */
 export function sendOrder(entries: readonly WaitingEntry[], ownerId: string): WaitingEntry[] {
   return entries
     .filter((e) => e.ownerId === ownerId && e.status === 'waiting')
@@ -222,14 +222,14 @@ export type JournalLike = {
   previousScore: number | null;
 };
 
-/** How a shot on the phone is shown: "Waiting to send" or "Not saved" (D-221, D-224). */
+/** How a shot on the phone is shown: "Waiting to send" or "Not saved". */
 export type Waiting = {
   status: WaitingStatus;
-  /** A shot that is not on the server opens its form on the phone (D-224, D-231). */
+  /** A shot that is not on the server opens its form on the phone. */
   form: { beanId: string } | null;
 };
 
-/** A shot or an edit opens its form on the phone (D-231, D-224); a score alone has no form of its own. */
+/** A shot or an edit opens its form on the phone; a score alone has no form of its own. */
 function formOf(entry: WaitingEntry): Waiting['form'] {
   return entry.shot ? { beanId: entry.shot.beanId } : null;
 }
@@ -250,7 +250,7 @@ function shownValues(shot: ShotState, show: WaitingShow) {
 }
 
 /**
- * The Journal with the shots on the phone (D-221, D-224): a waiting edit or score shows on its row, and
+ * The Journal with the shots on the phone: a waiting edit or score shows on its row, and
  * a new shot gets a row of its own where the filters let it in. A recipe filter leaves new shots out:
  * their recipe is only known once the server has them.
  */
@@ -300,7 +300,7 @@ export type LastShotLike = {
 };
 
 /**
- * Home's Last shot card with the shots on the phone (D-221, D-233): a new waiting shot of this bean is
+ * Home's Last shot card with the shots on the phone: a new waiting shot of this bean is
  * the last shot, and a waiting edit or score of the last shot shows on it.
  */
 export function lastShotWithWaiting<T extends LastShotLike>(
@@ -367,8 +367,8 @@ function waitingNew(entries: readonly WaitingEntry[], ownerId: string) {
 }
 
 /**
- * The bean "+" opens on (D-32, D-222): the bean of the newest waiting shot, as the server does once it
- * has the shot. Null when the form already shows it, the bean was chosen on the form (D-94), or the
+ * The bean "+" opens on: the bean of the newest waiting shot, as the server does once it
+ * has the shot. Null when the form already shows it, the bean was chosen on the form, or the
  * bean is no longer open.
  */
 export function beanToOpen(
@@ -401,9 +401,9 @@ export type FormStart = {
 };
 
 /**
- * A new shot starts from the newest waiting shot of its bean, and the recipe tag judges it against it
- * (D-222, D-03): it is the last shot brewed. Its recipe counts among the bean's recipes as the server
- * will count it. Taste is never prefilled (D-11).
+ * A new shot starts from the newest waiting shot of its bean, and the recipe tag judges it against it:
+ * it is the last shot brewed. Its recipe counts among the bean's recipes as the server
+ * will count it. Taste is never prefilled.
  */
 export function startFromWaiting<T extends FormStart>(
   form: T,
@@ -463,7 +463,7 @@ export function startFromWaiting<T extends FormStart>(
 }
 
 /**
- * The query and fragment of the shot form of a shot the server does not have yet (D-224, D-231), on the
+ * The query and fragment of the shot form of a shot the server does not have yet, on the
  * page the phone keeps for its bean (`/shot/new`); which shot is in the fragment, which the server never sees.
  */
 export function waitingFormQuery(

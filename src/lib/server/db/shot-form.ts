@@ -1,6 +1,6 @@
-// Everything the shot form needs (data-model §4.1, §4.2): the prefill, the bean's recipes for matching in
-// the browser, the bean's last shot for deltas (D-15, D-81), and the choices its pickers offer. Every query
-// is scoped by the owner (D-60).
+// Everything the shot form needs (docs/SPEC.md §4.1, §4.2): the prefill, the bean's recipes for matching in
+// the browser, the bean's last shot for deltas, and the choices its pickers offer. Every query
+// is scoped by the owner.
 import { and, asc, desc, eq, inArray, isNull, lt, or, sql, type SQL } from 'drizzle-orm';
 import { roastAgeDays } from '../../domain/bean';
 import { bestRecipe } from '../../domain/best-recipe';
@@ -39,36 +39,36 @@ import {
 } from './schema';
 
 type Process = (typeof bean.$inferSelect)['process'];
-/** A bean in the shot form's bean list, with its roast age today (D-94, D-134). */
+/** A bean in the shot form's bean list, with its roast age today. */
 export type BeanChoice = { id: string; name: string; process: Process; roastAgeDays: number };
 
 export type ShotFormData = {
   state: 'ready';
   prefill: Prefill;
   bean: BeanChoice;
-  /** Open beans for the bean switcher (D-94). */
+  /** Open beans for the bean switcher. */
   openBeans: BeanChoice[];
-  /** Machines and grinders you can pick (D-153), with their switched-on features and dial. */
+  /** Machines and grinders you can pick, with their switched-on features and dial. */
   machines: MachineChoice[];
   grinders: GrinderChoice[];
-  /** My setup's feature values: what a machine switched to on the form starts from (D-38, D-153). */
+  /** My setup's feature values: what a machine switched to on the form starts from. */
   defaultFeatures: Record<string, FeatureValue>;
   /** Names of every machine, grinder and basket, archived ones included, for what a recipe points to. */
   gearNames: Record<string, string>;
-  /** Baskets and routines you can pick (archived ones are left out), a basket with its dose range (D-154). */
+  /** Baskets and routines you can pick (archived ones are left out), a basket with its dose range. */
   baskets: { id: string; name: string; doseRange?: BasketSpec['doseRange'] }[];
   routines: { id: string; name: string; routine: RoutineNow }[];
-  /** Every puck prep step's setting, archived ones too: a step's value can change for one shot (D-166). */
+  /** Every puck prep step's setting, archived ones too: a step's value can change for one shot. */
   stepSettings: Record<string, PrepStepSetting>;
-  /** This bean's recipes, for matching while the form changes (D-16, D-12). */
+  /** This bean's recipes, for matching while the form changes. */
   recipes: KnownRecipe[];
-  /** This bean's last shot: what the deltas and the recipe tag compare with (D-15, D-81). */
+  /** This bean's last shot: what the deltas and the recipe tag compare with. */
   lastShot: ({ recipe: RecipeIdentity } & ShotResult) | null;
-  /** Flavor notes, most used first, then A–Z (D-97). */
+  /** Flavor notes, most used first, then A–Z. */
   tags: { id: string; name: string }[];
-  /** −/+ steps for dose, yield and time (D-89). */
+  /** −/+ steps for dose, yield and time. */
   steps: { dose: Thousandths; yield: Thousandths; time: Thousandths };
-  /** Editing a saved shot (D-57, D-113): its id and what it already has besides the recipe. */
+  /** Editing a saved shot: its id and what it already has besides the recipe. */
   edit?: { shotId: string; brewedAt: number; taste: Taste; tagIds: string[]; notes: string | null };
 };
 
@@ -107,8 +107,8 @@ function gearChoices(rows: GearRow[], keep: (string | null)[]) {
 export type ShotFormEmpty = { state: 'empty'; missing: 'setup' | 'bean' };
 
 /**
- * The shot form for the current bean, or for `beanId` when one of your open beans is chosen (D-94).
- * Brew next (D-43) applies unless another bean was chosen.
+ * The shot form for the current bean, or for `beanId` when one of your open beans is chosen.
+ * Brew next applies unless another bean was chosen.
  */
 export function loadShotForm(
   db: Queryable,
@@ -126,7 +126,7 @@ export function loadShotForm(
   const brewNextRow = state?.brewNextRecipeId
     ? recipeRow(db, ownerId, state.brewNextRecipeId)
     : undefined;
-  // D-43, D-94: the mark applies to an open bean, unless you chose another bean on the form.
+  // The mark applies to an open bean, unless you chose another bean on the form.
   const brewNext =
     brewNextRow &&
     openBeans.some((b) => b.id === brewNextRow.beanId) &&
@@ -186,7 +186,7 @@ export function loadShotForm(
 }
 
 /**
- * The shot form for editing a saved shot (D-57, D-113): it starts from the shot's own values, taste,
+ * The shot form for editing a saved shot: it starts from the shot's own values, taste,
  * flavor notes and notes. The changes and the recipe tag compare with the bean's shot brewed before it,
  * and only earlier shots count, as when it was brewed. `beanId` moves the shot to another open bean,
  * which is then compared with its own shots before this one. Null when the shot is not yours.
@@ -209,7 +209,7 @@ export function loadEditShotForm(
   const { shot: s, recipe: r } = row;
 
   const openBeans = openBeansOf(db, ownerId, settings.timeZone, now);
-  // The shot's own bean may be finished by now: the shot keeps it, but only open beans are offered (D-122).
+  // The shot's own bean may be finished by now: the shot keeps it, but only open beans are offered.
   const own =
     openBeans.find((b) => b.id === r.beanId) ??
     beanChoice(
@@ -240,7 +240,7 @@ export function loadEditShotForm(
     prefill: {
       ...toValues(r),
       beanId: current.id,
-      dose: s.dose, // D-186: the dose it was brewed with
+      dose: s.dose, // the dose it was brewed with
       yield: s.yield,
       time: s.time,
       source: 'last_shot',
@@ -248,7 +248,7 @@ export function loadEditShotForm(
     },
     bean: current,
     openBeans,
-    // The shot keeps its own gear, even when archived since (D-113).
+    // The shot keeps its own gear, even when archived since.
     ...gearChoices(gearRows, [r.machineId, r.grinderId, r.basketId]),
     defaultFeatures: settings.defaultFeatures,
     gearNames: Object.fromEntries(gearRows.map((g) => [g.id, g.name])),
@@ -276,7 +276,7 @@ export function loadEditShotForm(
   };
 }
 
-/** My setup as the prefill uses it, or null while it is not set up yet (D-38, D-157). */
+/** My setup as the prefill uses it, or null while it is not set up yet. */
 export function readMySetup(
   settings: typeof userSettings.$inferSelect
 ): PrefillContext['mySetup'] | null {
@@ -348,14 +348,14 @@ function latestShotOfBean(
     .where(and(eq(recipe.beanId, beanId), eq(shot.ownerId, ownerId), brewedBefore(before)))
     .orderBy(...newestShot)
     .get();
-  // D-186: the shot's own dose beside its recipe's: the next shot starts from it, while the recipe tag
+  // The shot's own dose beside its recipe's: the next shot starts from it, while the recipe tag
   // compares recipes.
   return row
     ? { recipe: toValues(row.recipe), shot: { dose: row.dose, yield: row.yield, time: row.time } }
     : null;
 }
 
-/** Earlier bags of a re-buy, nearest first (D-73, D-74), with their best recipe (D-66) and latest shot. */
+/** Earlier bags of a re-buy, nearest first, with their best recipe and latest shot. */
 function rebuyChain(db: Queryable, ownerId: string, beanId: string): PrefillContext['rebuyChain'] {
   const chain: PrefillContext['rebuyChain'] = [];
   const seen = new Set([beanId]);
@@ -402,7 +402,7 @@ function rebuyChain(db: Queryable, ownerId: string, beanId: string): PrefillCont
   return chain;
 }
 
-/** Every puck prep step's setting, archived ones too (D-166, D-178). */
+/** Every puck prep step's setting, archived ones too. */
 function stepSettingsOf(db: Queryable, ownerId: string): Record<string, PrepStepSetting> {
   return Object.fromEntries(
     db
@@ -414,7 +414,7 @@ function stepSettingsOf(db: Queryable, ownerId: string): Record<string, PrepStep
   );
 }
 
-/** Routines as they are now (D-76), with each step's current name and unit. */
+/** Routines as they are now, with each step's current name and unit. */
 function routinesNow(
   db: Queryable,
   ownerId: string,
@@ -449,14 +449,14 @@ function routinesNow(
   );
 }
 
-/** This bean's recipes with their shot count and the score of their latest rated shot (D-12, D-16). */
+/** This bean's recipes with their shot count and the score of their latest rated shot. */
 function knownRecipes(
   db: Queryable,
   ownerId: string,
   beanId: string,
   before?: ShotMoment
 ): KnownRecipe[] {
-  // Editing (D-113): only the shots brewed before the edited one count, as when it was brewed.
+  // Editing: only the shots brewed before the edited one count, as when it was brewed.
   const earlier = before
     ? sql`and (s.brewed_at < ${before.brewedAt} or (s.brewed_at = ${before.brewedAt} and s.id < ${before.id}))`
     : sql``;
@@ -476,14 +476,14 @@ function knownRecipes(
     .leftJoin(shot, and(eq(shot.recipeId, recipe.id), brewedBefore(before)))
     .where(and(eq(recipe.beanId, beanId), eq(recipe.ownerId, ownerId)))
     .groupBy(recipe.id)
-    // The order the server matches in, so a tie between two doses goes the same way (D-186).
+    // The order the server matches in, so a tie between two doses goes the same way.
     .orderBy(asc(recipe.createdAt), asc(recipe.id))
     .all();
   return rows;
 }
 
 /**
- * Flavor notes by how often you used them, then A–Z (D-97). Removed notes are left out (D-171), except
+ * Flavor notes by how often you used them, then A–Z. Removed notes are left out, except
  * those the edited shot already has (`keep`).
  */
 function tagsByUse(
@@ -517,7 +517,7 @@ function beanChoice(
   return { ...rest, roastAgeDays: roastAgeDays(roastDate, now, timeZone) };
 }
 
-/** Your open beans, newest first, for the bean list (D-94, D-134). */
+/** Your open beans, newest first, for the bean list. */
 function openBeansOf(db: Queryable, ownerId: string, timeZone: string, now: number): BeanChoice[] {
   return db
     .select(CHOICE)

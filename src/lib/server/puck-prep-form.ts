@@ -1,4 +1,4 @@
-// The puck prep pages' actions (D-51, D-52, D-167, D-168, D-175): the posted JSON, saved, or the problems
+// The puck prep pages' actions: the posted JSON, saved, or the problems
 // in plain words. Shared by the Puck prep page and the routine builder, which both offer "New step".
 import { fail } from '@sveltejs/kit';
 import {
@@ -14,7 +14,7 @@ import type { Db } from '#lib/server/db/client.ts';
 
 const GENERAL = 'Something on this page is not right';
 
-/** Plain words for the problems (D-20); anything else gets a general line. */
+/** Plain words for the problems; anything else gets a general line. */
 const PROBLEM: [RegExp, string][] = [
   [/^name/, 'Name is required'],
   [
@@ -36,7 +36,7 @@ export function words(problems: string[]): string[] {
   return [
     ...new Set(
       problems.map((p) =>
-        // D-175: a routine a step change would break comes already in words.
+        // A routine a step change would break comes already in words.
         p.startsWith('routine: ') && !p.startsWith('routine: not found')
           ? p.slice('routine: '.length)
           : (PROBLEM.find(([pattern]) => pattern.test(p))?.[1] ?? GENERAL)
@@ -65,7 +65,7 @@ export function attempt<T>(save: () => T) {
   }
 }
 
-/** "New step" (D-52); the new step's id comes back so the builder can insert it (D-164). */
+/** "New step"; the new step's id comes back so the builder can insert it. */
 export async function addStepAction(db: Db, ownerId: string, request: Request) {
   const { input } = await readPayload<StepInput>(request);
   if (!input) return fail(400, { problems: [GENERAL] });
@@ -80,7 +80,7 @@ export async function saveStepAction(db: Db, ownerId: string, request: Request) 
   return 'result' in done ? { saved: true } : done;
 }
 
-/** D-168, D-169: deleted when unused, archived when a shot used it, refused while in a routine. */
+/** Deleted when unused, archived when a shot used it, refused while in a routine. */
 export async function removeStepAction(db: Db, ownerId: string, request: Request) {
   const id = String((await request.formData()).get('id') ?? '');
   const result = removeStep(db, ownerId, id, Date.now());

@@ -1,6 +1,6 @@
 <script lang="ts">
   // A confirmation in the middle of the screen, over all of it, Save included, so only its two choices
-  // show (D-241). Tapping the dimmed screen or Escape closes it, as for a bottom sheet (D-21).
+  // show. Tapping the dimmed screen or Escape closes it, as for a bottom sheet.
   import type { Snippet } from 'svelte';
   import { cubicOut } from 'svelte/easing';
   import { fade, scale } from 'svelte/transition';

@@ -1,6 +1,6 @@
-// Library › Puck prep (D-51, D-52): your routines and the steps they are built from. Every query is scoped
-// by the owner (D-60). A step a shot used keeps what its recorded values mean (D-168); a step in a routine
-// stays (D-169).
+// Library › Puck prep: your routines and the steps they are built from. Every query is scoped
+// by the owner. A step a shot used keeps what its recorded values mean; a step in a routine
+// stays.
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import {
   prepStepSettingSchema,
@@ -20,9 +20,9 @@ export type RoutineCard = {
   name: string;
   /** Step names in order: the mini flow on the card. */
   steps: string[];
-  /** My setup's routine or the last shot's (D-163). */
+  /** My setup's routine or the last shot's. */
   inUse: boolean;
-  /** My setup's routine: it is not asked about for new shots (D-187). */
+  /** My setup's routine: it is not asked about for new shots. */
   inMySetup: boolean;
   shots: number;
   /** Average over the rated shots; null when none is rated. */
@@ -35,9 +35,9 @@ export type StepItem = {
   /** What the chip shows after the name ("seconds", "kg"); null for no setting or a list. */
   unit: string | null;
   setting: PrepStepSetting;
-  /** A shot has used it (D-168). */
+  /** A shot has used it. */
   used: boolean;
-  /** Names of the routines (not archived) that contain it (D-169). */
+  /** Names of the routines (not archived) that contain it. */
   routines: string[];
 };
 
@@ -59,7 +59,7 @@ export function unitOf(setting: PrepStepSetting): string | null {
   return null;
 }
 
-/** Step ids any of your recipes recorded: steps a shot has used (D-168). */
+/** Step ids any of your recipes recorded: steps a shot has used. */
 function usedStepIds(db: Queryable, ownerId: string): Set<string> {
   const ids = new Set<string>();
   for (const { setup } of db
@@ -71,7 +71,7 @@ function usedStepIds(db: Queryable, ownerId: string): Set<string> {
   return ids;
 }
 
-/** The Puck prep page (D-51): routines and steps in the order they were made. */
+/** The Puck prep page: routines and steps in the order they were made. */
 export function loadPuckPrep(db: Queryable, ownerId: string): PuckPrepPage {
   const steps = db
     .select()
@@ -148,7 +148,7 @@ function checked(input: StepInput): StepInput {
   return { name, setting: setting.data! };
 }
 
-/** New step (D-52). */
+/** New step. */
 export function addStep(db: Db, ownerId: string, input: StepInput, now: number): string {
   const step = checked(input);
   const id = newId(now);
@@ -158,7 +158,7 @@ export function addStep(db: Db, ownerId: string, input: StepInput, now: number):
   return id;
 }
 
-/** D-168: once used, the kind of setting, its unit and its list options stay. */
+/** Once used, the kind of setting, its unit and its list options stay. */
 function keepsMeaning(before: PrepStepSetting, after: PrepStepSetting): boolean {
   if (before.kind !== after.kind) return false;
   if (before.kind === 'number' && after.kind === 'number') return before.unit === after.unit;
@@ -181,7 +181,7 @@ function valueText(setting: PrepStepSetting, value: number | string | undefined)
 }
 
 /**
- * D-175: the routines (not archived) that hold this step and would no longer fit its new setting, each
+ * The routines (not archived) that hold this step and would no longer fit its new setting, each
  * as a "routine: …" problem in words.
  */
 function routineClashes(
@@ -212,7 +212,7 @@ function routineClashes(
   return problems;
 }
 
-/** Saves a step's sheet (D-168, D-175). */
+/** Saves a step's sheet. */
 export function saveStep(db: Db, ownerId: string, id: string, input: StepInput, now: number): void {
   const existing = db
     .select()
@@ -232,7 +232,7 @@ export function saveStep(db: Db, ownerId: string, id: string, input: StepInput, 
 }
 
 /**
- * Removes a step (D-168, D-169, D-176): refused while a routine (not archived) contains it; archived when a
+ * Removes a step: refused while a routine (not archived) contains it; archived when a
  * shot used it; otherwise deleted, also from archived routines. Null when it is not yours.
  */
 export function removeStep(
@@ -259,7 +259,7 @@ export function removeStep(
     db.update(prepStep).set({ archivedAt: now, updatedAt: now }).where(where).run();
     return 'archived';
   }
-  // D-176: unused, so it goes, also from the archived routines that still hold it.
+  // Unused, so it goes, also from the archived routines that still hold it.
   db.transaction((tx) => {
     for (const r of holders)
       tx.update(routine)
@@ -271,7 +271,7 @@ export function removeStep(
   return 'deleted';
 }
 
-// --- routines (D-51, D-164, D-165, D-167) ---
+// --- routines ---
 
 export type RoutineInput = { name: string; steps: RoutineSteps };
 
@@ -279,9 +279,9 @@ export type RoutineItem = {
   id: string;
   name: string;
   steps: RoutineSteps;
-  /** My setup uses it: it is neither archived nor deleted (D-83). */
+  /** My setup uses it: it is neither archived nor deleted. */
   inMySetup: boolean;
-  /** A shot used it: it is archived, not deleted (D-167). */
+  /** A shot used it: it is archived, not deleted. */
   used: boolean;
 };
 
@@ -328,7 +328,7 @@ export function loadRoutine(db: Queryable, ownerId: string, id: string): Routine
   };
 }
 
-/** The routine as typed, checked: a name, at least one of your steps, values that fit (D-51, D-165). */
+/** The routine as typed, checked: a name, at least one of your steps, values that fit. */
 function checkedRoutine(db: Queryable, ownerId: string, input: RoutineInput): RoutineInput {
   const name = typeof input.name === 'string' ? input.name.trim() : '';
   const parsed = routineStepsSchema.safeParse(input.steps);
@@ -356,7 +356,7 @@ function checkedRoutine(db: Queryable, ownerId: string, input: RoutineInput): Ro
   return { name, steps };
 }
 
-/** New routine (D-51). */
+/** New routine. */
 export function addRoutine(db: Db, ownerId: string, input: RoutineInput, now: number): string {
   const r = checkedRoutine(db, ownerId, input);
   const id = newId(now);
@@ -366,7 +366,7 @@ export function addRoutine(db: Db, ownerId: string, input: RoutineInput, now: nu
   return id;
 }
 
-/** Saves the builder (D-51). Shots keep the routine as it was in their recipe (D-65, D-76). */
+/** Saves the builder. Shots keep the routine as it was in their recipe. */
 export function saveRoutine(
   db: Db,
   ownerId: string,
@@ -382,7 +382,7 @@ export function saveRoutine(
     .run();
 }
 
-/** Archives a routine (D-167): not My setup's (D-83). Null when it is not yours. */
+/** Archives a routine: not My setup's. Null when it is not yours. */
 export function archiveRoutine(
   db: Db,
   ownerId: string,
@@ -400,7 +400,7 @@ export function archiveRoutine(
 }
 
 /**
- * "Use it for new shots?" answered yes (D-187): the routine becomes My setup's, and the next shot starts
+ * "Use it for new shots?" answered yes: the routine becomes My setup's, and the next shot starts
  * with it. False when it is not yours or is archived.
  */
 export function useForNewShots(db: Db, ownerId: string, id: string, now: number): boolean {
@@ -423,7 +423,7 @@ export function useForNewShots(db: Db, ownerId: string, id: string, now: number)
   return true;
 }
 
-/** Deletes a routine no shot used (D-167); not My setup's (D-83). Null when it is not yours. */
+/** Deletes a routine no shot used; not My setup's. Null when it is not yours. */
 export function deleteRoutine(
   db: Db,
   ownerId: string,

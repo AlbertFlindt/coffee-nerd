@@ -1,6 +1,6 @@
 <script lang="ts">
   // Layout for the sign-in and first-run pages: logo and title on top, fields, one full-width primary
-  // action at the bottom (D-14). Not designed yet: built from design-system parts only (D-84).
+  // action at the bottom. Not designed yet: built from design-system parts only.
   import type { Snippet } from 'svelte';
   import logo from '../../../design-system/logo/coffee-nerd-mark.svg';
 

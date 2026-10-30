@@ -1,6 +1,6 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 
-// The installable app (roadmap M10, D-217, D-227): the manifest and the logo icons, and the service
+// The installable app: the manifest and the logo icons, and the service
 // worker that keeps the app's own files on the phone. Nothing is saved.
 test.describe.configure({ mode: 'serial' });
 

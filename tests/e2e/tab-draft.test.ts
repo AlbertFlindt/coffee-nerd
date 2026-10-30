@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 
-// The shot form's draft (roadmap M10, D-226): what is being entered survives a reload and closing the
+// The shot form's draft: what is being entered survives a reload and closing the
 // app; Save and Back end it; another bean starts a new shot again. The shot saved here is deleted again.
 test.describe.configure({ mode: 'serial' });
 
@@ -29,7 +29,7 @@ test.beforeAll(async ({ browser }) => {
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
   const d = new Database(DATABASE, { readonly: true });
   appState = d.prepare('select * from app_state').get() as Record<string, unknown>;
-  // A shot saved here may use up a bag (D-95): the beans are put back as they were too.
+  // A shot saved here may use up a bag: the beans are put back as they were too.
   beans = d.prepare('select * from bean').all() as Record<string, unknown>[];
   d.close();
 });

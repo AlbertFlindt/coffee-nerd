@@ -22,7 +22,7 @@ const EMPTY = {
   rebuyOfId: null
 };
 
-// Add bean (screen 9, D-41); ?rebuy=<bean> fills it from an earlier bag ("Same as before", D-126, D-139).
+// Add bean (screen 9); ?rebuy=<bean> fills it from an earlier bag ("Same as before").
 export const load: PageServerLoad = ({ locals, url }) => {
   if (!locals.user) error(401);
   const db = getDb();
@@ -33,7 +33,7 @@ export const load: PageServerLoad = ({ locals, url }) => {
     rebuyName: rebuy?.name ?? null,
     choices: rebuyChoices(db, locals.user.id),
     today: localDate(Date.now(), timeZoneOf(db, locals.user.id)),
-    // The last step of the step-by-step start (D-157).
+    // The last step of the step-by-step start.
     guide: url.searchParams.has('guide') ? guideOf('bean') : null
   };
 };
@@ -47,7 +47,7 @@ export const actions: Actions = {
       id = addBean(getDb(), ownerId, bean, Date.now());
     });
     if (problem) return problem;
-    // D-157: the guide ends on the shot form; otherwise the new bean's page opens (D-140).
+    // The guide ends on the shot form; otherwise the new bean's page opens.
     redirect(
       303,
       url.searchParams.has('guide') ? guideNext(getDb(), ownerId) : `/library/beans/${id}`

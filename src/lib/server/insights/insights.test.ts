@@ -96,7 +96,7 @@ describe('loadInsights', () => {
       );
     const after = loadInsights(db, ids.userId, T0);
     expect(after).toMatchObject({ shots: 2, beans: 1 });
-    // D-205: the rated shot makes its recipe the best one of the bean on Home.
+    // The rated shot makes its recipe the best one of the bean on Home.
     expect(after.cards.find((c) => c.id === 'shot-time')?.sentence).toBe(
       'Brew 8 more shots of your best Guji Hambela recipe to see its shot times.'
     );

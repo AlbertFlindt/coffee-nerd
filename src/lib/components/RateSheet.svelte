@@ -1,8 +1,8 @@
 <script lang="ts">
-  // The Rate sheet (D-111), opened by the dashed Rate block in the Journal and on Home (D-197): the shot as
-  // the title, then the score row. A tap on a score saves it; a slide saves where the finger lifts (D-10).
+  // The Rate sheet, opened by the dashed Rate block in the Journal and on Home: the shot as
+  // the title, then the score row. A tap on a score saves it; a slide saves where the finger lifts.
   // It posts to the page's own `?/rate` action and closes once the score is saved. Without a connection
-  // the score waits on the phone and the sheet closes as well (D-223).
+  // the score waits on the phone and the sheet closes as well.
   import { tick } from 'svelte';
   import { enhance } from '$app/forms';
   import { page } from '$app/state';
@@ -33,7 +33,7 @@
 </script>
 
 <BottomSheet short label="Rate the shot" closeLabel="Close without rating" {onclose}>
-  <!-- Not designed yet beyond D-111: the shot as the title, then the score row (docs/open-items.md). -->
+  <!-- Not designed yet beyond the Rate block opening a score sheet: the shot as the title, then the score row. -->
   <h2 class="cn-type-heading sheet-title">
     {`${shot.beanName} · ${clockTime(shot.brewedAt, timeZone)}`}
   </h2>
@@ -43,7 +43,7 @@
     action="?/rate"
     data-waits
     use:enhance={async ({ cancel }) => {
-      // A shot on the phone takes its score there too, so a later send never undoes it (D-223).
+      // A shot on the phone takes its score there too, so a later send never undoes it.
       if (isWaiting(shot.id) && score !== null && page.data.userId) {
         cancel();
         await keepWaiting(
@@ -91,7 +91,7 @@
     </div>
   </form>
   {#if rateFailed}
-    <!-- Not designed yet (docs/open-items.md). -->
+    <!-- Not designed yet. -->
     <p class="problem" role="alert">The score could not be saved. Nothing was changed.</p>
   {/if}
 </BottomSheet>

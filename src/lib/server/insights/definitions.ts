@@ -1,5 +1,5 @@
-// Insight definitions (data-model §5, D-64): each card is a query, a chart, the data it needs (D-203)
-// and its wording for every outcome (D-206, D-214). A new insight is a new entry here.
+// Insight definitions (docs/SPEC.md §5): each card is a query, a chart, the data it needs
+// and its wording for every outcome. A new insight is a new entry here.
 import {
   careText,
   count,
@@ -30,11 +30,11 @@ import type { DimensionContext } from './registry';
 
 /** What cards need beyond the shots: the weeks to draw and the bean on Home with its best recipe. */
 export type InsightContext = {
-  /** The Mondays of the last 12 weeks, oldest first, ending with this week (D-208, D-212). */
+  /** The Mondays of the last 12 weeks, oldest first, ending with this week. */
   weeks: string[];
-  /** The bean on Home (D-195); null when there is none (D-198). */
+  /** The bean on Home; null when there is none. */
   homeBean: { id: string; name: string } | null;
-  /** Its best recipe (D-66), titled as on Home ("Grind 1.6 · 18.0 g → 36.0 g"); null without a rated shot. */
+  /** Its best recipe, titled as on Home ("Grind 1.6 · 18.0 g → 36.0 g"); null without a rated shot. */
   bestRecipe: { id: string; title: string } | null;
 };
 
@@ -45,12 +45,12 @@ export type InsightDefinition = {
   evaluate: (groups: QueryGroup[], context: InsightContext) => Omit<InsightCard, 'id' | 'topic'>;
 };
 
-/** D-203: score by process and by origin need 2 groups with 5 rated shots each. */
+/** Score by process and by origin need 2 groups with 5 rated shots each. */
 const GROUP_MINIMUM = 5;
 const GROUPS_NEEDED = 2;
-/** D-214: medians (process) and averages (origin) within 0.5 points are "no clear difference". */
+/** Medians (process) and averages (origin) within 0.5 points are "no clear difference". */
 const CLEAR_POINTS = 0.5;
-/** D-214: σ within 0.2 (seconds for routines, points for beans) is "no clear difference". */
+/** A σ within 0.2 (seconds for routines, points for beans) is "no clear difference". */
 const CLEAR_SIGMA = 0.2;
 
 /** "Naturals are your thing": a process as people say it about their coffees. */
@@ -63,7 +63,7 @@ const PROCESS_PLURAL: Record<string, string> = {
 };
 
 /**
- * What a card says while it lacks data (D-203, D-207): with one group ready, how many more rated shots
+ * What a card says while it lacks data: with one group ready, how many more rated shots
  * the next group needs, else that two groups are needed. `shots(n, group)` words "3 more washed shots".
  */
 function missing(
@@ -166,7 +166,7 @@ const scoreByOrigin: InsightDefinition = {
       .sort((a, b) => b.mean - a.mean || b.n - a.n);
     const [top, second] = rows;
     const clear = top.mean - second.mean > CLEAR_POINTS;
-    // D-206: amber marks a winner only when there is one.
+    // Amber marks a winner only when there is one.
     top.top = clear;
     const tightest = rows.every((r) => r.sigma >= top.sigma);
     const shots = rows.reduce((sum, r) => sum + r.n, 0);
@@ -193,7 +193,7 @@ const scoreByOrigin: InsightDefinition = {
   }
 };
 
-/** D-203: the weekly line needs 4 weeks with 2 rated shots each; a thinner week is a gap (D-212). */
+/** The weekly line needs 4 weeks with 2 rated shots each; a thinner week is a gap. */
 const WEEKS_NEEDED = 4;
 const WEEK_MINIMUM = 2;
 
@@ -265,15 +265,15 @@ const weeklyScore: InsightDefinition = {
   }
 };
 
-/** D-203: the bell curve needs 10 shots with a time on the recipe. */
+/** The bell curve needs 10 shots with a time on the recipe. */
 const TIMED_MINIMUM = 10;
-/** Up to this σ a recipe's shot time counts as under control (drafted for D-206). */
+/** Up to this σ a recipe's shot time counts as under control (a drafted number for the card titles). */
 const STEADY_SECONDS = 1.5;
 
 const shotTimeBell: InsightDefinition = {
   id: 'shot-time',
   topic: 'dial-in',
-  // Without a best recipe no shot matches, and the card says what it needs (D-213).
+  // Without a best recipe no shot matches, and the card says what it needs.
   query: ({ bestRecipe }) => ({ measure: 'time', filters: { recipeId: bestRecipe?.id ?? '' } }),
   evaluate(groups, { homeBean, bestRecipe }) {
     const values = groups[0]?.values ?? [];
@@ -332,7 +332,7 @@ const routineTime: InsightDefinition = {
     holdConstant: 'recipe-apart-from-routine'
   }),
   evaluate(groups, { homeBean }) {
-    // D-204: only recipes brewed with more than one of the compared routines hold everything else
+    // Only recipes brewed with more than one of the compared routines hold everything else
     // equal. A routine with too few such shots drops out, which can leave others with too few:
     // repeat until the routines compared stay the same. The first round says what is missing.
     const comparedAmong = (active: ReadonlySet<string>) => {

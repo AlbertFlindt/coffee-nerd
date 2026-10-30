@@ -1,4 +1,4 @@
-// A one-time message carried to the next page in a short-lived cookie (D-95, D-200: "Shot saved", and the
+// A one-time message carried to the next page in a short-lived cookie ("Shot saved", and the
 // automatic finish with its Undo).
 import type { Cookies } from '@sveltejs/kit';
 import { z } from 'zod';

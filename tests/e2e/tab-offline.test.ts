@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { expect, test, type BrowserContext, type Page, type Request } from '@playwright/test';
 
-// Opening offline (roadmap M10, D-219, D-225): the service worker keeps Home, the Journal and the shot
+// Opening offline: the service worker keeps Home, the Journal and the shot
 // form ready, pages already opened open as the phone kept them, and changes need a connection.
 // Nothing is saved, so the files after this one find the data as is.
 test.describe.configure({ mode: 'serial' });
@@ -11,7 +11,7 @@ const OFFLINE_LINE = 'Offline: showing what the phone kept. Changes need a conne
 const NOTHING_CHANGED = 'You are offline. This needs a connection, so nothing was changed.';
 
 let context: BrowserContext;
-// The line at the top of every page while offline (D-219).
+// The line at the top of every page while offline.
 const line = () => page.getByRole('status').filter({ hasText: /offline/i });
 let page: Page;
 

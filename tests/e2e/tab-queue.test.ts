@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import { dataUrl } from '../../src/lib/offline';
 
-// Shots saved offline (roadmap M10, D-61, D-220 to D-225, D-231 to D-234): they wait on the phone, show at
+// Shots saved offline: they wait on the phone, show at
 // once, and reach the server once when the connection returns. The shots saved here are deleted again at
 // the end, and the app state put back, so the files after this one find the data as before.
 test.describe.configure({ mode: 'serial' });
@@ -74,7 +74,7 @@ test.beforeAll(async ({ browser }) => {
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload();
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
-  // The pages the phone keeps for offline use are ready: every page with its data (D-219).
+  // The pages the phone keeps for offline use are ready: every page with its data.
   await page.getByRole('link', { name: 'Journal' }).click();
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
   await page.getByRole('link', { name: 'Home' }).click();
@@ -132,7 +132,7 @@ test('offline, a saved shot waits on the phone and the page returns as online', 
   await page.getByRole('button', { name: 'Save shot' }).click();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
   await expect(page.getByText('Shot saved')).toBeVisible();
-  // D-221, D-233: Home's Last shot card shows it at once.
+  // Home's Last shot card shows it at once.
   const card = page.getByRole('region', { name: 'Last shot' });
   await expect(card.getByText(WAITING)).toBeVisible();
   await expect(card.getByText(`Grind ${grind}`)).toBeVisible();
@@ -503,7 +503,7 @@ test('signing out asks first while a shot waits, then leaves nothing on the phon
     sheet.getByRole('heading', { name: '1 shot is still waiting to send' })
   ).toBeVisible();
   await screenshot('SignOutWaiting');
-  // D-241: signing out and deleting is red, staying amber.
+  // Signing out and deleting is red, staying amber.
   await expect(sheet.getByRole('button', { name: 'Sign out and delete' })).toHaveClass(
     /cn-btn-danger/
   );

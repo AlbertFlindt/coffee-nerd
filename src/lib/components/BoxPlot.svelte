@@ -1,6 +1,6 @@
 <script lang="ts">
-  // Box plot (screen 23, D-56): per group the middle half as a box, the median as an amber line (score
-  // data, D-19), the full range as whiskers, and how many shots ("n 38") on the right.
+  // Box plot (screen 23): per group the middle half as a box, the median as an amber line (score
+  // data is amber), the full range as whiskers, and how many shots ("n 38") on the right.
   import { statText, type BoxRow, type Chart } from '../domain/insights';
   import RowChart from './RowChart.svelte';
 

@@ -1,7 +1,7 @@
 <script lang="ts">
-  // A shot still on the phone (D-221, D-224): a muted line with an icon, "Waiting to send" until the
+  // A shot still on the phone: a muted line with an icon, "Waiting to send" until the
   // server has it, or "Not saved" when the server refused it. Built from design-system parts; the look
-  // is approved by screenshot (docs/open-items.md).
+  // is approved by screenshot.
   import type { WaitingStatus } from '../domain/waiting';
 
   let { status }: { status: WaitingStatus } = $props();

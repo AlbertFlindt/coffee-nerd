@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// Insights (screens 23–25, roadmap M9) on the seeded shot history (npm run db:seed -- --history): 214
+// Insights (screens 23–25) on the seeded shot history (npm run db:seed -- --history): 214
 // shots on 9 beans. The designed screens are saved to screenshots/ for comparing. The last tests save
 // and rate a shot, so they run after the screenshots.
 test.describe.configure({ mode: 'serial' });
@@ -56,7 +56,7 @@ test('Insights: the tab bar opens it on What I like with the data basis', async 
     'true'
   );
 
-  // D-56: score by process as a box plot, score by origin as average ± 1 σ, each with its basis.
+  // Score by process as a box plot, score by origin as average ± 1 σ, each with its basis.
   await expect(card('Naturals are your thing')).toContainText(
     'Score by process · box = middle 50% · amber line = median · whiskers = full range'
   );
@@ -110,14 +110,14 @@ test('InsightsProgress: Progress shows the weekly average score with its band', 
   // shots yet and is a gap, so the span is 11 weeks, and the spread may then stay about the same.
   const weekly = page.getByRole('article');
   await expect(weekly.getByRole('heading')).toHaveText(/^(Better and steadier|Getting better)$/);
-  // The sentence spans the first to the last drawn week (D-212).
+  // The sentence spans the first to the last drawn week.
   await expect(weekly).toContainText(
     /^.*Up \d(\.\d)? points in 1[12] weeks, and your spread (halved|narrowed|stayed about the same)/
   );
   await expect(weekly).toContainText('12 weeks ago');
   await expect(weekly).toContainText('This week');
   await expect(weekly).toContainText('Weekly average score · shaded band = ± 1 standard deviation');
-  // D-201: the bell curve is not under Progress.
+  // The bell curve is not under Progress.
   await expect(page.getByRole('article')).toHaveCount(1);
   const week = weekly.getByRole('button', { name: /^Week of .*: average / }).last();
   await week.click();

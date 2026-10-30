@@ -1,4 +1,4 @@
-// Quantities are stored as whole thousandths (18.0 g → 18000, data-model §1.4).
+// Quantities are stored as whole thousandths (18.0 g → 18000, docs/SPEC.md §1.4).
 // This is the only place that converts between thousandths and what people type or see.
 // All arithmetic here is on integers; rounding happens once, half away from zero.
 
@@ -41,7 +41,7 @@ export function decimalsForStep(step: Thousandths): number {
 
 /**
  * Decimals to show a value with: as many as its step, or more when the value was typed off the step grid
- * (93.5 °C with a 1 °C step), so two different recipes never look the same (D-07, D-16).
+ * (93.5 °C with a 1 °C step), so two different recipes never look the same.
  */
 export function decimalsFor(value: Thousandths, step: Thousandths): number {
   return Math.max(decimalsForStep(step), decimalsForStep(value));
@@ -58,7 +58,7 @@ export function formatNumber(value: Thousandths, decimals: number): string {
   return value < 0 && magnitude !== 0 ? MINUS + formatted : formatted;
 }
 
-/** "18.0 g", "93 °C", "1.6" (D-07). */
+/** "18.0 g", "93 °C", "1.6". */
 export function formatQuantity(
   value: Thousandths,
   { decimals, unit }: { decimals: number; unit?: string }
@@ -67,14 +67,14 @@ export function formatQuantity(
   return unit ? `${number} ${unit}` : number;
 }
 
-/** A change since the last shot: "+2.5", "−0.1"; no sign when it rounds to zero (D-15). */
+/** A change since the last shot: "+2.5", "−0.1"; no sign when it rounds to zero. */
 export function formatDelta(change: Thousandths, decimals: number): string {
   const text = formatNumber(change, decimals);
   return change > 0 && /[1-9]/.test(text) ? `+${text}` : text;
 }
 
 /**
- * The ratio of yield to dose as "1 : 2.1" (D-03), rounded once to one decimal straight from the two
+ * The ratio of yield to dose as "1 : 2.1", rounded once to one decimal straight from the two
  * quantities, so it never rounds twice. Null without a yield or a dose.
  */
 export function formatRatio(
@@ -87,15 +87,15 @@ export function formatRatio(
   return `1 : ${formatNumber(tenths * 100, 1)}`;
 }
 
-/** The label on a −/+ button: "+ 0.1 g", "− 1 s", "+ 0.1" (D-07). */
+/** The label on a −/+ button: "+ 0.1 g", "− 1 s", "+ 0.1". */
 export function stepLabel(direction: '+' | '-', step: Thousandths, unit?: string): string {
   const sign = direction === '+' ? '+' : MINUS;
   return `${sign} ${formatQuantity(step, { decimals: decimalsForStep(step), unit })}`;
 }
 
 /**
- * One tap on −/+: moves by exactly one step and stays inside the range (D-07). An empty value (time or
- * yield) counts from 0 (D-80, D-82): the first + gives one step.
+ * One tap on −/+: moves by exactly one step and stays inside the range. An empty value (time or
+ * yield) counts from 0: the first + gives one step.
  */
 export function applyStep(
   value: Thousandths | null,
@@ -104,7 +104,7 @@ export function applyStep(
   range: { min?: Thousandths; max?: Thousandths } = {}
 ): Thousandths {
   const { min, max } = range;
-  // D-80, D-82: an empty value counts from 0 — the first + gives one step, − stays at 0, whatever the range.
+  // An empty value counts from 0 — the first + gives one step, − stays at 0, whatever the range.
   if (value === null) return direction === '+' ? step : 0;
   const next = direction === '+' ? value + step : value - step;
   if (min !== undefined && next < min) return min;

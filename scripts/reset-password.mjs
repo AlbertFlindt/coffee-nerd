@@ -1,4 +1,4 @@
-// Sets a new password for the account and signs out every device (D-87).
+// Sets a new password for the account and signs out every device.
 // On the server: docker compose exec coffee-nerd node scripts/reset-password.mjs
 // Locally: DATABASE_PATH=./data/coffee-nerd.db node scripts/reset-password.mjs
 // Reads the new password twice: hidden at a terminal, or as two lines on standard input.

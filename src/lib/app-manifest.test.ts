@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 // The manifest and app.html cannot read CSS tokens, so they repeat the page background; this keeps
-// them in step with the design system after a sync (D-58, D-217).
+// them in step with the design system after a sync.
 const bg = JSON.parse(readFileSync('design-system/tokens.json', 'utf8')).color.tokens.find(
   (t: { name: string }) => t.name === 'bg'
 ).value.dark;

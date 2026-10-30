@@ -1,7 +1,7 @@
 <script lang="ts" generics="Row extends { label: string; right: string; tip: string }">
-  // The frame of Insights' row charts (screens 23 and 25, D-56): a label per row on the left, the value
+  // The frame of Insights' row charts (screens 23 and 25): a label per row on the left, the value
   // axis with its faint grid, a figure at the right of each row, and the mark each chart draws. Tapping
-  // a row shows its exact numbers (D-56; the tooltip is built without a design, D-207).
+  // a row shows its exact numbers (the tooltip is built without a design).
   import type { Snippet } from 'svelte';
   import type { Axis } from '../domain/insights';
 

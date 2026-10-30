@@ -87,7 +87,7 @@ describe('loadShotFacts', () => {
       countryCode: 'ET',
       roaster: 'Nordlys Roasters',
       roastLevel: 'light',
-      recipeShots: 2 // both shots share the recipe: 18.1 g is within 0.2 g of 18.0 g (D-186)
+      recipeShots: 2 // both shots share the recipe: 18.1 g is within 0.2 g of 18.0 g
     });
     expect(facts[1].setup.features.temperature).toMatchObject({ on: true, value: 93000 });
   });

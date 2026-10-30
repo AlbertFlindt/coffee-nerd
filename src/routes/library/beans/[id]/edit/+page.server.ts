@@ -12,7 +12,7 @@ import { getDb } from '#lib/server/db/connection.ts';
 import { saveBeanForm } from '#lib/server/bean-form.ts';
 import type { Actions, PageServerLoad } from './$types';
 
-// Edit bean (D-130): the Add bean form, filled in, without "Same as before".
+// Edit bean: the Add bean form, filled in, without "Same as before".
 export const load: PageServerLoad = ({ locals, params }) => {
   if (!locals.user) error(401);
   const db = getDb();
@@ -20,7 +20,7 @@ export const load: PageServerLoad = ({ locals, params }) => {
   if (!bean) error(404);
   return {
     text: beanFormText(bean),
-    // D-145: only a bean without shots can be deleted.
+    // Only a bean without shots can be deleted.
     deletable: !beanHasShots(db, locals.user.id, params.id),
     today: localDate(Date.now(), timeZoneOf(db, locals.user.id))
   };
@@ -34,10 +34,10 @@ export const actions: Actions = {
       updateBean(getDb(), ownerId, params.id, bean, Date.now())
     );
     if (problem) return problem;
-    // D-130: back to the bean's page.
+    // Back to the bean's page.
     redirect(303, `/library/beans/${params.id}`);
   },
-  // D-145: delete a bean without shots, then the Beans overview.
+  // Delete a bean without shots, then the Beans overview.
   delete: ({ locals, params }) => {
     if (!locals.user) error(401);
     const result = deleteBean(getDb(), locals.user.id, params.id);

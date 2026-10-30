@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// Screen 14 (D-46, D-151): your own feature on the machine page. It is added, shown, then deleted again
+// Screen 14: your own feature on the machine page. It is added, shown, then deleted again
 // (no shot used it), so the reference setup stays as it was. Runs after tab-library.test.ts (files run in
 // name order, one worker).
 test.describe.configure({ mode: 'serial' });
@@ -56,7 +56,7 @@ test('CustomFeature: a new feature is added from the machine page', async () => 
   ]);
   await sheet.getByLabel('Name').fill('Bloom pause');
   await sheet.getByRole('radio', { name: 'Seconds' }).click();
-  // D-185: Range opens the number keypad.
+  // Range opens the number keypad.
   await expect(sheet.getByLabel('Range')).toHaveAttribute('inputmode', 'decimal');
   await sheet.getByLabel('Step').fill('1');
   const preview = sheet.getByRole('region', { name: 'Preview' });

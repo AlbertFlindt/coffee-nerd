@@ -1,8 +1,8 @@
 <script lang="ts">
-  // The tag sheet on the Tags page (D-53, no design yet): "Add tag" asks a name and one of the five
-  // families, Other to start (D-174). Tapping a note opens it: rename it, change the family of your own
-  // notes (D-172), merge it into another note, or remove it (D-171), each with a confirmation. The
-  // "Same tag twice?" card opens it on the merge confirmation (D-180).
+  // The tag sheet on the Tags page (no design yet): "Add tag" asks a name and one of the five
+  // families, Other to start. Tapping a note opens it: rename it, change the family of your own
+  // notes, merge it into another note, or remove it, each with a confirmation. The
+  // "Same tag twice?" card opens it on the merge confirmation.
   import { enhance } from '$app/forms';
   import { untrack } from 'svelte';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
@@ -20,7 +20,7 @@
     tag?: TagItem;
     /** The notes it can be merged into. */
     others?: TagItem[];
-    /** Opens straight on merging into this note, as the "Same tag twice?" card does (D-180). */
+    /** Opens straight on merging into this note, as the "Same tag twice?" card does. */
     into?: TagItem;
     onclose: () => void;
   } = $props();

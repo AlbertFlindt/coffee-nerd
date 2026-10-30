@@ -22,7 +22,7 @@ import {
 
 const CUSTOM_KEY = 'custom-0199f3a2-7c1e-7d2a-9b4f-3a6c1e2d4f5a';
 
-// The reference machine: Lelit Bianca with the five built-in features (D-44).
+// The reference machine: Lelit Bianca with the five built-in features.
 const temperature: FeatureDefinition = {
   key: 'temperature',
   label: 'Temperature',

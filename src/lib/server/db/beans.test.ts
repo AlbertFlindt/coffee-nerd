@@ -293,7 +293,7 @@ describe('loadBeanDetail', () => {
     expect(detail.recipes).toMatchObject([
       {
         title: 'Grind 1.6 · 18.0 g → 36.0 g',
-        // D-144: both recipes are brewed at 93 °C, so the rows leave it out.
+        // Both recipes are brewed at 93 °C, so the rows leave it out.
         detail: 'Preinfusion 4 s · Low bar start 5 s · avg 28.0 s',
         history: { text: 'Reused 1x', reused: true },
         best: 9,

@@ -1,6 +1,6 @@
 <script lang="ts">
-  // An area's archived items (D-188): grouped like the page they came from, each with its line and a
-  // Restore button that puts it back in its list and pickers. Only the list scrolls (D-36).
+  // An area's archived items: grouped like the page they came from, each with its line and a
+  // Restore button that puts it back in its list and pickers. Only the list scrolls.
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import type { ArchiveArea, ArchivedGroup } from '#lib/server/db/archived.ts';
@@ -109,7 +109,7 @@
     color: var(--ink);
   }
 
-  /* D-36: the list scrolls inside the page. */
+  /* The list scrolls inside the page. */
   main {
     flex: 1;
     min-height: 0;
