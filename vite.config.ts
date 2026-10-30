@@ -1,8 +1,14 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vitest/config';
 import adapter from '@sveltejs/adapter-node';
 import { sveltekit } from '@sveltejs/kit/vite';
 
+// The release named in Settings. SvelteKit's own version stays the build time: the service
+// worker's cache key, so every build replaces the phone's copy.
+const release: string = JSON.parse(readFileSync('package.json', 'utf8')).version;
+
 export default defineConfig({
+  define: { __APP_VERSION__: JSON.stringify(release) },
   plugins: [
     sveltekit({
       compilerOptions: {

@@ -123,7 +123,7 @@
   <form class="sign-out" method="POST" action="/logout" onsubmit={signOut}>
     <button class="cn-btn-secondary cn-tap" type="submit" disabled={leaving}>Sign out</button>
   </form>
-  <p class="version cn-caption">{versionText(version)}</p>
+  <p class="version cn-caption">{versionText(__APP_VERSION__, version)}</p>
 </main>
 
 {#if asking}

@@ -496,7 +496,7 @@ test('signing out asks first while a shot waits, then leaves nothing on the phon
   await context.setOffline(false);
 
   await page.getByRole('link', { name: 'Settings' }).click();
-  await expect(page.getByText(/^Version of \d+ \w+ \d{4}, \d\d:\d\d$/)).toBeVisible();
+  await expect(page.getByText(/^Version \d+\.\d+\.\d+ · \d+ \w+ \d{4}, \d\d:\d\d$/)).toBeVisible();
   await page.getByRole('button', { name: 'Sign out' }).click();
   const sheet = page.getByRole('dialog', { name: 'Sign out' });
   await expect(
