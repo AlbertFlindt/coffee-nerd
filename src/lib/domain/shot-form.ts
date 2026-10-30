@@ -1,21 +1,21 @@
-// What the shot form shows about the values being entered (D-12, D-15, D-16, D-90, D-100). Pure, so it
-// runs in the browser on every change and works offline (D-61).
+// What the shot form shows about the values being entered. Pure, so it
+// runs in the browser on every change and works offline.
 import { trimmed } from './gear';
 import { describeChange, recipeFingerprint, sameDose, type RecipeIdentity } from './fingerprint';
 import type { FeatureDefinition, FeatureValue, SetupSnapshot } from './schemas';
 import { decimalsFor, formatQuantity, type Thousandths } from './units';
 
-/** A recipe of the current bean, as the form needs it for matching (data-model §4.1). */
+/** A recipe of the current bean, as the form needs it for matching (docs/SPEC.md §4.1). */
 export type KnownRecipe = {
   id: string;
   machineId: string;
   fingerprint: string;
-  /** The recipe's dose; a form dose within 0.2 g of it is this recipe (D-186). */
+  /** The recipe's dose; a form dose within 0.2 g of it is this recipe. */
   dose: Thousandths;
-  /** When its latest shot was brewed: equally close doses go to the most recent (D-186). */
+  /** When its latest shot was brewed: equally close doses go to the most recent. */
   lastBrewedAt?: number | null;
   shotCount: number;
-  /** Score of the recipe's latest rated shot (D-12); null when none is rated. */
+  /** Score of the recipe's latest rated shot; null when none is rated. */
   lastScore: number | null;
 };
 
@@ -24,9 +24,9 @@ export type FormMatch =
   | { kind: 'new'; changes: string[] };
 
 /**
- * The recipe these values make (D-16): an earlier recipe of this bean on this machine with the same
- * fingerprint and a dose within 0.2 g, the closest dose winning (D-186), or a new one whose changes are named against the bean's last shot (D-71, D-77, D-81). A
- * recipe without shots (kept only by its Brew next mark) has not been brewed, so it counts as new (D-104).
+ * The recipe these values make: an earlier recipe of this bean on this machine with the same
+ * fingerprint and a dose within 0.2 g, the closest dose winning, or a new one whose changes are named against the bean's last shot. A
+ * recipe without shots (kept only by its Brew next mark) has not been brewed, so it counts as new.
  */
 export function matchRecipe(
   form: RecipeIdentity,
@@ -34,7 +34,7 @@ export function matchRecipe(
   lastShotRecipe: RecipeIdentity | null
 ): FormMatch {
   const fingerprint = recipeFingerprint(form);
-  // Chosen among all of them, as the server does; one without shots is then still new (D-104).
+  // Chosen among all of them, as the server does; one without shots is then still new.
   const found = closestDose(
     form.dose,
     recipes.filter((r) => r.machineId === form.machineId && r.fingerprint === fingerprint)
@@ -51,7 +51,7 @@ export function matchRecipe(
 
 /**
  * Of recipes with the same fingerprint, the one whose dose is within reach and closest; equally close,
- * the one brewed most recently, then the first given (D-186).
+ * the one brewed most recently, then the first given.
  */
 export function closestDose<T extends { dose: Thousandths; lastBrewedAt?: number | null }>(
   dose: Thousandths,
@@ -81,7 +81,7 @@ export type CoreValues = {
 /** Changed since the last shot: the delta to show, or null when one side is empty (no number to show). */
 export type Change = { delta: Thousandths | null } | null;
 
-/** Which core values differ from the bean's last shot, with their deltas (D-15, D-81). */
+/** Which core values differ from the bean's last shot, with their deltas. */
 export function coreChanges(
   now: CoreValues,
   last: CoreValues | null
@@ -101,11 +101,11 @@ export function coreChanges(
 export type FeatureChange = {
   delta: Thousandths | null;
   pressureDelta: Thousandths | null;
-  /** Switched on or off since the last shot (D-90). */
+  /** Switched on or off since the last shot. */
   switched: 'On' | 'Off' | null;
 };
 
-/** A routine step whose value changed since the last shot (D-166); `delta` for numbers, null for a list. */
+/** A routine step whose value changed since the last shot; `delta` for numbers, null for a list. */
 export type StepChange = { delta: Thousandths | null } | null;
 
 export type SetupChanges = {
@@ -113,11 +113,11 @@ export type SetupChanges = {
   features: Record<string, FeatureChange>;
   basket: boolean;
   routine: boolean;
-  /** Per step of this shot's routine, when it is the last shot's routine too (D-166). */
+  /** Per step of this shot's routine, when it is the last shot's routine too. */
   steps: StepChange[];
 };
 
-/** What differs on the Setup tab from the bean's last shot (D-90). */
+/** What differs on the Setup tab from the bean's last shot. */
 export function setupChanges(now: RecipeIdentity, last: RecipeIdentity | null): SetupChanges {
   const result: SetupChanges = { features: {}, basket: false, routine: false, steps: [] };
   if (last === null) return result;
@@ -141,7 +141,7 @@ export function setupChanges(now: RecipeIdentity, last: RecipeIdentity | null): 
   }
 
   for (const [key, feature] of Object.entries(now.setup.features)) {
-    // A feature the machine did not have at the last shot counts as switched off then (D-78, D-90).
+    // A feature the machine did not have at the last shot counts as switched off then.
     const before = last.setup.features[key] ?? { label: feature.label, on: false };
     const change = featureChange(feature, before);
     if (change) result.features[key] = change;
@@ -166,9 +166,9 @@ const SUMMARY_LAST = 'temperature';
 const SUMMARY_LEFT_OUT = new Set(['flat_pressure']);
 
 /**
- * The setup line on the bean card (D-100): each switched-on phase and custom feature with its value, in
+ * The setup line on the bean card: each switched-on phase and custom feature with its value, in
  * the machine's order, then the temperature. Flat pressure and the basket are left out; a feature still
- * waiting for its value (D-78) too.
+ * waiting for its value too.
  */
 export function setupSummary(
   setup: SetupSnapshot,
@@ -185,15 +185,15 @@ export function setupSummary(
     if (definition.key === SUMMARY_LAST) temperature = text;
     else parts.push(text);
   }
-  // D-144: the bean page leaves it out when all of a bean's recipes share it.
+  // The bean page leaves it out when all of a bean's recipes share it.
   if (temperature && withTemperature) parts.push(temperature);
   return parts.join(' · ');
 }
 
 /**
- * The setup line on the shot detail (D-57): the whole pressure profile, so temperature, then flat pressure,
+ * The setup line on the shot detail: the whole pressure profile, so temperature, then flat pressure,
  * then every other switched-on feature in the machine's order, phases with their pressure. A feature still
- * waiting for its value (D-78) is left out.
+ * waiting for its value is left out.
  */
 export function setupDetail(setup: SetupSnapshot, features: readonly FeatureDefinition[]): string {
   return setupParts(setup, features)
@@ -203,7 +203,7 @@ export function setupDetail(setup: SetupSnapshot, features: readonly FeatureDefi
 }
 
 /**
- * Each routine step that has a value, as "WDT 30 s" or "Filter Metal", for telling recipes apart (D-170).
+ * Each routine step that has a value, as "WDT 30 s" or "Filter Metal", for telling recipes apart.
  * `label` names a list option. A step used twice gets its own key per occurrence.
  */
 export function routineParts(
@@ -226,8 +226,8 @@ export function routineParts(
 }
 
 /**
- * Each feature of a setup in the shot detail's order (D-57), switched-off ones as "Preinfusion off", for
- * telling recipes apart (D-121). A feature still waiting for its value (D-78) is left out.
+ * Each feature of a setup in the shot detail's order, switched-off ones as "Preinfusion off", for
+ * telling recipes apart. A feature still waiting for its value is left out.
  */
 export function setupParts(
   setup: SetupSnapshot,

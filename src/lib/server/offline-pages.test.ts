@@ -21,7 +21,7 @@ function seeded() {
 }
 
 describe('offlinePages', () => {
-  it('D-219: Home, the Journal and the shot form for every open bean, from Home and from the Journal', () => {
+  it('Home, the Journal and the shot form for every open bean, from Home and from the Journal', () => {
     const { db, ids } = seeded();
     const second = newId(T0);
     db.insert(bean)
@@ -47,7 +47,7 @@ describe('offlinePages', () => {
     ]);
   });
 
-  it('D-219: without My setup there is no shot form to keep, only Home and the Journal', () => {
+  it('without My setup there is no shot form to keep, only Home and the Journal', () => {
     const { db, ids } = seeded();
     db.delete(userSettings).where(eq(userSettings.userId, ids.userId)).run();
     expect(offlinePages(db, ids.userId, T0)).toEqual(['/', '/journal']);

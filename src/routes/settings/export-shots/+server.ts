@@ -6,7 +6,7 @@ import { loadSettings } from '#lib/server/db/settings.ts';
 import { download } from '#lib/server/download.ts';
 import type { RequestHandler } from './$types';
 
-// D-252: "Export shots" in Settings: the account's saved shots as a CSV file, one row each.
+// "Export shots" in Settings: the account's saved shots as a CSV file, one row each.
 export const POST: RequestHandler = ({ locals }) => {
   if (!locals.user) error(401);
   const db = getDb();

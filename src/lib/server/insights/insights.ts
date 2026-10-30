@@ -1,4 +1,4 @@
-// The Insights page (screens 23–25, D-55): the data basis for the header and every card, for one owner.
+// The Insights page (screens 23–25): the data basis for the header and every card, for one account.
 import { eq } from 'drizzle-orm';
 import { localDate } from '../../domain/bean';
 import { recipeTitle } from '../../domain/bean-detail';
@@ -11,13 +11,13 @@ import { evaluateInsights, type InsightContext } from './definitions';
 import { loadDimensionContext, loadShotFacts, mondayOf, type ShotFact } from './facts';
 
 export type InsightsPage = {
-  /** Every shot and every bean with a shot (D-208), unrated ones too. */
+  /** Every shot and every bean with a shot, unrated ones too. */
   shots: number;
   beans: number;
   cards: InsightCard[];
 };
 
-/** D-212: the weekly line covers the last 12 weeks. */
+/** The weekly line covers the last 12 weeks. */
 const WEEKS = 12;
 
 export function loadInsights(db: Queryable, ownerId: string, now: number): InsightsPage {
@@ -51,7 +51,7 @@ export function loadInsights(db: Queryable, ownerId: string, now: number): Insig
   };
 }
 
-/** The bean's best recipe (D-66), titled as on Home with the yield of its latest shot (D-143). */
+/** The bean's best recipe, titled as on Home with the yield of its latest shot. */
 function bestOf(
   facts: readonly ShotFact[],
   steps: { dose: number; yield: number }

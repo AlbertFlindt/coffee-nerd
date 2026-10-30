@@ -1,4 +1,4 @@
-// The registry of measures and dimensions (data-model §5, D-64). Each one reads a shot fact; a new kind of
+// The registry of measures and dimensions (docs/SPEC.md §5). Each one reads a shot fact; a new kind of
 // data becomes usable by every insight by adding one entry here. Measures give plain numbers for the
 // statistics module; dimensions give a group key and the words the chart shows for it.
 import { PROCESS_LABEL, ROAST_LEVEL_LABEL } from '../../domain/bean';
@@ -12,7 +12,7 @@ export type Measure = {
   label: string;
   /** Shown after a value ("s", "g"); none for scores and ratios. */
   unit?: string;
-  /** Null when the shot has no value: it is left out, never counted as 0 (D-11). */
+  /** Null when the shot has no value: it is left out, never counted as 0. */
   value: (fact: ShotFact) => number | null;
 };
 
@@ -95,7 +95,7 @@ export function dimension(name: DimensionName, context?: DimensionContext): Dime
   throw new Error(`Unknown dimension: ${name}`);
 }
 
-/** "1.6 · 18.0 g": grind and dose tell a bean's recipes apart (D-112). */
+/** "1.6 · 18.0 g": grind and dose tell a bean's recipes apart. */
 function recipeLabel(f: ShotFact): string {
   const grind = formatQuantity(f.grind, { decimals: decimalsFor(f.grind, f.grindStep) });
   const dose = formatQuantity(f.recipeDose, { decimals: 1, unit: 'g' });
@@ -108,7 +108,7 @@ function amountText(value: Thousandths, unit?: string): string {
 }
 
 /**
- * A machine feature as set on the shot's recipe (D-46, D-65), worded as on the shot detail
+ * A machine feature as set on the shot's recipe, worded as on the shot detail
  * ("Temperature 93 °C", "Preinfusion 4 s at 2 bar") by the machine's feature definitions; "Off" when off.
  */
 function featureDimension(key: string, machines: DimensionContext['machineFeatures']): Dimension {
@@ -128,7 +128,7 @@ function featureDimension(key: string, machines: DimensionContext['machineFeatur
   };
 }
 
-/** A puck prep step's value on the shot's recipe (D-51, D-65); shots whose routine lacks it are left out. */
+/** A puck prep step's value on the shot's recipe; shots whose routine lacks it are left out. */
 function stepDimension(stepId: string, options: Record<string, string>): Dimension {
   return {
     label: stepId,

@@ -41,7 +41,7 @@ const stock: BasketSpec = {
 };
 
 describe('loadGearPage', () => {
-  it('D-38: My setup on top, then gear grouped by kind with summaries and the Default chip', () => {
+  it('My setup on top, then gear grouped by kind with summaries and the Default chip', () => {
     const page = loadGearPage(db, ids.userId);
     expect(page.mySetup).toEqual({
       machine: 'Lelit Bianca',
@@ -67,13 +67,13 @@ describe('loadGearPage', () => {
     });
   });
 
-  it('D-148: archived gear is left out', () => {
+  it('archived gear is left out', () => {
     const id = addGear(db, ids.userId, { kind: 'basket', spec: stock }, T0);
     archiveGear(db, ids.userId, id, T0);
     expect(loadGearPage(db, ids.userId).baskets.map((b) => b.name)).toEqual(['VST · 18 g']);
   });
 
-  it('D-60: only your own gear', () => {
+  it('only your own gear', () => {
     const page = loadGearPage(db, 'someone-else');
     expect([page.machines, page.grinders, page.baskets]).toEqual([[], [], []]);
     expect(page.mySetup).toBeNull();
@@ -81,7 +81,7 @@ describe('loadGearPage', () => {
 });
 
 describe('addGear and saveGear', () => {
-  it('D-147, D-150: a basket is named by brand and size', () => {
+  it('a basket is named by brand and size', () => {
     const id = addGear(db, ids.userId, { kind: 'basket', spec: { ...stock, sizeG: 18000 } }, T0);
     expect(db.select().from(gear).where(eq(gear.id, id)).get()).toMatchObject({
       ownerId: ids.userId,
@@ -101,7 +101,7 @@ describe('addGear and saveGear', () => {
     expect(db.select().from(gear).where(eq(gear.id, spaced)).get()?.name).toBe('VST · 20 g');
   });
 
-  it('D-44: a machine is saved with its name and spec, checked first', () => {
+  it('a machine is saved with its name and spec, checked first', () => {
     const item = loadGear(db, ids.userId, ids.machineId)!;
     expect(item).toMatchObject({ kind: 'machine', name: 'Lelit Bianca', isDefault: true });
     saveGear(
@@ -126,7 +126,7 @@ describe('addGear and saveGear', () => {
     ).toThrow(GearRejected);
   });
 
-  it('D-48: a grinder whose finest equals its coarsest is refused', () => {
+  it('a grinder whose finest equals its coarsest is refused', () => {
     const spec = {
       ...REFERENCE.grinder.spec,
       dial: { ...REFERENCE.grinder.spec.dial, coarsest: 0 }
@@ -136,7 +136,7 @@ describe('addGear and saveGear', () => {
     ).toThrow(GearRejected);
   });
 
-  it('D-184: a low bar phase saved switched off leaves the machine; one switched on stays', () => {
+  it('a low bar phase saved switched off leaves the machine; one switched on stays', () => {
     const item = loadGear(db, ids.userId, ids.machineId)!;
     const spec = item.spec as MachineSpec;
     const features = spec.features.map((f) =>
@@ -156,7 +156,7 @@ describe('addGear and saveGear', () => {
     expect(keys).not.toContain('low_bar_end');
   });
 
-  it('D-60: not another user’s gear, and not changing its kind', () => {
+  it('not another user’s gear, and not changing its kind', () => {
     expect(loadGear(db, 'someone-else', ids.machineId)).toBeNull();
     expect(() =>
       saveGear(
@@ -174,14 +174,14 @@ describe('addGear and saveGear', () => {
 });
 
 describe('archiveGear', () => {
-  it('D-148: archives an item; past shots keep pointing to it', () => {
+  it('archives an item; past shots keep pointing to it', () => {
     const id = addGear(db, ids.userId, { kind: 'basket', spec: stock }, T0);
     expect(archiveGear(db, ids.userId, id, T0)).toBe('archived');
     expect(db.select().from(gear).where(eq(gear.id, id)).get()?.archivedAt).toBe(T0);
     expect(loadGear(db, ids.userId, id)).toMatchObject({ archived: true });
   });
 
-  it('D-148: archived gear is no longer saved from its page', () => {
+  it('archived gear is no longer saved from its page', () => {
     const id = addGear(db, ids.userId, { kind: 'basket', spec: stock }, T0);
     archiveGear(db, ids.userId, id, T0);
     expect(() =>
@@ -189,7 +189,7 @@ describe('archiveGear', () => {
     ).toThrow(GearRejected);
   });
 
-  it('D-83: an item My setup uses is not archived', () => {
+  it('an item My setup uses is not archived', () => {
     expect(archiveGear(db, ids.userId, ids.basketId, T0)).toBe('in_my_setup');
     expect(loadGear(db, ids.userId, ids.basketId)).toMatchObject({
       isDefault: true,
@@ -197,13 +197,13 @@ describe('archiveGear', () => {
     });
   });
 
-  it('D-60: not another user’s gear', () => {
+  it('not another user’s gear', () => {
     expect(archiveGear(db, 'someone-else', ids.basketId, T0)).toBeNull();
   });
 });
 
 describe('loadMachineSizes', () => {
-  it('D-49: your machines and their group size, for the basket fit check', () => {
+  it('your machines and their group size, for the basket fit check', () => {
     expect(loadMachineSizes(db, ids.userId)).toEqual([
       { name: 'Lelit Bianca', groupSizeMm: 58000 }
     ]);
@@ -212,7 +212,7 @@ describe('loadMachineSizes', () => {
 });
 
 describe('loadLibrary', () => {
-  it('D-50, D-156: a short summary for each section', () => {
+  it('a short summary for each section', () => {
     db.insert(bean)
       .values({
         id: newId(T0),
@@ -232,7 +232,7 @@ describe('loadLibrary', () => {
   });
 });
 
-describe('custom features (D-46, D-151)', () => {
+describe('custom features', () => {
   const KEY = 'custom-0b6c6a52-6a0e-4a1f-9c55-3f1f0f6d2a11';
   const bloom: FeatureDefinition = {
     key: KEY,
@@ -271,20 +271,20 @@ describe('custom features (D-46, D-151)', () => {
       .run();
   }
 
-  it('D-46: adding a custom feature saves it with the machine', () => {
+  it('adding a custom feature saves it with the machine', () => {
     saveGear(db, ids.userId, ids.machineId, withBloom(), T0);
     const spec = loadGear(db, ids.userId, ids.machineId)!.spec as MachineSpec;
     expect(spec.features.at(-1)).toMatchObject({ key: KEY, label: 'Bloom pause' });
   });
 
-  it('D-151: a custom feature no shot used can be deleted', () => {
+  it('a custom feature no shot used can be deleted', () => {
     saveGear(db, ids.userId, ids.machineId, withBloom(), T0);
     saveGear(db, ids.userId, ids.machineId, machine(REFERENCE.machine.spec.features), T0);
     const spec = loadGear(db, ids.userId, ids.machineId)!.spec as MachineSpec;
     expect(spec.features.map((f) => f.key)).not.toContain(KEY);
   });
 
-  it('D-151: a custom feature a shot used cannot be deleted', () => {
+  it('a custom feature a shot used cannot be deleted', () => {
     saveGear(db, ids.userId, ids.machineId, withBloom(), T0);
     useIt();
     expect(() =>
@@ -295,7 +295,7 @@ describe('custom features (D-46, D-151)', () => {
     );
   });
 
-  it('D-151: a custom feature a shot used can be renamed and switched off', () => {
+  it('a custom feature a shot used can be renamed and switched off', () => {
     saveGear(db, ids.userId, ids.machineId, withBloom(), T0);
     useIt();
     const renamed = { ...bloom, label: 'Bloom', enabled: false };
@@ -310,7 +310,7 @@ describe('custom features (D-46, D-151)', () => {
     expect(spec.features.at(-1)).toMatchObject({ label: 'Bloom', enabled: false });
   });
 
-  it('D-151: a used feature keeps its kind of value and its options', () => {
+  it('a used feature keeps its kind of value and its options', () => {
     const water: FeatureDefinition = {
       ...bloom,
       label: 'Water',
@@ -367,7 +367,7 @@ describe('custom features (D-46, D-151)', () => {
     );
   });
 
-  it('D-162: a used feature keeps its unit; its step and range can change', () => {
+  it('a used feature keeps its unit; its step and range can change', () => {
     const water: FeatureDefinition = {
       ...bloom,
       label: 'Water',
@@ -401,7 +401,7 @@ describe('custom features (D-46, D-151)', () => {
     );
   });
 
-  it('D-152: a list of your own needs at least two options', () => {
+  it('a list of your own needs at least two options', () => {
     const one: FeatureDefinition = {
       ...bloom,
       value: { kind: 'choice', options: [{ id: 'only', label: 'Only' }] }
@@ -417,7 +417,7 @@ describe('custom features (D-46, D-151)', () => {
     ).toThrow(GearRejected);
   });
 
-  it('D-151, D-60: usedFeatureKeys lists the keys of your recipes only', () => {
+  it('usedFeatureKeys lists the keys of your recipes only', () => {
     expect(usedFeatureKeys(db, ids.userId)).toEqual([]);
     useIt();
     expect(usedFeatureKeys(db, ids.userId)).toEqual([KEY]);

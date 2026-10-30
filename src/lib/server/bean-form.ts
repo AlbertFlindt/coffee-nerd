@@ -1,4 +1,4 @@
-// The Add bean and Edit bean actions (D-41, D-130): the posted form as text, read and saved.
+// The Add bean and Edit bean actions: the posted form as text, read and saved.
 import { fail } from '@sveltejs/kit';
 import { readBeanForm, type BeanFormText } from '#lib/domain/bean-form.ts';
 import type { BeanInput } from '#lib/domain/schemas.ts';

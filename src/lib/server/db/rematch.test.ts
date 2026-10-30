@@ -23,7 +23,7 @@ beforeEach(() => {
   ids = seedReferenceSetup(db, { now: T0, name: 'Demo', passwordHash: 'x' });
 });
 
-/** A recipe as saved before D-186, with an old-style fingerprint that held the dose, and one shot. */
+/** A recipe as saved before doses were matched within 0.2 g, with an old-style fingerprint that held the dose, and one shot. */
 function oldRecipe(dose: number, minutes: number, ownerId = ids.userId): string {
   const now = T0 + minutes * 60_000;
   const id = newId(now);
@@ -62,7 +62,7 @@ function oldRecipe(dose: number, minutes: number, ownerId = ids.userId): string 
 }
 
 describe('rematchRecipesByDose', () => {
-  it('D-186: recipes within 0.2 g of an earlier one join it, with their shots and Brew next mark', () => {
+  it('recipes within 0.2 g of an earlier one join it, with their shots and Brew next mark', () => {
     const at180 = oldRecipe(18000, 1);
     const at181 = oldRecipe(18100, 2);
     const at185 = oldRecipe(18500, 3);
@@ -86,7 +86,7 @@ describe('rematchRecipesByDose', () => {
     expect(db.select().from(appState).get()?.brewNextRecipeId).toBe(at180);
   });
 
-  it('D-186: it runs once', () => {
+  it('it runs once', () => {
     oldRecipe(18000, 1);
     const later = oldRecipe(18100, 2);
     // The database is already marked as matched by dose when it was opened.
@@ -95,9 +95,9 @@ describe('rematchRecipesByDose', () => {
   });
 });
 
-describe('migration 0007 and the merge, on a database from before D-186', () => {
-  it('D-186: each shot gets its recipe’s dose, then recipes within 0.2 g are merged', () => {
-    // The migrations up to 0006, as a database from before D-186 had them.
+describe('migration 0007 and the merge, on a database from before doses were matched within 0.2 g', () => {
+  it('each shot gets its recipe’s dose, then recipes within 0.2 g are merged', () => {
+    // The migrations up to 0006, as a database from before dose matching had them.
     const before = mkdtempSync(join(dir, 'migrations-'));
     cpSync('drizzle', before, { recursive: true });
     rmSync(join(before, '0007_shot_dose.sql'));
@@ -154,7 +154,7 @@ describe('migration 0007 and the merge, on a database from before D-186', () => 
 });
 
 describe('rematchRecipesByDose, more cases', () => {
-  it('D-186: owners are matched apart', () => {
+  it('accounts are matched apart', () => {
     const other = newId(T0);
     db.$client
       .prepare(
@@ -168,7 +168,7 @@ describe('rematchRecipesByDose, more cases', () => {
     expect(db.select().from(recipe).all()).toHaveLength(2);
   });
 
-  it('D-186: a later recipe within reach of two joins the closest', () => {
+  it('a later recipe within reach of two joins the closest', () => {
     const at180 = oldRecipe(18000, 1);
     const at183 = oldRecipe(18300, 2);
     oldRecipe(18200, 3);

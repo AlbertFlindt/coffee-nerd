@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The quiet "Archived" row at the end of Gear, Puck prep and Tags (D-188), shown while anything there is
+  // The quiet "Archived" row at the end of Gear, Puck prep and Tags, shown while anything there is
   // archived.
   import { resolve } from '$app/paths';
   import type { ArchiveArea } from '#lib/server/db/archived.ts';
@@ -31,7 +31,7 @@
 {/if}
 
 <style>
-  /* The quiet button (D-145's pattern), with a chevron. */
+  /* The quiet button pattern of "Delete bean", with a chevron. */
   .archived {
     flex: none;
     display: flex;

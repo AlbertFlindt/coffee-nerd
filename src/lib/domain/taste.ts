@@ -1,4 +1,4 @@
-// Taste values as words next to their sliders (D-96). The stored numbers stay whole numbers (D-67).
+// Taste values as words next to their sliders. The stored numbers stay whole numbers.
 
 export type TasteScale = 'balance' | 'body' | 'sweetness' | 'aftertaste';
 
@@ -9,7 +9,7 @@ const BANDS: Record<Exclude<TasteScale, 'balance'>, readonly string[]> = {
   aftertaste: ['Short', 'Medium-short', 'Medium', 'Medium-long', 'Long']
 };
 
-/** "Slightly sour", "Medium-heavy"; "Not set" when empty (D-11). */
+/** "Slightly sour", "Medium-heavy"; "Not set" when empty. */
 export function tasteWords(scale: TasteScale, value: number | null): string {
   if (value === null) return 'Not set';
   if (scale === 'balance') {

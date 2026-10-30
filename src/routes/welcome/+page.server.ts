@@ -5,7 +5,7 @@ import { getDb } from '#lib/server/db/connection.ts';
 import { guideNext } from '#lib/server/first-run.ts';
 import type { Actions } from './$types';
 
-// First run: create the one account (D-85, D-88), sign in, and start the step-by-step start (D-157).
+// First run: create the one account, sign in, and start the step-by-step start.
 export const actions: Actions = {
   default: async ({ request, cookies }) => {
     const form = await request.formData();
@@ -28,7 +28,7 @@ export const actions: Actions = {
       if (error instanceof AccountError) return fail(400, { name, error: error.message });
       throw error;
     }
-    // D-157: the step-by-step start begins right after creating the account.
+    // The step-by-step start begins right after creating the account.
     redirect(303, guideNext(db, userId));
   }
 };

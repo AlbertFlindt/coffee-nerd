@@ -1,7 +1,7 @@
 <script lang="ts">
-  // Home (screen 6, D-32): the app banner with the gear (D-34, D-199), the bean pill (D-195), then the
+  // Home (screen 6): the app banner with the gear, the bean pill, then the
   // last shot, quick numbers and best recipe for that bean. Everything follows the bean on the pill.
-  // A shot still on the phone is the Last shot at once (D-221, D-233).
+  // A shot still on the phone is the Last shot at once.
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
@@ -24,7 +24,7 @@
   let beanSheet = $state(false);
   let rating = $state(false);
   const now = Date.now();
-  // D-232: a shot just kept on the phone shows the usual "Shot saved" bar.
+  // A shot just kept on the phone shows the usual "Shot saved" bar.
   const savedOnPhone = takeSavedOnPhone();
   const lastShot = $derived(
     home.state === 'ready'
@@ -56,7 +56,7 @@
 
 {#if home.state === 'no-bean'}
   <main>
-    <!-- D-198: not designed yet (docs/open-items.md). -->
+    <!-- Not designed yet. -->
     <section class="cn-card empty-card" aria-label="No open beans">
       <h2>No open beans</h2>
       <a class="cn-btn-secondary cn-tap add" href={resolve('/library/beans/new')}>Add bean</a>
@@ -91,7 +91,7 @@
   <main>
     <section class="last" aria-label="Last shot">
       {#if last}
-        <!-- D-197: the card opens the shot, and its Back returns here. -->
+        <!-- The card opens the shot, and its Back returns here. -->
         <a
           class="card cn-tap"
           href={last.waiting?.form
@@ -131,7 +131,7 @@
           </span>
         </a>
         {#if last.score === null}
-          <!-- D-197, D-111: the Rate block opens the score sheet; the rest of the card opens the shot. -->
+          <!-- The Rate block opens the score sheet; the rest of the card opens the shot. -->
           <button
             type="button"
             class="rate cn-tap"
@@ -142,7 +142,7 @@
       {:else}
         <div class="card">
           <h2>Last shot</h2>
-          <!-- D-198: not designed yet (docs/open-items.md). -->
+          <!-- Not designed yet. -->
           <p class="muted">No shots yet</p>
         </div>
       {/if}
@@ -169,7 +169,7 @@
 
     <section class="best" aria-label="Best recipe for this bean">
       {#if home.best}
-        <!-- D-197: the card opens the bean page, where Brew next lives. -->
+        <!-- The card opens the bean page, where Brew next lives. -->
         <a class="card cn-tap" href={resolve('/library/beans/[id]', { id: home.bean.id })}>
           <div class="card-top">
             <h2>Best recipe for this bean</h2>
@@ -181,7 +181,7 @@
       {:else}
         <div class="card">
           <h2>Best recipe for this bean</h2>
-          <!-- D-198: not designed yet (docs/open-items.md). -->
+          <!-- Not designed yet. -->
           <p class="muted">
             {last === null ? 'No shots yet' : 'Rate a shot to see your best recipe.'}
           </p>
@@ -189,7 +189,7 @@
       {/if}
     </section>
 
-    <!-- D-193: Dial-in progress is the only graph for now, so there is no chip row above it. -->
+    <!-- Dial-in progress is the only graph for now, so there is no chip row above it. -->
     <section class="graph" aria-label="Dial-in progress">
       {#if home.graph}
         <span class="muted small">Score per shot · last {home.graph.points.length} rated shots</span
@@ -197,7 +197,7 @@
         <DialInGraph graph={home.graph} />
       {:else}
         <span class="muted small">Score per shot</span>
-        <!-- D-196, D-198: not designed yet (docs/open-items.md). -->
+        <!-- Not designed yet. -->
         <p class="muted">
           {last === null
             ? 'No shots yet'
@@ -216,7 +216,7 @@
       onclose={() => (beanSheet = false)}
     >
       <h2 class="cn-type-heading sheet-title">Open beans</h2>
-      <!-- D-195: the bean chosen here is also the one "+" starts from. Built like the shot form's list. -->
+      <!-- The bean chosen here is also the one "+" starts from. Built like the shot form's list. -->
       <form
         class="beans"
         method="POST"
@@ -411,7 +411,7 @@
     color: var(--ink-muted);
   }
 
-  /* An unrated shot (D-11): amber, your input still to give. Placed over the card's score block. */
+  /* An unrated shot: amber, your input still to give. Placed over the card's score block. */
   .rate {
     position: absolute;
     left: var(--space-4);
@@ -489,7 +489,7 @@
     font-size: 14px;
   }
 
-  /* D-32, D-36: the graph takes the height left, so Home fits shorter screens too. */
+  /* The graph takes the height left, so Home fits shorter screens too. */
   .graph {
     flex: 1;
     min-height: 0;

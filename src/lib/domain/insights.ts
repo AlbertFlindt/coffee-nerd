@@ -1,10 +1,10 @@
-// Insights (screens 23–25, D-55, D-56): what a card shows, as data the server fills and the components
+// Insights (screens 23–25): what a card shows, as data the server fills and the components
 // draw. Pure: the wording helpers here are shared by every insight definition.
 import { histogram } from './statistics';
 
 export type Topic = 'like' | 'progress' | 'dial-in' | 'comparisons';
 
-/** The topic chips in their order (D-55); Insights opens on the first (D-208). */
+/** The topic chips in their order; Insights opens on the first. */
 export const TOPICS: readonly { id: Topic; label: string }[] = [
   { id: 'like', label: 'What I like' },
   { id: 'progress', label: 'Progress' },
@@ -12,7 +12,7 @@ export const TOPICS: readonly { id: Topic; label: string }[] = [
   { id: 'comparisons', label: 'Comparisons' }
 ];
 
-/** One row of a box plot: the middle half as the box, the median, the full range as whiskers (D-56). */
+/** One row of a box plot: the middle half as the box, the median, the full range as whiskers. */
 export type BoxRow = {
   label: string;
   n: number;
@@ -23,13 +23,13 @@ export type BoxRow = {
   max: number;
 };
 
-/** One row of an average ± 1 σ dot plot (D-56); `top`, the clear winner, is amber, the rest cream (D-55). */
+/** One row of an average ± 1 σ dot plot; `top`, the clear winner, is amber, the rest cream. */
 export type DotRow = { label: string; n: number; mean: number; sigma: number; top: boolean };
 
-/** One bar of σ per group (D-56, screen 25): lower is steadier; `top` is the steadiest, in amber. */
+/** One bar of σ per group (screen 25): lower is steadier; `top` is the steadiest, in amber. */
 export type BarRow = { label: string; n: number; sigma: number; top: boolean };
 
-/** One week of the weekly line (D-212): its Monday, and no stats when too few rated shots, a gap. */
+/** One week of the weekly line: its Monday, and no stats when too few rated shots, a gap. */
 export type WeekStats = { mean: number; sigma: number; n: number };
 export type WeekPoint = { week: string; stats: WeekStats | null };
 
@@ -45,7 +45,7 @@ export type Chart =
   | {
       kind: 'weekly';
       measure: string;
-      /** Oldest week first, ending with this week (D-212). */
+      /** Oldest week first, ending with this week. */
       points: WeekPoint[];
       axis: Axis;
       /** The labels under the first and the last week ("12 weeks ago", "This week"). */
@@ -65,8 +65,8 @@ export type Chart =
   | { kind: 'sigma-bars'; measure: string; rows: BarRow[]; axis: Axis };
 
 /**
- * A card: one finding as a title and a sentence, its chart and its basis (D-55). Without enough data
- * the chart is left out and the sentence says what is missing (D-203, D-207).
+ * A card: one finding as a title and a sentence, its chart and its basis. Without enough data
+ * the chart is left out and the sentence says what is missing.
  */
 export type InsightCard = {
   id: string;
@@ -101,7 +101,7 @@ export function listText(items: readonly string[]): string {
   return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
 }
 
-/** D-203: the basis line names each group with fewer than 10 shots, to treat with care (screen 25). */
+/** The basis line names each group with fewer than 10 shots, to treat with care (screen 25). */
 export const CARE_BELOW = 10;
 
 export function careText(rows: readonly { label: string; n: number }[]): string | null {
@@ -111,7 +111,7 @@ export function careText(rows: readonly { label: string; n: number }[]): string 
 }
 
 /**
- * A score axis to 10 with a tick at each even number above its start (D-56: honest axes on scores).
+ * A score axis to 10 with a tick at each even number above its start (honest axes on scores).
  * Box plots start at 0; dot plots start 2 points below their lowest whisker, rounded down, so the
  * whiskers have room (screen 23: 3 to 10 for whiskers from 5.7).
  */
@@ -145,7 +145,7 @@ export function timeAxis(lowest: number, highest: number): Axis {
   return { from, to, ticks, unit: 's' };
 }
 
-/** A σ axis from 0 (bars start at zero, D-56) to at least 2, with a tick every half point (screen 25). */
+/** A σ axis from 0 (bars start at zero) to at least 2, with a tick every half point (screen 25). */
 export function sigmaAxis(highest: number): Axis {
   const to = Math.max(2, Math.ceil(highest * 2) / 2);
   const ticks: number[] = [];

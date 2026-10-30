@@ -16,7 +16,7 @@ describe('randomId', () => {
     expect(randomId()).toMatch(/^[0-9a-f-]{36}$/);
   });
 
-  it('D-65: a new custom feature key stays custom-<uuid>', () => {
+  it('a new custom feature key stays custom-<uuid>', () => {
     const key = `custom-${randomId()}`;
     const parsed = featureDefinitionSchema.safeParse({
       key,

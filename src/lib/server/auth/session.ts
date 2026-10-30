@@ -1,4 +1,4 @@
-// Sign-in sessions (D-86): you stay signed in until you sign out; each visit renews the session, and it
+// Sign-in sessions: you stay signed in until you sign out; each visit renews the session, and it
 // ends after a year without use. Only a SHA-256 of the cookie token is stored.
 import { createHash, randomBytes } from 'node:crypto';
 import { and, eq, gt } from 'drizzle-orm';
@@ -63,7 +63,7 @@ export function signOut(db: Db, token: string): void {
     .run();
 }
 
-/** Ends every session of the user, e.g. after a password reset (D-87). */
+/** Ends every session of the user, e.g. after a password reset. */
 export function signOutEverywhere(db: Db, userId: string): void {
   db.delete(session).where(eq(session.userId, userId)).run();
 }

@@ -1,4 +1,4 @@
-# Owner-maintained or synced files keep their own formatting
+# Hand-maintained or synced files keep their own formatting
 docs/
 design-system/
 CLAUDE.md
@@ -8,5 +8,5 @@ drizzle/
 package-lock.json
 /static/
 
-# Prose is maintained by the owner
+# Prose keeps its own formatting
 *.md

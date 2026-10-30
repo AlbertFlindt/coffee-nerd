@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// Screen 14 (D-46, D-151): your own feature on the machine page. It is added, shown, then deleted again
+// Screen 14: your own feature on the machine page. It is added, shown, then deleted again
 // (no shot used it), so the reference setup stays as it was. Runs after tab-library.test.ts (files run in
 // name order, one worker).
 test.describe.configure({ mode: 'serial' });
@@ -43,7 +43,7 @@ async function openMachine() {
   await expect(page.getByRole('heading', { name: 'Machine', level: 1 })).toBeVisible();
 }
 
-test('CustomFeature, D-46, D-185: a new feature is added from the machine page', async () => {
+test('CustomFeature: a new feature is added from the machine page', async () => {
   await openMachine();
   await page.getByRole('button', { name: 'Add your own feature' }).click();
   const sheet = page.getByRole('region', { name: 'Add your own feature' });
@@ -56,7 +56,7 @@ test('CustomFeature, D-46, D-185: a new feature is added from the machine page',
   ]);
   await sheet.getByLabel('Name').fill('Bloom pause');
   await sheet.getByRole('radio', { name: 'Seconds' }).click();
-  // D-185: Range opens the number keypad.
+  // Range opens the number keypad.
   await expect(sheet.getByLabel('Range')).toHaveAttribute('inputmode', 'decimal');
   await sheet.getByLabel('Step').fill('1');
   const preview = sheet.getByRole('region', { name: 'Preview' });
@@ -77,7 +77,7 @@ test('CustomFeature, D-46, D-185: a new feature is added from the machine page',
   await expect(page.getByRole('switch', { name: 'Bloom pause' })).toBeVisible();
 });
 
-test('CustomFeature, D-152: a list needs at least two options', async () => {
+test('CustomFeature: a list needs at least two options', async () => {
   await page.getByRole('button', { name: 'Add your own feature' }).click();
   const sheet = page.getByRole('region', { name: 'Add your own feature' });
   await sheet.getByLabel('Name').fill('Water');
@@ -102,7 +102,7 @@ test('CustomFeature, D-152: a list needs at least two options', async () => {
   await expect(sheet).toHaveCount(0);
 });
 
-test('CustomFeature, D-151: an unused feature is renamed or deleted from its own sheet', async () => {
+test('CustomFeature: an unused feature is renamed or deleted from its own sheet', async () => {
   await page.getByRole('button', { name: 'Edit Bloom pause' }).click();
   const sheet = page.getByRole('region', { name: 'Edit Bloom pause' });
   await expect(sheet.getByRole('button', { name: 'Save feature' })).toBeVisible();

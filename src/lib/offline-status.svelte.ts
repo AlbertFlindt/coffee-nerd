@@ -1,4 +1,4 @@
-// The pages' side of offline use (D-219): whether the server can be reached, the "Offline" line, and
+// The pages' side of offline use: whether the server can be reached, the "Offline" line, and
 // asking the service worker to keep Home, the Journal and the shot form ready.
 import { NEEDS_CONNECTION } from './offline';
 
@@ -40,13 +40,13 @@ export function watchNetwork(): void {
       network.message = NEEDS_CONNECTION;
     }
   });
-  // A change needs the server: offline, the form is not sent and nothing changes (D-219).
+  // A change needs the server: offline, the form is not sent and nothing changes.
   document.addEventListener(
     'submit',
     (event) => {
       const form = event.target as HTMLFormElement;
       const method = (event.submitter?.getAttribute('formmethod') ?? form.method).toLowerCase();
-      // A shot, an edit or a score waits on the phone instead (D-61, D-223).
+      // A shot, an edit or a score waits on the phone instead.
       if (method !== 'post' || form.hasAttribute('data-waits')) return;
       // Only when the phone itself has no network: a server that did not answer once may answer now,
       // and the service worker answers a change that cannot be sent (nothing changes either way).
@@ -62,7 +62,7 @@ export function watchNetwork(): void {
   );
 }
 
-/** After each page: keep the offline pages up to date, at once after a change (D-219). */
+/** After each page: keep the offline pages up to date, at once after a change. */
 export function keepForOffline(): void {
   post({ type: 'keep', force: Date.now() - changedAt < 10_000 });
   post({ type: 'status' });

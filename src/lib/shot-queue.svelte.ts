@@ -1,4 +1,4 @@
-// The shots waiting on the phone (D-61, D-220 to D-224): kept in the browser's database (IndexedDB),
+// The shots waiting on the phone: kept in the browser's database (IndexedDB),
 // shown by the pages at once, and sent in the order they were brewed whenever the server can be reached.
 // The server saves each one once, however often it is sent.
 import type { ActionResult } from '$app/forms';
@@ -90,14 +90,14 @@ async function keepStorage() {
   }
 }
 
-/** D-224, D-231: deletes a shot that is not on the server. */
+/** Deletes a shot that is not on the server. */
 export async function deleteWaiting(shotId: string): Promise<void> {
   const removed = await locked(async () => {
     const kept = (await update()).some((e) => e.shotId === shotId);
     if (kept) await update((entries) => entries.filter((e) => e.shotId !== shotId));
     return kept;
   });
-  // Sent meanwhile: the server has it now, so it is deleted there (D-116).
+  // Sent meanwhile: the server has it now, so it is deleted there.
   if (!removed)
     await fetch(`/journal/${encodeURIComponent(shotId)}/edit?/delete`, {
       method: 'POST',
@@ -107,9 +107,8 @@ export async function deleteWaiting(shotId: string): Promise<void> {
 }
 
 /**
- * A change saved online replaces what waited for the same shot: the latest change wins (D-223). Also
- * "Discard change" (D-238). Waits for a send in progress, so the waiting change never arrives after it
- * (D-239).
+ * A change saved online replaces what waited for the same shot: the latest change wins. Also
+ * "Discard change". Waits for a send in progress, so the waiting change never arrives after it.
  */
 export async function dropWaiting(shotId: string): Promise<WaitingEntry | null> {
   let dropped: WaitingEntry | null = null;
@@ -122,14 +121,14 @@ export async function dropWaiting(shotId: string): Promise<WaitingEntry | null> 
   return dropped;
 }
 
-/** A change dropped for an online save the server did not take waits again as it was (D-239). */
+/** A change dropped for an online save the server did not take waits again as it was. */
 export async function putBackWaiting(entry: WaitingEntry): Promise<void> {
   await update((entries) =>
     entries.some((e) => e.shotId === entry.shotId) ? entries : [...entries, entry]
   );
 }
 
-/** Whether anything of this shot waits on the phone: a score for it then waits with it (D-223). */
+/** Whether anything of this shot waits on the phone: a score for it then waits with it. */
 export function isWaiting(shotId: string): boolean {
   return waiting.entries.some((e) => e.shotId === shotId);
 }
@@ -141,7 +140,7 @@ function locked<T>(run: () => Promise<T>): Promise<T> {
   return navigator.locks ? navigator.locks.request(LOCK, run) : run();
 }
 
-/** D-225: signing out leaves no shot of that account on the phone. */
+/** Signing out leaves no shot of that account on the phone. */
 export async function clearWaiting(ownerId: string): Promise<void> {
   await update((entries) => entries.filter((e) => e.ownerId !== ownerId));
 }
@@ -152,7 +151,7 @@ async function resultOf(response: Response): Promise<SendResult | null> {
   const body = (await response.json()) as { outcome?: string; problems?: string[] };
   if (body.outcome === 'saved' || body.outcome === 'gone') return { kind: 'sent' };
   if (body.outcome === 'refused') return { kind: 'refused', problems: body.problems ?? [] };
-  // D-237: an error of the app itself. A proxy's page while the server restarts is not one.
+  // An error of the app itself. A proxy's page while the server restarts is not one.
   if (response.status >= 500) return { kind: 'failed' };
   return null;
 }
@@ -195,7 +194,7 @@ async function send(ownerId: string) {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(queueRequest(entry)),
-          // D-235: a server this slow counts as offline; the server saves each change once anyway.
+          // A server this slow counts as offline; the server saves each change once anyway.
           signal: AbortSignal.timeout(TIME_LIMIT)
         });
         result = await resultOf(response);
@@ -249,7 +248,7 @@ export function unreached(result: ActionResult): boolean {
 
 let savedOnPhone: Flash | null = null;
 
-/** D-232: a shot kept on the phone shows the usual "Shot saved" bar on the page it returns to. */
+/** A shot kept on the phone shows the usual "Shot saved" bar on the page it returns to. */
 export function showSavedOnPhone(): void {
   savedOnPhone = { kind: 'saved' };
 }

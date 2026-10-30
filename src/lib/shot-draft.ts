@@ -1,4 +1,4 @@
-// The shot form's draft on the phone (D-226), in the browser's own storage: kept at once on every change,
+// The shot form's draft on the phone, in the browser's own storage: kept at once on every change,
 // so it is there however the page ends. Without storage (a private window that refuses it) there is none.
 import { v7 } from 'uuid';
 import type { ShotState } from './components/shot-state';

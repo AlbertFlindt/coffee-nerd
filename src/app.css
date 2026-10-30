@@ -12,7 +12,7 @@ body {
   height: 100%;
   background: var(--bg);
   /*
-   * D-36: the page itself never moves. In a browser tab (Vanadium, Firefox, or Chrome before it installs
+   * The page itself never moves. In a browser tab (Vanadium, Firefox, or Chrome before it installs
    * the app) a drag past the end of a list otherwise stretches or pulls the whole screen down to reload.
    */
   overscroll-behavior: none;
@@ -28,7 +28,7 @@ body {
   box-sizing: border-box;
 }
 
-/* D-36: no visible scrollbars anywhere; lists scroll inside their own area. */
+/* No visible scrollbars anywhere; lists scroll inside their own area. */
 * {
   scrollbar-width: none;
 }
@@ -36,4 +36,4 @@ body {
   display: none;
 }
 
-/* D-107: the pressed states live in the design system now (cn-tap, cn-tap-strong, D-146). */
+/* The pressed states live in the design system now (cn-tap, cn-tap-strong). */

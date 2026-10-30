@@ -1,4 +1,4 @@
-// The step-by-step start (D-157): after creating the account, and on "+" while something is missing, the
+// The step-by-step start: after creating the account, and on "+" while something is missing, the
 // app walks through Machine → Grinder → Basket (can be skipped) → My setup → first bean, each on its own
 // page with "Step n of 5" and "Next". Leaving halfway is fine: the guide resumes at the first missing step.
 import { and, eq, isNull } from 'drizzle-orm';
@@ -34,7 +34,7 @@ export function firstStep(db: Queryable, ownerId: string): GuideStep | null {
   // The same test the shot form uses, so "+" never sends you back to itself.
   const settings = db.select().from(userSettings).where(eq(userSettings.userId, ownerId)).get();
   const hasMySetup = !!settings && readMySetup(settings) !== null;
-  // A saved My setup may have no basket on purpose (D-155): the basket step only asks before it exists.
+  // A saved My setup may have no basket on purpose: the basket step only asks before it exists.
   const state = db.select().from(appState).where(eq(appState.userId, ownerId)).get();
   if (!hasMySetup && !kinds.has('basket') && !state?.basketStepSkipped) return 'basket';
   if (!hasMySetup) return 'setup';
@@ -52,7 +52,7 @@ export function guideNext(db: Queryable, ownerId: string): string {
   return step ? stepUrl(step) : '/shot/new';
 }
 
-/** "Skip" on the basket step: remembered, so the guide does not ask again (D-157). */
+/** "Skip" on the basket step: remembered, so the guide does not ask again. */
 export function skipBasketStep(db: Queryable, ownerId: string, now: number): void {
   db.update(appState)
     .set({ basketStepSkipped: true, updatedAt: now })

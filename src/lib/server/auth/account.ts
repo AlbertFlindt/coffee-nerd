@@ -1,5 +1,5 @@
-// The one account of an installation (D-60): created on first run with a name and a password (D-85),
-// with the built-in flavor tags and nothing else (D-88).
+// The one account of an installation: created on first run with a name and a password,
+// with the built-in flavor tags and nothing else.
 import { randomBytes } from 'node:crypto';
 import { count } from 'drizzle-orm';
 import { insertBuiltInTags } from '../db/built-in-tags';
@@ -95,7 +95,7 @@ export async function attemptSignIn(
   return { outcome: 'signed_in', user: signedIn };
 }
 
-/** An IANA time zone the runtime knows, or UTC (data-model §1.8). */
+/** An IANA time zone the runtime knows, or UTC (docs/SPEC.md §1.8). */
 function validTimeZone(timeZone: string): string {
   try {
     new Intl.DateTimeFormat('en', { timeZone });

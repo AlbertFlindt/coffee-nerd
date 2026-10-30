@@ -71,7 +71,7 @@ const save = (shotInput: ShotInput, now = shotInput.brewedAt) =>
 const recipeCount = () => db.select().from(recipe).all().length;
 
 describe('saveShot', () => {
-  it('D-186: a dose within 0.2 g reuses the recipe; the shot keeps its own dose', () => {
+  it('a dose within 0.2 g reuses the recipe; the shot keeps its own dose', () => {
     const first = save(input({}, 1));
     const second = save(input({ dose: 18100 }, 2));
     expect(second).toMatchObject({ recipeId: first.recipeId, newRecipe: false });
@@ -96,7 +96,7 @@ describe('saveShot', () => {
     ).toEqual([18000, 18300]);
   });
 
-  it('D-186: equally close doses go to the recipe brewed most recently', () => {
+  it('equally close doses go to the recipe brewed most recently', () => {
     const older = save(input({ dose: 18000 }, 1));
     const newer = save(input({ dose: 18400 }, 2));
     const tie = save(input({ dose: 18200 }, 3));
@@ -108,7 +108,7 @@ describe('saveShot', () => {
     );
   });
 
-  it('D-63: the first shot creates its recipe; the same values reuse it', () => {
+  it('the first shot creates its recipe; the same values reuse it', () => {
     const first = save(input({}, 1));
     expect(first).toMatchObject({ status: 'saved', recipeShotCount: 1, newRecipe: true });
     const second = save(input({}, 2));
@@ -116,7 +116,7 @@ describe('saveShot', () => {
     expect(recipeCount()).toBe(1);
   });
 
-  it('D-16: going back to an earlier grind reuses that recipe', () => {
+  it('going back to an earlier grind reuses that recipe', () => {
     const at16 = save(input({ grind: 1600 }, 1));
     const at15 = save(input({ grind: 1500 }, 2));
     const back = save(input({ grind: 1600 }, 3));
@@ -124,7 +124,7 @@ describe('saveShot', () => {
     expect(back).toMatchObject({ recipeId: at16.recipeId, recipeShotCount: 2, newRecipe: false });
   });
 
-  it('D-65: renaming a feature label does not make a new recipe', () => {
+  it('renaming a feature label does not make a new recipe', () => {
     const first = save(input({}, 1));
     const renamed = input({}, 2);
     renamed.setup.features = {
@@ -134,14 +134,14 @@ describe('saveShot', () => {
     expect(save(renamed).recipeId).toBe(first.recipeId);
   });
 
-  it('D-63: the server recomputes the fingerprint and stores the recipe values', () => {
+  it('the server recomputes the fingerprint and stores the recipe values', () => {
     const { recipeId } = save(input({ grind: 1700 }, 1));
     const stored = db.select().from(recipe).where(eq(recipe.id, recipeId)).get()!;
     expect(stored).toMatchObject({ grind: 1700, dose: 18000, method: 'espresso' });
     expect(stored.fingerprint).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it('D-61: saving the same shot twice changes nothing', () => {
+  it('saving the same shot twice changes nothing', () => {
     const shotInput = input({}, 1);
     save(shotInput);
     const again = save({ ...shotInput, grind: 1900 });
@@ -150,7 +150,7 @@ describe('saveShot', () => {
     expect(recipeCount()).toBe(1);
   });
 
-  it('D-11: taste is stored as given; not rated stays empty, never 0', () => {
+  it('taste is stored as given; not rated stays empty, never 0', () => {
     const { shotId } = save(input({}, 1));
     expect(db.select().from(shot).where(eq(shot.id, shotId)).get()).toMatchObject({
       score: null,
@@ -168,7 +168,7 @@ describe('saveShot', () => {
     });
   });
 
-  it('D-23: flavor notes are linked to the shot', () => {
+  it('flavor notes are linked to the shot', () => {
     const [berry, caramel] = db.select().from(tag).limit(2).all();
     const { shotId } = save(input({ tagIds: [berry.id, caramel.id] }, 1));
     expect(
@@ -182,14 +182,14 @@ describe('saveShot', () => {
     ).toEqual([berry.id, caramel.id].sort());
   });
 
-  it('D-43: saving a shot clears Brew next', () => {
+  it('saving a shot clears Brew next', () => {
     const { recipeId } = save(input({}, 1));
     db.update(appState).set({ brewNextRecipeId: recipeId }).run();
     save(input({}, 2));
     expect(db.select().from(appState).get()?.brewNextRecipeId).toBeNull();
   });
 
-  it('D-40: the bean finishes automatically when a shot uses up the bag', () => {
+  it('the bean finishes automatically when a shot uses up the bag', () => {
     db.update(bean).set({ bagWeight: 36000 }).where(eq(bean.id, ids.beanId)).run();
     expect(save(input({}, 1)).autoFinished).toBe(false);
     expect(save(input({}, 2)).autoFinished).toBe(true);
@@ -200,7 +200,7 @@ describe('saveShot', () => {
     });
   });
 
-  it('D-40: after reopening, the next shot does not finish the bean again', () => {
+  it('after reopening, the next shot does not finish the bean again', () => {
     db.update(bean).set({ bagWeight: 36000 }).where(eq(bean.id, ids.beanId)).run();
     save(input({}, 1));
     save(input({}, 2));
@@ -209,7 +209,7 @@ describe('saveShot', () => {
     expect(db.select().from(bean).get()?.status).toBe('open');
   });
 
-  it('D-91: a shot is saved with an empty time and yield, stored as not set', () => {
+  it('a shot is saved with an empty time and yield, stored as not set', () => {
     const { shotId } = save(input({ time: null, yield: null }, 1));
     expect(db.select().from(shot).where(eq(shot.id, shotId)).get()).toMatchObject({
       time: null,
@@ -217,13 +217,13 @@ describe('saveShot', () => {
     });
   });
 
-  it('D-32: saving a shot makes its bean the current bean', () => {
+  it('saving a shot makes its bean the current bean', () => {
     db.update(appState).set({ currentBeanId: null }).run();
     save(input({}, 1));
     expect(db.select().from(appState).get()?.currentBeanId).toBe(ids.beanId);
   });
 
-  it('D-101: a note added on the Tasting tab is created in "Other" when the shot is saved', () => {
+  it('a note added on the Tasting tab is created in "Other" when the shot is saved', () => {
     const { shotId } = save(input({ newTagNames: [' Blood orange '] }, 1));
     const created = db.select().from(tag).where(eq(tag.name, 'Blood orange')).get();
     expect(created).toMatchObject({ family: 'other', builtIn: false, ownerId: ids.userId });
@@ -232,7 +232,7 @@ describe('saveShot', () => {
     ]);
   });
 
-  it('D-53, D-101: an added note that already exists (ignoring case) is reused, not duplicated', () => {
+  it('an added note that already exists (ignoring case) is reused, not duplicated', () => {
     const berry = db.select().from(tag).where(eq(tag.name, 'Berry')).get()!;
     const { shotId } = save(input({ tagIds: [berry.id], newTagNames: ['berry', 'BERRY'] }, 1));
     expect(
@@ -247,12 +247,12 @@ describe('saveShot', () => {
     ]);
   });
 
-  it('D-101: a rejected shot leaves no new note behind', () => {
+  it('a rejected shot leaves no new note behind', () => {
     expect(() => save(input({ dose: 0, newTagNames: ['Blood orange'] }))).toThrow(ShotRejected);
     expect(db.select().from(tag).where(eq(tag.name, 'Blood orange')).get()).toBeUndefined();
   });
 
-  it('D-95, D-40: Undo reopens a bean that a shot finished automatically', () => {
+  it('Undo reopens a bean that a shot finished automatically', () => {
     db.update(bean).set({ bagWeight: 18000 }).where(eq(bean.id, ids.beanId)).run();
     expect(save(input({}, 1)).autoFinished).toBe(true);
     expect(reopenAutoFinishedBean(db, ids.userId, ids.beanId, T0 + 2 * MINUTE)).toBe(true);
@@ -263,7 +263,7 @@ describe('saveShot', () => {
     });
   });
 
-  it('D-95, D-40: Undo does not reopen a bean that was finished by hand, or another owner’s', () => {
+  it('Undo does not reopen a bean that was finished by hand, or another account’s', () => {
     db.update(bean)
       .set({ status: 'finished', finishedAt: T0 })
       .where(eq(bean.id, ids.beanId))
@@ -274,7 +274,7 @@ describe('saveShot', () => {
     expect(db.select().from(bean).where(eq(bean.id, ids.beanId)).get()?.status).toBe('finished');
   });
 
-  it('D-43: "Use last shot recipe" clears the Brew next mark', () => {
+  it('"Use last shot recipe" clears the Brew next mark', () => {
     const { recipeId } = save(input({}, 1));
     db.update(appState).set({ brewNextRecipeId: recipeId }).run();
     clearBrewNext(db, ids.userId, T0 + 2 * MINUTE);
@@ -289,7 +289,7 @@ describe('saveShot', () => {
       expect(recipeCount()).toBe(0);
     };
 
-    it('D-09: a score outside 1–10', () => {
+    it('a score outside 1–10', () => {
       rejects(
         input({
           taste: { score: 11, balance: null, body: null, sweetness: null, aftertaste: null }
@@ -298,7 +298,7 @@ describe('saveShot', () => {
       );
     });
 
-    it('D-02: a setup that does not fit the machine', () => {
+    it('a setup that does not fit the machine', () => {
       const bad = input();
       bad.setup.features = {
         ...bad.setup.features,
@@ -307,32 +307,32 @@ describe('saveShot', () => {
       rejects(bad, /setup/);
     });
 
-    it('D-52: a step value that does not fit its step', () => {
+    it('a step value that does not fit its step', () => {
       const bad = input();
       bad.setup.routine!.steps[1] = { ...bad.setup.routine!.steps[1], value: 5000 };
       rejects(bad, /routine/);
     });
 
-    it('D-51: puck prep that does not match the routine', () => {
+    it('puck prep that does not match the routine', () => {
       rejects(input({ routineId: null }), /routine/);
     });
 
-    it('D-68: gear of the wrong kind', () => {
+    it('gear of the wrong kind', () => {
       rejects(input({ grinderId: ids.machineId }), /grinder/);
     });
 
-    it('D-65: a setup that is not a setup at all', () => {
+    it('a setup that is not a setup at all', () => {
       rejects(input({ setup: null as never }), /setup/);
       rejects(input({ setup: { features: {}, routine: { name: 'Broken' } } as never }), /setup/);
     });
 
-    it('D-63: a dose that is not a positive whole number of thousandths', () => {
+    it('a dose that is not a positive whole number of thousandths', () => {
       rejects(input({ dose: 0 }), /dose/);
       rejects(input({ grind: 1.5 }), /grind/);
     });
   });
 
-  it('D-63: a failure part way through a save rolls everything back', () => {
+  it('a failure part way through a save rolls everything back', () => {
     db.run(
       sql`CREATE TRIGGER fail_tags BEFORE INSERT ON shot_tag BEGIN SELECT RAISE(ABORT, 'boom'); END`
     );
@@ -342,7 +342,7 @@ describe('saveShot', () => {
     expect(recipeCount()).toBe(0);
   });
 
-  it('D-63, D-65: only the checked setup is stored in the recipe, never extra fields', () => {
+  it('only the checked setup is stored in the recipe, never extra fields', () => {
     const extra = input();
     (extra.setup as Record<string, unknown>).injected = 'not part of a setup';
     const { recipeId } = save(extra);
@@ -351,7 +351,7 @@ describe('saveShot', () => {
     );
   });
 
-  it('D-60: another owner’s bean, gear or tags cannot be used, and their rows stay untouched', () => {
+  it('another account’s bean, gear or tags cannot be used, and their rows stay untouched', () => {
     const other = seedOtherAccount();
     expect(() => save(input({ beanId: other.beanId }))).toThrow(/bean/);
     expect(() => save(input({ machineId: other.machineId }))).toThrow(/machine/);
@@ -362,7 +362,7 @@ describe('saveShot', () => {
 });
 
 describe('editShot', () => {
-  it('D-178: an earlier shot keeps the step value it was brewed with, even out of today’s range', () => {
+  it('an earlier shot keeps the step value it was brewed with, even out of today’s range', () => {
     const wdt30 = input({}, 1);
     wdt30.setup.routine!.steps[0].value = 30000;
     const { shotId } = save(wdt30);
@@ -380,7 +380,7 @@ describe('editShot', () => {
     expect(() => save(input({ setup: wdt30.setup }, 2))).toThrow(ShotRejected);
   });
 
-  it('D-113: a shot can move to an open bean, not to a finished one; its own finished bean stays fine', () => {
+  it('a shot can move to an open bean, not to a finished one; its own finished bean stays fine', () => {
     const { shotId } = save(input({}, 1));
     const other = newId(T0);
     db.insert(bean)
@@ -403,7 +403,7 @@ describe('editShot', () => {
     expect(moveTo(other).status).toBe('saved');
   });
 
-  it('D-57: editing a shot that moves it to a new recipe removes the recipe left without shots', () => {
+  it('editing a shot that moves it to a new recipe removes the recipe left without shots', () => {
     const first = save(input({ grind: 1600 }, 1));
     const { shotId, recipeId } = save(input({ grind: 1500 }, 2));
     const edited = editShot(
@@ -418,7 +418,7 @@ describe('editShot', () => {
     expect(recipeCount()).toBe(1);
   });
 
-  it('D-43: a recipe left without shots is kept when it is marked Brew next', () => {
+  it('a recipe left without shots is kept when it is marked Brew next', () => {
     const { shotId, recipeId } = save(input({ grind: 1500 }, 1));
     db.update(appState).set({ brewNextRecipeId: recipeId }).run();
     editShot(db, ids.userId, shotId, { ...input({ grind: 1700 }, 1), id: shotId }, T0);
@@ -426,7 +426,7 @@ describe('editShot', () => {
     expect(db.select().from(appState).get()?.brewNextRecipeId).toBe(recipeId);
   });
 
-  it('D-57: editing result and taste keeps the recipe and replaces the flavor notes', () => {
+  it('editing result and taste keeps the recipe and replaces the flavor notes', () => {
     const [berry, caramel] = db.select().from(tag).limit(2).all();
     const shotInput = input({ tagIds: [berry.id] }, 1);
     const { recipeId } = save(shotInput);
@@ -453,7 +453,7 @@ describe('editShot', () => {
     ).toEqual([caramel.id]);
   });
 
-  it('data-model §4.1: a recipe that still has other shots stays when one of them moves away', () => {
+  it('a recipe that still has other shots stays when one of them moves away', () => {
     const first = save(input({ grind: 1600 }, 1));
     const second = save(input({ grind: 1600 }, 2));
     editShot(
@@ -467,7 +467,7 @@ describe('editShot', () => {
     expect(recipeCount()).toBe(2);
   });
 
-  it('D-57: a rejected edit changes nothing', () => {
+  it('a rejected edit changes nothing', () => {
     const [berry] = db.select().from(tag).limit(1).all();
     const shotInput = input({ tagIds: [berry.id] }, 1);
     const { recipeId } = save(shotInput);
@@ -483,7 +483,7 @@ describe('editShot', () => {
     expect(recipeCount()).toBe(1);
   });
 
-  it('D-57, D-16: editing a shot onto another bean moves it to that bean’s recipe', () => {
+  it('editing a shot onto another bean moves it to that bean’s recipe', () => {
     const otherBeanId = newId(T0 + 5);
     db.insert(bean)
       .values({
@@ -510,7 +510,7 @@ describe('editShot', () => {
     expect(db.select().from(recipe).where(eq(recipe.id, recipeId)).get()).toBeUndefined();
   });
 
-  it('D-60: a shot of another owner cannot be edited', () => {
+  it('a shot of another account cannot be edited', () => {
     const { shotId } = save(input({}, 1));
     const other = seedOtherAccount();
     expect(() => editShot(db, other.userId, shotId, input({}, 1), T0)).toThrow(/shot/);
@@ -545,7 +545,7 @@ function seedOtherAccount() {
 }
 
 describe('rateShot', () => {
-  it('D-111: sets the score of an unrated shot and nothing else', () => {
+  it('sets the score of an unrated shot and nothing else', () => {
     const shotId = save(input({ notes: 'thin' }, 1)).shotId;
     expect(rateShot(db, ids.userId, shotId, 7, T0 + 5 * MINUTE)).toBe(true);
     const row = db.select().from(shot).where(eq(shot.id, shotId)).get()!;
@@ -557,14 +557,14 @@ describe('rateShot', () => {
     });
   });
 
-  it('D-09: only whole scores from 1 to 10', () => {
+  it('only whole scores from 1 to 10', () => {
     const shotId = save(input({}, 1)).shotId;
     for (const score of [0, 11, 7.5])
       expect(() => rateShot(db, ids.userId, shotId, score, T0)).toThrow(ShotRejected);
     expect(db.select().from(shot).where(eq(shot.id, shotId)).get()!.score).toBeNull();
   });
 
-  it('D-60: another user’s shot, or an unknown one, is left alone', () => {
+  it('another user’s shot, or an unknown one, is left alone', () => {
     const shotId = save(input({}, 1)).shotId;
     expect(rateShot(db, 'someone-else', shotId, 7, T0)).toBe(false);
     expect(rateShot(db, ids.userId, 'nope', 7, T0)).toBe(false);
@@ -573,7 +573,7 @@ describe('rateShot', () => {
 });
 
 describe('deleteShot', () => {
-  it('D-116: removes the shot and its flavor notes; a recipe left without shots goes too', () => {
+  it('removes the shot and its flavor notes; a recipe left without shots goes too', () => {
     const berry = db.select().from(tag).where(eq(tag.name, 'Berry')).get()!;
     const kept = save(input({}, 1));
     const { shotId, recipeId } = save(input({ grind: 1500, tagIds: [berry.id] }, 2));
@@ -584,7 +584,7 @@ describe('deleteShot', () => {
     expect(db.select().from(recipe).where(eq(recipe.id, kept.recipeId)).get()).toBeDefined();
   });
 
-  it('D-116, D-43: a recipe that still has shots, or is marked Brew next, stays', () => {
+  it('a recipe that still has shots, or is marked Brew next, stays', () => {
     const first = save(input({}, 1));
     const second = save(input({}, 2));
     deleteShot(db, ids.userId, second.shotId);
@@ -595,7 +595,7 @@ describe('deleteShot', () => {
     expect(db.select().from(recipe).where(eq(recipe.id, lone.recipeId)).get()).toBeDefined();
   });
 
-  it('D-60: another user’s shot, or an unknown one, is left alone', () => {
+  it('another user’s shot, or an unknown one, is left alone', () => {
     const { shotId } = save(input({}, 1));
     expect(deleteShot(db, 'someone-else', shotId)).toBe(false);
     expect(deleteShot(db, ids.userId, 'nope')).toBe(false);

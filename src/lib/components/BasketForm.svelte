@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The basket page (screen 16, D-49, D-150, D-79, D-147, D-158): brand and size (the name is built from
+  // The basket page (screen 16): brand and size (the name is built from
   // them by the server), type, shot size, diameter with the machines it fits, and the optional dose range.
   import { untrack } from 'svelte';
   import type { Guide } from '#lib/domain/guide.ts';
@@ -19,7 +19,7 @@
     spec?: BasketSpec;
     isDefault?: boolean;
     machines: { name: string; groupSizeMm?: number }[];
-    /** A step of the step-by-step start (D-157). */
+    /** A step of the step-by-step start. */
     guide?: Guide | null;
     problems?: string[];
   } = $props();
@@ -43,7 +43,7 @@
   const fits = $derived(fitsMachines(value.diameterMm, machines));
 
   function diameter(direction: '+' | '-') {
-    // Not set yet: the first tap starts at the most common size (D-158).
+    // Not set yet: the first tap starts at the most common size.
     if (value.diameterMm === undefined) {
       value.diameterMm = 58000;
       return;
@@ -134,7 +134,7 @@
       onchange={readSize}
     />
   </div>
-  <!-- Size only names the basket (D-150); the dose range below is what the shot form uses (D-154). -->
+  <!-- Size only names the basket; the dose range below is what the shot form uses. -->
   <p class="cn-caption note size-note">
     Size is the grams the basket is made for. It names the basket, like VST · 18 g.
   </p>

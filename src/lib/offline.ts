@@ -1,14 +1,14 @@
-// Shared by the pages and the service worker: how pages are kept for offline use (D-61, D-219).
+// Shared by the pages and the service worker: how pages are kept for offline use.
 
 /** Sent by the service worker when it keeps a copy: the server then takes no flash and sets no cookie. */
 export const OFFLINE_COPY_HEADER = 'x-coffee-nerd-offline-copy';
 
-/** What a change says when it cannot reach the server (D-219). */
+/** What a change says when it cannot reach the server. */
 export const NEEDS_CONNECTION = 'You are offline. This needs a connection, so nothing was changed.';
 
 /**
  * A change that cannot reach the server answers as a form that failed without problems of its own, in
- * the form SvelteKit sends an action's data (devalue): the "Offline" line says why (D-219).
+ * the form SvelteKit sends an action's data (devalue): the "Offline" line says why.
  */
 export const NO_CHANGE_ACTION_DATA = JSON.stringify([{}]);
 
@@ -39,7 +39,7 @@ export function pagePath(url: URL): string {
 
 /**
  * Home, the Journal and the shot form are kept by the service worker itself, from copies without a
- * "Shot saved" bar (D-219); other pages are kept as they are opened.
+ * "Shot saved" bar; other pages are kept as they are opened.
  */
 export function isKeptPage(pathname: string): boolean {
   const path = pathname.endsWith(DATA_SUFFIX)
@@ -49,7 +49,7 @@ export function isKeptPage(pathname: string): boolean {
 }
 
 /**
- * A change that waits on the phone when it cannot reach the server (D-61, D-223): saving a shot, new or
+ * A change that waits on the phone when it cannot reach the server: saving a shot, new or
  * edited, a score from the Rate sheet, and the waiting shots themselves on their way to the server.
  */
 export function waitsOffline(url: URL): boolean {
@@ -60,7 +60,7 @@ export function waitsOffline(url: URL): boolean {
   return false;
 }
 
-/** The files Settings hands out (D-251, D-252): they change nothing, so the kept pages need no refresh. */
+/** The files Settings hands out: they change nothing, so the kept pages need no refresh. */
 export function isDownload(url: URL): boolean {
   return ['/settings/backup', '/settings/export-shots', '/settings/export-everything'].includes(
     url.pathname

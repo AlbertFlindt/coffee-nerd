@@ -9,7 +9,7 @@ const post = (fields: Record<string, string>) => {
 };
 
 describe('saveBeanForm', () => {
-  it('D-41: a readable form is saved', async () => {
+  it('a readable form is saved', async () => {
     let saved = '';
     const result = await saveBeanForm(post({ name: 'Kiambu AA', roastDate: '2026-10-13' }), (b) => {
       saved = b.name;
@@ -18,7 +18,7 @@ describe('saveBeanForm', () => {
     expect(saved).toBe('Kiambu AA');
   });
 
-  it('D-138: a roast date after today comes back in plain words', async () => {
+  it('a roast date after today comes back in plain words', async () => {
     const result = await saveBeanForm(post({ name: 'Kiambu AA', roastDate: '2099-01-01' }), () => {
       throw new BeanRejected(['roastDate: after today']);
     });

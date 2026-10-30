@@ -1,5 +1,5 @@
-// Shapes of the JSON the app stores (D-64), checked in the browser and again on the server.
-// Numbers that are quantities are whole thousandths (data-model §1.4); see ./units.ts.
+// Shapes of the JSON the app stores, checked in the browser and again on the server.
+// Numbers that are quantities are whole thousandths (docs/SPEC.md §1.4); see ./units.ts.
 import { z } from 'zod';
 import { countryName } from './countries';
 
@@ -7,7 +7,7 @@ const thousandths = z.number().int();
 const step = z.number().int().positive();
 const name = z.string().trim().min(1);
 const id = z.uuid();
-/** A size in millimetres, in thousandths so 58.5 mm fits (D-79). */
+/** A size in millimetres, in thousandths so 58.5 mm fits. */
 const millimetres = thousandths.positive().optional();
 
 type Range = { min?: number; max?: number };
@@ -15,7 +15,7 @@ const rangeIsOrdered = ({ min, max }: Range) =>
   min === undefined || max === undefined || min <= max;
 const RANGE_MESSAGE = 'The range must run from low to high';
 
-// --- value definitions: shared by machine features and puck prep steps (D-46, D-52) ---
+// --- value definitions: shared by machine features and puck prep steps ---
 
 const numberValue = z.object({
   kind: z.literal('number'),
@@ -38,7 +38,7 @@ const choiceOptions = z
     message: 'Options need distinct ids'
   });
 const choiceValue = z.object({ kind: z.literal('choice'), options: choiceOptions });
-/** A pressure profile phase: seconds as the main value, optional pressure in bar (D-24). */
+/** A pressure profile phase: seconds as the main value, optional pressure in bar. */
 const phaseValue = z.object({
   kind: z.literal('phase'),
   step,
@@ -53,7 +53,7 @@ export const valueDefinitionSchema = z
   .refine((v) => !('min' in v) || rangeIsOrdered(v), RANGE_MESSAGE);
 export type ValueDefinition = z.infer<typeof valueDefinitionSchema>;
 
-// --- machine features (D-44, D-46) ---
+// --- machine features ---
 
 export const BUILT_IN_FEATURE_KEYS = [
   'temperature',
@@ -76,7 +76,7 @@ const CUSTOM_KEY = /^custom-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9
 
 export const featureDefinitionSchema = z
   .object({
-    /** Stable forever; labels can be renamed freely (D-65). */
+    /** Stable forever; labels can be renamed freely. */
     key: z.string().refine((key) => builtInKeys.has(key) || CUSTOM_KEY.test(key), {
       message: 'A feature key is built in or custom-<uuid>'
     }),
@@ -95,15 +95,15 @@ export const featureDefinitionSchema = z
       const rule = BUILT_IN_RULES[f.key] ?? CUSTOM_RULE;
       return f.switchable === rule.switchable && rule.kinds.includes(f.value.kind);
     },
-    { message: 'This feature has a fixed kind of value and off switch (data-model §3)' }
+    { message: 'This feature has a fixed kind of value and off switch' }
   )
   .refine((f) => f.value.kind !== 'choice' || f.value.options.length >= 2, {
-    message: 'A list needs at least two options (D-152)',
+    message: 'A list needs at least two options',
     path: ['value', 'options']
   });
 export type FeatureDefinition = z.infer<typeof featureDefinitionSchema>;
 
-// --- gear specs: one per kind (D-68) ---
+// --- gear specs: one per kind ---
 
 export const machineSpecSchema = z.object({
   type: z.enum(['automatic', 'semi_auto', 'lever', 'manual']),
@@ -120,7 +120,7 @@ export const grinderSpecSchema = z.object({
   type: z.enum(['electric', 'hand']),
   burrs: z.enum(['flat', 'conical']),
   burrSizeMm: millimetres,
-  /** How the dial works; drives the grind control (D-48). */
+  /** How the dial works; drives the grind control. */
   dial: z
     .object({
       mode: z.enum(['stepped', 'stepless']),
@@ -135,7 +135,7 @@ export const grinderSpecSchema = z.object({
 export type GrinderSpec = z.infer<typeof grinderSpecSchema>;
 
 export const basketSpecSchema = z.object({
-  /** The basket is named by brand and size: "VST · 18 g" (D-150). */
+  /** The basket is named by brand and size: "VST · 18 g". */
   brand: name,
   sizeG: thousandths.positive().optional(),
   type: z.enum(['precision', 'standard', 'pressurized']),
@@ -155,7 +155,7 @@ export const gearSchema = z.discriminatedUnion('kind', [
 ]);
 export type Gear = z.infer<typeof gearSchema>;
 
-// --- puck prep (D-51, D-52) ---
+// --- puck prep ---
 
 const inRange = (value: number, { min, max }: Range) =>
   (min === undefined || value >= min) && (max === undefined || value <= max);
@@ -170,7 +170,7 @@ export const prepStepSettingSchema = z
   ])
   .refine((s) => !('min' in s) || rangeIsOrdered(s), RANGE_MESSAGE)
   .refine((s) => s.kind !== 'choice' || s.options.length >= 2, {
-    message: 'A list needs at least two options (D-52, D-152)',
+    message: 'A list needs at least two options',
     path: ['options']
   })
   .refine(
@@ -184,11 +184,11 @@ export type PrepStepSetting = z.infer<typeof prepStepSettingSchema>;
 /** A step value: thousandths for numbers and seconds, an option id for lists, null for no setting. */
 const stepValue = z.union([thousandths, name, z.null()]);
 
-/** A routine is a straight line of steps (D-51). */
+/** A routine is a straight line of steps. */
 export const routineStepsSchema = z.array(z.object({ stepId: id, value: stepValue }));
 export type RoutineSteps = z.infer<typeof routineStepsSchema>;
 
-// --- a recipe's setup snapshot (D-65) ---
+// --- a recipe's setup snapshot ---
 
 export const featureValueSchema = z.object({
   label: name,
@@ -232,7 +232,7 @@ export type SetupProblem = {
 /**
  * Checks a setup against the machine it is brewed on: every enabled feature is present, nothing else is,
  * non-switchable features are on, and switched-on values fit their definition. Values typed off the step
- * grid are allowed (D-07). An empty list means valid.
+ * grid are allowed. An empty list means valid.
  */
 export function validateSetupAgainstMachine(
   setup: SetupSnapshot,
@@ -319,7 +319,7 @@ export type RoutineProblem = {
 };
 
 /**
- * Checks a routine's step values against each step's setting (D-51, D-52): no value for "No setting",
+ * Checks a routine's step values against each step's setting: no value for "No setting",
  * whole thousandths inside the range for numbers and seconds, one of the options for lists.
  */
 export function validateRoutineAgainstSteps(
@@ -350,7 +350,7 @@ export function validateRoutineAgainstSteps(
 }
 
 /**
- * A routine brought back to fit its steps as they are now (D-188, as D-178 does for a shot): a number moves
+ * A routine brought back to fit its steps as they are now (as a shot's step values are): a number moves
  * to the nearest end of the range, a value of the wrong kind or a removed option becomes the step's
  * starting value, and a step that no longer exists leaves the routine. `changed` says whether anything did.
  */
@@ -380,7 +380,7 @@ export function fitRoutine(
   return { steps: fitted, changed: JSON.stringify(fitted) !== JSON.stringify(steps) };
 }
 
-// --- a shot's taste (D-09, D-11, D-23, D-67): null means not rated / not set, never 0 ---
+// --- a shot's taste: null means not rated / not set, never 0 ---
 
 const scale = (min: number, max: number) => z.number().int().min(min).max(max).nullable();
 
@@ -393,7 +393,7 @@ export const tasteSchema = z.object({
 });
 export type Taste = z.infer<typeof tasteSchema>;
 
-// --- a bean as entered on the Add bean form (D-35, D-41) ---
+// --- a bean as entered on the Add bean form ---
 
 const optionalText = z.string().trim().min(1).nullable();
 const metres = z.number().int().positive().nullable();
@@ -422,7 +422,7 @@ export const beanInputSchema = z
     roastLevel: z.enum(['light', 'medium_light', 'medium', 'dark']).nullable(),
     roastDate: calendarDate,
     bagWeight: thousandths.positive().nullable(),
-    /** The earlier bag a re-buy repeats ("Same as before", D-41, D-139). */
+    /** The earlier bag a re-buy repeats ("Same as before"). */
     rebuyOfId: id.nullable()
   })
   .refine(

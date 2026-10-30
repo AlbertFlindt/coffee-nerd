@@ -1,8 +1,8 @@
 <script lang="ts">
-  // Gear (screen 8, D-38): the cream My setup card, then the gear grouped by kind, each with a short
-  // summary and the Default chip for what My setup uses (D-149). "Add gear" asks for the kind first (D-147).
-  // Only the list scrolls (D-36). "Edit" opens Edit My setup (screen 13, D-45), the only place the default
-  // is chosen (D-149).
+  // Gear (screen 8): the cream My setup card, then the gear grouped by kind, each with a short
+  // summary and the Default chip for what My setup uses. "Add gear" asks for the kind first.
+  // Only the list scrolls. "Edit" opens Edit My setup (screen 13), the only place the default
+  // is chosen.
   import { resolve } from '$app/paths';
   import ArchivedLink from '#lib/components/ArchivedLink.svelte';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
@@ -127,7 +127,7 @@
 <TabBar current="library" />
 
 {#if adding}
-  <!-- D-147: "Add gear" asks for the kind, then opens that kind's page, empty. -->
+  <!-- "Add gear" asks for the kind, then opens that kind's page, empty. -->
   <BottomSheet short label="Add gear" closeLabel="Close" onclose={() => (adding = false)}>
     <h2 class="sheet-title">Add gear</h2>
     <!-- Screen 36: one row per kind, with its icon and a chevron. -->
@@ -289,7 +289,7 @@
     font-size: 14px;
   }
 
-  /* D-36: the gear list is the part that scrolls. */
+  /* The gear list is the part that scrolls. */
   .list {
     flex: 1;
     min-height: 0;

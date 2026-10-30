@@ -9,11 +9,11 @@ import { originOf } from '#lib/domain/origin.ts';
 import { and, eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 
-// Home (screen 6, D-32): the bean you're brewing, its last shot, quick numbers and best recipe.
+// Home (screen 6): the bean you're brewing, its last shot, quick numbers and best recipe.
 export const load: PageServerLoad = ({ locals, cookies }) => {
   if (!locals.user) error(401);
   return {
-    // D-61, D-225: whose shots wait on the phone; they are only shown and sent for their own account.
+    // Whose shots wait on the phone; they are only shown and sent for their own account.
     userId: locals.user.id,
     home: loadHome(getDb(), locals.user.id, Date.now()),
     flash: locals.offlineCopy ? null : takeFlash(cookies)
@@ -21,7 +21,7 @@ export const load: PageServerLoad = ({ locals, cookies }) => {
 };
 
 export const actions: Actions = {
-  // D-195: the bean pill chooses the bean Home shows and "+" starts from.
+  // The bean pill chooses the bean Home shows and "+" starts from.
   bean: async ({ locals, request }) => {
     if (!locals.user) error(401);
     const beanId = String((await request.formData()).get('beanId') ?? '');
@@ -29,7 +29,7 @@ export const actions: Actions = {
     return { chosen: true };
   },
 
-  // D-111, D-197: the Rate block on the Last shot card sets the shot's score.
+  // The Rate block on the Last shot card sets the shot's score.
   rate: async ({ locals, request }) => {
     if (!locals.user) error(401);
     const data = await request.formData();
@@ -51,7 +51,7 @@ export const actions: Actions = {
     return { rated: true };
   },
 
-  // D-95, D-40: Undo after a shot finished the bean automatically.
+  // Undo after a shot finished the bean automatically.
   undoFinish: async ({ locals, request, cookies }) => {
     if (!locals.user) error(401);
     const data = await request.formData();
@@ -65,7 +65,7 @@ export const actions: Actions = {
         .get();
       setFlash(cookies, request, { kind: 'reopened', beanName: reopened?.name ?? '' });
     }
-    // D-200: the bar stays on the page that showed it, Home or the Journal.
+    // The bar stays on the page that showed it, Home or the Journal.
     redirect(303, originPath(originOf(String(data.get('from') ?? '')), cookies));
   }
 };

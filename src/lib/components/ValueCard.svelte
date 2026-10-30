@@ -1,7 +1,7 @@
 <script lang="ts">
-  // A core value (grind, dose, yield, time) with −/+ that show their step (D-07, D-14). Changed since the
-  // last shot: sage value and a delta pill (D-15). Empty: a muted dash with the unit (D-99). Tap the value
-  // to type it (D-06).
+  // A core value (grind, dose, yield, time) with −/+ that show their step. Changed since the
+  // last shot: sage value and a delta pill. Empty: a muted dash with the unit. Tap the value
+  // to type it.
   import { tick } from 'svelte';
   import {
     applyStep,
@@ -154,7 +154,7 @@
     line-height: 1.15;
   }
 
-  /* D-15: a changed value turns sage, as .cn-value-card--changed does for the design system's value. */
+  /* A changed value turns sage, as .cn-value-card--changed does for the design system's value. */
   .cn-value-card--changed .value {
     color: var(--sage);
   }

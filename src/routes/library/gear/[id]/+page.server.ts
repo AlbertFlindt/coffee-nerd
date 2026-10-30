@@ -10,7 +10,7 @@ import { getDb } from '#lib/server/db/connection.ts';
 import { saveGearForm } from '#lib/server/gear-form.ts';
 import type { Actions, PageServerLoad } from './$types';
 
-// A gear page (screens 12, 15, 16): machine, grinder or basket, by its kind (D-44, D-48, D-49).
+// A gear page (screens 12, 15, 16): machine, grinder or basket, by its kind.
 export const load: PageServerLoad = ({ locals, params }) => {
   if (!locals.user) error(401);
   const db = getDb();
@@ -19,7 +19,7 @@ export const load: PageServerLoad = ({ locals, params }) => {
   return {
     item,
     machines: loadMachineSizes(db, locals.user.id),
-    // D-151: a custom feature can be deleted only while no shot has used it.
+    // A custom feature can be deleted only while no shot has used it.
     usedFeatures: item.kind === 'machine' ? usedFeatureKeys(db, locals.user.id) : []
   };
 };
@@ -34,7 +34,7 @@ export const actions: Actions = {
     if (problem) return problem;
     redirect(303, '/library/gear');
   },
-  // D-148: archive; an item My setup uses is refused (D-83).
+  // Archive; an item My setup uses is refused.
   archive: ({ locals, params }) => {
     if (!locals.user) error(401);
     const result = archiveGear(getDb(), locals.user.id, params.id, Date.now());

@@ -24,7 +24,7 @@ test.beforeAll(async ({ browser, baseURL }) => {
 
 test.afterAll(() => page.close());
 
-test('NewStep, D-52: opens and takes list options on plain HTTP', async () => {
+test('NewStep: opens and takes list options on plain HTTP', async () => {
   errors.length = 0;
   await page.goto('/library/puck-prep');
   await page.getByRole('button', { name: 'New step' }).click();
@@ -36,7 +36,7 @@ test('NewStep, D-52: opens and takes list options on plain HTTP', async () => {
   expect(errors).toEqual([]);
 });
 
-test('CustomFeature, D-46: opens and adds the feature on plain HTTP', async () => {
+test('CustomFeature: opens and adds the feature on plain HTTP', async () => {
   errors.length = 0;
   await page.goto('/library/gear');
   await page.getByRole('link', { name: /^Lelit Bianca/ }).click();
@@ -51,7 +51,7 @@ test('CustomFeature, D-46: opens and adds the feature on plain HTTP', async () =
   expect(errors).toEqual([]);
 });
 
-test('D-218: on plain HTTP the app works online, without installing or a service worker', async () => {
+test('on plain HTTP the app works online, without installing or a service worker', async () => {
   errors.length = 0;
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();

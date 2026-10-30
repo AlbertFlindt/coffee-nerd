@@ -1,7 +1,7 @@
 <script lang="ts">
-  // A bottom sheet over a dimmed screen; tapping the dimmed part closes it (D-21). Placed inside the area
+  // A bottom sheet over a dimmed screen; tapping the dimmed part closes it. Placed inside the area
   // above the Save button, so the sheet stops above it and Save stays usable. It slides in and out, and
-  // dragging its handle down closes it (D-108).
+  // dragging its handle down closes it.
   import type { Snippet } from 'svelte';
   import { cubicOut } from 'svelte/easing';
   import { fade, fly } from 'svelte/transition';
@@ -16,7 +16,7 @@
     label: string;
     closeLabel: string;
     onclose: () => void;
-    /** As tall as its content, for a sheet with one control (the Rate sheet, D-111). */
+    /** As tall as its content, for a sheet with one control (the Rate sheet). */
     short?: boolean;
     children: Snippet;
   } = $props();
@@ -68,7 +68,7 @@
     style:transform={dragged > 0 ? `translateY(${dragged}px)` : undefined}
     transition:fly={{ y: sheet?.offsetHeight ?? 600, duration, easing: cubicOut }}
   >
-    <!-- D-108: the handle and the strip around it can be dragged down to close; Escape and tapping
+    <!-- The handle and the strip around it can be dragged down to close; Escape and tapping
          outside do the same for keyboards and screen readers. -->
     <div
       class="cn-sheet__grip"
@@ -111,7 +111,7 @@
     transition: transform 200ms ease-out;
   }
 
-  /* As tall as its content, but never above where a full sheet starts: a long list scrolls (D-36). */
+  /* As tall as its content, but never above where a full sheet starts: a long list scrolls. */
   .sheet.short {
     top: auto;
     max-height: calc(100% - 96px);
@@ -127,7 +127,7 @@
     }
   }
 
-  /* D-36: on a short screen the sheet starts higher, so its content keeps room. */
+  /* On a short screen the sheet starts higher, so its content keeps room. */
   @media (max-height: 760px) {
     .sheet {
       top: 48px;

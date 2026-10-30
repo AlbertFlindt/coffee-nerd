@@ -1,6 +1,6 @@
 <script lang="ts">
-  // A taste slider (D-08, D-23): starts empty (D-11), tap or slide to set whole numbers (D-67), the value
-  // as words next to the title (D-96), "Clear" to empty it again (D-98).
+  // A taste slider: starts empty, tap or slide to set whole numbers, the value
+  // as words next to the title, "Clear" to empty it again.
   import { tasteWords, type TasteScale } from '../domain/taste';
 
   let {
@@ -17,7 +17,7 @@
     scale: TasteScale;
     title: string;
     ariaLabel: string;
-    /** Words under the track: two ends, or three with the middle and a centre mark (D-192). */
+    /** Words under the track: two ends, or three with the middle and a centre mark. */
     ends: string[];
     value: number | null;
     min: number;
@@ -99,7 +99,7 @@
     {#if value !== null}
       <div class="handle" style:left="{percent(value)}%"></div>
     {:else}
-      <!-- D-106: nothing set yet; a hollow dashed handle in the middle shows where to tap or drag. -->
+      <!-- Nothing set yet; a hollow dashed handle in the middle shows where to tap or drag. -->
       <div class="handle cn-slider-handle--empty" style:left="50%"></div>
     {/if}
   </div>
@@ -222,7 +222,7 @@
     border: 4px solid var(--behind);
   }
 
-  /* The empty look comes from the design system (cn-slider-handle--empty, D-106); this wins over .handle. */
+  /* The empty look comes from the design system (cn-slider-handle--empty); this wins over .handle. */
   .handle.cn-slider-handle--empty {
     background: transparent;
     border: 1.5px dashed var(--ink-muted);
@@ -237,7 +237,7 @@
     margin-top: -8px;
   }
 
-  /* D-192: the middle word sits under the centre mark, whatever the width of the end words. */
+  /* The middle word sits under the centre mark, whatever the width of the end words. */
   .ends.three {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -247,7 +247,7 @@
     text-align: right;
   }
 
-  /* D-36: tighter around the track on shorter screens; the track keeps its 44 px. */
+  /* Tighter around the track on shorter screens; the track keeps its 44 px. */
   @media (max-height: 880px) {
     .taste {
       gap: 0;

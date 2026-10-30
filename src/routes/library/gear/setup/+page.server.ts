@@ -4,8 +4,8 @@ import { loadMySetupForm, MySetupRejected, saveMySetup } from '#lib/server/db/my
 import { guideNext, guideOf } from '#lib/server/first-run.ts';
 import type { Actions, PageServerLoad } from './$types';
 
-// Edit My setup (screen 13, D-45): the starting point for new beans, chosen here only (D-149). With ?guide=1
-// it is step 4 of the step-by-step start (D-157).
+// Edit My setup (screen 13): the starting point for new beans, chosen here only. With ?guide=1
+// it is step 4 of the step-by-step start.
 export const load: PageServerLoad = ({ locals, url }) => {
   if (!locals.user) error(401);
   return {

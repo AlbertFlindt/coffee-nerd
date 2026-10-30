@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import Database from 'better-sqlite3';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 
-// Settings (roadmap M11, D-248): the dose, yield and time steps (D-249), the backup (D-251) and the
-// exports (D-252). Each test leaves the steps as it found them. The page is saved to screenshots/.
+// Settings: the dose, yield and time steps, the backup and the
+// exports. Each test leaves the steps as it found them. The page is saved to screenshots/.
 test.describe.configure({ mode: 'serial' });
 
 const DATABASE = 'test-results/e2e-seeded.db';
@@ -41,12 +41,12 @@ function count(table: string): number {
 
 const steps = (name: string) => page.getByRole('radiogroup', { name });
 
-test('Settings, D-248: steps, your data, Sign out and the version, on one screen', async () => {
+test('Settings: steps, your data, Sign out and the version, on one screen', async () => {
   await page.getByRole('link', { name: 'Settings' }).click();
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Steps', level: 2 })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Your data', level: 2 })).toBeVisible();
-  // D-89: 0.1 g, 0.1 g and 1 s until changed.
+  // 0.1 g, 0.1 g and 1 s until changed.
   await expect(steps('Dose').getByRole('radio', { checked: true })).toHaveText('0.1 g');
   await expect(steps('Yield').getByRole('radio', { checked: true })).toHaveText('0.1 g');
   await expect(steps('Time').getByRole('radio', { checked: true })).toHaveText('1 s');
@@ -64,7 +64,7 @@ test('Settings, D-248: steps, your data, Sign out and the version, on one screen
   await page.screenshot({ path: 'screenshots/Settings.png' });
 });
 
-test('D-249: a step tapped in Settings is saved at once and used by the shot form', async () => {
+test('a step tapped in Settings is saved at once and used by the shot form', async () => {
   await steps('Dose').getByRole('radio', { name: '0.5 g', exact: true }).click();
   await expect(steps('Dose').getByRole('radio', { name: '0.5 g', exact: true })).toBeChecked();
   await steps('Time').getByRole('radio', { name: '0.1 s', exact: true }).click();
@@ -82,7 +82,7 @@ test('D-249: a step tapped in Settings is saved at once and used by the shot for
   await expect(steps('Time').getByRole('radio', { name: '1 s', exact: true })).toBeChecked();
 });
 
-test('D-251: "Download backup" saves a copy of the database without sign-ins', async () => {
+test('"Download backup" saves a copy of the database without sign-ins', async () => {
   const [file] = await Promise.all([
     page.waitForEvent('download'),
     page.getByRole('button', { name: /^Download backup/ }).click()
@@ -98,7 +98,7 @@ test('D-251: "Download backup" saves a copy of the database without sign-ins', a
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
 });
 
-test('D-252: "Export shots" saves a CSV file with one row per shot', async () => {
+test('"Export shots" saves a CSV file with one row per shot', async () => {
   const [file] = await Promise.all([
     page.waitForEvent('download'),
     page.getByRole('button', { name: /^Export shots/ }).click()
@@ -109,7 +109,7 @@ test('D-252: "Export shots" saves a CSV file with one row per shot', async () =>
   expect(lines).toHaveLength(count('shot') + 2);
 });
 
-test('D-252: "Export everything" saves all the account holds as JSON', async () => {
+test('"Export everything" saves all the account holds as JSON', async () => {
   const [file] = await Promise.all([
     page.waitForEvent('download'),
     page.getByRole('button', { name: /^Export everything/ }).click()
@@ -121,7 +121,7 @@ test('D-252: "Export everything" saves all the account holds as JSON', async () 
   expect(all.account).toEqual({ name: 'Demo' });
 });
 
-test('D-219, D-248: offline, the steps and the downloads need a connection and change nothing', async () => {
+test('offline, the steps and the downloads need a connection and change nothing', async () => {
   await page.goto('/settings');
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
   await context.setOffline(true);

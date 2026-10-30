@@ -1,8 +1,8 @@
 <script lang="ts">
-  // Puck prep (screen 18, D-51): your routines as cards (name, "In use" for My setup's and the last shot's
-  // routine, D-163, the steps as a mini flow, shots and average score), then your steps as chips with
-  // their unit and "New step" (D-52). A step chip opens the step sheet (D-168); a card or "New routine"
-  // opens the routine builder (D-167). Only the page area scrolls (D-36).
+  // Puck prep (screen 18): your routines as cards (name, "In use" for My setup's and the last shot's
+  // routine, the steps as a mini flow, shots and average score), then your steps as chips with
+  // their unit and "New step". A step chip opens the step sheet; a card or "New routine"
+  // opens the routine builder. Only the page area scrolls.
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page as current } from '$app/state';
@@ -20,7 +20,7 @@
   let sheet: 'new' | string | null = $state(null);
   const editing = $derived(page.steps.find((s) => s.id === sheet));
 
-  // D-187: a routine just saved asks to be used for new shots (`?ask=<id>`), unless My setup uses it.
+  // A routine just saved asks to be used for new shots (`?ask=<id>`), unless My setup uses it.
   const asking = $derived(
     page.routines.find((r) => r.id === current.url.searchParams.get('ask') && !r.inMySetup)
   );

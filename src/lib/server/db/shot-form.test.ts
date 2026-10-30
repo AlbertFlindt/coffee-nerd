@@ -76,7 +76,7 @@ function addBean(values: Partial<typeof bean.$inferInsert> = {}): string {
 }
 
 describe('loadShotForm', () => {
-  it('D-186: the next shot starts from the last shot’s own dose, and that recipe is reused', () => {
+  it('the next shot starts from the last shot’s own dose, and that recipe is reused', () => {
     save({}, 1);
     const saved = save(
       { dose: (ready(loadShotForm(db, ids.userId)).prefill.dose as number) + 100 },
@@ -92,7 +92,7 @@ describe('loadShotForm', () => {
     });
   });
 
-  it('D-186: the last shot is compared by its recipe’s dose; its own dose is kept beside it', () => {
+  it('the last shot is compared by its recipe’s dose; its own dose is kept beside it', () => {
     save({ dose: 18000 }, 1);
     save({ dose: 18200 }, 2);
     const form = ready(loadShotForm(db, ids.userId));
@@ -100,14 +100,14 @@ describe('loadShotForm', () => {
     expect(form.prefill.dose).toBe(18200);
   });
 
-  it('D-186: editing a shot starts from the dose it was brewed with', () => {
+  it('editing a shot starts from the dose it was brewed with', () => {
     const first = save({ dose: 18100 }, 1);
     if (first.status !== 'saved') throw new Error('not saved');
     const shotId = db.select({ id: shot.id }).from(shot).get()!.id;
     expect(loadEditShotForm(db, ids.userId, shotId)!.prefill.dose).toBe(18100);
   });
 
-  it('D-38, D-72, D-77: a bean’s first shot starts from My setup, with an empty time', () => {
+  it('a bean’s first shot starts from My setup, with an empty time', () => {
     const form = ready(loadShotForm(db, ids.userId));
     expect(form.prefill).toMatchObject({
       source: 'my_setup',
@@ -131,7 +131,7 @@ describe('loadShotForm', () => {
     expect(form.grinders).toMatchObject([{ name: 'Timemore 064S', dial: { step: 100 } }]);
   });
 
-  it('D-153: every machine and grinder you can pick, archived ones left out', () => {
+  it('every machine and grinder you can pick, archived ones left out', () => {
     const add = (kind: 'machine' | 'grinder', name: string, archivedAt: number | null) => {
       const id = newId(T0);
       const spec = kind === 'machine' ? REFERENCE.machine.spec : REFERENCE.grinder.spec;
@@ -155,24 +155,24 @@ describe('loadShotForm', () => {
     expect(form.machines.map((m) => m.name)).toEqual(['Lelit Bianca']);
     expect(form.machines[0].features.every((f) => f.enabled)).toBe(true);
     expect(form.grinders.map((g) => g.name)).toEqual(['Comandante C40', 'Timemore 064S']);
-    // Switching the machine fills new features from My setup (D-38, D-153).
+    // Switching the machine fills new features from My setup.
     expect(form.defaultFeatures).toMatchObject({ temperature: { on: true, value: 93000 } });
   });
 
-  it('D-166: each step’s setting comes with the form, to change a step for one shot', () => {
+  it('each step’s setting comes with the form, to change a step for one shot', () => {
     const form = ready(loadShotForm(db, ids.userId));
     expect(form.stepSettings[ids.stepIds[0]]).toMatchObject({ kind: 'seconds', step: 1000 });
     expect(form.stepSettings[ids.stepIds[2]]).toMatchObject({ kind: 'number', unit: 'kg' });
   });
 
-  it('D-154: a basket comes with its dose range for the hint', () => {
+  it('a basket comes with its dose range for the hint', () => {
     const form = ready(loadShotForm(db, ids.userId));
     expect(form.baskets).toEqual([
       { id: ids.basketId, name: 'VST · 18 g', doseRange: { from: 17000, to: 19000 } }
     ]);
   });
 
-  it('D-03, D-16, D-12: the next shot starts from the last one, and knows the bean’s recipes', () => {
+  it('the next shot starts from the last one, and knows the bean’s recipes', () => {
     const first = save({ taste: { ...noTaste, score: 8 } }, 1);
     save({ grind: 1500, time: 31000 }, 2);
     const form = ready(loadShotForm(db, ids.userId));
@@ -183,7 +183,7 @@ describe('loadShotForm', () => {
     expect(form.recipes).toHaveLength(2);
   });
 
-  it('D-12: the earlier score is the latest rated shot of the recipe', () => {
+  it('the earlier score is the latest rated shot of the recipe', () => {
     save({ taste: { ...noTaste, score: 6 } }, 1);
     save({ taste: { ...noTaste, score: 8 } }, 2);
     save({}, 3);
@@ -191,7 +191,7 @@ describe('loadShotForm', () => {
     expect(recipe).toMatchObject({ shotCount: 3, lastScore: 8 });
   });
 
-  it('D-43: a recipe marked Brew next is where the form starts', () => {
+  it('a recipe marked Brew next is where the form starts', () => {
     const marked = save({ grind: 1700 }, 1);
     save({ grind: 1500 }, 2);
     db.update(appState).set({ brewNextRecipeId: marked.recipeId }).run();
@@ -200,7 +200,7 @@ describe('loadShotForm', () => {
     expect(form.lastShot?.recipe.grind).toBe(1500);
   });
 
-  it('D-43: a Brew next mark on a bean that is no longer open is ignored', () => {
+  it('a Brew next mark on a bean that is no longer open is ignored', () => {
     const marked = save({ grind: 1700 }, 1);
     db.update(appState).set({ brewNextRecipeId: marked.recipeId }).run();
     db.update(bean).set({ status: 'finished' }).where(eq(bean.id, ids.beanId)).run();
@@ -210,13 +210,13 @@ describe('loadShotForm', () => {
     expect(form.bean.id).toBe(kenya);
   });
 
-  it('D-134: each open bean in the list has its roast age', () => {
+  it('each open bean in the list has its roast age', () => {
     const form = ready(loadShotForm(db, ids.userId, undefined, T0 + 2 * 86_400_000));
     // The reference bean was roasted 12 days before the seed.
     expect(form.openBeans[0]).toMatchObject({ name: 'Guji Hambela', roastAgeDays: 14 });
   });
 
-  it('D-94: choosing another open bean starts from that bean; Brew next of another bean waits', () => {
+  it('choosing another open bean starts from that bean; Brew next of another bean waits', () => {
     const marked = save({}, 1);
     db.update(appState).set({ brewNextRecipeId: marked.recipeId }).run();
     const kenya = addBean();
@@ -226,7 +226,7 @@ describe('loadShotForm', () => {
     expect(form.openBeans.map((b) => b.name).sort()).toEqual(['Guji Hambela', 'Kenya Kiambu']);
   });
 
-  it('D-60, D-94: a bean that is finished or not yours is not offered and not used', () => {
+  it('a bean that is finished or not yours is not offered and not used', () => {
     const finished = addBean({ name: 'Finished bean', status: 'finished' });
     const form = ready(loadShotForm(db, ids.userId, finished));
     expect(form.bean.id).toBe(ids.beanId);
@@ -234,12 +234,12 @@ describe('loadShotForm', () => {
     expect(ready(loadShotForm(db, ids.userId, 'not-a-bean')).bean.id).toBe(ids.beanId);
   });
 
-  it('D-32: without a current bean the form uses the newest open bean', () => {
+  it('without a current bean the form uses the newest open bean', () => {
     db.update(appState).set({ currentBeanId: null }).run();
     expect(ready(loadShotForm(db, ids.userId)).bean.id).toBe(ids.beanId);
   });
 
-  it('D-73: a re-buy starts from the earlier bag’s best recipe, as a new recipe for this bag', () => {
+  it('a re-buy starts from the earlier bag’s best recipe, as a new recipe for this bag', () => {
     save({ grind: 1500, taste: { ...noTaste, score: 9 } }, 1);
     save({ grind: 1700, taste: { ...noTaste, score: 6 } }, 2);
     const again = addBean({ name: 'Guji Hambela', rebuyOfId: ids.beanId });
@@ -249,7 +249,7 @@ describe('loadShotForm', () => {
     expect(form.lastShot).toBeNull();
   });
 
-  it('D-75: archived gear in the last shot is swapped for My setup’s', () => {
+  it('archived gear in the last shot is swapped for My setup’s', () => {
     const otherBasket = newId(T0);
     db.insert(gear)
       .values({
@@ -270,7 +270,7 @@ describe('loadShotForm', () => {
     expect(form.gearNames[otherBasket]).toBe('IMS 20 g');
   });
 
-  it('D-97: flavor notes come most used first, then A–Z', () => {
+  it('flavor notes come most used first, then A–Z', () => {
     const byName = Object.fromEntries(
       db
         .select()
@@ -285,7 +285,7 @@ describe('loadShotForm', () => {
     expect(names).toHaveLength(15);
   });
 
-  it('D-89: the steps come from your settings', () => {
+  it('the steps come from your settings', () => {
     db.update(userSettings).set({ doseStep: 500, yieldStep: 200, timeStep: 500 }).run();
     expect(ready(loadShotForm(db, ids.userId)).steps).toEqual({
       dose: 500,
@@ -294,7 +294,7 @@ describe('loadShotForm', () => {
     });
   });
 
-  it('D-51, D-76: routines are offered as they are now, with step names and units', () => {
+  it('routines are offered as they are now, with step names and units', () => {
     const [routine] = ready(loadShotForm(db, ids.userId)).routines;
     expect(routine.name).toBe('Daily routine');
     expect(routine.routine.steps.map((s) => [s.name, s.unit ?? null, s.value])).toEqual([
@@ -305,12 +305,12 @@ describe('loadShotForm', () => {
     ]);
   });
 
-  it('D-88: without My setup, there is nothing to brew with yet', () => {
+  it('without My setup, there is nothing to brew with yet', () => {
     db.update(userSettings).set({ defaultMachineId: null }).run();
     expect(loadShotForm(db, ids.userId)).toEqual({ state: 'empty', missing: 'setup' });
   });
 
-  it('D-88: without an open bean, there is nothing to brew yet', () => {
+  it('without an open bean, there is nothing to brew yet', () => {
     db.update(appState).set({ currentBeanId: null }).run();
     db.update(bean).set({ status: 'finished' }).run();
     expect(loadShotForm(db, ids.userId)).toEqual({ state: 'empty', missing: 'bean' });
@@ -323,7 +323,7 @@ const noTaste = { score: null, balance: null, body: null, sweetness: null, after
 describe('loadEditShotForm', () => {
   const rated = { score: 7, balance: -2, body: 6, sweetness: null, aftertaste: null };
 
-  it('D-113, D-153: a shot keeps its own grinder in the list, even when archived since', () => {
+  it('a shot keeps its own grinder in the list, even when archived since', () => {
     const { shotId } = save({}, 1);
     db.update(gear).set({ archivedAt: T0 }).where(eq(gear.id, ids.grinderId)).run();
     const form = loadEditShotForm(db, ids.userId, shotId)!;
@@ -331,7 +331,7 @@ describe('loadEditShotForm', () => {
     expect(form.machines.map((m) => m.id)).toEqual([ids.machineId]);
   });
 
-  it('D-57: starts from the shot itself: its values, taste, flavor notes and notes', () => {
+  it('starts from the shot itself: its values, taste, flavor notes and notes', () => {
     const berry = db.select().from(tag).where(eq(tag.name, 'Berry')).get()!;
     const { shotId } = save(
       { grind: 1500, yield: 38500, time: 25500, taste: rated, tagIds: [berry.id], notes: 'thin' },
@@ -349,7 +349,7 @@ describe('loadEditShotForm', () => {
     expect(form.bean.id).toBe(ids.beanId);
   });
 
-  it('D-113: compares with the bean’s shot before this one, and counts only earlier shots', () => {
+  it('compares with the bean’s shot before this one, and counts only earlier shots', () => {
     save({ yield: 36000 }, 1);
     const second = save({ yield: 37000, taste: rated }, 2).shotId;
     save({ yield: 39000 }, 3); // later: not seen when editing the second
@@ -359,7 +359,7 @@ describe('loadEditShotForm', () => {
     expect(form.recipes[0]).toMatchObject({ shotCount: 1, lastScore: null });
   });
 
-  it('D-113: the first shot of a bean has nothing before it', () => {
+  it('the first shot of a bean has nothing before it', () => {
     const first = save({}, 1).shotId;
     save({}, 2);
     const form = ready(loadEditShotForm(db, ids.userId, first)!);
@@ -367,7 +367,7 @@ describe('loadEditShotForm', () => {
     expect(form.recipes.every((r) => r.shotCount === 0)).toBe(true);
   });
 
-  it('D-113: another open bean can be chosen; it is compared with its own shots before this one', () => {
+  it('another open bean can be chosen; it is compared with its own shots before this one', () => {
     const shotId = save({}, 5).shotId;
     const other = newId(T0);
     db.insert(bean)
@@ -389,7 +389,7 @@ describe('loadEditShotForm', () => {
     expect(form.prefill.grind).toBe(1600); // the values stay the shot's
   });
 
-  it('D-122: a finished own bean is not offered, but the shot keeps it until another is picked', () => {
+  it('a finished own bean is not offered, but the shot keeps it until another is picked', () => {
     const shotId = save({}, 1).shotId;
     db.update(bean).set({ status: 'finished' }).where(eq(bean.id, ids.beanId)).run();
     const form = ready(loadEditShotForm(db, ids.userId, shotId)!);
@@ -397,7 +397,7 @@ describe('loadEditShotForm', () => {
     expect(form.bean.id).toBe(ids.beanId);
   });
 
-  it('D-60: another user’s shot is not found', () => {
+  it('another user’s shot is not found', () => {
     const shotId = save({}, 1).shotId;
     expect(loadEditShotForm(db, 'someone-else', shotId)).toBeNull();
   });

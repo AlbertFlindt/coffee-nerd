@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Edit bean (D-130).
+  // Edit bean.
   import { page } from '$app/state';
   import BeanForm from '#lib/components/BeanForm.svelte';
   import type { PageProps } from './$types';

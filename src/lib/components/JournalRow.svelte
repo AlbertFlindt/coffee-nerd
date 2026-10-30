@@ -1,8 +1,8 @@
 <script lang="ts">
-  // One shot in the Journal (D-54): score block (or a dashed amber "Rate" block when unrated), bean and
-  // time, core values, then taste and the recipe tag (cherry, D-16). The row opens the shot; the Rate
-  // block is a button of its own that opens the score sheet (D-111). A shot still on the phone says so
-  // (D-221, D-224), and one the server does not have yet opens its form (D-231).
+  // One shot in the Journal: score block (or a dashed amber "Rate" block when unrated), bean and
+  // time, core values, then taste and the recipe tag (cherry). The row opens the shot; the Rate
+  // block is a button of its own that opens the score sheet. A shot still on the phone says so,
+  // and one the server does not have yet opens its form.
   import { resolve } from '$app/paths';
   import WaitingLine from './WaitingLine.svelte';
   import { recipeTagText } from '../domain/fingerprint';
@@ -110,7 +110,7 @@
     color: var(--ink-muted);
   }
 
-  /* An unrated shot (D-11): amber, your input still to give. */
+  /* An unrated shot: amber, your input still to give. */
   .rate {
     position: absolute;
     left: var(--space-3);

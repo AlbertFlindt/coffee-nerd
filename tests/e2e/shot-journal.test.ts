@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { expect, test, type Page } from '@playwright/test';
 
-// The Journal and shot detail (roadmap M4) on the shots logged by shot-form.test.ts, which runs first
+// The Journal and shot detail on the shots logged by shot-form.test.ts, which runs first
 // (files run in name order, one worker). The two oldest shots are moved back a day and four days, so the
 // list shows several days. Each designed screen is saved to screenshots/ for comparing with docs/screens/.
 test.describe.configure({ mode: 'serial' });
@@ -64,7 +64,7 @@ async function screenshot(name: string) {
 
 const rows = () => page.getByRole('main').getByRole('link');
 
-test('Journal, D-54: every shot, newest first, grouped by day', async () => {
+test('Journal: every shot, newest first, grouped by day', async () => {
   await page
     .getByRole('navigation', { name: 'Main' })
     .getByRole('link', { name: 'Journal' })
@@ -80,9 +80,9 @@ test('Journal, D-54: every shot, newest first, grouped by day', async () => {
   await expect(first).toContainText('Guji Hambela');
   await expect(first).toContainText(/\d\.\d · \d+\.\d → \d+\.\d g · \d+\.\d s/);
   await expect(first.locator('.cn-tag')).toHaveText(/^(Recipe reused \d+x|New recipe)$/);
-  // The oldest shot is its recipe's first (D-16).
+  // The oldest shot is its recipe's first.
   await expect(rows().last().locator('.cn-tag')).toHaveText('New recipe');
-  // D-30, D-156, D-55: the tab bar; Library opens the Library page, Insights the Insights page.
+  // The tab bar; Library opens the Library page, Insights the Insights page.
   const bar = page.getByRole('navigation', { name: 'Main' });
   await expect(bar.getByRole('link', { name: 'Journal' })).toHaveAttribute('aria-current', 'page');
   await expect(bar.getByRole('link', { name: 'New shot' })).toBeVisible();
@@ -92,13 +92,13 @@ test('Journal, D-54: every shot, newest first, grouped by day', async () => {
   await screenshot('Journal');
 });
 
-test('D-36: only the list scrolls', async () => {
+test('only the list scrolls', async () => {
   const main = page.getByRole('main');
   const overflowY = await main.evaluate((el) => getComputedStyle(el).overflowY);
   expect(overflowY).toBe('auto');
 });
 
-test('D-54, D-11: "Unrated · N" shows the N unrated shots, with a Rate block', async () => {
+test('"Unrated · N" shows the N unrated shots, with a Rate block', async () => {
   const chip = page.getByRole('button', { name: /^Unrated · \d+$/ });
   const n = Number((await chip.textContent())!.match(/\d+/)![0]);
   await chip.click();
@@ -115,7 +115,7 @@ test('D-54, D-11: "Unrated · N" shows the N unrated shots, with a Rate block', 
   );
 });
 
-test('D-111: the Rate block opens a score sheet; a tap saves the score', async () => {
+test('the Rate block opens a score sheet; a tap saves the score', async () => {
   const chip = page.getByRole('button', { name: /^Unrated · \d+$/ });
   const before = Number((await chip.textContent())!.match(/\d+/)![0]);
   const rate = page.getByRole('button', { name: /^Rate the shot at / }).first();
@@ -133,7 +133,7 @@ test('D-111: the Rate block opens a score sheet; a tap saves the score', async (
   await expect(row).toContainText('6score');
 });
 
-test('D-54: the bean filter lists the beans that have shots', async () => {
+test('the bean filter lists the beans that have shots', async () => {
   const total = await rows().count();
   await page.getByRole('button', { name: 'All beans' }).click();
   const sheet = page.getByRole('region', { name: 'Choose a bean' });
@@ -150,7 +150,7 @@ test('D-54: the bean filter lists the beans that have shots', async () => {
   await expect(page).toHaveURL(/[?&]bean=/);
   await expect(rows()).toHaveCount(total);
 
-  // D-112: with a bean chosen, its recipes filter the list.
+  // With a bean chosen, its recipes filter the list.
   const filters = page.getByRole('group', { name: 'Filters' });
   await filters.getByRole('button', { name: 'Any recipe' }).click();
   const recipes = page.getByRole('region', { name: 'Choose a recipe' });
@@ -166,7 +166,7 @@ test('D-54: the bean filter lists the beans that have shots', async () => {
   await expectNoPageScroll();
   await screenshot('JournalFiltered');
 
-  // D-117: "Back" from the shot returns to the Journal as it was left.
+  // "Back" from the shot returns to the Journal as it was left.
   await rows().first().click();
   await page.getByRole('link', { name: 'Back to Journal' }).click();
   await expect(page).toHaveURL(/[?&]recipe=/);
@@ -180,7 +180,7 @@ test('D-54: the bean filter lists the beans that have shots', async () => {
   await expect(rows()).toHaveCount(total);
 });
 
-test('ShotDetail, D-57: tapping a shot opens it', async () => {
+test('ShotDetail: tapping a shot opens it', async () => {
   await rows().first().click();
   await expect(page.getByRole('heading', { name: 'Shot', level: 1 })).toBeVisible();
   await expect(page.getByText(/^Today \d\d:\d\d$/)).toBeVisible();
@@ -193,12 +193,12 @@ test('ShotDetail, D-57: tapping a shot opens it', async () => {
   for (const label of ['Grind', 'Dose', 'Yield', 'Time']) await expect(values).toContainText(label);
   await expect(page.getByText(/^Ratio 1 : \d\.\d$/)).toBeVisible();
   const taste = page.getByRole('region', { name: 'Taste' });
-  // D-115: aftertaste shows because this shot has one.
+  // Aftertaste shows because this shot has one.
   for (const label of ['Balance', 'Body', 'Sweetness', 'Aftertaste'])
     await expect(taste).toContainText(label);
   await expect(taste).toContainText('Slightly sour');
   await expect(taste.getByRole('list', { name: 'Flavor notes' })).toContainText('Dark chocolate');
-  // D-109, D-110: against the recipe's other shots; the count includes this one.
+  // Against the recipe's other shots; the count includes this one.
   const reused = Number((await card.locator('.cn-tag').textContent())!.match(/\d+/)?.[0] ?? 0);
   const compared = page.getByRole('region', { name: 'Compared with this recipe' });
   await expect(compared).toContainText(`${reused + 1} shots`);
@@ -211,27 +211,27 @@ test('ShotDetail, D-57: tapping a shot opens it', async () => {
   await screenshot('ShotDetail');
 });
 
-test('D-57: back returns to the Journal', async () => {
+test('back returns to the Journal', async () => {
   await page.getByRole('link', { name: 'Back to Journal' }).click();
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
 });
 
-test('D-57, D-113: Edit opens the shot form on the shot; "Save changes" returns to it', async () => {
+test('Edit opens the shot form on the shot; "Save changes" returns to it', async () => {
   await rows().first().click();
   const brewed = await page.getByText(/^Today \d\d:\d\d$/).textContent();
   await page.getByRole('link', { name: 'Edit' }).click();
   await expect(page.getByRole('heading', { name: 'Edit shot' })).toBeVisible();
-  // The shot's own taste stays (D-11 is about new shots).
+  // The shot's own taste stays (only a new shot's taste starts empty).
   await expect(page.getByRole('radio', { name: /^7/ })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('button', { name: 'Grind minus 0.1' }).click();
-  // Compared with the shot before it, where 1.5 had been brewed once (D-113, D-16).
+  // Compared with the shot before it, where 1.5 had been brewed once.
   await expect(page.locator('.cn-tag')).toHaveText(/^Recipe reused \d+x$/);
   await expectNoPageScroll();
   await screenshot('EditShot');
   await page.getByRole('button', { name: 'Save changes' }).click();
 
   await expect(page.getByRole('heading', { name: 'Shot', level: 1 })).toBeVisible();
-  // D-113: the brewing time stays as it was.
+  // The brewing time stays as it was.
   await expect(page.getByText(/^Today \d\d:\d\d$/)).toHaveText(brewed!);
   const values = page.getByRole('region', { name: 'Core values' });
   await expect(values).toContainText('1.5');
@@ -239,7 +239,7 @@ test('D-57, D-113: Edit opens the shot form on the shot; "Save changes" returns 
   await expect(page.getByRole('region', { name: 'Notes' })).toContainText('Ran fast');
 });
 
-test('D-113: editing, another bean keeps the values entered', async () => {
+test('editing, another bean keeps the values entered', async () => {
   const db = new Database(DATABASE);
   const owner = db.prepare('select owner_id as o from bean limit 1').get() as { o: string };
   const now = Date.now();
@@ -264,13 +264,13 @@ test('D-113: editing, another bean keeps the values entered', async () => {
   ).toBeVisible();
   await expect(page.getByRole('button', { name: /^Time, .*tap to type$/ })).toHaveText(time!);
   await expect(page.getByRole('button', { name: /^Grind, 1\.5,/ })).toBeVisible();
-  // The new bean has no shots before this one: a new recipe (D-113, D-77).
+  // The new bean has no shots before this one: a new recipe.
   await expect(page.locator('.cn-tag')).toHaveText('New recipe');
   await page.getByRole('button', { name: 'Save changes' }).click();
   await expect(page.getByRole('region', { name: 'Bean and setup' })).toContainText('Kiambu AA');
 });
 
-test('D-116: a shot is deleted from the edit form, after a confirmation', async () => {
+test('a shot is deleted from the edit form, after a confirmation', async () => {
   await page.getByRole('link', { name: 'Back to Journal' }).click();
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
   await expect(rows().first()).toBeVisible();
@@ -280,7 +280,7 @@ test('D-116: a shot is deleted from the edit form, after a confirmation', async 
   await page.getByRole('button', { name: 'Delete shot' }).click();
   const confirm = page.getByRole('dialog', { name: 'Delete this shot' });
   await expect(confirm).toContainText('This cannot be undone.');
-  // D-241: deleting is red, keeping amber, and the dialog covers the form's own Save and Delete.
+  // Deleting is red, keeping amber, and the dialog covers the form's own Save and Delete.
   await expect(confirm.getByRole('button', { name: 'Delete shot' })).toHaveClass(/cn-btn-danger/);
   await expect(confirm.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);
   const save = (await page.getByRole('button', { name: 'Save changes' }).boundingBox())!;
@@ -293,7 +293,7 @@ test('D-116: a shot is deleted from the edit form, after a confirmation', async 
   await confirm.getByRole('button', { name: 'Keep it' }).click();
   await expect(confirm).toBeHidden();
   await expect(page.getByRole('heading', { name: 'Edit shot' })).toBeVisible();
-  // D-36: with "Delete shot" the edit form still fits a phone browser (412 × 780), Save in view.
+  // With "Delete shot" the edit form still fits a phone browser (412 × 780), Save in view.
   await page.setViewportSize({ width: 412, height: 780 });
   await expectNoPageScroll();
   await expect(page.getByRole('button', { name: 'Save changes' })).toBeInViewport();
@@ -303,13 +303,13 @@ test('D-116: a shot is deleted from the edit form, after a confirmation', async 
   await confirm.getByRole('button', { name: 'Delete shot' }).click();
   await expect(page.getByRole('heading', { name: 'Journal', level: 1 })).toBeVisible();
   await expect(rows()).toHaveCount(before - 1);
-  // D-36: the Journal the delete opens as a page of its own still fits the screen, tab bar included.
+  // The Journal the delete opens as a page of its own still fits the screen, tab bar included.
   await expectNoPageScroll();
   const bar = (await page.getByRole('navigation', { name: 'Main' }).boundingBox())!;
   expect(bar.y + bar.height).toBeCloseTo(page.viewportSize()!.height, 0);
 });
 
-test('D-116, D-117: after deleting, the Journal keeps its filters', async () => {
+test('after deleting, the Journal keeps its filters', async () => {
   const chip = page.getByRole('button', { name: /^Unrated · \d+$/ });
   const unrated = Number((await chip.textContent())!.match(/\d+/)![0]);
   await chip.click();

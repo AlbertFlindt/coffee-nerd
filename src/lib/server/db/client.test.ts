@@ -10,7 +10,7 @@ const dir = mkdtempSync(join(tmpdir(), 'coffee-nerd-db-'));
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 describe('openDatabase', () => {
-  it('D-59: creates the SQLite file and its folder, and applies the migrations', () => {
+  it('creates the SQLite file and its folder, and applies the migrations', () => {
     const path = join(dir, 'nested', 'coffee-nerd.db');
     const db = openDatabase(path);
 
@@ -19,7 +19,7 @@ describe('openDatabase', () => {
     expect(applied.length).toBeGreaterThan(0);
   });
 
-  it('D-59: opening an existing database again does not re-apply migrations', () => {
+  it('opening an existing database again does not re-apply migrations', () => {
     const path = join(dir, 'reopen.db');
     const count = () =>
       openDatabase(path).get<{ n: number }>(sql`select count(*) as n from __drizzle_migrations`)?.n;
@@ -27,7 +27,7 @@ describe('openDatabase', () => {
     expect(count()).toBe(count());
   });
 
-  it('D-64: a later migration can rebuild a table the shot facts view reads', () => {
+  it('a later migration can rebuild a table the shot facts view reads', () => {
     const path = join(dir, 'rebuild.db');
     openDatabase(path); // the view now exists
     // A migration as drizzle-kit writes one for a column change: copy, drop, rename.
@@ -54,7 +54,7 @@ describe('openDatabase', () => {
     expect(db.all(sql`select * from shot_facts`)).toEqual([]);
   });
 
-  it('D-59: uses write-ahead logging and enforces foreign keys', () => {
+  it('uses write-ahead logging and enforces foreign keys', () => {
     const db = openDatabase(join(dir, 'pragmas.db'));
 
     expect(db.get<{ journal_mode: string }>(sql`pragma journal_mode`)?.journal_mode).toBe('wal');
@@ -63,11 +63,11 @@ describe('openDatabase', () => {
 });
 
 describe('isDatabaseReachable', () => {
-  it('D-59: is true for an open database', () => {
+  it('is true for an open database', () => {
     expect(isDatabaseReachable(openDatabase(join(dir, 'health.db')))).toBe(true);
   });
 
-  it('D-59: is false once the connection is closed', () => {
+  it('is false once the connection is closed', () => {
     const db = openDatabase(join(dir, 'closed.db'));
     db.$client.close();
 
@@ -76,7 +76,7 @@ describe('isDatabaseReachable', () => {
 });
 
 describe('migration 0003_basket_brand_size', () => {
-  it('D-150: an existing basket is split once into brand and size', () => {
+  it('an existing basket is split once into brand and size', () => {
     const db = openDatabase(join(dir, 'baskets.db'));
     const raw = db.$client;
     const owner = raw.prepare(

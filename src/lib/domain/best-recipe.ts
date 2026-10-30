@@ -1,8 +1,8 @@
-// "Best recipe" (D-66): used on Home, the bean detail page and as the re-buy starting point. Never stored.
+// "Best recipe": used on Home, the bean detail page and as the re-buy starting point. Never stored.
 
 export type RecipeShots = {
   recipeId: string;
-  /** Every shot of the recipe; `score` is null when not rated (D-11). `brewedAt` is UTC milliseconds. */
+  /** Every shot of the recipe; `score` is null when not rated. `brewedAt` is UTC milliseconds. */
   shots: { score: number | null; brewedAt: number }[];
 };
 
@@ -68,7 +68,7 @@ function pick(candidates: Candidate[], compare: (a: Candidate, b: Candidate) => 
 }
 
 /**
- * A bean's recipes "best first" (D-135), as D-66 ranks them: recipes with at least 3 rated shots by
+ * A bean's recipes "best first", ranked by the best-recipe rule: recipes with at least 3 rated shots by
  * average, then the other rated ones by their highest score, ties by more rated shots, then the latest
  * shot; recipes without a rated shot last, most recent first. The first is the best recipe.
  */

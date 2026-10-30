@@ -14,8 +14,8 @@ import {
 import type { Family } from '#lib/domain/tags.ts';
 import type { Actions, PageServerLoad } from './$types';
 
-// Tags (screen 21, D-53): your flavor notes by family, the "Same tag twice?" card (D-173), "Add tag"
-// (D-174) and the tag sheet: rename, family for your own notes, merge into another, remove (D-171, D-172).
+// Tags (screen 21): your flavor notes by family, the "Same tag twice?" card, "Add tag"
+// and the tag sheet: rename, family for your own notes, merge into another, remove.
 export const load: PageServerLoad = ({ locals }) => {
   if (!locals.user) error(401);
   const db = getDb();
@@ -27,7 +27,7 @@ export const load: PageServerLoad = ({ locals }) => {
 
 const GENERAL = 'Something on this page is not right';
 
-/** Plain words for the problems (D-20). */
+/** Plain words for the problems. */
 const PROBLEM: [RegExp, string][] = [
   [/^name: required/, 'Name is required'],
   [/^name: too long/, 'Name can be at most 40 letters'],

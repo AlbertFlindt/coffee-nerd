@@ -1,4 +1,4 @@
-// Draws the home-screen icons from the logo (D-217), into static/icons/. The favicon is the logo
+// Draws the home-screen icons from the logo, into static/icons/. The favicon is the logo
 // itself (src/routes/+layout.svelte).
 // Usage: npm run icons. Run it again after a design-system sync changes the logo.
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -17,7 +17,7 @@ const svg = readFileSync(LOGO, 'utf8');
 // 27 × 32 units. Android crops an adaptive (maskable) icon to a circle whose radius is 40 % of its size,
 // so there the box at 90 % of the icon, centred on the bean, keeps the whole bean inside it. The plain
 // icons, which a launcher may shrink onto a white disc, are cropped to the bean: it fills 92 % of their
-// height (D-217, D-230).
+// height.
 const icons = [
   { file: 'icon-192.png', size: 192, background: null, scale: 1.17 },
   { file: 'icon-512.png', size: 512, background: null, scale: 1.17 },

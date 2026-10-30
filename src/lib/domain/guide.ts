@@ -1,4 +1,4 @@
-// The step-by-step start after sign-up (D-157): its steps in order, and what a page shows for one.
+// The step-by-step start after sign-up: its steps in order, and what a page shows for one.
 
 export const GUIDE_STEPS = ['machine', 'grinder', 'basket', 'setup', 'bean'] as const;
 export type GuideStep = (typeof GUIDE_STEPS)[number];

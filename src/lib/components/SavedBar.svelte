@@ -1,7 +1,7 @@
 <script lang="ts">
-  // What happened to the shot just saved, as a short bar just above the tab bar (D-95, D-200): "Shot saved"
-  // fades after 4 seconds; when the shot finished the bean (D-40) the bar offers Undo and stays 10 seconds,
-  // and "… is open again" after Undo shows the same way. Built without a design (docs/open-items.md).
+  // What happened to the shot just saved, as a short bar just above the tab bar: "Shot saved"
+  // fades after 4 seconds; when the shot finished the bean the bar offers Undo and stays 10 seconds,
+  // and "… is open again" after Undo shows the same way. Built without a design.
   // The page passes the message once; a later load without one leaves the bar to finish on its own.
   import { onDestroy } from 'svelte';
   import type { Origin } from '../domain/origin';
@@ -53,8 +53,8 @@
 
 <style>
   /* Cream like the design system's highlighted card, so it stands out from the cards under it. Above the
-     tab bar, over the page: the screen keeps its layout (D-36) and the bar covers neither the
-     bean pill nor the Journal filters (D-200). */
+     tab bar, over the page: the screen keeps its layout and the bar covers neither the
+     bean pill nor the Journal filters. */
   .anchor {
     position: fixed;
     left: var(--space-5);

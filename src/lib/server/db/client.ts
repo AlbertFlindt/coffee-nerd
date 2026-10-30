@@ -14,7 +14,7 @@ export type Db = BetterSQLite3Database<typeof schema> & { $client: Database.Data
 /** The database or a transaction on it: what repository functions take, so they compose in one transaction. */
 export type Queryable = BaseSQLiteDatabase<'sync', RunResult, typeof schema>;
 
-/** Opens (creating if needed) the SQLite file at `path`, applies all migrations and the one-time D-186 step. */
+/** Opens (creating if needed) the SQLite file at `path`, applies all migrations and the one-time dose rematch. */
 export function openDatabase(path: string, migrationsFolder = MIGRATIONS_FOLDER): Db {
   if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
   const client = new Database(path);

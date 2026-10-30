@@ -12,7 +12,7 @@ import type { Actions, PageServerLoad } from './$types';
 
 const IN_MY_SETUP = 'Used in My setup · choose another default first';
 
-// A routine in the builder (screen 19, D-51, D-167).
+// A routine in the builder (screen 19).
 export const load: PageServerLoad = ({ locals, params }) => {
   if (!locals.user) error(401);
   const db = getDb();
@@ -31,7 +31,7 @@ export const actions: Actions = {
     if (!('result' in done)) return done;
     redirect(303, '/library/puck-prep');
   },
-  // D-167: archived with a confirmation; not My setup's (D-83).
+  // Archived with a confirmation; not My setup's.
   archive: ({ locals, params }) => {
     if (!locals.user) error(401);
     const result = archiveRoutine(getDb(), locals.user.id, params.id, Date.now());
@@ -39,7 +39,7 @@ export const actions: Actions = {
     if (result === 'in_my_setup') return fail(409, { problems: [IN_MY_SETUP] });
     redirect(303, '/library/puck-prep');
   },
-  // D-167: a routine no shot used can be deleted instead.
+  // A routine no shot used can be deleted instead.
   delete: ({ locals, params }) => {
     if (!locals.user) error(401);
     const result = deleteRoutine(getDb(), locals.user.id, params.id);

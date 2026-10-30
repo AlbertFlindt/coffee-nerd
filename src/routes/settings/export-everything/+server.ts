@@ -6,7 +6,7 @@ import { loadSettings } from '#lib/server/db/settings.ts';
 import { download } from '#lib/server/download.ts';
 import type { RequestHandler } from './$types';
 
-// D-252: "Export everything" in Settings: all the account holds as one JSON file.
+// "Export everything" in Settings: all the account holds as one JSON file.
 export const POST: RequestHandler = ({ locals }) => {
   if (!locals.user) error(401);
   const db = getDb();

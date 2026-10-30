@@ -78,7 +78,7 @@ function machine(features: string[]): MachineSpec {
 }
 
 describe('loadMySetupForm', () => {
-  it('D-45: the form starts from My setup, with your gear to choose from and your steps (D-89)', () => {
+  it('the form starts from My setup, with your gear to choose from and your steps', () => {
     const form = loadMySetupForm(db, ids.userId);
     expect(form.current).toMatchObject({
       machineId: ids.machineId,
@@ -98,7 +98,7 @@ describe('loadMySetupForm', () => {
     expect(form.routines.map((r) => r.name)).toEqual(['Daily routine']);
   });
 
-  it('D-89: dose and yield steps are the ones in your settings', () => {
+  it('dose and yield steps are the ones in your settings', () => {
     db.update(userSettings)
       .set({ doseStep: 500, yieldStep: 250 })
       .where(eq(userSettings.userId, ids.userId))
@@ -106,19 +106,19 @@ describe('loadMySetupForm', () => {
     expect(loadMySetupForm(db, ids.userId).steps).toEqual({ dose: 500, yield: 250 });
   });
 
-  it('D-155, D-148: archived gear and routines are never offered', () => {
+  it('archived gear and routines are never offered', () => {
     const spare = addGear(db, ids.userId, { kind: 'basket', spec: basket }, T0);
     archiveGear(db, ids.userId, spare, T0);
     const form = loadMySetupForm(db, ids.userId);
     expect(form.baskets.map((b) => b.id)).toEqual([ids.basketId]);
   });
 
-  it('D-60: another user’s gear is not offered', () => {
+  it('another user’s gear is not offered', () => {
     otherUsersGear('machine');
     expect(loadMySetupForm(db, ids.userId).machines).toHaveLength(1);
   });
 
-  it('D-38: a new account with nothing chosen yet gets an empty form', () => {
+  it('a new account with nothing chosen yet gets an empty form', () => {
     db.update(userSettings)
       .set({
         defaultMachineId: null,
@@ -139,7 +139,7 @@ describe('loadMySetupForm', () => {
 });
 
 describe('saveMySetup', () => {
-  it('D-45: My setup is saved and a new bean starts from it', () => {
+  it('My setup is saved and a new bean starts from it', () => {
     saveMySetup(db, ids.userId, { ...current(), dose: 18500, grind: 1700, yield: 37000 }, T0);
     const form = loadMySetupForm(db, ids.userId);
     expect(form.current).toMatchObject({ dose: 18500, grind: 1700, yield: 37000 });
@@ -156,7 +156,7 @@ describe('saveMySetup', () => {
     );
   });
 
-  it('D-161: a feature of your own has a default in My setup, and a new bean starts with it', () => {
+  it('a feature of your own has a default in My setup, and a new bean starts with it', () => {
     const key = 'custom-0b6c6a52-6a0e-4a1f-9c55-3f1f0f6d2a11';
     const spec = db.select().from(gear).where(eq(gear.id, ids.machineId)).get()!
       .spec as MachineSpec;
@@ -198,7 +198,7 @@ describe('saveMySetup', () => {
     expect(shotForm.prefill.setup.features[key]).toMatchObject({ on: true, value: 6000 });
   });
 
-  it('D-161: a list of your own keeps its chosen option as the default', () => {
+  it('a list of your own keeps its chosen option as the default', () => {
     const key = 'custom-1c7d7b63-7b1f-4b2a-8d66-4a2a1a7e3b22';
     const spec = db.select().from(gear).where(eq(gear.id, ids.machineId)).get()!
       .spec as MachineSpec;
@@ -240,13 +240,13 @@ describe('saveMySetup', () => {
     const shotForm = loadShotForm(db, ids.userId);
     if (shotForm.state !== 'ready') throw new Error('Expected a ready shot form');
     expect(shotForm.prefill.setup.features[key]).toMatchObject({ on: true, choice: 'hard' });
-    // Switched on without an option, it waits for one (D-78).
+    // Switched on without an option, it waits for one.
     expect(
       rejection({ ...input, features: { ...input.features, [key]: { label: 'Water', on: true } } })
     ).toEqual(['Set Water first.']);
   });
 
-  it('D-45: pressure profile values are saved with My setup', () => {
+  it('pressure profile values are saved with My setup', () => {
     const input = current();
     input.features.low_bar_start = { ...input.features.low_bar_start, value: 6000, pressure: 3000 };
     input.features.low_bar_end = {
@@ -261,7 +261,7 @@ describe('saveMySetup', () => {
     expect(saved.low_bar_end).toMatchObject({ on: true, value: 8000, pressure: 4000 });
   });
 
-  it('D-149: the Default chip follows My setup', () => {
+  it('the Default chip follows My setup', () => {
     const second = addGear(
       db,
       ids.userId,
@@ -289,7 +289,7 @@ describe('saveMySetup', () => {
     expect(page.mySetup?.machine).toBe('Second');
   });
 
-  it('D-45, D-153: features the chosen machine does not have keep their defaults for other machines', () => {
+  it('features the chosen machine does not have keep their defaults for other machines', () => {
     const plain = addGear(
       db,
       ids.userId,
@@ -323,7 +323,7 @@ describe('saveMySetup', () => {
     expect(Object.keys(form.prefill.setup.features)).toEqual(['flat_pressure']);
   });
 
-  it('D-187: changing My setup’s routine drops the routine chosen for the next shot', () => {
+  it('changing My setup’s routine drops the routine chosen for the next shot', () => {
     db.update(appState)
       .set({ nextRoutineId: ids.routineId })
       .where(eq(appState.userId, ids.userId))
@@ -337,19 +337,19 @@ describe('saveMySetup', () => {
     expect(next()).toBeNull();
   });
 
-  it('D-155: no basket and no puck prep', () => {
+  it('no basket and no puck prep', () => {
     saveMySetup(db, ids.userId, { ...current(), basketId: null, routineId: null }, T0);
     const form = loadMySetupForm(db, ids.userId);
     expect(form.current).toMatchObject({ basketId: null, routineId: null });
     expect(loadGearPage(db, ids.userId).mySetup).toMatchObject({ basket: null, routine: null });
   });
 
-  it('D-155: an empty yield stays empty, never 0', () => {
+  it('an empty yield stays empty, never 0', () => {
     saveMySetup(db, ids.userId, { ...current(), yield: null }, T0);
     expect(loadMySetupForm(db, ids.userId).current.yield).toBeNull();
   });
 
-  it('D-60: another user’s gear is refused', () => {
+  it('another user’s gear is refused', () => {
     expect(rejection({ ...current(), machineId: otherUsersGear('machine') })).toEqual([
       'This gear could not be found'
     ]);
@@ -358,7 +358,7 @@ describe('saveMySetup', () => {
     ]);
   });
 
-  it('D-60: another user’s routine is refused', () => {
+  it('another user’s routine is refused', () => {
     db.insert(user)
       .values({ id: 'someone-else', name: 'Else', passwordHash: 'x', createdAt: T0, updatedAt: T0 })
       .run();
@@ -376,7 +376,7 @@ describe('saveMySetup', () => {
     expect(rejection({ ...current(), routineId: id })).toEqual(['This gear could not be found']);
   });
 
-  it('D-60: a gear item of the wrong kind is refused', () => {
+  it('a gear item of the wrong kind is refused', () => {
     expect(rejection({ ...current(), grinderId: ids.machineId })).toEqual([
       'This gear could not be found'
     ]);
@@ -385,54 +385,54 @@ describe('saveMySetup', () => {
     ]);
   });
 
-  it('D-148: archived gear is refused', () => {
+  it('archived gear is refused', () => {
     const spare = addGear(db, ids.userId, { kind: 'basket', spec: basket }, T0);
     archiveGear(db, ids.userId, spare, T0);
     expect(rejection({ ...current(), basketId: spare })).toEqual(['This gear could not be found']);
   });
 
-  it('D-45: a machine and a grinder are required', () => {
+  it('a machine and a grinder are required', () => {
     expect(rejection({ ...current(), machineId: null })).toEqual(['Choose a machine']);
     expect(rejection({ ...current(), grinderId: null })).toEqual(['Choose a grinder']);
   });
 
-  it('D-45: grind and dose are required, and dose is more than 0', () => {
+  it('grind and dose are required, and dose is more than 0', () => {
     expect(rejection({ ...current(), dose: null })).toEqual(['Set Dose first.']);
     expect(rejection({ ...current(), dose: 0 })).toEqual(['Set Dose first.']);
     expect(rejection({ ...current(), grind: null })).toEqual(['Set Grind first.']);
   });
 
-  it('D-48: a grind outside the grinder’s range is refused', () => {
+  it('a grind outside the grinder’s range is refused', () => {
     expect(rejection({ ...current(), grind: 17000 })).toEqual([
       'Grind must be within the grinder’s range'
     ]);
   });
 
-  it('D-78: temperature without a value is refused', () => {
+  it('temperature without a value is refused', () => {
     const input = current();
     input.features.temperature = { label: 'Temperature', unit: '°C', on: true };
     expect(rejection(input)).toEqual(['Set Temperature first.']);
   });
 
-  it('D-78: flat pressure that is missing is refused, and temperature cannot be switched off', () => {
+  it('flat pressure that is missing is refused, and temperature cannot be switched off', () => {
     const input = current();
     delete input.features.flat_pressure;
     input.features.temperature = { ...input.features.temperature, on: false };
     expect(rejection(input)).toEqual(['Set Temperature first.', 'Set Flat pressure first.']);
   });
 
-  it('D-24: a switched-on phase needs its seconds and pressure', () => {
+  it('a switched-on phase needs its seconds and pressure', () => {
     const input = current();
     input.features.low_bar_start = { label: 'Low bar start', on: true, value: 5000 };
     expect(rejection(input)).toEqual(['Set the pressure for Low bar start first.']);
   });
 
-  it('D-45: nothing is saved when it is refused', () => {
+  it('nothing is saved when it is refused', () => {
     rejection({ ...current(), dose: 22000, machineId: otherUsersGear('machine') });
     expect(loadMySetupForm(db, ids.userId).current.dose).toBe(18000);
   });
 
-  it('D-38: an account without a settings row gets one', () => {
+  it('an account without a settings row gets one', () => {
     db.delete(userSettings).where(eq(userSettings.userId, ids.userId)).run();
     saveMySetup(
       db,

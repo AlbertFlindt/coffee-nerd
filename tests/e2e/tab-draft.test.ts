@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 
-// The shot form's draft (roadmap M10, D-226): what is being entered survives a reload and closing the
+// The shot form's draft: what is being entered survives a reload and closing the
 // app; Save and Back end it; another bean starts a new shot again. The shot saved here is deleted again.
 test.describe.configure({ mode: 'serial' });
 
@@ -29,7 +29,7 @@ test.beforeAll(async ({ browser }) => {
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
   const d = new Database(DATABASE, { readonly: true });
   appState = d.prepare('select * from app_state').get() as Record<string, unknown>;
-  // A shot saved here may use up a bag (D-95): the beans are put back as they were too.
+  // A shot saved here may use up a bag: the beans are put back as they were too.
   beans = d.prepare('select * from bean').all() as Record<string, unknown>[];
   d.close();
 });
@@ -72,7 +72,7 @@ const newestId = () => {
   return id;
 };
 
-test('D-226: a new shot survives a reload and closing the app; Back ends it', async () => {
+test('a new shot survives a reload and closing the app; Back ends it', async () => {
   await newShot();
   prefilled = await grind();
   await page.getByRole('button', { name: 'Grind plus 0.1' }).click();
@@ -93,7 +93,7 @@ test('D-226: a new shot survives a reload and closing the app; Back ends it', as
   expect(await drafts()).toBeNull();
 });
 
-test("D-226: the phone's back gesture ends the draft too", async () => {
+test("the phone's back gesture ends the draft too", async () => {
   await page.goto('/');
   await page.getByRole('link', { name: 'New shot' }).click();
   await page.getByRole('button', { name: 'Grind plus 0.1' }).click();
@@ -105,7 +105,7 @@ test("D-226: the phone's back gesture ends the draft too", async () => {
   expect(await grind()).toBe(prefilled);
 });
 
-test('D-226, D-94: another bean starts the new shot again, without the draft', async () => {
+test('another bean starts the new shot again, without the draft', async () => {
   // Kiambu AA is opened by the shot-* files before this one.
   await newShot();
   await page.getByRole('button', { name: 'Grind plus 0.1' }).click();
@@ -123,7 +123,7 @@ test('D-226, D-94: another bean starts the new shot again, without the draft', a
   expect(await grind()).toBe(prefilled);
 });
 
-test('D-226, D-94: picking the bean already chosen keeps the draft', async () => {
+test('picking the bean already chosen keeps the draft', async () => {
   await newShot();
   await page.getByRole('button', { name: 'Grind plus 0.1' }).click();
   const entered = await grind();
@@ -140,7 +140,7 @@ test('D-226, D-94: picking the bean already chosen keeps the draft', async () =>
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
 });
 
-test('D-226: an edit survives a reload; Save ends it', async () => {
+test('an edit survives a reload; Save ends it', async () => {
   const db = new Database(DATABASE, { readonly: true });
   const { id } = db.prepare('select id from shot order by brewed_at desc limit 1').get() as {
     id: string;
@@ -168,7 +168,7 @@ test('D-226: an edit survives a reload; Save ends it', async () => {
   expect(await drafts()).toBeNull();
 });
 
-test('D-226, D-113: an edit draft made with another bean opens on that bean again', async () => {
+test('an edit draft made with another bean opens on that bean again', async () => {
   const id = newestId();
   await page.goto(`/journal/${id}/edit`);
   await page.getByRole('button', { name: 'Time plus 1 second' }).click();
@@ -194,7 +194,7 @@ test('D-226, D-113: an edit draft made with another bean opens on that bean agai
   expect(await drafts()).toBeNull();
 });
 
-test('D-226, D-113, D-231: a waiting shot keeps its values and the bean chosen for it', async () => {
+test('a waiting shot keeps its values and the bean chosen for it', async () => {
   await page.goto('/journal');
   await context.setOffline(true);
   await page.getByRole('link', { name: 'New shot' }).click();
@@ -228,7 +228,7 @@ test('D-226, D-113, D-231: a waiting shot keeps its values and the bean chosen f
   expect(await drafts()).toBeNull();
 });
 
-test('D-226, D-61: a draft whose Save already reached the server is saved as a shot of its own', async () => {
+test('a draft whose Save already reached the server is saved as a shot of its own', async () => {
   // The app closed after Save reached the server, before the draft ended: the draft has the id of a
   // shot the server has.
   const db = new Database(DATABASE, { readonly: true });
@@ -257,7 +257,7 @@ test('D-226, D-61: a draft whose Save already reached the server is saved as a s
   added = newestId();
 });
 
-test('D-225, D-226: signing out leaves no draft on the phone', async () => {
+test('signing out leaves no draft on the phone', async () => {
   await newShot();
   await page.getByRole('button', { name: 'Grind plus 0.1' }).click();
   expect(await drafts()).not.toBeNull();

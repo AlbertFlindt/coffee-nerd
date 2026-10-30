@@ -64,7 +64,7 @@ function shotAt(brewedAt: number, overrides: Partial<ShotInput> = {}): ShotInput
 const save = (input: ShotInput) => saveShot(db, ids.userId, input, input.brewedAt).shotId;
 
 describe('loadShotFacts', () => {
-  it('D-64: one row per shot with its recipe, bean and gear', () => {
+  it('one row per shot with its recipe, bean and gear', () => {
     const first = save(shotAt(T0 - DAY));
     const second = save(shotAt(T0, { yield: 38500, time: null, dose: 18100 }));
     const facts = loadShotFacts(db, ids.userId, ZONE);
@@ -87,12 +87,12 @@ describe('loadShotFacts', () => {
       countryCode: 'ET',
       roaster: 'Nordlys Roasters',
       roastLevel: 'light',
-      recipeShots: 2 // both shots share the recipe: 18.1 g is within 0.2 g of 18.0 g (D-186)
+      recipeShots: 2 // both shots share the recipe: 18.1 g is within 0.2 g of 18.0 g
     });
     expect(facts[1].setup.features.temperature).toMatchObject({ on: true, value: 93000 });
   });
 
-  it('D-208: the local day, the week from Monday and the roast age follow the user’s time zone', () => {
+  it('the local day, the week from Monday and the roast age follow the user’s time zone', () => {
     // Sunday 18 Oct, 23:30 in Copenhagen, and half past midnight on Monday 19 Oct.
     save(shotAt(Date.UTC(2026, 9, 18, 21, 30)));
     save(shotAt(Date.UTC(2026, 9, 18, 22, 30)));
@@ -101,7 +101,7 @@ describe('loadShotFacts', () => {
     expect(monday).toMatchObject({ localDay: '2026-10-19', week: '2026-10-19', roastAgeDays: 44 });
   });
 
-  it('D-11: a shot without a score stays null, never 0', () => {
+  it('a shot without a score stays null, never 0', () => {
     save(
       shotAt(T0, {
         taste: { score: null, balance: null, body: null, sweetness: null, aftertaste: null }
@@ -110,13 +110,13 @@ describe('loadShotFacts', () => {
     expect(loadShotFacts(db, ids.userId, ZONE)[0]).toMatchObject({ score: null, balance: null });
   });
 
-  it('D-64, data-model §1.7: shots on archived gear still count', () => {
+  it('shots on archived gear still count', () => {
     const id = save(shotAt(T0));
     db.update(gear).set({ archivedAt: T0 }).where(eq(gear.id, ids.basketId)).run();
     expect(loadShotFacts(db, ids.userId, ZONE).map((f) => f.shotId)).toEqual([id]);
   });
 
-  it('D-60: another account’s shots never appear', () => {
+  it('another account’s shots never appear', () => {
     const mine = save(shotAt(T0));
     const otherUser = newId(T0);
     const otherBean = newId(T0);
@@ -165,7 +165,7 @@ describe('loadShotFacts', () => {
     expect(loadShotFacts(db, otherUser, ZONE)).toHaveLength(1);
   });
 
-  it('D-64, data-model §5: filters by bean, recipe and time', () => {
+  it('filters by bean, recipe and time', () => {
     const early = save(shotAt(T0 - 2 * DAY));
     const late = save(shotAt(T0, { grind: 1700 }));
     const all = loadShotFacts(db, ids.userId, ZONE);
@@ -183,7 +183,7 @@ describe('loadShotFacts', () => {
 });
 
 describe('mondayOf', () => {
-  it('D-208: weeks start on Monday', () => {
+  it('weeks start on Monday', () => {
     expect(mondayOf('2026-10-19')).toBe('2026-10-19'); // Monday
     expect(mondayOf('2026-10-25')).toBe('2026-10-19'); // Sunday
     expect(mondayOf('2027-01-01')).toBe('2026-12-28'); // across the year
@@ -191,7 +191,7 @@ describe('mondayOf', () => {
 });
 
 describe('loadDimensionContext', () => {
-  it('D-46, D-51: names list step options, and only those, and each machine’s features', () => {
+  it('names list step options, and only those, and each machine’s features', () => {
     const screen = addStep(
       db,
       ids.userId,

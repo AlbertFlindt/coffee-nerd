@@ -1,5 +1,5 @@
 <script lang="ts">
-  // New routine (screen 19, D-51).
+  // New routine (screen 19).
   import RoutinePage from '#lib/components/RoutinePage.svelte';
   import type { PageProps } from './$types';
 

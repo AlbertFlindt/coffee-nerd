@@ -1,8 +1,8 @@
 <script lang="ts">
-  // Dial-in progress on Home (screen 6, D-196): the score of the bean's last 12 rated shots, oldest on the
-  // left, the last shot as the larger point, and a cherry dashed line where a new recipe starts (D-19:
-  // cherry is recipe history, amber your scores). The graph fills the height Home leaves it (D-32, D-36).
-  // Tapping a point shows its exact score (D-56: every chart gets a tap tooltip).
+  // Dial-in progress on Home (screen 6): the score of the bean's last 12 rated shots, oldest on the
+  // left, the last shot as the larger point, and a cherry dashed line where a new recipe starts
+  // (cherry is recipe history, amber your scores). The graph fills the height Home leaves it.
+  // Tapping a point shows its exact score (every chart gets a tap tooltip).
   import type { DialInGraph } from '../domain/home';
 
   let { graph }: { graph: DialInGraph } = $props();

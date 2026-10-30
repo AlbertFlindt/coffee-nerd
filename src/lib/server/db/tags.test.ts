@@ -70,7 +70,7 @@ const shotTags = (shotId: string) =>
     .map((r) => r.id);
 
 describe('loadTags', () => {
-  it('D-53: the five families in order, each note with its count, built-ins not custom', () => {
+  it('the five families in order, each note with its count, built-ins not custom', () => {
     brew(1, [named('Berry').id]);
     brew(2, [named('Berry').id, named('Honey').id]);
     const page = loadTags(db, ids.userId);
@@ -92,13 +92,13 @@ describe('loadTags', () => {
     expect(page.duplicate).toBeNull();
   });
 
-  it('D-53: a note you added carries "custom" and comes after the built-ins', () => {
+  it('a note you added carries "custom" and comes after the built-ins', () => {
     addTag(db, ids.userId, { name: 'Blueberry jam', family: 'fruity' }, T0 + 1);
     const fruity = loadTags(db, ids.userId).families[0].tags;
     expect(fruity.at(-1)).toMatchObject({ name: 'Blueberry jam', custom: true, count: 0 });
   });
 
-  it('D-53, D-173: suggests merging a look-alike into the more used note', () => {
+  it('suggests merging a look-alike into the more used note', () => {
     brew(1, [named('Caramel').id]);
     const carmel = addTag(db, ids.userId, { name: 'Carmel', family: 'sweet' }, T0 + 1);
     const { duplicate } = loadTags(db, ids.userId);
@@ -108,12 +108,12 @@ describe('loadTags', () => {
 });
 
 describe('addTag', () => {
-  it('D-174: a name and a family', () => {
+  it('a name and a family', () => {
     const id = addTag(db, ids.userId, { name: '  Funky ', family: 'other' }, T0);
     expect(named('Funky')).toMatchObject({ id, family: 'other', custom: true });
   });
 
-  it('D-174: refuses an empty, too long or taken name', () => {
+  it('refuses an empty, too long or taken name', () => {
     const problems = (name: string) => {
       try {
         addTag(db, ids.userId, { name, family: 'other' }, T0);
@@ -128,7 +128,7 @@ describe('addTag', () => {
     expect(problems('berry')).toEqual(['name: taken']);
   });
 
-  it('D-181: a removed note comes back when added again', () => {
+  it('a removed note comes back when added again', () => {
     const funky = addTag(db, ids.userId, { name: 'Funky', family: 'other' }, T0);
     brew(1, [funky]);
     removeTag(db, ids.userId, funky, T0 + 2 * 60_000);
@@ -140,7 +140,7 @@ describe('addTag', () => {
 });
 
 describe('saveTag', () => {
-  it('D-172: a built-in note can be renamed but keeps its family', () => {
+  it('a built-in note can be renamed but keeps its family', () => {
     const berry = named('Berry').id;
     saveTag(db, ids.userId, berry, { name: 'Berries', family: 'fruity' }, T0);
     expect(named('Berries').id).toBe(berry);
@@ -149,13 +149,13 @@ describe('saveTag', () => {
     ).toThrowError(TagRejected);
   });
 
-  it('D-172: your own note can change family', () => {
+  it('your own note can change family', () => {
     const funky = addTag(db, ids.userId, { name: 'Funky', family: 'other' }, T0);
     saveTag(db, ids.userId, funky, { name: 'Funky', family: 'fruity' }, T0);
     expect(named('Funky').family).toBe('fruity');
   });
 
-  it('D-53: refuses a name another note has, but not a change of case', () => {
+  it('refuses a name another note has, but not a change of case', () => {
     const berry = named('Berry').id;
     expect(() =>
       saveTag(db, ids.userId, berry, { name: 'citrus', family: 'fruity' }, T0)
@@ -164,7 +164,7 @@ describe('saveTag', () => {
     expect(named('BERRY').id).toBe(berry);
   });
 
-  it('D-60: is scoped by owner', () => {
+  it('is scoped to the account', () => {
     expect(
       saveTag(db, 'someone-else', named('Berry').id, { name: 'X', family: 'fruity' }, T0)
     ).toBe(false);
@@ -172,7 +172,7 @@ describe('saveTag', () => {
 });
 
 describe('mergeTag', () => {
-  it('D-53: every shot of the old note moves to the kept one, and the old note goes', () => {
+  it('every shot of the old note moves to the kept one, and the old note goes', () => {
     const caramel = named('Caramel').id;
     const carmel = addTag(db, ids.userId, { name: 'Carmel', family: 'sweet' }, T0);
     const both = brew(1, [caramel, carmel]);
@@ -184,15 +184,15 @@ describe('mergeTag', () => {
     expect(all().some((t) => t.name === 'Carmel')).toBe(false);
   });
 
-  it('D-53: refuses merging a note into itself or into a missing note', () => {
+  it('refuses merging a note into itself or into a missing note', () => {
     const berry = named('Berry').id;
     expect(mergeTag(db, ids.userId, berry, berry)).toBe(false);
     expect(mergeTag(db, ids.userId, berry, 'missing')).toBe(false);
   });
 });
 
-describe('D-182: a shot saved with notes changed since', () => {
-  it('D-182: a merged note becomes the note it went into, also after a second merge', () => {
+describe('a shot saved with notes changed since', () => {
+  it('a merged note becomes the note it went into, also after a second merge', () => {
     const caramel = named('Caramel').id;
     const honey = named('Honey').id;
     const carmel = addTag(db, ids.userId, { name: 'Carmel', family: 'sweet' }, T0);
@@ -202,7 +202,7 @@ describe('D-182: a shot saved with notes changed since', () => {
     expect(shotTags(brew(2, [carmel]))).toEqual([honey]);
   });
 
-  it('D-182: a deleted note is left off and the shot saves', () => {
+  it('a deleted note is left off and the shot saves', () => {
     const berry = named('Berry').id;
     const honey = named('Honey').id;
     removeTag(db, ids.userId, berry, T0);
@@ -211,13 +211,13 @@ describe('D-182: a shot saved with notes changed since', () => {
 });
 
 describe('removeTag', () => {
-  it('D-171: a note no shot used is deleted', () => {
+  it('a note no shot used is deleted', () => {
     const berry = named('Berry').id;
     expect(removeTag(db, ids.userId, berry, T0)).toBe('deleted');
     expect(db.select().from(tag).where(eq(tag.id, berry)).get()).toBeUndefined();
   });
 
-  it('D-171: a used note is archived: off the page and the Tasting chips, kept on its shot', () => {
+  it('a used note is archived: off the page and the Tasting chips, kept on its shot', () => {
     const berry = named('Berry').id;
     const shotId = brew(1, [berry]);
     expect(removeTag(db, ids.userId, berry, T0 + 2 * 60_000)).toBe('archived');
@@ -232,7 +232,7 @@ describe('removeTag', () => {
     expect(loadLibrary(db, ids.userId, T0).tags[0]).toBe('14 flavor notes');
   });
 
-  it('D-181: typing a removed note on the Tasting tab brings it back', () => {
+  it('typing a removed note on the Tasting tab brings it back', () => {
     const berry = named('Berry').id;
     brew(1, [berry]);
     removeTag(db, ids.userId, berry, T0 + 2 * 60_000);
@@ -242,8 +242,8 @@ describe('removeTag', () => {
   });
 });
 
-describe('D-60: owner scoping', () => {
-  it('D-60: another account sees none of your notes and cannot remove or merge them', () => {
+describe('account scoping', () => {
+  it('another account sees none of your notes and cannot remove or merge them', () => {
     const berry = named('Berry').id;
     expect(loadTags(db, 'someone-else').total).toBe(0);
     expect(removeTag(db, 'someone-else', berry, T0)).toBeNull();
@@ -254,7 +254,7 @@ describe('D-60: owner scoping', () => {
 });
 
 describe('keepBoth', () => {
-  it('D-173: a kept pair is not suggested again', () => {
+  it('a kept pair is not suggested again', () => {
     const carmel = addTag(db, ids.userId, { name: 'Carmel', family: 'sweet' }, T0);
     expect(keepBoth(db, ids.userId, carmel, named('Caramel').id)).toBe(true);
     expect(loadTags(db, ids.userId).duplicate).toBeNull();
@@ -262,7 +262,7 @@ describe('keepBoth', () => {
     expect(keepBoth(db, ids.userId, named('Caramel').id, carmel)).toBe(true);
   });
 
-  it('D-173: refuses notes that are not yours', () => {
+  it('refuses notes that are not yours', () => {
     expect(keepBoth(db, ids.userId, named('Caramel').id, 'missing')).toBe(false);
   });
 });

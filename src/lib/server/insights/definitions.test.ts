@@ -21,7 +21,7 @@ const shots = (n: number, overrides: Partial<ShotFact>, scores: number[] = [8]) 
 describe('score by process (screen 23)', () => {
   const process = (facts: ShotFact[]) => card('score-by-process', facts);
 
-  it('D-55, D-206: names the process with the highest median, and the one that sits lowest', () => {
+  it('names the process with the highest median, and the one that sits lowest', () => {
     const result = process([
       ...shots(6, { process: 'natural' }, [7, 8, 9, 8, 10, 6]),
       ...shots(6, { process: 'washed' }, [4, 5, 7, 8, 9, 7])
@@ -44,7 +44,7 @@ describe('score by process (screen 23)', () => {
     );
   });
 
-  it('D-214: medians within half a point are no clear difference', () => {
+  it('medians within half a point are no clear difference', () => {
     const result = process([
       ...shots(10, { process: 'natural' }, [8]),
       ...shots(10, { process: 'honey' }, [7, 8])
@@ -55,7 +55,7 @@ describe('score by process (screen 23)', () => {
     );
   });
 
-  it('D-11: unrated shots are left out, never counted as 0', () => {
+  it('unrated shots are left out, never counted as 0', () => {
     const result = process([
       ...shots(5, { process: 'natural' }, [8]),
       ...shots(5, { process: 'washed' }, [6]),
@@ -64,7 +64,7 @@ describe('score by process (screen 23)', () => {
     expect(result.chart).toMatchObject({ rows: [{ n: 5 }, { n: 5, min: 6 }] });
   });
 
-  it('D-203, D-207: without two processes of 5 rated shots, the card says what is missing', () => {
+  it('without two processes of 5 rated shots, the card says what is missing', () => {
     expect(process([])).toEqual({
       id: 'score-by-process',
       topic: 'like',
@@ -84,7 +84,7 @@ describe('score by process (screen 23)', () => {
     ).toBe('Rate 1 more honey shot to compare.');
   });
 
-  it('D-203: a process with fewer than 5 rated shots is left out of the chart', () => {
+  it('a process with fewer than 5 rated shots is left out of the chart', () => {
     const result = process([
       ...shots(5, { process: 'natural' }, [9]),
       ...shots(5, { process: 'washed' }, [6]),
@@ -93,7 +93,7 @@ describe('score by process (screen 23)', () => {
     expect(result.chart).toMatchObject({ rows: [{ label: 'Natural' }, { label: 'Washed' }] });
   });
 
-  it('D-55: rows run from the highest median down; on a tie, the higher average first', () => {
+  it('rows run from the highest median down; on a tie, the higher average first', () => {
     const result = process([
       ...shots(5, { process: 'washed' }, [5, 7, 7]),
       ...shots(5, { process: 'honey' }, [6, 7, 8]),
@@ -111,7 +111,7 @@ describe('score by process (screen 23)', () => {
 describe('score by origin (screen 23)', () => {
   const origin = (facts: ShotFact[]) => card('score-by-origin', facts);
 
-  it('D-55, D-206: names the origin with the highest average; its row is the amber one', () => {
+  it('names the origin with the highest average; its row is the amber one', () => {
     const result = origin([
       ...shots(10, { countryCode: 'ET' }, [8, 8, 9, 8]),
       ...shots(12, { countryCode: 'KE' }, [6, 8, 7, 9]),
@@ -132,7 +132,7 @@ describe('score by origin (screen 23)', () => {
     expect(result.basis).toBe('Average score ± 1 standard deviation · 32 rated shots');
   });
 
-  it('D-206: without the tightest spread, the sentence compares the top two averages', () => {
+  it('without the tightest spread, the sentence compares the top two averages', () => {
     const result = origin([
       ...shots(10, { countryCode: 'ET' }, [6, 10]),
       ...shots(10, { countryCode: 'KE' }, [7])
@@ -141,18 +141,18 @@ describe('score by origin (screen 23)', () => {
     expect(result.sentence).toBe('Highest average: 8 against 7 for Kenya.');
   });
 
-  it('D-214: averages within half a point are no clear difference', () => {
+  it('averages within half a point are no clear difference', () => {
     const result = origin([
       ...shots(10, { countryCode: 'ET' }, [8]),
       ...shots(10, { countryCode: 'KE' }, [8, 7, 8, 8, 8, 8, 8, 8, 8, 8])
     ]);
     expect(result.title).toBe('No clear favorite origin');
     expect(result.sentence).toBe('Your top origins average within half a point of each other.');
-    // D-206: no row is painted amber as a winner.
+    // No row is painted amber as a winner.
     expect(result.chart).toMatchObject({ rows: [{ top: false }, { top: false }] });
   });
 
-  it('D-56: the axis starts below the lowest whisker', () => {
+  it('the axis starts below the lowest whisker', () => {
     const result = origin([
       ...shots(10, { countryCode: 'ET' }, [8]),
       ...shots(10, { countryCode: 'BR' }, [5, 7])
@@ -161,7 +161,7 @@ describe('score by origin (screen 23)', () => {
     expect(result.chart?.axis).toEqual({ from: 2, to: 10, ticks: [4, 6, 8, 10] });
   });
 
-  it('D-203: says how many more shots an origin needs', () => {
+  it('says how many more shots an origin needs', () => {
     expect(
       origin([...shots(6, { countryCode: 'ET' }), ...shots(1, { countryCode: 'KE' })]).sentence
     ).toBe('Rate 4 more shots from Kenya to compare.');
@@ -176,7 +176,7 @@ describe('weekly average score (screen 24)', () => {
   const week = (i: number, scores: number[]) =>
     scores.map((score) => fact({ week: WEEKS[i], score }));
 
-  it('D-56, D-206: better and steadier when the line rises and the band narrows', () => {
+  it('better and steadier when the line rises and the band narrows', () => {
     const result = weekly([
       ...week(0, [5, 7, 6, 8]),
       ...week(4, [6, 7]),
@@ -196,7 +196,7 @@ describe('weekly average score (screen 24)', () => {
     });
   });
 
-  it('D-212, D-11: a week with fewer than 2 rated shots is a gap, never 0', () => {
+  it('a week with fewer than 2 rated shots is a gap, never 0', () => {
     const result = weekly([
       ...week(0, [6, 7]),
       ...week(1, [9]),
@@ -227,7 +227,7 @@ describe('weekly average score (screen 24)', () => {
     );
   });
 
-  it('D-206: falling scores and a wider spread are said too', () => {
+  it('falling scores and a wider spread are said too', () => {
     const result = weekly([
       ...week(0, [8, 8]),
       ...week(1, [8, 8.5]),
@@ -240,7 +240,7 @@ describe('weekly average score (screen 24)', () => {
     );
   });
 
-  it('D-203: needs 4 weeks with 2 rated shots each', () => {
+  it('needs 4 weeks with 2 rated shots each', () => {
     const result = weekly([...week(0, [6, 7]), ...week(1, [6, 7]), ...week(2, [7])]);
     expect(result).toMatchObject({
       title: 'Weekly average score',
@@ -256,7 +256,7 @@ describe('shot time on the best recipe (screen 24, under Dial-in)', () => {
   const times = (seconds: number[], overrides: Partial<ShotFact> = {}) =>
     seconds.map((t) => fact({ time: t * 1000, ...overrides }));
 
-  it('D-201, D-205: the best recipe of the bean on Home, with μ, σ and where 2 in 3 shots land', () => {
+  it('the best recipe of the bean on Home, with μ, σ and where 2 in 3 shots land', () => {
     const result = bell([
       ...times([26, 27, 27, 28, 28, 28, 28, 29, 29, 30]),
       ...times([40, 41], { recipeId: 'recipe-b' })
@@ -283,12 +283,12 @@ describe('shot time on the best recipe (screen 24, under Dial-in)', () => {
     });
   });
 
-  it('D-206: a wide spread says the shot time wanders', () => {
+  it('a wide spread says the shot time wanders', () => {
     const result = bell(times([24, 26, 28, 30, 32, 24, 26, 28, 30, 32]));
     expect(result.title).toBe('Your shot time wanders');
   });
 
-  it('D-203, D-213: without a bean on Home, a best recipe or 10 timed shots, says what it needs', () => {
+  it('without a bean on Home, a best recipe or 10 timed shots, says what it needs', () => {
     expect(bell([], { ...home, homeBean: null, bestRecipe: null }).sentence).toBe(
       'Add a bean on Home to see the shot times of its best recipe.'
     );
@@ -309,13 +309,13 @@ describe('shot time by routine (screen 25)', () => {
   const times = (seconds: number[], overrides: Partial<ShotFact> = {}) =>
     seconds.map((t) => fact({ time: t * 1000, recipeShots: seconds.length, ...overrides }));
 
-  it('D-204, D-210, D-216: compares routines on the bean on Home with the rest of the recipe equal', () => {
+  it('compares routines on the bean on Home with the rest of the recipe equal', () => {
     const result = routines([
       ...times([27, 28, 28, 29, 28]),
       ...times([25, 28, 31, 28, 30], light),
       // Another grind is another recipe: not compared.
       ...times([20, 40], { grind: 1500, recipeId: 'recipe-fine' }),
-      // Another bean: not compared (D-210).
+      // Another bean: not compared.
       ...times([20, 40, 20, 40, 20], { ...light, beanId: 'bean-other', recipeId: 'recipe-o' })
     ]);
     expect(result.title).toBe('Daily routine is more repeatable');
@@ -337,7 +337,7 @@ describe('shot time by routine (screen 25)', () => {
     );
   });
 
-  it('D-204: routines that never shared a recipe are not compared', () => {
+  it('routines that never shared a recipe are not compared', () => {
     const turbo = { routineId: 'routine-turbo', routineName: 'Turbo', recipeId: 'recipe-t' };
     const result = routines([
       // Daily on recipe A, with one Light roast shot beside it.
@@ -350,7 +350,7 @@ describe('shot time by routine (screen 25)', () => {
     expect(result.chart).toBeNull();
   });
 
-  it('D-214: σ within 0.2 s is no clear difference; no row is amber', () => {
+  it('σ within 0.2 s is no clear difference; no row is amber', () => {
     const result = routines([
       ...times([27, 28, 29, 28, 28]),
       ...times([27, 28, 29, 28, 28], light)
@@ -359,7 +359,7 @@ describe('shot time by routine (screen 25)', () => {
     expect(result.chart).toMatchObject({ rows: [{ top: false }, { top: false }] });
   });
 
-  it('D-203: needs 2 routines with 5 comparable shots each', () => {
+  it('needs 2 routines with 5 comparable shots each', () => {
     expect(routines(times([27, 28, 29, 28, 28])).sentence).toBe(
       'Brew 5 shots of Guji Hambela with each of two routines, the rest of the recipe the same, to compare.'
     );
@@ -384,7 +384,7 @@ describe('most consistent beans (screen 25)', () => {
       )
     );
 
-  it('D-211: spread is pooled within each reused recipe; moving between recipes is not spread', () => {
+  it('spread is pooled within each reused recipe; moving between recipes is not spread', () => {
     const result = beans([
       // Steady within each recipe, though the recipes score far apart.
       ...bean('Guji Hambela', [
@@ -392,7 +392,7 @@ describe('most consistent beans (screen 25)', () => {
         [9, 9, 8]
       ]),
       ...bean('Huila', [[5, 7, 9, 6, 8]]),
-      // A recipe brewed once does not count (D-203).
+      // A recipe brewed once does not count.
       ...bean('Cerrado', [[9], [2], [5], [7], [1]])
     ]);
     expect(result.title).toBe('Most consistent beans');
@@ -424,7 +424,7 @@ describe('most consistent beans (screen 25)', () => {
     });
   });
 
-  it('D-203, D-214: needs 2 beans with 5 rated shots on reused recipes; σ within 0.2 is no winner', () => {
+  it('needs 2 beans with 5 rated shots on reused recipes; σ within 0.2 is no winner', () => {
     expect(beans(bean('Guji Hambela', [[7, 8, 7, 8, 7]])).sentence).toBe(
       'Rate 5 shots each of two beans on recipes you reuse to compare.'
     );

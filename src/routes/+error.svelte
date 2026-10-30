@@ -1,6 +1,6 @@
 <script lang="ts">
-  // A page that could not open, e.g. one the phone has not kept for offline use (D-219). Built from
-  // design-system parts, not designed yet (docs/open-items.md).
+  // A page that could not open, e.g. one the phone has not kept for offline use. Built from
+  // design-system parts, not designed yet.
   import { page } from '$app/state';
   import { resolve } from '$app/paths';
 </script>

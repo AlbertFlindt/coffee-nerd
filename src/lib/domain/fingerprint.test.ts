@@ -47,19 +47,19 @@ const withFeatures = (features: Features): RecipeIdentity => ({
 });
 
 describe('recipeFingerprint', () => {
-  it('D-63: the same setup always gives the same fingerprint (a SHA-256 hex digest)', () => {
+  it('the same setup always gives the same fingerprint (a SHA-256 hex digest)', () => {
     const fingerprint = recipeFingerprint(base);
     expect(fingerprint).toMatch(/^[0-9a-f]{64}$/);
     expect(recipeFingerprint(structuredClone(base))).toBe(fingerprint);
   });
 
-  it('D-16: returning to an earlier grind gives that recipe’s fingerprint again', () => {
+  it('returning to an earlier grind gives that recipe’s fingerprint again', () => {
     const finer = recipeFingerprint({ ...base, grind: 1500 });
     expect(finer).not.toBe(recipeFingerprint(base));
     expect(recipeFingerprint({ ...base, grind: 1600 })).toBe(recipeFingerprint(base));
   });
 
-  it('D-65: renaming a feature, a step, the routine or changing a unit keeps the recipe', () => {
+  it('renaming a feature, a step, the routine or changing a unit keeps the recipe', () => {
     const renamed: RecipeIdentity = {
       ...base,
       setup: {
@@ -80,21 +80,21 @@ describe('recipeFingerprint', () => {
     expect(recipeFingerprint(renamed)).toBe(recipeFingerprint(base));
   });
 
-  it('D-65: a switched-off feature counts only as off, whatever value it had', () => {
+  it('a switched-off feature counts only as off, whatever value it had', () => {
     const offWithOldValue = withFeatures({
       low_bar_start: { label: 'Low bar start', on: false, value: 5000, pressure: 2000 }
     });
     expect(recipeFingerprint(offWithOldValue)).toBe(recipeFingerprint(base));
   });
 
-  it('D-16: switching a feature on or off makes a new recipe', () => {
+  it('switching a feature on or off makes a new recipe', () => {
     const switchedOn = withFeatures({
       low_bar_start: { label: 'Low bar start', on: true, value: 5000, pressure: 2000 }
     });
     expect(recipeFingerprint(switchedOn)).not.toBe(recipeFingerprint(base));
   });
 
-  it('D-24: a phase’s pressure and a list choice are part of the recipe', () => {
+  it('a phase’s pressure and a list choice are part of the recipe', () => {
     expect(
       recipeFingerprint(
         withFeatures({
@@ -109,7 +109,7 @@ describe('recipeFingerprint', () => {
     ).not.toBe(recipeFingerprint(base));
   });
 
-  it('D-63: feature order does not matter, step order does', () => {
+  it('feature order does not matter, step order does', () => {
     const reordered: RecipeIdentity = {
       ...base,
       setup: {
@@ -129,7 +129,7 @@ describe('recipeFingerprint', () => {
     expect(recipeFingerprint(swappedSteps)).not.toBe(recipeFingerprint(base));
   });
 
-  it('D-63, D-186: grinder, basket, routine and step values are each part of the recipe', () => {
+  it('grinder, basket, routine and step values are each part of the recipe', () => {
     const fingerprints = new Set([
       recipeFingerprint(base),
       recipeFingerprint({ ...base, grinderId: OTHER_GRINDER }),
@@ -149,14 +149,14 @@ describe('recipeFingerprint', () => {
     expect(fingerprints.size).toBe(5);
   });
 
-  it('D-186: the dose is left out; recipes are told apart by a dose more than 0.2 g away', () => {
+  it('the dose is left out; recipes are told apart by a dose more than 0.2 g away', () => {
     expect(recipeFingerprint({ ...base, dose: 18500 })).toBe(recipeFingerprint(base));
     expect(sameDose(18000, 18200)).toBe(true);
     expect(sameDose(18000, 17800)).toBe(true);
     expect(sameDose(18000, 18300)).toBe(false);
   });
 
-  it('D-63: an empty field and a missing field give the same fingerprint', () => {
+  it('an empty field and a missing field give the same fingerprint', () => {
     const explicit = withFeatures({
       low_bar_start: { label: 'Low bar start', on: false, value: undefined, pressure: undefined }
     });
@@ -168,7 +168,7 @@ describe('recipeFingerprint', () => {
     );
   });
 
-  it('D-63: a step value of 20000 and the text "20000" are different recipes', () => {
+  it('a step value of 20000 and the text "20000" are different recipes', () => {
     const steps = base.setup.routine!.steps;
     const asText: RecipeIdentity = {
       ...base,
@@ -180,7 +180,7 @@ describe('recipeFingerprint', () => {
     expect(recipeFingerprint(asText)).not.toBe(recipeFingerprint(base));
   });
 
-  it('D-16: the machine is the matching scope, not part of the fingerprint', () => {
+  it('the machine is the matching scope, not part of the fingerprint', () => {
     expect(recipeFingerprint({ ...base, machineId: '0199f3a2-0000-7000-8000-00000000d002' })).toBe(
       recipeFingerprint(base)
     );
@@ -188,16 +188,16 @@ describe('recipeFingerprint', () => {
 });
 
 describe('describeChange', () => {
-  it('D-16: names what changed since the last shot’s recipe', () => {
+  it('names what changed since the last shot’s recipe', () => {
     expect(describeChange({ ...base, grind: 1500 }, base)).toEqual(['grind']);
   });
 
-  it('D-186: a dose within 0.2 g is not named as a change; one further away is', () => {
+  it('a dose within 0.2 g is not named as a change; one further away is', () => {
     expect(describeChange({ ...base, grind: 1500, dose: 18100 }, base)).toEqual(['grind']);
     expect(describeChange({ ...base, dose: 18300 }, base)).toEqual(['dose']);
   });
 
-  it('D-16, D-71: lists changes in a fixed order: grind, dose, gear, routine, then features', () => {
+  it('lists changes in a fixed order: grind, dose, gear, routine, then features', () => {
     const changed: RecipeIdentity = {
       ...withFeatures({
         preinfusion: { label: 'Preinfusion', on: false },
@@ -228,7 +228,7 @@ describe('describeChange', () => {
     ]);
   });
 
-  it('D-16: a changed step value in the same routine counts as a routine change', () => {
+  it('a changed step value in the same routine counts as a routine change', () => {
     const steps = base.setup.routine!.steps;
     const longerWdt: RecipeIdentity = {
       ...base,
@@ -240,13 +240,13 @@ describe('describeChange', () => {
     expect(describeChange(longerWdt, base)).toEqual(['routine']);
   });
 
-  it('D-16: another machine is named as a change', () => {
+  it('another machine is named as a change', () => {
     expect(
       describeChange({ ...base, machineId: '0199f3a2-0000-7000-8000-00000000d002' }, base)
     ).toEqual(['machine']);
   });
 
-  it('D-65: renaming alone is no change; a switched-off feature’s old value is ignored', () => {
+  it('renaming alone is no change; a switched-off feature’s old value is ignored', () => {
     const renamedAndStale = withFeatures({
       temperature: { label: 'Brew temperature', unit: '°C', on: true, value: 93000 },
       low_bar_start: { label: 'Low bar start', on: false, value: 9000 }
@@ -254,7 +254,7 @@ describe('describeChange', () => {
     expect(describeChange(renamedAndStale, base)).toEqual([]);
   });
 
-  it('D-16: a feature only in one of the two setups counts as changed, named by its current label', () => {
+  it('a feature only in one of the two setups counts as changed, named by its current label', () => {
     const { [PADDLE]: paddle, ...withoutPaddle } = base.setup.features;
     expect(paddle).toBeDefined();
     const last: RecipeIdentity = { ...base, setup: { ...base.setup, features: withoutPaddle } };
@@ -262,7 +262,7 @@ describe('describeChange', () => {
     expect(describeChange(last, base)).toEqual(['paddle position']);
   });
 
-  it('D-16: keeps all-capital words such as "RPM" as they are', () => {
+  it('keeps all-capital words such as "RPM" as they are', () => {
     const rpm = 'custom-0199f3a2-7c1e-7d2a-9b4f-000000000001';
     const current = withFeatures({ [rpm]: { label: 'RPM', unit: 'rpm', on: true, value: 1000 } });
     const last = withFeatures({ [rpm]: { label: 'RPM', unit: 'rpm', on: true, value: 1200 } });
@@ -271,12 +271,12 @@ describe('describeChange', () => {
 });
 
 describe('recipeTagText', () => {
-  it('D-16: a recipe brewed before shows how often', () => {
+  it('a recipe brewed before shows how often', () => {
     expect(recipeTagText({ kind: 'reused', shotCount: 2 })).toBe('Recipe reused 2x');
     expect(recipeTagText({ kind: 'reused', shotCount: 1 })).toBe('Recipe reused 1x');
   });
 
-  it('D-16, D-71: a new recipe names up to two changes and counts the rest', () => {
+  it('a new recipe names up to two changes and counts the rest', () => {
     expect(recipeTagText({ kind: 'new', changes: ['grind'] })).toBe('New recipe · grind changed');
     expect(recipeTagText({ kind: 'new', changes: ['grind', 'dose'] })).toBe(
       'New recipe · grind and dose changed'
@@ -289,7 +289,7 @@ describe('recipeTagText', () => {
     );
   });
 
-  it('D-16: a new recipe with nothing to compare against (a bean’s first shot) says only "New recipe"', () => {
+  it('a new recipe with nothing to compare against (a bean’s first shot) says only "New recipe"', () => {
     expect(recipeTagText({ kind: 'new', changes: [] })).toBe('New recipe');
   });
 });

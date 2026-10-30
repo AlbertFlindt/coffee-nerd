@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The grinder page (screen 15, D-48, D-79, D-147, D-158, D-159): name, type, burrs, burr size, and how the dial
+  // The grinder page (screen 15): name, type, burrs, burr size, and how the dial
   // works, with a preview of the shot form's Grind card so you see what the settings do.
   import { untrack } from 'svelte';
   import type { Guide } from '#lib/domain/guide.ts';
@@ -26,7 +26,7 @@
     name?: string;
     spec?: GrinderSpec;
     isDefault?: boolean;
-    /** A step of the step-by-step start (D-157). */
+    /** A step of the step-by-step start. */
     guide?: Guide | null;
     problems?: string[];
   } = $props();
@@ -65,7 +65,7 @@
     );
   }
 
-  // D-159: the step interval is typed; any positive number is how far − or + moves.
+  // The step interval is typed; any positive number is how far − or + moves.
   let step = $state(untrack(() => formatNumber(value.dial.step, decimalsForStep(value.dial.step))));
   function readStep() {
     try {

@@ -5,7 +5,7 @@
   import type { PageProps } from './$types';
 
   let { form }: PageProps = $props();
-  // The time zone decides what "Today" means (data-model §1.8); without JavaScript the server uses UTC.
+  // The time zone decides what "Today" means (docs/SPEC.md §1.8); without JavaScript the server uses UTC.
   let timeZone = $state('UTC');
   onMount(() => (timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone));
 </script>

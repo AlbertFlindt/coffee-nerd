@@ -1,4 +1,4 @@
-// The Journal (D-54) and the shot detail (D-57). Every query is scoped by the owner (D-60).
+// The Journal and the shot detail. Every query is scoped to the signed-in account.
 import { and, asc, desc, eq, inArray, lt, or } from 'drizzle-orm';
 import { describeChange, type RecipeMatch } from '../../domain/fingerprint';
 import { recipeFilterLabel, setupDifferences, shotsThisWeek } from '../../domain/journal';
@@ -15,16 +15,16 @@ export type JournalShot = {
   brewedAt: number;
   beanName: string;
   grind: Thousandths;
-  /** The grinder dial's step, for the grind's decimals (D-07). */
+  /** The grinder dial's step, for the grind's decimals. */
   grindStep: Thousandths;
   dose: Thousandths;
   yield: Thousandths | null;
   time: Thousandths | null;
   score: number | null;
   balance: number | null;
-  /** The recipe tag as it was when the shot was brewed (D-16): reused N× before it, or new. */
+  /** The recipe tag as it was when the shot was brewed: reused N× before it, or new. */
   recipeTag: RecipeMatch;
-  /** The score of the recipe's latest rated shot before this one, the faint marker of the Rate sheet (D-12). */
+  /** The score of the recipe's latest rated shot before this one, the faint marker of the Rate sheet. */
   previousScore: number | null;
 };
 
@@ -34,7 +34,7 @@ export type Journal = {
   beans: { id: string; name: string }[];
   /** The bean filter in effect; null for all beans (an unknown bean is ignored). */
   beanId: string | null;
-  /** The chosen bean's recipes, most recently brewed first, for the recipe filter (D-112); empty without a bean. */
+  /** The chosen bean's recipes, most recently brewed first, for the recipe filter; empty without a bean. */
   recipes: { id: string; label: string }[];
   /** The recipe filter in effect: only with a bean, and only one of its recipes. */
   recipeId: string | null;
@@ -44,7 +44,7 @@ export type Journal = {
   /** All shots since Monday, whatever the filter: "9 shots this week". */
   shotsThisWeek: number;
   timeZone: string;
-  /** −/+ steps of dose, yield and time, for their decimals (D-07, D-89). */
+  /** −/+ steps of dose, yield and time, for their decimals. */
   steps: Steps;
 };
 
@@ -66,7 +66,7 @@ export function loadJournal(
       beanId: recipe.beanId,
       beanName: bean.name,
       grind: recipe.grind,
-      // D-186: a shot shows the dose it was brewed with; recipe labels show the recipe's.
+      // A shot shows the dose it was brewed with; recipe labels show the recipe's.
       dose: shot.dose,
       recipeDose: recipe.dose,
       setup: recipe.setup,
@@ -98,10 +98,10 @@ export function loadJournal(
     const ofRecipe = ofBean.filter(
       (row, i) => ofBean.findIndex((r) => r.recipeId === row.recipeId) === i
     );
-    // Two recipes with the same values say which setup values tell them apart (D-121).
+    // Two recipes with the same values say which setup values tell them apart.
     const gearRows = db.select().from(gear).where(eq(gear.ownerId, ownerId)).all();
     const gearOf = new Map(gearRows.map((g) => [g.id, g]));
-    // D-170: a step value that differs names it too; a list option by its label.
+    // A step value that differs names it too; a list option by its label.
     const settingOf = new Map(
       db
         .select({ id: prepStep.id, setting: prepStep.setting })
@@ -192,9 +192,9 @@ export type ShotDetail = {
   brewedAt: number;
   beanName: string;
   roastDate: string;
-  /** "Lelit Bianca · Timemore 064S · VST · 18 g · Daily routine" (D-57). */
+  /** "Lelit Bianca · Timemore 064S · VST · 18 g · Daily routine". */
   gear: string;
-  /** The pressure profile and other features (D-57). */
+  /** The pressure profile and other features. */
   setup: string;
   recipeTag: RecipeMatch;
   grind: Thousandths;
@@ -210,7 +210,7 @@ export type ShotDetail = {
     aftertaste: number | null;
   };
   flavors: string[];
-  /** "Compared with this recipe" (D-109): the recipe's shot count and its other shots' results. */
+  /** "Compared with this recipe": the recipe's shot count and its other shots' results. */
   recipe: { shotCount: number; others: { time: Thousandths | null; score: number | null }[] };
   notes: string | null;
   timeZone: string;
@@ -295,7 +295,7 @@ export function loadShotDetail(db: Queryable, ownerId: string, shotId: string): 
 }
 
 /**
- * D-118: for a recipe's first shot, what changed since the bean's shot before it (D-81, D-113), named as
+ * For a recipe's first shot, what changed since the bean's shot before it, named as
  * on the shot form; nothing when the bean had no shot before.
  */
 function changesSincePrevious(
@@ -326,9 +326,9 @@ function before(a: { id: string; brewedAt: number }, b: { id: string; brewedAt: 
 }
 
 /**
- * The recipe tag of each shot at the time it was brewed (D-16), and its recipe's last score before it (D-12): "Recipe reused N×" with N the recipe's
+ * The recipe tag of each shot at the time it was brewed, and its recipe's last score before it: "Recipe reused N×" with N the recipe's
  * earlier shots, or "New recipe" for its first. What changed is not named here: that compares with the
- * shot before it on the form (D-81), and the Journal shows "New recipe" alone.
+ * shot before it on the form, and the Journal shows "New recipe" alone.
  */
 function recipeTags(
   newestFirst: readonly { id: string; recipeId: string; score: number | null }[]

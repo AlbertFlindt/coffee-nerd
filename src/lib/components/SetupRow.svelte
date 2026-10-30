@@ -1,8 +1,8 @@
 <script lang="ts">
-  // One standing-setup row in the Setup sheet (RowStepper, D-22, D-24): an optional switch, the label, −/+
-  // and the value. A phase that is on shows its pressure as a small tappable amber value (D-24); a
+  // One standing-setup row in the Setup sheet (RowStepper): an optional switch, the label, −/+
+  // and the value. A phase that is on shows its pressure as a small tappable amber value; a
   // switched-off row collapses to one quiet line. Changed since the last shot: sage value and a delta
-  // pill, or an "On"/"Off" pill (D-90).
+  // pill, or an "On"/"Off" pill.
   import { tick } from 'svelte';
   import {
     applyStep,
@@ -39,7 +39,7 @@
     step: Thousandths;
     min?: Thousandths;
     max?: Thousandths;
-    /** A phase's pressure in bar, when the phase has one (D-24). */
+    /** A phase's pressure in bar, when the phase has one. */
     pressure?: { value: Thousandths | undefined; step: Thousandths; min: number; max: number };
     change?: FeatureChange;
     ontoggle?: (on: boolean) => void;

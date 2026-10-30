@@ -1,5 +1,5 @@
-// Library › Tags (D-53): your flavor notes by family, with the duplicate finder (D-173). Every query is
-// scoped by the owner (D-60). A note shots used is archived, not deleted (D-171).
+// Library › Tags: your flavor notes by family, with the duplicate finder. Every query is
+// scoped to the signed-in account. A note shots used is archived, not deleted.
 import { and, asc, count, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { duplicatePairs, FAMILIES, keptKey, type Family } from '../../domain/tags';
 import type { Db, Queryable } from './client';
@@ -12,7 +12,7 @@ export type TagItem = {
   family: Family;
   /** Shots that used it. */
   count: number;
-  /** Added by you, not built in: the "custom" label (D-53). */
+  /** Added by you, not built in: the "custom" label. */
   custom: boolean;
 };
 
@@ -20,7 +20,7 @@ export type TagsPage = {
   /** All five families, in order, with their notes (built-ins first, then yours, oldest first). */
   families: { family: Family; label: string; tags: TagItem[] }[];
   total: number;
-  /** The pair the "Same tag twice?" card suggests (D-173), or null. */
+  /** The pair the "Same tag twice?" card suggests, or null. */
   duplicate: { keep: TagItem; merge: TagItem } | null;
 };
 
@@ -94,8 +94,8 @@ function checked(db: Queryable, ownerId: string, input: TagInput, self: string |
 }
 
 /**
- * D-174: a new note in the chosen family. A removed note with the same name comes back instead
- * (D-171), in the chosen family if it is your own (D-172).
+ * A new note in the chosen family. A removed note with the same name comes back instead,
+ * in the chosen family if it is your own.
  */
 export function addTag(db: Db, ownerId: string, input: TagInput, now: number): string {
   const { name, family, same } = checked(db, ownerId, input, null);
@@ -112,7 +112,7 @@ export function addTag(db: Db, ownerId: string, input: TagInput, now: number): s
   return id;
 }
 
-/** Rename a note; only your own notes change family (D-172). False when it is not yours. */
+/** Rename a note; only your own notes change family. False when it is not yours. */
 export function saveTag(
   db: Db,
   ownerId: string,
@@ -132,7 +132,7 @@ export function saveTag(
   return true;
 }
 
-/** D-53: every shot with `fromId` gets `intoId` instead, then `fromId` goes. False when not possible. */
+/** Every shot with `fromId` gets `intoId` instead, then `fromId` goes. False when not possible. */
 export function mergeTag(db: Db, ownerId: string, fromId: string, intoId: string): boolean {
   if (fromId === intoId) return false;
   const found = db
@@ -147,13 +147,13 @@ export function mergeTag(db: Db, ownerId: string, fromId: string, intoId: string
     );
     tx.delete(shotTag).where(eq(shotTag.tagId, fromId)).run();
     tx.delete(tag).where(eq(tag.id, fromId)).run();
-    // D-182: a shot saved later with the old note gets this one.
+    // A shot saved later with the old note gets this one.
     tx.insert(tagMerged).values({ tagId: fromId, ownerId, intoTagId: intoId }).run();
   });
   return true;
 }
 
-/** D-171: a note shots used is archived; one no shot used is deleted. Null when it is not yours. */
+/** A note shots used is archived; one no shot used is deleted. Null when it is not yours. */
 export function removeTag(
   db: Db,
   ownerId: string,
@@ -171,7 +171,7 @@ export function removeTag(
   return 'deleted';
 }
 
-/** D-173: "Keep both": the pair is no longer suggested. False when either note is not yours. */
+/** "Keep both": the pair is no longer suggested. False when either note is not yours. */
 export function keepBoth(db: Db, ownerId: string, a: string, b: string): boolean {
   if (a === b) return false;
   const found = db

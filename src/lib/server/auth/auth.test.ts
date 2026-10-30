@@ -35,7 +35,7 @@ const account = (overrides: Partial<Parameters<typeof createAccount>[1]> = {}) =
   );
 
 describe('passwords', () => {
-  it('D-60: a stored password is a salted hash that verifies only the right password', async () => {
+  it('a stored password is a salted hash that verifies only the right password', async () => {
     const hash = await hashPassword('espresso-at-dawn');
     expect(hash).not.toContain('espresso');
     expect(hash).not.toBe(await hashPassword('espresso-at-dawn'));
@@ -45,8 +45,8 @@ describe('passwords', () => {
   });
 });
 
-describe('first run (D-85, D-88)', () => {
-  it('D-88: creating the account adds My setup with the time zone, app state and the built-in tags only', async () => {
+describe('first run', () => {
+  it('creating the account adds My setup with the time zone, app state and the built-in tags only', async () => {
     expect(hasAccount(db)).toBe(false);
     const userId = await account();
     expect(hasAccount(db)).toBe(true);
@@ -62,25 +62,25 @@ describe('first run (D-85, D-88)', () => {
     expect(tags.every((t) => t.builtIn)).toBe(true);
   });
 
-  it('D-60: there is only one account per installation', async () => {
+  it('there is only one account per installation', async () => {
     await account();
     await expect(account({ name: 'Someone else' })).rejects.toThrow(AccountError);
   });
 
-  it('D-85: a name and a password of at least 8 characters are required', async () => {
+  it('a name and a password of at least 8 characters are required', async () => {
     await expect(account({ name: '  ' })).rejects.toThrow(/name/i);
     await expect(account({ password: 'short' })).rejects.toThrow(/password/i);
     expect(hasAccount(db)).toBe(false);
   });
 
-  it('data-model §1.8: an unknown time zone falls back to UTC', async () => {
+  it('an unknown time zone falls back to UTC', async () => {
     await account({ timeZone: 'Mars/Olympus' });
     expect(db.select().from(userSettings).get()?.timeZone).toBe('UTC');
   });
 });
 
-describe('signing in (D-85)', () => {
-  it('D-85: the right name and password sign in; the name ignores case and spaces', async () => {
+describe('signing in', () => {
+  it('the right name and password sign in; the name ignores case and spaces', async () => {
     const userId = await account();
     expect(await signIn(db, ' albert ', 'espresso-at-dawn')).toEqual({
       id: userId,
@@ -88,22 +88,22 @@ describe('signing in (D-85)', () => {
     });
   });
 
-  it('D-85: a wrong name or password does not sign in', async () => {
+  it('a wrong name or password does not sign in', async () => {
     await account();
     expect(await signIn(db, 'Albert', 'wrong-password')).toBeNull();
     expect(await signIn(db, 'Bob', 'espresso-at-dawn')).toBeNull();
   });
 });
 
-describe('sessions (D-86)', () => {
-  it('D-86: a session signs you in and stores only a hash of its token', async () => {
+describe('sessions', () => {
+  it('a session signs you in and stores only a hash of its token', async () => {
     const userId = await account();
     const token = createSession(db, userId, T0);
     expect(validateSession(db, token, T0 + DAY)).toEqual({ id: userId, name: 'Albert' });
     expect(db.select().from(session).get()?.id).not.toBe(token);
   });
 
-  it('D-86: each visit renews the session, so you stay signed in while you use the app', async () => {
+  it('each visit renews the session, so you stay signed in while you use the app', async () => {
     const userId = await account();
     const token = createSession(db, userId, T0);
     for (let day = 300; day <= 1500; day += 300) {
@@ -111,14 +111,14 @@ describe('sessions (D-86)', () => {
     }
   });
 
-  it('D-86: a session ends after a year without use', async () => {
+  it('a session ends after a year without use', async () => {
     const userId = await account();
     const token = createSession(db, userId, T0);
     expect(validateSession(db, token, T0 + SESSION_LIFETIME + DAY)).toBeNull();
     expect(db.select().from(session).all()).toHaveLength(0);
   });
 
-  it('D-86: signing out ends that session only', async () => {
+  it('signing out ends that session only', async () => {
     const userId = await account();
     const phone = createSession(db, userId, T0);
     const laptop = createSession(db, userId, T0);
@@ -127,7 +127,7 @@ describe('sessions (D-86)', () => {
     expect(validateSession(db, laptop, T0)).not.toBeNull();
   });
 
-  it('D-87: signing out everywhere ends every session', async () => {
+  it('signing out everywhere ends every session', async () => {
     const userId = await account();
     const phone = createSession(db, userId, T0);
     const laptop = createSession(db, userId, T0);
@@ -136,20 +136,20 @@ describe('sessions (D-86)', () => {
     expect(validateSession(db, laptop, T0)).toBeNull();
   });
 
-  it('D-86: an unknown token signs nobody in', () => {
+  it('an unknown token signs nobody in', () => {
     expect(validateSession(db, 'made-up', T0)).toBeNull();
   });
 });
 
 describe('SignInThrottle', () => {
-  it('D-85: after 5 wrong passwords in 15 minutes, sign-in waits a minute', () => {
+  it('after 5 wrong passwords in 15 minutes, sign-in waits a minute', () => {
     const throttle = new SignInThrottle();
     for (let i = 0; i < 5; i++) throttle.recordFailure(T0 + i * 1000);
     expect(throttle.retryAfter(T0 + 5000)).toBeGreaterThan(0);
     expect(throttle.retryAfter(T0 + 5000 + 61_000)).toBe(0);
   });
 
-  it('D-85: fewer failures, old failures or a success do not slow sign-in', () => {
+  it('fewer failures, old failures or a success do not slow sign-in', () => {
     const throttle = new SignInThrottle();
     for (let i = 0; i < 4; i++) throttle.recordFailure(T0);
     expect(throttle.retryAfter(T0)).toBe(0);
@@ -162,7 +162,7 @@ describe('SignInThrottle', () => {
 });
 
 describe('attemptSignIn', () => {
-  it('D-85: guesses sent all at once are limited like guesses sent one by one', async () => {
+  it('guesses sent all at once are limited like guesses sent one by one', async () => {
     await account();
     const throttle = new SignInThrottle();
     const results = await Promise.all(
@@ -172,7 +172,7 @@ describe('attemptSignIn', () => {
     expect(results.filter((r) => r.outcome === 'throttled')).toHaveLength(5);
   });
 
-  it('D-85: the right password signs in and clears earlier failures', async () => {
+  it('the right password signs in and clears earlier failures', async () => {
     const userId = await account();
     const throttle = new SignInThrottle();
     await attemptSignIn(db, throttle, 'Albert', 'wrong-guess', T0);

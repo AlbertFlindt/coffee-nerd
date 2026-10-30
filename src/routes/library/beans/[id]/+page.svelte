@@ -1,7 +1,7 @@
 <script lang="ts">
-  // Bean detail (screen 10, D-42): the about card with roast age, the numbers, and the recipes best first
-  // (D-135). The recipe list is the part that scrolls (D-36). A recipe opens the Journal filtered to it
-  // (D-125); its round button marks it Brew next (D-43). "Mark as finished" offers Undo (D-127).
+  // Bean detail (screen 10): the about card with roast age, the numbers, and the recipes best first.
+  // The recipe list is the part that scrolls. A recipe opens the Journal filtered to it;
+  // its round button marks it Brew next. "Mark as finished" offers Undo.
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import TabBar from '#lib/components/TabBar.svelte';
@@ -87,7 +87,7 @@
   <div class="recipes">
     {#each bean.recipes as r (r.id)}
       <div class="recipe" class:marked={r.marked}>
-        <!-- D-125: a recipe opens the Journal filtered to this bean and recipe. -->
+        <!-- A recipe opens the Journal filtered to this bean and recipe. -->
         <form class="recipe-link" method="GET" action={resolve('/journal')}>
           <input type="hidden" name="bean" value={bean.id} />
           <button class="recipe-open cn-tap" name="recipe" value={r.id}>
@@ -126,7 +126,7 @@
 
   <footer>
     {#if form?.finished}
-      <!-- D-127: the message with Undo, screen 34. -->
+      <!-- The message with Undo, screen 34. -->
       <div class="cn-card message" role="status">
         <span>{bean.name} is finished</span>
         <form method="POST" action="?/reopen" use:enhance>
@@ -295,7 +295,7 @@
     font-size: 13px;
   }
 
-  /* D-36: the recipes are the list that scrolls. */
+  /* The recipes are the list that scrolls. */
   .recipes {
     flex: 1;
     min-height: 0;
@@ -319,7 +319,7 @@
     background: var(--surface);
   }
 
-  /* D-43: the marked recipe gets an amber outline. */
+  /* The marked recipe gets an amber outline. */
   .recipe.marked {
     box-shadow: inset 0 0 0 2px var(--amber);
   }

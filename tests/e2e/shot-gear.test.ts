@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// The shot form's gear (roadmap M6) on the reference seed: switching the grinder for one shot (D-153),
-// the dose hint (D-154), and leaving out the basket or puck prep (D-155). Nothing is saved, so the shots
+// The shot form's gear on the reference seed: switching the grinder for one shot,
+// the dose hint, and leaving out the basket or puck prep. Nothing is saved, so the shots
 // the next files count stay as they are; the grinder added here is archived at the end.
 test.describe.configure({ mode: 'serial' });
 
@@ -37,11 +37,11 @@ async function screenshot(name: string) {
   await page.screenshot({ path: `screenshots/${name}.png` });
 }
 
-test('D-153: the gear line switches the grinder for this shot; the grind control follows', async () => {
+test('the gear line switches the grinder for this shot; the grind control follows', async () => {
   await page.goto('/library/gear');
   await page.getByRole('button', { name: 'Add gear' }).click();
   await page.getByRole('button', { name: 'Grinder' }).click();
-  // Screen 38, D-147: adding is a task with × to close.
+  // Screen 38: adding is a task with × to close.
   await expect(page.getByRole('link', { name: 'Close without saving' })).toBeVisible();
   await screenshot('GrinderNew');
   await page.getByLabel('Name').fill('Comandante C40');
@@ -70,16 +70,16 @@ test('D-153: the gear line switches the grinder for this shot; the grind control
   await expect(page.locator('.card')).toContainText('Lelit Bianca · Comandante C40');
   await expect(page.getByRole('button', { name: 'Grind plus 1' })).toBeVisible();
   await expect(page.locator('.cn-tag')).toContainText('New recipe');
-  // Back ends the draft (D-226): the next shot starts from the last shot's gear again.
+  // Back ends the draft: the next shot starts from the last shot's gear again.
   await page.getByRole('link', { name: 'Back without saving' }).click();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
 });
 
-test('D-153: switching the machine brings its own features; values both have stay', async () => {
+test('switching the machine brings its own features; values both have stay', async () => {
   await page.goto('/library/gear');
   await page.getByRole('button', { name: 'Add gear' }).click();
   await page.getByRole('button', { name: 'Machine' }).click();
-  // D-158: a new machine has temperature and flat pressure, no phases. D-184: no low bar phases at all.
+  // A new machine has temperature and flat pressure, no phases. No low bar phases at all.
   await expect(page.getByRole('switch', { name: 'Preinfusion' })).toBeVisible();
   await expect(page.getByRole('switch', { name: /Low bar/ })).toHaveCount(0);
   await page.getByLabel('Name').fill('Gaggia Classic');
@@ -102,7 +102,7 @@ test('D-153: switching the machine brings its own features; values both have sta
   await expect(more.getByText('Flat')).toBeVisible();
 });
 
-test('D-154: a dose outside the basket’s range shows a gentle hint, never a block', async () => {
+test('a dose outside the basket’s range shows a gentle hint, never a block', async () => {
   await page.goto('/shot/new');
   await expect(page.getByText(/holds 17\.0–19\.0 g/)).toHaveCount(0);
   await page.getByRole('button', { name: /^Dose, .*tap to type$/ }).click();
@@ -114,7 +114,7 @@ test('D-154: a dose outside the basket’s range shows a gentle hint, never a bl
   await screenshot('ShotDoseHint');
 });
 
-test('D-155: the basket and puck prep pickers start with leaving them out', async () => {
+test('the basket and puck prep pickers start with leaving them out', async () => {
   await page.goto('/shot/new');
   await page.getByRole('button', { name: 'Setup', exact: true }).click();
   const sheet = page.getByRole('region', { name: 'Setup', exact: true });
@@ -128,7 +128,7 @@ test('D-155: the basket and puck prep pickers start with leaving them out', asyn
   await expect(page.locator('.cn-tag')).toContainText('New recipe');
 
   await sheet.getByRole('button', { name: /Puck prep/ }).click();
-  // D-166: the row opens the routine's steps; "Routine" there opens the picker.
+  // The row opens the routine's steps; "Routine" there opens the picker.
   await sheet.getByRole('button', { name: /^Routine/ }).click();
   await expect(sheet.locator('.pick').first()).toHaveText('No puck prep');
   await expect(

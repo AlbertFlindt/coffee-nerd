@@ -1,7 +1,7 @@
 <script lang="ts">
-  // Beans overview (screen 7, D-37): open beans as cards with their roast age, finished beans as rows below;
-  // below the header everything scrolls as one list (D-36, D-136). Back goes to the Library page (D-156). A bean
-  // opens its page (D-42).
+  // Beans overview (screen 7): open beans as cards with their roast age, finished beans as rows below;
+  // below the header everything scrolls as one list. Back goes to the Library page. A bean
+  // opens its page.
   import { resolve } from '$app/paths';
   import TabBar from '#lib/components/TabBar.svelte';
   import type { PageData } from './$types';
@@ -57,7 +57,7 @@
         <div class="about">
           <span class="name">{bean.name}</span>
           {#if bean.origin}<span class="origin">{bean.origin}</span>{/if}
-          <!-- D-132: the numbers are separated by dots; grams left only with a bag weight. -->
+          <!-- The numbers are separated by dots; grams left only with a bag weight. -->
           <span class="numbers">
             {#if bean.best}<span><span class="soft">Best</span> <b>{bean.best}</b></span
               >{:else}<span class="soft">Not rated yet</span>{/if}
@@ -139,7 +139,7 @@
     flex-direction: column;
     gap: var(--space-3);
     padding: var(--space-1) var(--space-5) var(--space-4);
-    /* D-36, D-136: open cards and finished rows scroll together as one list. */
+    /* Open cards and finished rows scroll together as one list. */
     overflow-y: auto;
   }
 
@@ -222,7 +222,7 @@
     font-size: 13px;
   }
 
-  /* D-132: dots with room around them keep the numbers apart; a long line wraps. */
+  /* Dots with room around them keep the numbers apart; a long line wraps. */
   .numbers {
     display: flex;
     flex-wrap: wrap;

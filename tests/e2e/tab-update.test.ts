@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 
-// D-236: while a new version waits for the app to be closed (D-229), the offline copies stay current.
+// While a new version waits for the app to be closed, the offline copies stay current.
 // The newer server is played by changing the version its copies say they come from, for the version on
 // the phone only; the version that waits gets them as they are. The shot saved here is deleted again.
 test.describe.configure({ mode: 'serial' });
@@ -27,7 +27,7 @@ test.beforeAll(async ({ browser }) => {
 
 test.afterAll(() => context.close());
 
-test('D-236: while a new version waits, the copies for offline use stay current', async () => {
+test('while a new version waits, the copies for offline use stay current', async () => {
   // A newer server: every copy the version on the phone takes says it comes from another version.
   const pages = (url: URL) => !url.pathname.startsWith('/_app/');
   await context.route(pages, async (route) => {

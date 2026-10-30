@@ -1,13 +1,13 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// One installation, one account (D-60): these steps run in order on a fresh database.
+// One installation, one account: these steps run in order on a fresh database.
 test.describe.configure({ mode: 'serial' });
 
 const NAME = 'Albert';
 const PASSWORD = 'espresso-at-dawn';
 
 async function expectNoPageScroll(page: Page) {
-  // The app shell clips overflow, so check both the document and the shell itself (D-36).
+  // The app shell clips overflow, so check both the document and the shell itself.
   const overflow = await page.evaluate(() =>
     [document.documentElement, document.querySelector('.cn-root')!].map(
       (el) => el.scrollHeight - el.clientHeight
@@ -16,16 +16,14 @@ async function expectNoPageScroll(page: Page) {
   expect(overflow).toEqual([0, 0]);
 }
 
-test('D-59: /health reports the app and its database as ok, without signing in', async ({
-  request
-}) => {
+test('/health reports the app and its database as ok, without signing in', async ({ request }) => {
   const response = await request.get('/health');
 
   expect(response.status()).toBe(200);
   expect(await response.json()).toEqual({ status: 'ok' });
 });
 
-test('D-88: on first run every page leads to creating the account', async ({ page }) => {
+test('on first run every page leads to creating the account', async ({ page }) => {
   await page.goto('/');
 
   await expect(page).toHaveURL(/\/welcome$/);
@@ -33,7 +31,7 @@ test('D-88: on first run every page leads to creating the account', async ({ pag
   await expectNoPageScroll(page);
 });
 
-test('D-18, D-69: the app uses the design system and self-hosted Figtree, with no external requests', async ({
+test('the app uses the design system and self-hosted Figtree, with no external requests', async ({
   page
 }) => {
   const external: string[] = [];
@@ -50,7 +48,7 @@ test('D-18, D-69: the app uses the design system and self-hosted Figtree, with n
   expect(external).toEqual([]);
 });
 
-test('D-85: the two passwords must match', async ({ page }) => {
+test('the two passwords must match', async ({ page }) => {
   await page.goto('/welcome');
   await page.getByLabel('Name').fill(NAME);
   await page.getByLabel('Password · at least 8 characters').fill(PASSWORD);
@@ -61,14 +59,14 @@ test('D-85: the two passwords must match', async ({ page }) => {
   await expect(page.getByLabel('Name')).toHaveValue(NAME);
 });
 
-test('D-85, D-86: creating the account signs you in', async ({ page }) => {
+test('creating the account signs you in', async ({ page }) => {
   await page.goto('/welcome');
   await page.getByLabel('Name').fill(NAME);
   await page.getByLabel('Password · at least 8 characters').fill(PASSWORD);
   await page.getByLabel('Password again').fill(PASSWORD);
   await page.getByRole('button', { name: 'Create account' }).click();
 
-  // D-157: the step-by-step start begins with the machine.
+  // The step-by-step start begins with the machine.
   await expect(page).toHaveURL(/\/library\/gear\/new\?kind=machine&guide=1$/);
   await expect(page.getByRole('heading', { name: 'Add machine', level: 1 })).toBeVisible();
   await expect(page.getByText('Step 1 of 5')).toBeVisible();
@@ -76,7 +74,7 @@ test('D-85, D-86: creating the account signs you in', async ({ page }) => {
   await page.screenshot({ path: 'screenshots/GuideMachine.png' });
 });
 
-test('D-157: step by step from the machine to a ready shot form; leaving halfway resumes', async ({
+test('step by step from the machine to a ready shot form; leaving halfway resumes', async ({
   page
 }) => {
   await page.goto('/login');
@@ -97,16 +95,16 @@ test('D-157: step by step from the machine to a ready shot form; leaving halfway
 
   await expect(page.getByRole('heading', { name: 'Add grinder', level: 1 })).toBeVisible();
   await expect(page.getByText('Step 2 of 5')).toBeVisible();
-  // Screen 37: the Gear page before My setup exists, without Default chips (D-149).
+  // Screen 37: the Gear page before My setup exists, without Default chips.
   await page.goto('/library/gear');
   await expect(page.getByRole('region', { name: 'My setup' })).toContainText('Not set up yet');
   await expect(page.getByText('Default', { exact: true })).toHaveCount(0);
   await page.screenshot({ path: 'screenshots/GearFirstRun.png' });
-  // D-188: with nothing archived there is no Archived row, and its page says so.
+  // With nothing archived there is no Archived row, and its page says so.
   await expect(page.getByRole('link', { name: /^Archived/ })).toHaveCount(0);
   await page.goto('/library/gear/archived');
   await expect(page.getByText('Nothing archived.')).toBeVisible();
-  // Screen 51, D-51, D-163: no routines yet, and the heading has no count.
+  // Screen 51: no routines yet, and the heading has no count.
   await page.goto('/library/puck-prep');
   await expect(page.getByText('No routines yet.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Routines', exact: true })).toBeVisible();
@@ -129,7 +127,7 @@ test('D-157: step by step from the machine to a ready shot form; leaving halfway
 
   await expect(page.getByRole('heading', { name: 'My setup', level: 1 })).toBeVisible();
   await expect(page.getByText('Step 4 of 5 · Starting point for new beans')).toBeVisible();
-  // Nothing was chosen yet: your only machine and grinder are (D-157).
+  // Nothing was chosen yet: your only machine and grinder are.
   await expect(page.getByRole('button', { name: 'Machine, Gaggia Classic' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Grinder, Comandante C40' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Basket, No basket' })).toBeVisible();
@@ -144,7 +142,7 @@ test('D-157: step by step from the machine to a ready shot form; leaving halfway
     await page.getByRole('textbox', { name: label }).press('Enter');
   }
   await page.getByRole('button', { name: /^Pressure profile/ }).click();
-  // D-78: flat pressure waits for a value; from empty each tap adds one step of 0.5 bar.
+  // Flat pressure waits for a value; from empty each tap adds one step of 0.5 bar.
   for (let i = 0; i < 18; i++)
     await page.getByRole('button', { name: 'Flat plus 0.5 bar' }).click();
   await expect(page.getByRole('region', { name: 'Pressure profile' })).toContainText('9.0');
@@ -180,7 +178,7 @@ test('D-157: step by step from the machine to a ready shot form; leaving halfway
   await expect(page.getByRole('button', { name: 'Save shot' })).toBeVisible();
 });
 
-test('D-60: after first run, signed-out visits lead to sign-in, and /welcome is gone', async ({
+test('after first run, signed-out visits lead to sign-in, and /welcome is gone', async ({
   page
 }) => {
   await page.goto('/welcome');
@@ -190,7 +188,7 @@ test('D-60: after first run, signed-out visits lead to sign-in, and /welcome is 
   await expectNoPageScroll(page);
 });
 
-test('D-85: a wrong password does not sign in', async ({ page }) => {
+test('a wrong password does not sign in', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('Name').fill(NAME);
   await page.getByLabel('Password').fill('wrong-password');
@@ -200,7 +198,7 @@ test('D-85: a wrong password does not sign in', async ({ page }) => {
   await expect(page).toHaveURL(/\/login$/);
 });
 
-test('D-203, D-207, D-208: with its first shot, a new account sees on Insights what each card needs', async ({
+test('with its first shot, a new account sees on Insights what each card needs', async ({
   page
 }) => {
   await page.goto('/login');
@@ -221,7 +219,7 @@ test('D-203, D-207, D-208: with its first shot, a new account sees on Insights w
   await expect(page.getByRole('img')).toHaveCount(0);
 });
 
-test('D-86: sign in, stay signed in, sign out', async ({ page, context }) => {
+test('sign in, stay signed in, sign out', async ({ page, context }) => {
   await page.goto('/login');
   await page.getByLabel('Name').fill(NAME.toLowerCase());
   await page.getByLabel('Password').fill(PASSWORD);
@@ -235,7 +233,7 @@ test('D-86: sign in, stay signed in, sign out', async ({ page, context }) => {
   await page.goto('/login');
   await expect(page).toHaveURL(/\/$/);
 
-  // D-199: Sign out lives on the Settings page behind the gear on Home.
+  // Sign out lives on the Settings page behind the gear on Home.
   await page.getByRole('link', { name: 'Settings' }).click();
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/login$/);

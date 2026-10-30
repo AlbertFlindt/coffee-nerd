@@ -1,4 +1,4 @@
-// The fixed country list behind the Country picker (D-41, D-133): ISO 3166-1 two-letter codes, named in
+// The fixed country list behind the Country picker: ISO 3166-1 two-letter codes, named in
 // English by the runtime's own data, so no list is fetched (no external requests).
 
 /** Every ISO 3166-1 alpha-2 country code. */
@@ -32,7 +32,7 @@ const ALL = COUNTRY_CODES.map((code) => ({ code, name: countryName(code)! })).so
 );
 
 /**
- * Countries whose name contains the search, ignoring case and accents (D-133): those that start with it
+ * Countries whose name contains the search, ignoring case and accents: those that start with it
  * first, each part A to Z.
  */
 export function searchCountries(search: string): { code: string; name: string }[] {

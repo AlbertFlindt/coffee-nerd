@@ -1,5 +1,5 @@
 <script lang="ts">
-  // A labelled text field, as on the Add bean form (D-41): label above, value below, on a surface.
+  // A labelled text field, as on the Add bean form: label above, value below, on a surface.
   import type { HTMLInputAttributes } from 'svelte/elements';
 
   let {
@@ -12,7 +12,7 @@
   }: {
     label: string;
     id: string;
-    /** Shown at the right of the label, e.g. "Required" (D-41). */
+    /** Shown at the right of the label, e.g. "Required". */
     hint?: string;
     /** A value in regular weight, as for optional fields on the Add bean form. */
     plain?: boolean;

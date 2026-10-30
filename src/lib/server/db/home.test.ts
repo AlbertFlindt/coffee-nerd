@@ -93,12 +93,12 @@ function ready() {
 }
 
 describe('loadHome', () => {
-  it('D-198: with no open bean, Home has nothing to show for one', () => {
+  it('with no open bean, Home has nothing to show for one', () => {
     finishBean(db, ids.userId, ids.beanId, T0);
     expect(loadHome(db, ids.userId, T0)).toEqual({ state: 'no-bean' });
   });
 
-  it('D-198: a bean without shots shows its freshness and nothing else yet', () => {
+  it('a bean without shots shows its freshness and nothing else yet', () => {
     const home = ready();
     expect(home.bean).toMatchObject({ name: 'Guji Hambela', roastAgeDays: 42, gramsLeft: null });
     expect(home.lastShot).toBeNull();
@@ -106,7 +106,7 @@ describe('loadHome', () => {
     expect(home.week).toEqual({ shots: 0, rated: 0, average: null });
   });
 
-  it('D-32: the last shot of this bean, with its values, taste and recipe tag', () => {
+  it('the last shot of this bean, with its values, taste and recipe tag', () => {
     save(shotAt(T0 - 2 * DAY));
     const id = save(shotAt(T0 - 10 * MINUTE, { yield: 38500, time: 25500, taste: taste(7, -2) }));
     const { lastShot } = ready();
@@ -125,9 +125,9 @@ describe('loadHome', () => {
     ]);
   });
 
-  it('D-194: this week counts only this bean’s shots since Monday', () => {
+  it('this week counts only this bean’s shots since Monday', () => {
     const other = secondBean();
-    // Saved first: saving a shot makes its bean Home's bean (data-model §4.4).
+    // Saved first: saving a shot makes its bean Home's bean (docs/SPEC.md §4.4).
     save(shotAt(T0 - 30 * MINUTE, { beanId: other, taste: taste(3) }));
     save(shotAt(T0 - 10 * MINUTE, { taste: taste(8) }));
     save(shotAt(T0 - 20 * MINUTE, { taste: taste(null) }));
@@ -135,7 +135,7 @@ describe('loadHome', () => {
     expect(ready().week).toEqual({ shots: 2, rated: 1, average: 8 });
   });
 
-  it('D-197, D-135, D-143: the best recipe with its score, values, setup line and reuse', () => {
+  it('the best recipe with its score, values, setup line and reuse', () => {
     for (const [i, score] of [7, 8, 8].entries())
       save(shotAt(T0 - (i + 1) * DAY, { taste: taste(score) }));
     save(shotAt(T0 - 5 * MINUTE, { grind: 1500, taste: taste(9) }));
@@ -146,18 +146,18 @@ describe('loadHome', () => {
     });
   });
 
-  it('D-66, D-135: until a recipe has 3 rated shots, the highest single score', () => {
+  it('until a recipe has 3 rated shots, the highest single score', () => {
     save(shotAt(T0 - DAY, { taste: taste(6) }));
     save(shotAt(T0 - 5 * MINUTE, { grind: 1500, taste: taste(9), time: null }));
     expect(ready().best).toMatchObject({ score: '9 / 10', title: 'Grind 1.5 · 18.0 g → 36.0 g' });
   });
 
-  it('D-11, D-198: shots without a rating give no best recipe', () => {
+  it('shots without a rating give no best recipe', () => {
     save(shotAt(T0 - DAY, { taste: taste(null) }));
     expect(ready().best).toBeNull();
   });
 
-  it('D-196: Dial-in progress plots this bean’s rated shots, oldest first, with recipe changes', () => {
+  it('Dial-in progress plots this bean’s rated shots, oldest first, with recipe changes', () => {
     save(shotAt(T0 - 3 * DAY, { taste: taste(6) }));
     save(shotAt(T0 - 2 * DAY, { taste: taste(null) }));
     save(shotAt(T0 - DAY, { grind: 1500, taste: taste(8) }));
@@ -170,19 +170,19 @@ describe('loadHome', () => {
     });
   });
 
-  it('D-196: with fewer than 2 rated shots there is no graph', () => {
+  it('with fewer than 2 rated shots there is no graph', () => {
     save(shotAt(T0 - 2 * DAY, { taste: taste(null) }));
     save(shotAt(T0 - DAY, { taste: taste(6) }));
     expect(ready()).toMatchObject({ graph: null, ratedShots: 1 });
   });
 
-  it('D-35: grams left when the bean has a bag weight', () => {
+  it('grams left when the bean has a bag weight', () => {
     db.update(bean).set({ bagWeight: 250000 }).where(eq(bean.id, ids.beanId)).run();
     save(shotAt(T0 - DAY));
     expect(ready().bean.gramsLeft).toBe('232 g left');
   });
 
-  it('D-195: the current bean while it is open, otherwise the newest open bean', () => {
+  it('the current bean while it is open, otherwise the newest open bean', () => {
     const other = secondBean(T0 - DAY);
     expect(ready().bean.id).toBe(ids.beanId);
     expect(ready().openBeans.map((b) => `${b.name} · ${b.detail}`)).toEqual([
@@ -193,7 +193,7 @@ describe('loadHome', () => {
     expect(ready().bean.id).toBe(other);
   });
 
-  it('D-60: shows nothing of another user', () => {
+  it('shows nothing of another user', () => {
     const otherUser = newId(T0);
     db.insert(user)
       .values({ id: otherUser, name: 'Other', passwordHash: 'x', createdAt: T0, updatedAt: T0 })
@@ -207,7 +207,7 @@ describe('loadHome', () => {
 });
 
 describe('chooseHomeBean', () => {
-  it('D-195: the chosen bean is the one Home shows and "+" starts from', () => {
+  it('the chosen bean is the one Home shows and "+" starts from', () => {
     const other = secondBean();
     expect(chooseHomeBean(db, ids.userId, other, T0)).toBe(true);
     expect(ready().bean.id).toBe(other);
@@ -215,7 +215,7 @@ describe('chooseHomeBean', () => {
     expect(form.state === 'ready' && form.bean.id).toBe(other);
   });
 
-  it('D-195: a finished bean or another user’s bean cannot be chosen', () => {
+  it('a finished bean or another user’s bean cannot be chosen', () => {
     const other = secondBean();
     finishBean(db, ids.userId, other, T0);
     expect(chooseHomeBean(db, ids.userId, other, T0)).toBe(false);

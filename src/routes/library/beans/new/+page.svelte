@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Add bean (screen 9, D-41).
+  // Add bean (screen 9).
   import BeanForm from '#lib/components/BeanForm.svelte';
   import type { PageProps } from './$types';
 
@@ -8,7 +8,7 @@
 
 <svelte:head><title>Add bean · Coffee Nerd</title></svelte:head>
 
-<!-- A re-buy picked in "Same as before" starts the form again from that bean (D-139). -->
+<!-- A re-buy picked in "Same as before" starts the form again from that bean. -->
 {#key data.text}
   <BeanForm
     mode="add"

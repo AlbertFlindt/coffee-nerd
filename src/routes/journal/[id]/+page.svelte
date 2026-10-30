@@ -1,6 +1,6 @@
 <script lang="ts">
-  // Shot detail (screen 26, D-57): bean and setup card, core values and ratio, taste, "Compared with this
-  // recipe" (D-109, D-110), notes, and Edit (D-113).
+  // Shot detail (screen 26): bean and setup card, core values and ratio, taste, "Compared with this
+  // recipe", notes, and Edit.
   import { resolve } from '$app/paths';
   import { recipeTagText } from '#lib/domain/fingerprint.ts';
   import {
@@ -40,7 +40,7 @@
     }
   ]);
 
-  // D-109, D-110: time and score against the recipe's other shots.
+  // Time and score against the recipe's other shots.
   const comparisons = $derived([
     {
       label: 'Time',
@@ -66,7 +66,7 @@
     }
   ]);
 
-  // D-57: balance, body and sweetness as small scales, and aftertaste when it is set (D-115); the
+  // Balance, body and sweetness as small scales, and aftertaste when it is set; the
   // handle sits where the value is.
   const scales: { scale: TasteScale; label: string }[] = $derived([
     { scale: 'balance', label: 'Balance' },
@@ -76,7 +76,7 @@
       ? []
       : [{ scale: 'aftertaste' as const, label: 'Aftertaste' }])
   ]);
-  // D-118: "New recipe" in cherry, what changed after it in muted ink, as on the shot form.
+  // "New recipe" in cherry, what changed after it in muted ink, as on the shot form.
   const [tagMain, ...tagRest] = $derived(recipeTagText(shot.recipeTag).split(' · '));
   const position = (scale: TasteScale, value: number) =>
     scale === 'balance' ? ((value + 10) / 20) * 100 : value * 10;
@@ -108,7 +108,7 @@
     <h1 class="cn-type-title">Shot</h1>
     <span class="when">{when}</span>
   </div>
-  <!-- D-57, D-113: the shot form in edit mode. -->
+  <!-- The shot form in edit mode. -->
   <a
     class="edit cn-tap"
     href={data.fromHome
@@ -137,7 +137,7 @@
         <span class="tile-label">{tile.label}</span>
         <span class="tile-value">
           {#if tile.value === null}
-            <!-- An empty yield or time (D-91); not designed yet (docs/open-items.md). -->
+            <!-- An empty yield or time; not designed yet. -->
             <span class="unit">Not set</span>
           {:else}
             {tile.value}{#if tile.unit}<span class="unit">{` ${tile.unit}`}</span>{/if}
@@ -151,7 +151,7 @@
   <section class="cn-card taste" aria-label="Taste">
     <div class="score">
       {#if shot.taste.score === null}
-        <!-- An unrated shot (D-11); not designed yet (docs/open-items.md). -->
+        <!-- An unrated shot; not designed yet. -->
         <span class="not-rated">Not rated</span>
       {:else}
         <span class="number">{shot.taste.score}</span>
@@ -241,7 +241,7 @@
     color: var(--ink);
   }
 
-  /* Amber: an action you take (D-19). */
+  /* Amber: an action you take. */
   .edit {
     display: flex;
     align-items: center;
@@ -275,7 +275,7 @@
     flex-direction: column;
     gap: var(--space-3);
     padding: var(--space-1) var(--space-5) var(--space-3);
-    /* D-36: the screen fits; a long note scrolls inside its own card. */
+    /* The screen fits; a long note scrolls inside its own card. */
     overflow: hidden;
   }
 
@@ -457,7 +457,7 @@
     font-weight: 600;
   }
 
-  /* The recipe's history is cherry (D-19). */
+  /* The recipe's history is cherry. */
   .count {
     font-size: 12px;
     font-weight: 600;

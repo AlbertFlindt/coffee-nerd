@@ -7,8 +7,8 @@ import type { Actions, PageServerLoad } from './$types';
 
 const KINDS = ['machine', 'grinder', 'basket'] as const;
 
-// Add gear (D-147): ?kind=machine|grinder|basket opens that kind's page, empty. With &guide=1 it is a step
-// of the step-by-step start (D-157): "Step n of 5", "Next", and the basket step can be skipped.
+// Add gear: ?kind=machine|grinder|basket opens that kind's page, empty. With &guide=1 it is a step
+// of the step-by-step start: "Step n of 5", "Next", and the basket step can be skipped.
 export const load: PageServerLoad = ({ locals, url }) => {
   if (!locals.user) error(401);
   const kind = KINDS.find((k) => k === url.searchParams.get('kind'));
@@ -31,7 +31,7 @@ export const actions: Actions = {
     if (problem) return problem;
     redirect(303, url.searchParams.has('guide') ? guideNext(db, ownerId) : '/library/gear');
   },
-  // D-157: the basket step can be skipped; the guide remembers it.
+  // The basket step can be skipped; the guide remembers it.
   skip: ({ locals }) => {
     if (!locals.user) error(401);
     const db = getDb();

@@ -1,4 +1,4 @@
-// Home (D-32): the numbers and short texts on its cards, for the bean on Home. Pure, like the rest of the domain.
+// Home: the numbers and short texts on its cards, for the bean on Home. Pure, like the rest of the domain.
 import type { BestRecipe } from './best-recipe';
 import { bestScoreText } from './bean';
 import { isThisWeek } from './journal';
@@ -8,7 +8,7 @@ import { decimalsFor, formatQuantity, formatRatio, type Thousandths } from './un
 
 export type Week = { shots: number; rated: number; average: number | null };
 
-/** This bean's shots since Monday, their average score and how many are rated (D-194). */
+/** This bean's shots since Monday, their average score and how many are rated. */
 export function thisWeek(
   shots: readonly { brewedAt: number; score: number | null }[],
   now: number,
@@ -19,7 +19,7 @@ export function thisWeek(
   return { shots: week.length, rated: scores.length, average: mean(scores) };
 }
 
-/** "9 shots" over "avg 7.2 · 8 of 9 rated"; no average without a rated shot (D-11), no line without shots. */
+/** "9 shots" over "avg 7.2 · 8 of 9 rated"; no average without a rated shot, no line without shots. */
 export function thisWeekText(week: Week): { value: string; detail: string | null } {
   const value = `${week.shots} ${week.shots === 1 ? 'shot' : 'shots'}`;
   if (week.shots === 0) return { value, detail: null };
@@ -30,19 +30,19 @@ export function thisWeekText(week: Week): { value: string; detail: string | null
   };
 }
 
-/** The best recipe's score as on the Beans pages (D-135, D-197): "7.7 / 10" or "8 / 10". */
+/** The best recipe's score as on the Beans pages: "7.7 / 10" or "8 / 10". */
 export function bestScoreOutOfTen(best: BestRecipe): string {
   return `${bestScoreText(best)} / 10`;
 }
 
-/** Under the roast age: "since roast", with grams left when the bean has a bag weight (D-35). */
+/** Under the roast age: "since roast", with grams left when the bean has a bag weight. */
 export function freshnessDetail(gramsLeft: string | null): string {
   return gramsLeft === null ? 'since roast' : `since roast · ${gramsLeft}`;
 }
 
 /**
- * The last shot's values in two fixed columns (D-32): Grind, In, Ratio on the left; Time, Out, Taste on
- * the right. A missing yield, time or balance is left out (D-91, D-11), and so is the ratio without a
+ * The last shot's values in two fixed columns: Grind, In, Ratio on the left; Time, Out, Taste on
+ * the right. A missing yield, time or balance is left out, and so is the ratio without a
  * yield; the rest of its column closes up.
  */
 export function lastShotValues(
@@ -84,8 +84,8 @@ export type DialInGraph = {
 };
 
 /**
- * Dial-in progress (D-196): the score of the bean's last 12 rated shots, oldest first. Unrated shots are
- * left out, never drawn as 0 (D-11). A recipe change is marked on a shot whose recipe differs from the
+ * Dial-in progress: the score of the bean's last 12 rated shots, oldest first. Unrated shots are
+ * left out, never drawn as 0. A recipe change is marked on a shot whose recipe differs from the
  * shot drawn before it. Fewer than 2 rated shots give no graph.
  */
 export function dialInProgress(

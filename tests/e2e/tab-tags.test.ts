@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// Library › Tags (roadmap M7) on the reference seed. Notes added here are merged or deleted again; the one
+// Library › Tags on the reference seed. Notes added here are merged or deleted again; the one
 // a shot used ends archived, so the page shows the same notes as before.
 test.describe.configure({ mode: 'serial' });
 
@@ -43,7 +43,7 @@ const card = () => page.getByRole('region', { name: 'Possible duplicate' });
 async function addTag(name: string, family: string) {
   await page.getByRole('button', { name: 'Add tag' }).click();
   const sheet = page.getByRole('region', { name: 'New tag' });
-  // D-241: every bottom sheet has a line outline.
+  // Every bottom sheet has a line outline.
   await expect(sheet).toHaveCSS('border-top-width', '1px');
   await expect(sheet.getByRole('radio', { name: 'Other' })).toHaveAttribute('aria-checked', 'true');
   await sheet.getByLabel('Name').fill(name);
@@ -51,7 +51,7 @@ async function addTag(name: string, family: string) {
   return sheet;
 }
 
-test('Tags, D-53, D-174: notes by family; "Add tag" asks a name and a family', async () => {
+test('Tags: notes by family; "Add tag" asks a name and a family', async () => {
   await page.goto('/library');
   await page.getByRole('link', { name: /^Tags/ }).click();
   await expect(page.getByRole('heading', { name: 'Tags', level: 1 })).toBeVisible();
@@ -78,13 +78,13 @@ test('Tags, D-53, D-174: notes by family; "Add tag" asks a name and a family', a
   ).toBeVisible();
 });
 
-test('D-53, D-173, D-180: the "Same tag twice?" card merges into the more used note', async () => {
+test('the "Same tag twice?" card merges into the more used note', async () => {
   await expect(card()).toContainText('Same tag twice?');
   await expect(card()).toContainText('"Dark choclate" (0 shots) looks like "Dark chocolate"');
   await expectNoPageScroll();
   await screenshot('Tags');
   await card().getByRole('button', { name: 'Merge Dark choclate into Dark chocolate' }).click();
-  // D-180: it asks first.
+  // It asks first.
   const confirm = page.getByRole('region', { name: 'Edit Dark choclate' });
   await expect(confirm.getByRole('heading', { name: 'Merge into Dark chocolate?' })).toBeVisible();
   await expect(confirm).toContainText('This cannot be undone.');
@@ -94,7 +94,7 @@ test('D-53, D-173, D-180: the "Same tag twice?" card merges into the more used n
   await expect(chip('Dark chocolate')).toBeVisible();
 });
 
-test('D-173: "Keep both" is remembered for that pair', async () => {
+test('"Keep both" is remembered for that pair', async () => {
   await (await addTag('Carmel', 'Sweet')).getByRole('button', { name: 'Add tag' }).click();
   await expect(card()).toContainText('"Carmel"');
   await card().getByRole('button', { name: 'Keep both' }).click();
@@ -102,7 +102,7 @@ test('D-173: "Keep both" is remembered for that pair', async () => {
   await page.reload();
   await expect(card()).toHaveCount(0);
 
-  // Screens 57, 58, D-173: the search keeps matching notes; nothing found says so.
+  // Screens 57, 58: the search keeps matching notes; nothing found says so.
   await page.getByLabel('Search tags').fill('car');
   await expect(chip('Carmel')).toBeVisible();
   await screenshot('TagsSearch');
@@ -111,7 +111,7 @@ test('D-173: "Keep both" is remembered for that pair', async () => {
   await screenshot('TagsNoMatch');
   await page.getByLabel('Search tags').fill('');
 
-  // Screens 60, 62, 63, D-174: your own note's sheet and its merge steps.
+  // Screens 60, 62, 63: your own note's sheet and its merge steps.
   await chip('Carmel').click();
   const sheet = page.getByRole('region', { name: 'Edit Carmel' });
   await expect(sheet.getByRole('radiogroup', { name: 'Family' })).toBeVisible();
@@ -121,7 +121,7 @@ test('D-173: "Keep both" is remembered for that pair', async () => {
   await screenshot('TagMergeList');
   await sheet.getByRole('button', { name: /^Caramel/ }).click();
   await expect(sheet.getByRole('heading', { name: 'Merge into Caramel?' })).toBeVisible();
-  // D-242: merging removes a tag, so it is red and going back amber.
+  // Merging removes a tag, so it is red and going back amber.
   await expect(sheet.getByRole('button', { name: 'Merge', exact: true })).toHaveClass(
     /cn-btn-danger/
   );
@@ -130,11 +130,11 @@ test('D-173: "Keep both" is remembered for that pair', async () => {
   await page.keyboard.press('Escape');
   await expect(sheet).toHaveCount(0);
 
-  // A note no shot used is deleted (D-171).
+  // A note no shot used is deleted.
   await chip('Carmel').click();
   await sheet.getByRole('button', { name: 'Remove tag' }).click();
   await expect(sheet.getByRole('heading', { name: 'Delete this tag?' })).toBeVisible();
-  // D-241: deleting is red, keeping amber.
+  // Deleting is red, keeping amber.
   await expect(sheet.getByRole('button', { name: 'Delete tag' })).toHaveClass(/cn-btn-danger/);
   await expect(sheet.getByRole('button', { name: 'Keep it' })).toHaveClass(/cn-btn-primary/);
   await screenshot('TagRemove');
@@ -142,7 +142,7 @@ test('D-173: "Keep both" is remembered for that pair', async () => {
   await expect(chip('Carmel')).toHaveCount(0);
 });
 
-test('D-172: a built-in note can be renamed but keeps its family', async () => {
+test('a built-in note can be renamed but keeps its family', async () => {
   await chip('Berry').click();
   const sheet = page.getByRole('region', { name: 'Edit Berry' });
   await expect(sheet.getByRole('radiogroup', { name: 'Family' })).toHaveCount(0);
@@ -164,8 +164,8 @@ test('D-172: a built-in note can be renamed but keeps its family', async () => {
   await expect(chip('Berry')).toBeVisible();
 });
 
-test('D-171: a note a shot used is removed from the page and the chips, and stays on its shot', async () => {
-  // Brew a shot with a new note, added in the Tasting sheet (D-101).
+test('a note a shot used is removed from the page and the chips, and stays on its shot', async () => {
+  // Brew a shot with a new note, added in the Tasting sheet.
   await page.goto('/shot/new');
   await page.getByRole('button', { name: 'Tasting', exact: true }).click();
   const more = page.getByRole('region', { name: 'Tasting', exact: true });
@@ -192,7 +192,7 @@ test('D-171: a note a shot used is removed from the page and the chips, and stay
   await page.getByRole('main').getByRole('link').first().click();
   await expect(page.getByRole('list', { name: 'Flavor notes' })).toContainText('Funky');
 
-  // D-188: the removed note is listed under Archived and comes back with Restore.
+  // The removed note is listed under Archived and comes back with Restore.
   await page.goto('/library/tags');
   await page.getByRole('link', { name: /^Archived · \d+/ }).click();
   await expect(page.getByRole('main')).toContainText('Funky');

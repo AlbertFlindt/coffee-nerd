@@ -1,7 +1,7 @@
 <script lang="ts">
-  // The shot form's bean card (D-14): bean, machine and grinder, the setup summary (D-100) and the recipe
-  // tag (D-16). Tapping it switches the bean (D-94); tapping the gear line switches the machine or grinder
-  // (D-153). Started from Brew next, it says so and offers "Use last shot recipe" (D-43).
+  // The shot form's bean card: bean, machine and grinder, the setup summary and the recipe
+  // tag. Tapping it switches the bean; tapping the gear line switches the machine or grinder
+  // for this shot. Started from Brew next, it says so and offers "Use last shot recipe".
   import type { Snippet } from 'svelte';
 
   let {
@@ -32,7 +32,7 @@
 
 <div class="card" class:compact={!!brewNext}>
   <div class="main">
-    <!-- The whole card opens the bean list; the gear line on top of it opens the gear list (D-153). -->
+    <!-- The whole card opens the bean list; the gear line on top of it opens the gear list. -->
     <button
       type="button"
       class="pick cn-tap"
@@ -245,7 +245,7 @@
     font-weight: 600;
   }
 
-  /* D-36: tighter on shorter screens, as the rest of the shot form. */
+  /* Tighter on shorter screens, as the rest of the shot form. */
   @media (max-height: 880px) {
     .card,
     .card.compact {

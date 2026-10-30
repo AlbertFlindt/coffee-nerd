@@ -1,9 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// End-to-end tests run at the reference viewport, Pixel 8a 412 × 915 (CLAUDE.md, D-36).
-// Three installations: "first-run" starts empty to test creating the account (D-88); "seeded" starts from
+// End-to-end tests run at the reference viewport, Pixel 8a 412 × 915 (CLAUDE.md).
+// Three installations: "first-run" starts empty to test creating the account; "seeded" starts from
 // the reference seed (npm run db:seed) for the screens, which use seeded data only; "insights" adds the
-// seeded shot history (npm run db:seed -- --history) for Insights (roadmap M9).
+// seeded shot history (npm run db:seed -- --history) for Insights.
 export default defineConfig({
   testDir: 'tests/e2e',
   forbidOnly: !!process.env.CI,

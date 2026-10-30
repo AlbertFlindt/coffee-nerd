@@ -1,4 +1,4 @@
-// What a new shot starts from (data-model §4.2; D-03, D-11, D-38, D-41, D-43, D-72 to D-76, D-78).
+// What a new shot starts from (docs/SPEC.md §4.2).
 // Pure: the caller loads the candidates (Brew next, the bean's latest shot, the re-buy chain, My setup,
 // machines, routines, archived ids) and this function picks one and brings it up to date.
 import type { FeatureValue, MachineSpec, PrepStepSetting, SetupSnapshot, Taste } from './schemas';
@@ -16,7 +16,7 @@ export type RecipeValues = {
 };
 
 export type ShotResult = {
-  /** The shot's own dose (D-186); without it the recipe's dose is used. */
+  /** The shot's own dose; without it the recipe's dose is used. */
   dose?: Thousandths;
   yield: Thousandths | null;
   time: Thousandths | null;
@@ -28,20 +28,20 @@ export type RoutineNow = NonNullable<SetupSnapshot['routine']>;
 export type PrefillContext = {
   /** The current bean (Home's bean scope). */
   beanId: string;
-  /** The recipe marked Brew next, with its latest shot if it has one (D-43). */
+  /** The recipe marked Brew next, with its latest shot if it has one. */
   brewNext: { recipe: RecipeValues; latestShot: ShotResult | null } | null;
   /** The current bean's latest shot and its recipe. */
   latestShotOfBean: { recipe: RecipeValues; shot: ShotResult } | null;
   /**
-   * Earlier bags of a re-buy, nearest first (D-73): each with its best recipe (D-66) if it has rated
-   * shots, and its latest shot (D-74); both null when the bag has no shots.
+   * Earlier bags of a re-buy, nearest first: each with its best recipe if it has rated
+   * shots, and its latest shot; both null when the bag has no shots.
    */
   rebuyChain: {
     beanId: string;
     best: { recipe: RecipeValues; latestShot: ShotResult | null } | null;
     latest: { recipe: RecipeValues; shot: ShotResult } | null;
   }[];
-  /** My setup defaults (D-38); `features` has the same shape as a recipe's feature values. */
+  /** My setup defaults; `features` has the same shape as a recipe's feature values. */
   mySetup: {
     machineId: string;
     grinderId: string;
@@ -54,13 +54,13 @@ export type PrefillContext = {
   };
   /** Machine specs as they are now, by id, including any archived machine a candidate uses. */
   machines: Record<string, MachineSpec>;
-  /** Routines as they are now, by id (D-76). */
+  /** Routines as they are now, by id. */
   routines: Record<string, RoutineNow>;
-  /** Puck prep steps' settings as they are now, by id: a copied value is brought into range (D-178). */
+  /** Puck prep steps' settings as they are now, by id: a copied value is brought into range. */
   stepSettings?: Record<string, PrepStepSetting>;
-  /** Ids of archived gear and routines (D-75). */
+  /** Ids of archived gear and routines. */
   archivedIds: ReadonlySet<string>;
-  /** A routine just chosen for new shots (D-187): the next shot starts with it, unless it is Brew next. */
+  /** A routine just chosen for new shots: the next shot starts with it, unless it is Brew next. */
   nextRoutineId?: string | null;
 };
 
@@ -68,14 +68,14 @@ export type PrefillSource = 'brew_next' | 'last_shot' | 'rebuy' | 'my_setup';
 
 export type Prefill = Omit<RecipeValues, 'setup'> &
   ShotResult & {
-    /** `brew_next` makes the form say "Recipe chosen from Library" (D-43). */
+    /** `brew_next` makes the form say "Recipe chosen from Library". */
     source: PrefillSource;
     setup: SetupSnapshot;
-    /** Always empty: taste is never prefilled (D-11). */
+    /** Always empty: taste is never prefilled. */
     taste: Taste;
   };
 
-/** A fresh object each time, so a form writing into one prefill never prefills the next (D-11). */
+/** A fresh object each time, so a form writing into one prefill never prefills the next. */
 const emptyTaste = (): Taste => ({
   score: null,
   balance: null,
@@ -84,7 +84,7 @@ const emptyTaste = (): Taste => ({
   aftertaste: null
 });
 
-/** The new shot's starting values, in the order of data-model §4.2. */
+/** The new shot's starting values, in the order of docs/SPEC.md §4.2. */
 export function prefill(context: PrefillContext): Prefill {
   const { brewNext, latestShotOfBean, rebuyChain, mySetup, beanId } = context;
 
@@ -95,7 +95,7 @@ export function prefill(context: PrefillContext): Prefill {
   if (latestShotOfBean) {
     return fromRecipe(context, 'last_shot', latestShotOfBean.recipe, latestShotOfBean.shot, beanId);
   }
-  // A new recipe for this bag; scores are not carried over (D-41, D-73, D-74).
+  // A new recipe for this bag; scores are not carried over.
   for (const bag of rebuyChain) {
     if (bag.best) return fromRecipe(context, 'rebuy', bag.best.recipe, bag.best.latestShot, beanId);
     if (bag.latest) return fromRecipe(context, 'rebuy', bag.latest.recipe, bag.latest.shot, beanId);
@@ -110,7 +110,7 @@ export function prefill(context: PrefillContext): Prefill {
     grind: mySetup.grind,
     dose: mySetup.dose,
     yield: mySetup.yield,
-    time: null, // D-72
+    time: null, // a bean's first shot starts with an empty time
     setup: {
       features: reconcileFeatures(
         machineSpec(context, mySetup.machineId),
@@ -131,7 +131,7 @@ function fromRecipe(
   beanId: string
 ): Prefill {
   const { mySetup, archivedIds } = context;
-  // D-75: an archived item is swapped for My setup's; everything else is copied. D-187: a routine just
+  // An archived item is swapped for My setup's; everything else is copied. A routine just
   // chosen for new shots replaces the copied one.
   const current = <T extends string | null>(id: T, fallback: T): T =>
     id !== null && archivedIds.has(id) ? fallback : id;
@@ -151,7 +151,7 @@ function fromRecipe(
     basketId: current(recipe.basketId, mySetup.basketId),
     routineId,
     grind: recipe.grind,
-    dose: shot?.dose ?? recipe.dose, // D-186: the dose of its last shot
+    dose: shot?.dose ?? recipe.dose, // the dose of its last shot
     yield: shot?.yield ?? null,
     time: shot?.time ?? null,
     setup: {
@@ -170,7 +170,7 @@ function fromRecipe(
 }
 
 /**
- * D-178: a copied step value that no longer fits its step: a number moves to the nearest end of the
+ * A copied step value that no longer fits its step: a number moves to the nearest end of the
  * range, a removed option falls back to the routine's own value.
  */
 function inRange(
@@ -195,7 +195,7 @@ function machineSpec(context: PrefillContext, machineId: string): MachineSpec {
 }
 
 /**
- * The routine as it is now (D-76): its current name and steps, with the copied value for each step that
+ * The routine as it is now: its current name and steps, with the copied value for each step that
  * is still in it (matched by step id, in order, so a step used twice keeps both values) and the routine's
  * own value for new steps.
  */
@@ -224,11 +224,11 @@ function routineNow(
 }
 
 /**
- * Fits copied feature values to the machine as it is now (data-model §4.2): features switched off on the
+ * Fits copied feature values to the machine as it is now (docs/SPEC.md §4.2): features switched off on the
  * machine are left out; features switched on since start from My setup when it has a value, otherwise
- * switched off, or on and waiting for a value when they have no off switch (D-78). Values take the
- * feature's current label and unit, since the new recipe's snapshot records them as they are now (D-65).
- * Also used when the machine is switched on the shot form (D-153) or in Edit My setup (D-45).
+ * switched off, or on and waiting for a value when they have no off switch. Values take the
+ * feature's current label and unit, since the new recipe's snapshot records them as they are now.
+ * Also used when the machine is switched on the shot form or in Edit My setup.
  */
 export function reconcileFeatures(
   machine: Pick<MachineSpec, 'features'>,

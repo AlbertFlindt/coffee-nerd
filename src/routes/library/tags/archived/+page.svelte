@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Archived (D-188).
+  // Archived.
   import ArchivedPage from '#lib/components/ArchivedPage.svelte';
   import type { PageProps } from './$types';
 

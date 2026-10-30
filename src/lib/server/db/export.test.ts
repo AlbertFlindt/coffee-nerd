@@ -102,7 +102,7 @@ function otherAccount() {
 }
 
 describe('saveStep', () => {
-  it('D-249: a step chosen in Settings is the step the shot form and Edit My setup use', () => {
+  it('a step chosen in Settings is the step the shot form and Edit My setup use', () => {
     expect(saveStep(db, ids.userId, 'dose', 500, T0)).toBe(true);
     expect(saveStep(db, ids.userId, 'yield', 1000, T0)).toBe(true);
     expect(saveStep(db, ids.userId, 'time', 100, T0)).toBe(true);
@@ -112,13 +112,13 @@ describe('saveStep', () => {
     expect(loadMySetupForm(db, ids.userId).steps).toEqual({ dose: 500, yield: 1000 });
   });
 
-  it('D-249: a step that is not offered changes nothing', () => {
+  it('a step that is not offered changes nothing', () => {
     expect(saveStep(db, ids.userId, 'dose', 200, T0)).toBe(false);
     expect(saveStep(db, ids.userId, 'time', -1000, T0)).toBe(false);
     expect(loadSettings(db, ids.userId).steps).toEqual({ dose: 100, yield: 100, time: 1000 });
   });
 
-  it('D-60: changes only the signed-in account', () => {
+  it('changes only the signed-in account', () => {
     const otherId = otherAccount();
     saveStep(db, ids.userId, 'dose', 1000, T0);
     expect(loadSettings(db, otherId).steps.dose).toBe(100);
@@ -126,7 +126,7 @@ describe('saveStep', () => {
 });
 
 describe('backupDatabase', () => {
-  it('D-251: the backup opens as a database with the same shots, and no sign-ins', () => {
+  it('the backup opens as a database with the same shots, and no sign-ins', () => {
     saveShot(db, ids.userId, input(), T0 + MINUTE);
     saveShot(db, ids.userId, input({ grind: 1700 }, 2), T0 + 2 * MINUTE);
     createSession(db, ids.userId, T0);
@@ -141,7 +141,7 @@ describe('backupDatabase', () => {
     restored.$client.close();
   });
 
-  it('D-251: made while the app is in use: shots not yet written back from the log are in it', () => {
+  it('made while the app is in use: shots not yet written back from the log are in it', () => {
     db.$client.pragma('wal_autocheckpoint = 0');
     saveShot(db, ids.userId, input(), T0 + MINUTE);
     const restored = new (db.$client.constructor as typeof import('better-sqlite3'))(
@@ -153,7 +153,7 @@ describe('backupDatabase', () => {
 });
 
 describe('exportShotRows', () => {
-  it('D-252: one row per saved shot, oldest first, named as the shot detail shows them', () => {
+  it('one row per saved shot, oldest first, named as the shot detail shows them', () => {
     const [first] = db.select().from(tag).where(eq(tag.ownerId, ids.userId)).limit(1).all();
     saveShot(db, ids.userId, input({ grind: 1700, notes: 'second' }, 5), T0 + 5 * MINUTE);
     saveShot(
@@ -183,14 +183,14 @@ describe('exportShotRows', () => {
     expect(rows[1]).toMatchObject({ notes: 'second', score: null, flavors: [] });
   });
 
-  it('D-60: never another account’s shots', () => {
+  it('never another account’s shots', () => {
     saveShot(db, ids.userId, input(), T0 + MINUTE);
     expect(exportShotRows(db, otherAccount())).toEqual([]);
   });
 });
 
 describe('exportEverything', () => {
-  it('D-252: holds every kind of row the account owns, archived ones included, in decimals', () => {
+  it('holds every kind of row the account owns, archived ones included, in decimals', () => {
     saveShot(db, ids.userId, input(), T0 + MINUTE);
     const spare = addGear(
       db,
@@ -228,7 +228,7 @@ describe('exportEverything', () => {
     ]);
   });
 
-  it('D-60, D-252: never another account’s rows, the password or sign-ins', () => {
+  it('never another account’s rows, the password or sign-ins', () => {
     const otherId = otherAccount();
     createSession(db, ids.userId, T0);
     const text = JSON.stringify(exportEverything(db, ids.userId, T0));

@@ -1,7 +1,7 @@
 <script lang="ts">
-  // The weekly line (screen 24, D-56): the average score per week with a ± 1 σ band, so the line rising
-  // reads as better and the band narrowing as steadier. Score is amber (D-19). A week with too few rated
-  // shots is a gap, never 0 (D-11, D-212). Tapping a week shows its numbers (D-56, built plainly, D-207).
+  // The weekly line (screen 24): the average score per week with a ± 1 σ band, so the line rising
+  // reads as better and the band narrowing as steadier. Score is amber. A week with too few rated
+  // shots is a gap, never 0. Tapping a week shows its numbers (built plainly).
   import { roastDateText } from '../domain/bean';
   import { statText, type Chart, type WeekPoint, type WeekStats } from '../domain/insights';
 
@@ -21,7 +21,7 @@
   const y = (score: number) =>
     BOTTOM - ((score - chart.axis.from) / (chart.axis.to - chart.axis.from)) * (BOTTOM - TOP);
 
-  /** Runs of weeks with a point; a gap ends a run (D-212). */
+  /** Runs of weeks with a point; a gap ends a run. */
   const runs = $derived.by(() => {
     const result: { i: number; p: WeekStats }[][] = [];
     let run: { i: number; p: WeekStats }[] = [];

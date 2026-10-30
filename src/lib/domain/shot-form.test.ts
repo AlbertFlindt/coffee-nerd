@@ -60,19 +60,19 @@ const known = (recipe: RecipeIdentity, extra: Partial<KnownRecipe> = {}): KnownR
 });
 
 describe('matchRecipe', () => {
-  it('D-16, D-12: the same recipe is reused, with its shot count and its last score', () => {
+  it('the same recipe is reused, with its shot count and its last score', () => {
     const match = matchRecipe(base, [known(base)], base);
     expect(match).toEqual({ kind: 'reused', recipeId: 'r1', shotCount: 2, lastScore: 8 });
     expect(recipeTagText(match)).toBe('Recipe reused 2x');
   });
 
-  it('D-16: returning to an earlier grind finds that recipe, not only the last one', () => {
+  it('returning to an earlier grind finds that recipe, not only the last one', () => {
     const at15 = { ...base, grind: 1500 };
     const match = matchRecipe(base, [known(base), known(at15, { id: 'r2' })], at15);
     expect(match).toMatchObject({ kind: 'reused', recipeId: 'r1' });
   });
 
-  it('D-186: a dose within 0.2 g reuses the recipe; further away is a new recipe', () => {
+  it('a dose within 0.2 g reuses the recipe; further away is a new recipe', () => {
     expect(matchRecipe({ ...base, dose: 18100 }, [known(base)], base)).toMatchObject({
       kind: 'reused',
       recipeId: 'r1'
@@ -84,7 +84,7 @@ describe('matchRecipe', () => {
     });
   });
 
-  it('D-186: when two recipes are within reach, the closest dose wins', () => {
+  it('when two recipes are within reach, the closest dose wins', () => {
     const at183 = { ...base, dose: 18300 };
     const match = matchRecipe(
       { ...base, dose: 18200 },
@@ -94,7 +94,7 @@ describe('matchRecipe', () => {
     expect(match).toMatchObject({ kind: 'reused', recipeId: 'r2' });
   });
 
-  it('D-186: equally close doses go to the recipe brewed most recently', () => {
+  it('equally close doses go to the recipe brewed most recently', () => {
     const at184 = { ...base, dose: 18400 };
     const match = matchRecipe(
       { ...base, dose: 18200 },
@@ -104,7 +104,7 @@ describe('matchRecipe', () => {
     expect(match).toMatchObject({ kind: 'reused', recipeId: 'r2' });
   });
 
-  it('D-186, D-104: the closest recipe is chosen among all, so one without shots makes it new', () => {
+  it('the closest recipe is chosen among all, so one without shots makes it new', () => {
     // The server saves on the closest recipe (18.3 g, kept only by Brew next), so the form says new.
     const at183 = { ...base, dose: 18300 };
     const match = matchRecipe(
@@ -115,34 +115,34 @@ describe('matchRecipe', () => {
     expect(match.kind).toBe('new');
   });
 
-  it('D-12: a reused recipe without a rated shot has no earlier score', () => {
+  it('a reused recipe without a rated shot has no earlier score', () => {
     const match = matchRecipe(base, [known(base, { lastScore: null })], base);
     expect(match).toMatchObject({ kind: 'reused', lastScore: null });
   });
 
-  it('D-16, D-81: a new recipe names what changed against the bean’s last shot', () => {
+  it('a new recipe names what changed against the bean’s last shot', () => {
     const match = matchRecipe({ ...base, grind: 1500 }, [known(base)], base);
     expect(match).toEqual({ kind: 'new', changes: ['grind'] });
     expect(recipeTagText(match)).toBe('New recipe · grind changed');
   });
 
-  it('D-71, D-77: several changes are named in order, the first two and a count', () => {
+  it('several changes are named in order, the first two and a count', () => {
     const changed = { ...withFeatures({ preinfusion: { label: 'Preinfusion', on: false } }) };
     const match = matchRecipe({ ...changed, dose: 18500, grind: 1500 }, [], base);
     expect(recipeTagText(match)).toBe('New recipe · grind, dose and 1 more changed');
   });
 
-  it('D-77: a bean’s first shot is a plain "New recipe"', () => {
+  it('a bean’s first shot is a plain "New recipe"', () => {
     const match = matchRecipe(base, [], null);
     expect(recipeTagText(match)).toBe('New recipe');
   });
 
-  it('D-16: a recipe on another machine is not this recipe (bean and machine are the scope)', () => {
+  it('a recipe on another machine is not this recipe (bean and machine are the scope)', () => {
     const match = matchRecipe(base, [known(base, { machineId: OTHER_MACHINE })], null);
     expect(match.kind).toBe('new');
   });
 
-  it('D-104: a recipe kept only by its Brew next mark (no shots) has not been brewed: new', () => {
+  it('a recipe kept only by its Brew next mark (no shots) has not been brewed: new', () => {
     const match = matchRecipe(base, [known(base, { shotCount: 0 })], null);
     expect(match.kind).toBe('new');
   });
@@ -151,7 +151,7 @@ describe('matchRecipe', () => {
 describe('coreChanges', () => {
   const last = { grind: 1600, dose: 18000, yield: 36000, time: 28000 };
 
-  it('D-15: changed values carry their delta; unchanged ones none', () => {
+  it('changed values carry their delta; unchanged ones none', () => {
     expect(coreChanges({ grind: 1600, dose: 18000, yield: 38500, time: 25500 }, last)).toEqual({
       grind: null,
       dose: null,
@@ -160,14 +160,14 @@ describe('coreChanges', () => {
     });
   });
 
-  it('D-15: a value set now but empty last time is changed, without a number to show', () => {
+  it('a value set now but empty last time is changed, without a number to show', () => {
     expect(
       coreChanges({ grind: 1600, dose: 18000, yield: 36000, time: 28000 }, { ...last, time: null })
         .time
     ).toEqual({ delta: null });
   });
 
-  it('D-81: a bean’s first shot has nothing to compare with, so nothing is changed', () => {
+  it('a bean’s first shot has nothing to compare with, so nothing is changed', () => {
     expect(coreChanges({ grind: 1500, dose: 18000, yield: null, time: null }, null)).toEqual({
       grind: null,
       dose: null,
@@ -178,7 +178,7 @@ describe('coreChanges', () => {
 });
 
 describe('setupChanges', () => {
-  it('D-90: a changed setup value carries its delta', () => {
+  it('a changed setup value carries its delta', () => {
     const now = withFeatures({
       temperature: { label: 'Temperature', unit: '°C', on: true, value: 94000 },
       low_bar_start: { label: 'Low bar start', on: true, value: 5000, pressure: 2500 }
@@ -197,7 +197,7 @@ describe('setupChanges', () => {
     expect(changes.features.preinfusion).toBeUndefined();
   });
 
-  it('D-90: a feature switched on or off since the last shot shows "On" or "Off"', () => {
+  it('a feature switched on or off since the last shot shows "On" or "Off"', () => {
     const now = withFeatures({
       preinfusion: { label: 'Preinfusion', on: false },
       low_bar_end: { label: 'Low bar end', on: true, value: 3000, pressure: 2000 }
@@ -211,7 +211,7 @@ describe('setupChanges', () => {
     expect(changes.features.low_bar_end?.switched).toBe('On');
   });
 
-  it('D-90, D-78: a feature added to the machine since the last shot and switched on shows "On"', () => {
+  it('a feature added to the machine since the last shot and switched on shows "On"', () => {
     const earlier = { ...base.setup.features };
     delete earlier.low_bar_end;
     const last = { ...base, setup: { ...base.setup, features: earlier } };
@@ -222,7 +222,7 @@ describe('setupChanges', () => {
     expect(setupChanges(base, last).features.low_bar_end).toBeUndefined();
   });
 
-  it('D-90: a different basket or routine values count as changed', () => {
+  it('a different basket or routine values count as changed', () => {
     const now: RecipeIdentity = {
       ...base,
       basketId: OTHER_BASKET,
@@ -240,7 +240,7 @@ describe('setupChanges', () => {
     });
   });
 
-  it('D-166: a step value changed for this shot is named, with its delta', () => {
+  it('a step value changed for this shot is named, with its delta', () => {
     const now: RecipeIdentity = {
       ...base,
       setup: {
@@ -256,7 +256,7 @@ describe('setupChanges', () => {
     expect(setupChanges({ ...now, routineId: OTHER_BASKET }, base).steps).toEqual([]);
   });
 
-  it('D-166: a changed list step is named without a delta', () => {
+  it('a changed list step is named without a delta', () => {
     const withFilter = (value: string): RecipeIdentity => ({
       ...base,
       setup: {
@@ -267,7 +267,7 @@ describe('setupChanges', () => {
     expect(setupChanges(withFilter('metal'), withFilter('paper')).steps).toEqual([{ delta: null }]);
   });
 
-  it('D-76, D-166: after the routine gained a step, only steps in the same place compare', () => {
+  it('after the routine gained a step, only steps in the same place compare', () => {
     const TAMP = '0199f3a2-0000-7000-8000-00000000e009';
     const now: RecipeIdentity = {
       ...base,
@@ -286,7 +286,7 @@ describe('setupChanges', () => {
     expect(setupChanges(now, base).routine).toBe(true);
   });
 
-  it('D-81: without a last shot nothing is changed', () => {
+  it('without a last shot nothing is changed', () => {
     expect(setupChanges(base, null)).toEqual({
       features: {},
       basket: false,
@@ -354,7 +354,7 @@ const features: FeatureDefinition[] = [
 ];
 
 describe('setupSummary', () => {
-  it('D-100: switched-on phases and custom features, then temperature; no flat pressure', () => {
+  it('switched-on phases and custom features, then temperature; no flat pressure', () => {
     expect(setupSummary(base.setup, features)).toBe('Preinfusion 4 s · Low bar start 5 s · 93 °C');
     const withPaddle = withFeatures({ [PADDLE]: { label: 'Paddle', on: true, choice: 'mid' } });
     expect(setupSummary(withPaddle.setup, features)).toBe(
@@ -362,7 +362,7 @@ describe('setupSummary', () => {
     );
   });
 
-  it('D-07, D-100: values typed off the step grid keep their decimals', () => {
+  it('values typed off the step grid keep their decimals', () => {
     const typed = withFeatures({
       temperature: { label: 'Temperature', unit: '°C', on: true, value: 93500 },
       preinfusion: { label: 'Preinfusion', on: false },
@@ -371,12 +371,12 @@ describe('setupSummary', () => {
     expect(setupSummary(typed.setup, features)).toBe('93.5 °C');
   });
 
-  it('D-78: a feature waiting for its value is left out until it has one', () => {
+  it('a feature waiting for its value is left out until it has one', () => {
     const waiting = withFeatures({ temperature: { label: 'Temperature', unit: '°C', on: true } });
     expect(setupSummary(waiting.setup, features)).toBe('Preinfusion 4 s · Low bar start 5 s');
   });
 
-  it('D-144: the temperature can be left out', () => {
+  it('the temperature can be left out', () => {
     expect(setupSummary(base.setup, features, { temperature: false })).toBe(
       'Preinfusion 4 s · Low bar start 5 s'
     );
@@ -384,13 +384,13 @@ describe('setupSummary', () => {
 });
 
 describe('setupDetail', () => {
-  it('D-57: the whole pressure profile: temperature, flat pressure, then each phase with its pressure', () => {
+  it('the whole pressure profile: temperature, flat pressure, then each phase with its pressure', () => {
     expect(setupDetail(base.setup, features)).toBe(
       '93 °C · Flat 9.0 bar · Preinfusion 4 s · Low bar start 5 s at 2.0 bar'
     );
   });
 
-  it('D-57: custom features follow in the machine’s order; switched-off ones are left out', () => {
+  it('custom features follow in the machine’s order; switched-off ones are left out', () => {
     const withPaddle = withFeatures({
       [PADDLE]: { label: 'Paddle', on: true, choice: 'mid' },
       preinfusion: { label: 'Preinfusion', on: false }
@@ -400,7 +400,7 @@ describe('setupDetail', () => {
     );
   });
 
-  it('D-78: a feature without a value is left out', () => {
+  it('a feature without a value is left out', () => {
     const waiting = withFeatures({ temperature: { label: 'Temperature', unit: '°C', on: true } });
     expect(setupDetail(waiting.setup, features)).toBe(
       'Flat 9.0 bar · Preinfusion 4 s · Low bar start 5 s at 2.0 bar'
@@ -409,7 +409,7 @@ describe('setupDetail', () => {
 });
 
 describe('setupParts', () => {
-  it('D-121: each feature in the shot detail’s order, switched-off ones as off', () => {
+  it('each feature in the shot detail’s order, switched-off ones as off', () => {
     const withPaddle = withFeatures({
       [PADDLE]: { label: 'Paddle', on: true, choice: 'mid' },
       preinfusion: { label: 'Preinfusion', on: false }
@@ -426,7 +426,7 @@ describe('setupParts', () => {
 });
 
 describe('routineParts', () => {
-  it('D-170: each step with a value, as "WDT 30 s", "Filter Metal"; steps without a value are left out', () => {
+  it('each step with a value, as "WDT 30 s", "Filter Metal"; steps without a value are left out', () => {
     const routine = {
       name: 'Daily routine',
       steps: [

@@ -1,4 +1,4 @@
-// D-186, run once when the database opens: recipes that differ only by a dose within 0.2 g become one.
+// Dose matching, run once when the database opens: recipes that differ only by a dose within 0.2 g become one.
 // The fingerprint no longer holds the dose, so every recipe gets its new fingerprint; within a bean and
 // machine, a recipe whose dose is within reach of an earlier recipe's (the closest; equally close, the one
 // brewed most recently) gives it its shots and its Brew next mark, and is deleted. Shots keep their own dose (migration 0007).
@@ -8,7 +8,7 @@ import { closestDose } from '../../domain/shot-form';
 import type { Db } from './client';
 import { appState, recipe, shot } from './schema';
 
-/** `PRAGMA user_version` once recipes are matched by dose (D-186). */
+/** `PRAGMA user_version` once recipes are matched by dose. */
 const MATCHED_BY_DOSE = 1;
 
 export function rematchRecipesByDose(db: Db): void {

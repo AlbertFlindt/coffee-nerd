@@ -1,5 +1,5 @@
 <script lang="ts">
-  // D-219: offline, pages open as the phone kept them, and a line at the top says so. A change tried
+  // Offline, pages open as the phone kept them, and a line at the top says so. A change tried
   // offline says that nothing was changed.
   import { network } from '#lib/offline-status.svelte.ts';
 </script>

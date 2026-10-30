@@ -23,7 +23,7 @@ function seeded() {
 }
 
 describe('seedShotHistory', () => {
-  it('M9: 214 shots on 9 beans over 13 weeks, 96 of them rated, as screen 23 counts', () => {
+  it('214 shots on 9 beans over 13 weeks, 96 of them rated, as screen 23 counts', () => {
     const { facts } = seeded();
     expect(facts).toHaveLength(214);
     expect(new Set(facts.map((f) => f.beanId)).size).toBe(9);
@@ -32,7 +32,7 @@ describe('seedShotHistory', () => {
     expect(facts[facts.length - 1].brewedAt).toBeLessThan(T0);
   });
 
-  it('M9: rated shots per process and per origin match screen 23', () => {
+  it('rated shots per process and per origin match screen 23', () => {
     const { facts } = seeded();
     const rated = facts.filter((f) => f.score !== null);
     const per = (key: (f: (typeof facts)[number]) => string | null) =>
@@ -43,7 +43,7 @@ describe('seedShotHistory', () => {
     expect(per((f) => f.countryCode)).toEqual({ ET: 41, KE: 22, CO: 18, BR: 15 });
   });
 
-  it('D-195: Guji Hambela is the one open bean and the bean on Home; a Light roast routine exists', () => {
+  it('Guji Hambela is the one open bean and the bean on Home; a Light roast routine exists', () => {
     const { db, ids } = seeded();
     expect(
       db
@@ -63,7 +63,7 @@ describe('seedShotHistory', () => {
     ).toEqual(['Daily routine', 'Light roast']);
   });
 
-  it('D-55: every card shows the finding screens 23 to 25 are drawn with', () => {
+  it('every card shows the finding screens 23 to 25 are drawn with', () => {
     const { db, ids } = seeded();
     const cards = loadInsights(db, ids.userId, T0).cards;
     expect(cards.map((c) => c.title)).toEqual([
@@ -81,7 +81,7 @@ describe('seedShotHistory', () => {
     ]);
   });
 
-  it('D-88: is the same every time', () => {
+  it('is the same every time', () => {
     const scores = () => seeded().facts.map((f) => [f.score, f.time, f.grind]);
     expect(scores()).toEqual(scores());
   });

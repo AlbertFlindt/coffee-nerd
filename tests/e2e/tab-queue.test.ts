@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import { dataUrl } from '../../src/lib/offline';
 
-// Shots saved offline (roadmap M10, D-61, D-220 to D-225, D-231 to D-234): they wait on the phone, show at
+// Shots saved offline: they wait on the phone, show at
 // once, and reach the server once when the connection returns. The shots saved here are deleted again at
 // the end, and the app state put back, so the files after this one find the data as before.
 test.describe.configure({ mode: 'serial' });
@@ -74,7 +74,7 @@ test.beforeAll(async ({ browser }) => {
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload();
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
-  // The pages the phone keeps for offline use are ready: every page with its data (D-219).
+  // The pages the phone keeps for offline use are ready: every page with its data.
   await page.getByRole('link', { name: 'Journal' }).click();
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
   await page.getByRole('link', { name: 'Home' }).click();
@@ -122,7 +122,7 @@ test.afterAll(async () => {
 
 let savedAt = 0;
 
-test('D-61, D-220, D-232: offline, a saved shot waits on the phone and the page returns as online', async () => {
+test('offline, a saved shot waits on the phone and the page returns as online', async () => {
   await context.setOffline(true);
   await page.getByRole('link', { name: 'New shot' }).click();
   await expect(page.getByRole('button', { name: 'Save shot' })).toBeVisible();
@@ -132,7 +132,7 @@ test('D-61, D-220, D-232: offline, a saved shot waits on the phone and the page 
   await page.getByRole('button', { name: 'Save shot' }).click();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
   await expect(page.getByText('Shot saved')).toBeVisible();
-  // D-221, D-233: Home's Last shot card shows it at once.
+  // Home's Last shot card shows it at once.
   const card = page.getByRole('region', { name: 'Last shot' });
   await expect(card.getByText(WAITING)).toBeVisible();
   await expect(card.getByText(`Grind ${grind}`)).toBeVisible();
@@ -142,7 +142,7 @@ test('D-61, D-220, D-232: offline, a saved shot waits on the phone and the page 
   await screenshot('HomeWaiting');
 });
 
-test('D-222: the next shot starts from the waiting shot', async () => {
+test('the next shot starts from the waiting shot', async () => {
   const card = page.getByRole('region', { name: 'Last shot' });
   const grind = (await card.getByText(/^Grind /).innerText()).replace('Grind ', '');
   await page.getByRole('link', { name: 'New shot' }).click();
@@ -152,7 +152,7 @@ test('D-222: the next shot starts from the waiting shot', async () => {
   await page.getByRole('link', { name: 'Back without saving' }).click();
 });
 
-test('D-221, D-223: the Journal shows the waiting shot first, and it can be rated offline', async () => {
+test('the Journal shows the waiting shot first, and it can be rated offline', async () => {
   await page.getByRole('link', { name: 'Journal' }).click();
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
   const first = page.locator('main .item').first();
@@ -166,7 +166,7 @@ test('D-221, D-223: the Journal shows the waiting shot first, and it can be rate
   await screenshot('JournalWaiting');
 });
 
-test('D-231: tapping a waiting shot opens its form; a change keeps it waiting with its brew time', async () => {
+test('tapping a waiting shot opens its form; a change keeps it waiting with its brew time', async () => {
   await page.locator('main .item').first().getByRole('link').click();
   await expect(page.getByRole('heading', { name: 'Edit shot' })).toBeVisible();
   await expect(page.getByRole('radio', { name: '8' })).toHaveAttribute('aria-checked', 'true');
@@ -182,7 +182,7 @@ test('D-231: tapping a waiting shot opens its form; a change keeps it waiting wi
   expect(entry.brewedAt).toBeLessThan(savedAt + 5000);
 });
 
-test('D-61, D-220, D-223: back online, the shot reaches the server once, with its brew time and score', async () => {
+test('back online, the shot reaches the server once, with its brew time and score', async () => {
   const [entry] = await entries();
   const sentBodies: string[] = [];
   page.on('request', (r) => {
@@ -226,7 +226,7 @@ test('D-61, D-220, D-223: back online, the shot reaches the server once, with it
   d2.close();
 });
 
-test('D-220: an edit saved offline keeps the brew time of its shot', async () => {
+test('an edit saved offline keeps the brew time of its shot', async () => {
   const [id] = newShots();
   const brewedAt = () => {
     const d = db();
@@ -249,7 +249,7 @@ test('D-220: an edit saved offline keeps the brew time of its shot', async () =>
   expect(brewedAt()).toBe(entry.brewedAt);
 });
 
-test('D-239, D-238: the edit page shows the change waiting for the shot; it can be discarded or saved', async () => {
+test('the edit page shows the change waiting for the shot; it can be discarded or saved', async () => {
   const [id] = newShots();
   const timeOnServer = () => {
     const d = db();
@@ -321,7 +321,7 @@ test('D-239, D-238: the edit page shows the change waiting for the shot; it can 
   await context.unroute('**/queue');
 });
 
-test('D-220, D-61: several waiting shots arrive once each, in brew order, also when a send is cut off', async () => {
+test('several waiting shots arrive once each, in brew order, also when a send is cut off', async () => {
   const before = shotIds();
   await page.goto('/journal');
   await context.setOffline(true);
@@ -362,7 +362,7 @@ test('D-220, D-61: several waiting shots arrive once each, in brew order, also w
   await context.unroute('**/queue');
 });
 
-test('D-237: a shot the server keeps failing on is "Not saved" with the reason, to save again or delete', async () => {
+test('a shot the server keeps failing on is "Not saved" with the reason, to save again or delete', async () => {
   await page.goto('/journal');
   await context.setOffline(true);
   await page.getByRole('link', { name: 'New shot' }).click();
@@ -403,7 +403,7 @@ test('D-237: a shot the server keeps failing on is "Not saved" with the reason, 
   expect(await entries()).toEqual([]);
 });
 
-test('D-224: a waiting shot the server refuses is kept as "Not saved", to fix or delete', async () => {
+test('a waiting shot the server refuses is kept as "Not saved", to fix or delete', async () => {
   await context.setOffline(true);
   await page.getByRole('link', { name: 'New shot' }).click();
   await page.getByRole('button', { name: 'Save shot' }).click();
@@ -451,7 +451,7 @@ test('D-224: a waiting shot the server refuses is kept as "Not saved", to fix or
   expect(await entries()).toEqual([]);
 });
 
-test('D-235: a save the server has not answered in 4 seconds waits on the phone, and so does a slow send', async () => {
+test('a save the server has not answered in 4 seconds waits on the phone, and so does a slow send', async () => {
   const before = shotIds();
   await page.goto('/journal');
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
@@ -485,7 +485,7 @@ test('D-235: a save the server has not answered in 4 seconds waits on the phone,
   expect(shotIds().filter((s) => !before.includes(s))).toHaveLength(1);
 });
 
-test('D-225, D-234: signing out asks first while a shot waits, then leaves nothing on the phone', async () => {
+test('signing out asks first while a shot waits, then leaves nothing on the phone', async () => {
   // A shot that cannot reach the server yet.
   await context.route('**/queue', (route) => route.abort());
   await context.setOffline(true);
@@ -503,7 +503,7 @@ test('D-225, D-234: signing out asks first while a shot waits, then leaves nothi
     sheet.getByRole('heading', { name: '1 shot is still waiting to send' })
   ).toBeVisible();
   await screenshot('SignOutWaiting');
-  // D-241: signing out and deleting is red, staying amber.
+  // Signing out and deleting is red, staying amber.
   await expect(sheet.getByRole('button', { name: 'Sign out and delete' })).toHaveClass(
     /cn-btn-danger/
   );

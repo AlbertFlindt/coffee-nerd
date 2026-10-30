@@ -1,6 +1,6 @@
-// Fills an empty database with the reference setup for development and screenshots (roadmap M2, D-88).
+// Fills an empty database with the reference setup for development and screenshots.
 // Usage: npm run db:seed   (uses DATABASE_PATH, default ./data/coffee-nerd.db)
-//        npm run db:seed -- --history   adds 13 weeks of shots for Insights (roadmap M9)
+//        npm run db:seed -- --history   adds 13 weeks of shots for Insights
 import { hashPassword } from '../src/lib/server/auth/password.js';
 import { openDatabase } from '../src/lib/server/db/client';
 import { DEFAULT_DATABASE_PATH } from '../src/lib/server/db/paths';
