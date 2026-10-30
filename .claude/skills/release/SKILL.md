@@ -4,7 +4,7 @@ description: Bump the Coffee Nerd version for a release (every pull request that
 argument-hint: "[X.Y.Z]"
 ---
 Every merge to `main` that changes the app is a release. The version bump goes **in the pull
-request**, as its last commit; on merge, `.github/workflows/release.yml` tags `vX.Y.Z`, publishes
+request**, as its last commit; once CI passes on `main`, `.github/workflows/release.yml` tags `vX.Y.Z`, publishes
 the GitHub release from the CHANGELOG section and pushes the Docker image as
 `ghcr.io/albertflindt/coffee-nerd:X.Y.Z` and `:latest`. CI's "Version bumped" check fails a pull
 request that changes the app without a bump (docs, CI and `.claude/` changes alone are exempt).

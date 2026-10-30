@@ -60,7 +60,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - Domain logic: write the failing test first; name tests after the behavior they protect.
 - Screens: use the `build-screen` skill. Not done until your screenshot matches the PNG in `docs/screens/`.
 - **Every merge that changes the app is a release.** Bump the version in the pull request with the `release`
-  skill; on merge, CI (`.github/workflows/release.yml`) tags `vX.Y.Z`, publishes the GitHub release and the
+  skill; once CI passes on `main`, `.github/workflows/release.yml` tags `vX.Y.Z`, publishes the GitHub release and the
   Docker image tags. CI's "Version bumped" check fails a pull request that changes the app without a bump.
 - Keep `PROGRESS.md` (state, known issues, states built without a design, next steps) and `docs/SPEC.md` current
   in the same pull request.

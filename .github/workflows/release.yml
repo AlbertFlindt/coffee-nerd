@@ -1,0 +1,56 @@
+name: Release
+
+# After CI passes on main: if package.json names a version that has no tag yet, tag it, publish
+# the GitHub release with that version's CHANGELOG section, and tag the image CI just pushed
+# (ghcr.io/<owner>/coffee-nerd:sha-<commit>) as :X.Y.Z and :latest.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Tag and publish if the version is new
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          version=$(node scripts/version.mjs get)
+          if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "v$version is already released; nothing to do."; exit 0
+          fi
+          node scripts/version.mjs check
+          node scripts/version.mjs notes > "$RUNNER_TEMP/notes.md"
+          gh release create "v$version" --target "$SHA" \
+            --title "Coffee Nerd $version" --notes-file "$RUNNER_TEMP/notes.md"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Tag the image as the release and latest
+        if: steps.release.outputs.version
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io --username "${{ github.actor }}" --password-stdin
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          docker buildx imagetools create --tag "$image:$VERSION" --tag "$image:latest" "$image:sha-${SHA::7}"

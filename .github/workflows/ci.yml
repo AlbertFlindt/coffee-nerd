@@ -90,9 +90,42 @@ jobs:
             --data 'name=Demo&password=coffee-nerd' http://localhost:3001/login)
           test "$code" = 303
 
+  version:
+    # Every merge that changes the app ships as a release, so such a pull request must bump the version.
+    name: Version bumped
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require a new version when the app changes
+        run: |
+          base="origin/${{ github.base_ref }}"
+          changed=$(git diff --name-only "$base"...HEAD)
+          echo "Changed files:"; echo "$changed" | sed 's/^/  /'
+          # Docs, CI, the license and Claude Code files alone don't need a release.
+          app=$(echo "$changed" | grep -Ev '^(\.github/|\.claude/|docs/|[^/]+\.md$|LICENSE$|scripts/version\.mjs$)' || true)
+          if [ -z "$app" ]; then
+            echo "Only docs or CI changed: no release needed."; exit 0
+          fi
+          new=$(node scripts/version.mjs get)
+          old=$(git show "$base":package.json | node -e 'let s="";process.stdin.on("data",(d)=>s+=d).on("end",()=>console.log(JSON.parse(s).version))')
+          if [ "$new" = "$old" ] || [ "$(printf '%s\n%s\n' "$old" "$new" | sort -V | tail -1)" != "$new" ]; then
+            echo "::error::This pull request changes the app but keeps version $old. Run node scripts/version.mjs bump X.Y.Z and add the CHANGELOG section (see the release skill)."
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/v$new" >/dev/null; then
+            echo "::error::Tag v$new already exists."; exit 1
+          fi
+          node scripts/version.mjs check
+          echo "Will release $new on merge (was $old)."
+
   publish:
     name: Publish image
-    # Every merge to main becomes ghcr.io/<owner>/coffee-nerd:main, for trying the latest build on a server.
+    # Every merge to main becomes ghcr.io/<owner>/coffee-nerd:main (and :sha-<commit>, which the
+    # release workflow tags as :X.Y.Z and :latest when the version is new).
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [checks, docker]
     runs-on: ubuntu-24.04
