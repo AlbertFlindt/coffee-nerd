@@ -1,6 +1,6 @@
 # Progress / handoff
 
-**Last updated:** 2026-10-30. **Latest release:** 1.0.0 (details in `CHANGELOG.md`).
+**Last updated:** 2026-10-30. **Latest release:** 1.0.1 (details in `CHANGELOG.md`).
 How things work: `docs/SPEC.md`.
 
 ## Current state
@@ -54,14 +54,13 @@ app, and Settings with steps, backup and exports.
 ## Next steps
 
 ### 1.1
-1. A public Docker image and the real install guide in the README in place of the private-image
-   steps: claim the account right after starting, https behind a reverse proxy (forward
-   `X-Forwarded-Proto`, and `X-Forwarded-Host` if the proxy changes the host), updating.
-2. Take `scripts/seed.mjs` out of the runtime image.
-3. Make the repository public and protect `main`. The GitHub page gets a description, topics and
+1. Make the image on GitHub's container registry public (the README's install guide already
+   pulls it without signing in), then check `docker pull ghcr.io/albertflindt/coffee-nerd:latest`
+   from a machine that isn't signed in.
+2. Make the repository public and protect `main`. The GitHub page gets a description, topics and
    a preview image.
-4. A contributing guide, a code of conduct and issue templates.
-5. A designed sign-in and "Create your account" page.
+3. A contributing guide, a code of conduct and issue templates.
+4. A designed sign-in and "Create your account" page.
 
 ### 1.2
 1. Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency) and the
