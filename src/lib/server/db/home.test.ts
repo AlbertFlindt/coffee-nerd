@@ -158,13 +158,13 @@ describe('loadHome', () => {
   });
 
   it('Dial-in progress plots this bean’s rated shots, oldest first, with recipe changes', () => {
-    save(shotAt(T0 - 3 * DAY, { taste: taste(6) }));
+    const first = save(shotAt(T0 - 3 * DAY, { taste: taste(6) }));
     save(shotAt(T0 - 2 * DAY, { taste: taste(null) }));
-    save(shotAt(T0 - DAY, { grind: 1500, taste: taste(8) }));
+    const last = save(shotAt(T0 - DAY, { grind: 1500, taste: taste(8) }));
     expect(ready().graph).toEqual({
       points: [
-        { score: 6, newRecipe: false },
-        { score: 8, newRecipe: true }
+        { shotId: first, score: 6, newRecipe: false },
+        { shotId: last, score: 8, newRecipe: true }
       ],
       ticks: [6, 7, 8]
     });

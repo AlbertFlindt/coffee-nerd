@@ -2,14 +2,20 @@
   // Dial-in progress on Home (screen 6): the score of the bean's last 12 rated shots, oldest on the
   // left, the last shot as the larger point, and a cherry dashed line where a new recipe starts
   // (cherry is recipe history, amber your scores). The graph fills the height Home leaves it.
-  // Tapping a point shows its exact score (every chart gets a tap tooltip).
+  // Tapping a point shows its exact score (every chart gets a tap tooltip); tapping it again opens
+  // that shot, whose Back returns to Home.
+  import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import type { DialInGraph } from '../domain/home';
 
   let { graph }: { graph: DialInGraph } = $props();
 
   let width = $state(0);
   let chosen: number | null = $state(null);
-  const choose = (i: number) => (chosen = chosen === i ? null : i);
+  const choose = (i: number) => {
+    if (chosen === i) goto(resolve('/journal/[id]?from=home', { id: graph.points[i].shotId }));
+    else chosen = i;
+  };
   let height = $state(0);
 
   // Room for the score labels on the left and the two captions under the plot, as on screen 6.
@@ -66,7 +72,9 @@
           r="16"
           role="button"
           tabindex="0"
-          aria-label="Shot {i + 1} of {graph.points.length}, score {p.score}"
+          aria-label="Shot {i + 1} of {graph.points.length}, score {p.score}{chosen === i
+            ? ', tap again to open it'
+            : ''}"
           aria-pressed={chosen === i}
           onclick={() => choose(i)}
           onkeydown={(e) => {
@@ -79,11 +87,13 @@
       {/each}
       {#if chosen !== null}
         {@const p = graph.points[chosen]}
-        {@const tipX = Math.min(Math.max(x(chosen), LEFT + 30), width - RIGHT - 30)}
+        {@const tipX = Math.min(Math.max(x(chosen), LEFT + 36), width - RIGHT - 36)}
         {@const tipY = Math.max(y(p.score) - 30, 2)}
+        <!-- The chevron says a second tap opens the shot. -->
         <g class="tip" aria-hidden="true">
-          <rect x={tipX - 30} y={tipY - 2} width="60" height="22" rx="6" />
-          <text x={tipX} y={tipY + 13} text-anchor="middle">Score {p.score}</text>
+          <rect x={tipX - 36} y={tipY - 2} width="72" height="22" rx="6" />
+          <text x={tipX - 6} y={tipY + 13} text-anchor="middle">Score {p.score}</text>
+          <path class="chevron" d="M{tipX + 23} {tipY + 5}l4 4-4 4" />
         </g>
       {/if}
       <text class="caption" x={LEFT} y={height - 4}>{graph.points.length} rated shots ago</text>
@@ -152,6 +162,14 @@
 
   .tip rect {
     fill: var(--control);
+  }
+
+  .tip .chevron {
+    fill: none;
+    stroke: var(--ink-muted);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .tip text {

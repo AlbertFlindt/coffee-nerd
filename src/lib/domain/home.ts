@@ -78,7 +78,7 @@ const DIAL_IN_SHOTS = 12;
 
 export type DialInGraph = {
   /** Oldest first; `newRecipe` marks the first shot drawn of a recipe that differs from the one before. */
-  points: { score: number; newRecipe: boolean }[];
+  points: { shotId: string; score: number; newRecipe: boolean }[];
   /** Three whole-number grid lines, low to high, within 0–10. */
   ticks: [number, number, number];
 };
@@ -89,10 +89,12 @@ export type DialInGraph = {
  * shot drawn before it. Fewer than 2 rated shots give no graph.
  */
 export function dialInProgress(
-  newestFirst: readonly { score: number | null; recipeId: string }[]
+  newestFirst: readonly { shotId: string; score: number | null; recipeId: string }[]
 ): DialInGraph | null {
   const rated = newestFirst
-    .flatMap((s) => (s.score === null ? [] : [{ score: s.score, recipeId: s.recipeId }]))
+    .flatMap((s) =>
+      s.score === null ? [] : [{ shotId: s.shotId, score: s.score, recipeId: s.recipeId }]
+    )
     .slice(0, DIAL_IN_SHOTS)
     .reverse();
   if (rated.length < 2) return null;
@@ -103,6 +105,7 @@ export function dialInProgress(
   const start = Math.max(0, Math.min(low, 10 - 2 * step));
   return {
     points: rated.map((s, i) => ({
+      shotId: s.shotId,
       score: s.score,
       newRecipe: i > 0 && s.recipeId !== rated[i - 1].recipeId
     })),
