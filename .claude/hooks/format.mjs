@@ -1,5 +1,5 @@
 // PostToolUse hook: format the file Claude just edited with Prettier.
-// Silent no-op until Prettier is installed (milestone M0) or for file types Prettier doesn't handle.
+// Silent no-op until Prettier is installed or for file types Prettier doesn't handle.
 import { existsSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { extname, join } from 'node:path';
