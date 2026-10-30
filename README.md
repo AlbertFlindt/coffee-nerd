@@ -105,10 +105,7 @@ on Home.
 Coffee Nerd is one container with one data volume. Each release is published as
 `ghcr.io/albertflindt/coffee-nerd:<version>` and `:latest`; every merge to `main` as `:main`.
 
-1. **Once: let the server pull the image.** The image is private for now. On GitHub, create a
-   personal access token (classic) with only the `read:packages` scope, run
-   `docker login ghcr.io -u <your GitHub name>` on the server and paste the token as the password.
-2. **Start it.** Save this as `compose.yaml` in a folder called `coffee-nerd` and run
+1. **Start it.** Save this as `compose.yaml` in a folder called `coffee-nerd` and run
    `docker compose up -d`:
 
    ```yaml
@@ -125,23 +122,44 @@ Coffee Nerd is one container with one data volume. Each release is published as
      data:
    ```
 
-3. **Create your account right away** at `http://<server>:3000`. Until then, anyone who can reach
-   the server can claim the app. The app then walks you through your machine, grinder,
-   basket, My setup and first bean, one step at a time.
+   To stay on one version and update by hand, use a version tag such as `:1.0.1` in place of `:latest`.
+2. **Create your account right away** at `http://<server>:3000`. Until then, anyone who can reach
+   the server can claim the app: it has one account, and the first person to create it owns it.
+   The app then walks you through your machine, grinder, basket, My setup and first bean, one step
+   at a time.
+3. **Put it behind https** to install it on your phone and use it offline (see below).
 
-**Trying it with sample data instead:** before creating an account, run
-`docker compose exec coffee-nerd node scripts/seed.mjs`. It fills
-an empty app with a reference setup (Lelit Bianca, Timemore 064S, VST 18 g, a Daily routine, one
-bean). Sign in as **Demo** with the password **coffee-nerd**, then set your own password at once.
+### Behind a reverse proxy
+
+Point the proxy at port 3000 and forward `X-Forwarded-Proto`, so the sign-in cookie is marked
+secure. If the proxy changes the host name, forward `X-Forwarded-Host` too, or forms are refused.
+Caddy forwards both on its own:
+
+```
+coffee.example.com {
+	reverse_proxy <server>:3000
+}
+```
+
+With nginx, inside the `location` block:
+
+```nginx
+proxy_pass http://<server>:3000;
+proxy_set_header Host $host;
+proxy_set_header X-Forwarded-Proto $scheme;
+proxy_set_header X-Forwarded-Host $host;
+```
+
+### Updating
+
+In the `coffee-nerd` folder, run `docker compose pull && docker compose up -d`. Your shots stay in
+the `data` volume, and database changes are applied when the app starts. Each release's changes are
+in [CHANGELOG.md](CHANGELOG.md). Download a backup first (see below) if you want a way back.
+
+### Password and starting over
 
 **Password:** `docker compose exec coffee-nerd node scripts/reset-password.mjs` sets a new one and
 signs out every device.
-
-**Behind a reverse proxy** with https, forward `X-Forwarded-Proto` (and `X-Forwarded-Host` if the
-proxy changes the host), so the sign-in cookie is marked secure and forms are accepted.
-
-**Update:** `docker compose pull && docker compose up -d` Your shots stay in
-the `data` volume, and database changes are applied when the app starts.
 
 **Start over:** stop the app and delete its `data` volume (`docker volume rm coffee-nerd_data`).
 

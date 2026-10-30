@@ -77,18 +77,8 @@ jobs:
           printf 'new-password\nnew-password\n' | docker exec -i coffee-nerd node scripts/reset-password.mjs
           test "$(post /login 'name=Albert&password=new-password')" = 303
           test "$(post /login 'name=Albert&password=old-password')" = 400
-      - name: The reference seed fills a fresh container, and its account signs in
-        run: |
-          docker run --rm --volume seeded:/data coffee-nerd:ci node scripts/seed.mjs
-          docker run --detach --name seeded --publish 3001:3000 --volume seeded:/data coffee-nerd:ci
-          for i in $(seq 1 30); do
-            if curl --silent --fail http://localhost:3001/health; then break; fi
-            sleep 1
-          done
-          code=$(curl --silent --output /dev/null --write-out '%{http_code}' -X POST \
-            -H 'Origin: http://localhost:3001' -H 'Accept: text/html' \
-            --data 'name=Demo&password=coffee-nerd' http://localhost:3001/login)
-          test "$code" = 303
+      - name: The image holds no sample setup, only the password reset script
+        run: test "$(docker run --rm coffee-nerd:ci ls scripts)" = reset-password.mjs
 
   version:
     # Every merge that changes the app ships as a release, so such a pull request must bump the version.
