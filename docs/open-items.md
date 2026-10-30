@@ -69,7 +69,7 @@ Last updated: 2026-10-30
 | Success metrics (time to log, % rated, repeat rate) | Not scheduled | Open topic 7 |
 | Measuring gear (scales, refractometers) | Not scheduled | Open topic 20, D-47 |
 | Grinder burr change / recalibration marker | Not scheduled | Open topic 21 |
-| Households: own Library each, or a share toggle | Not scheduled | Open topic 22, D-60 |
+| Households: own Library each, or a share toggle. The backup (D-251) copies every account, password hashes included, so it must be limited to one account or to an administrator first | Not scheduled | Open topic 22, D-60, D-251 |
 | Open source: contributing guide, code of conduct (license: AGPL-3.0, D-246) | M12 | Open topic 26, D-243 |
 | Optional: `@claude` in GitHub issues and pull requests | Not scheduled | Open topic 27 |
 | A choice of units (degrees Fahrenheit, ounces): metric only for now | After the release, when someone asks | D-250 |

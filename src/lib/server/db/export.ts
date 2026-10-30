@@ -5,7 +5,7 @@ import { and, asc, eq, inArray } from 'drizzle-orm';
 import { decimalsDeep, type ShotExportRow } from '../../domain/export';
 import type { MachineSpec } from '../../domain/schemas';
 import { setupDetail } from '../../domain/shot-form';
-import type { Thousandths } from '../../domain/units';
+import { fromThousandths, type Thousandths } from '../../domain/units';
 import type { Db, Queryable } from './client';
 import {
   appState,
@@ -103,7 +103,7 @@ export function exportShotRows(db: Queryable, ownerId: string): ShotExportRow[] 
 }
 
 const iso = (ms: number | null) => (ms === null ? null : new Date(ms).toISOString());
-const dec = (value: Thousandths | null) => (value === null ? null : value / 1000);
+const dec = (value: Thousandths | null) => (value === null ? null : fromThousandths(value));
 const library = (row: { shared: boolean; archivedAt: number | null }) => ({
   shared: row.shared,
   archivedAt: iso(row.archivedAt)

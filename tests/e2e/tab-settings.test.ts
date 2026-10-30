@@ -65,10 +65,10 @@ test('Settings, D-248: steps, your data, Sign out and the version, on one screen
 });
 
 test('D-249: a step tapped in Settings is saved at once and used by the shot form', async () => {
-  await steps('Dose').getByRole('radio', { name: '0.5 g' }).click();
-  await expect(steps('Dose').getByRole('radio', { name: '0.5 g' })).toBeChecked();
-  await steps('Time').getByRole('radio', { name: '0.1 s' }).click();
-  await expect(steps('Time').getByRole('radio', { name: '0.1 s' })).toBeChecked();
+  await steps('Dose').getByRole('radio', { name: '0.5 g', exact: true }).click();
+  await expect(steps('Dose').getByRole('radio', { name: '0.5 g', exact: true })).toBeChecked();
+  await steps('Time').getByRole('radio', { name: '0.1 s', exact: true }).click();
+  await expect(steps('Time').getByRole('radio', { name: '0.1 s', exact: true })).toBeChecked();
   await page.goto('/shot/new');
   await expect(page.getByRole('button', { name: /^Dose plus 0\.5 gram/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /^Time plus 0\.1 second/ })).toBeVisible();
@@ -76,10 +76,10 @@ test('D-249: a step tapped in Settings is saved at once and used by the shot for
   await expect(page.getByRole('button', { name: /^Dose plus 0\.5 gram/ })).toBeVisible();
 
   await page.goto('/settings');
-  await steps('Dose').getByRole('radio', { name: '0.1 g' }).click();
-  await expect(steps('Dose').getByRole('radio', { name: '0.1 g' })).toBeChecked();
-  await steps('Time').getByRole('radio', { name: '1 s' }).click();
-  await expect(steps('Time').getByRole('radio', { name: '1 s' })).toBeChecked();
+  await steps('Dose').getByRole('radio', { name: '0.1 g', exact: true }).click();
+  await expect(steps('Dose').getByRole('radio', { name: '0.1 g', exact: true })).toBeChecked();
+  await steps('Time').getByRole('radio', { name: '1 s', exact: true }).click();
+  await expect(steps('Time').getByRole('radio', { name: '1 s', exact: true })).toBeChecked();
 });
 
 test('D-251: "Download backup" saves a copy of the database without sign-ins', async () => {
@@ -105,7 +105,7 @@ test('D-252: "Export shots" saves a CSV file with one row per shot', async () =>
   ]);
   expect(file.suggestedFilename()).toMatch(/^coffee-nerd-shots-\d{4}-\d{2}-\d{2}\.csv$/);
   const lines = readFileSync(await file.path(), 'utf8').split('\r\n');
-  expect(lines[0]).toMatch(/^﻿Date,Time of day,Bean,/);
+  expect(lines[0]).toMatch(/^\uFEFFDate,Time of day,Bean,/);
   expect(lines).toHaveLength(count('shot') + 2);
 });
 
@@ -126,9 +126,9 @@ test('D-219, D-248: offline, the steps and the downloads need a connection and c
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
   await context.setOffline(true);
   const line = page.getByRole('status').filter({ hasText: /offline/i });
-  await steps('Dose').getByRole('radio', { name: '1 g' }).click();
+  await steps('Dose').getByRole('radio', { name: '1 g', exact: true }).click();
   await expect(line).toHaveText(NOTHING_CHANGED);
-  await expect(steps('Dose').getByRole('radio', { name: '0.1 g' })).toBeChecked();
+  await expect(steps('Dose').getByRole('radio', { name: '0.1 g', exact: true })).toBeChecked();
   let downloaded = false;
   page.on('download', () => (downloaded = true));
   await page.getByRole('button', { name: /^Download backup/ }).click();

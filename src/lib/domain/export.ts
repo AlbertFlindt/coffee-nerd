@@ -2,7 +2,7 @@
 // Pure, so it is tested without a database; the server gathers the rows (src/lib/server/db/export.ts).
 import { localDate } from './bean';
 import { clockTime } from './journal';
-import { formatRatio, type Thousandths } from './units';
+import { formatRatio, fromThousandths, type Thousandths } from './units';
 
 /** One saved shot as the CSV has it: names as the shot detail shows them (D-57), quantities in thousandths. */
 export type ShotExportRow = {
@@ -59,12 +59,12 @@ export const SHOT_COLUMNS = [
  * not set (D-11). The division is exact for the three decimals a stored value can have.
  */
 export function decimal(value: Thousandths | null): string {
-  return value === null ? '' : String(value / 1000);
+  return value === null ? '' : String(fromThousandths(value));
 }
 
 /** Every number in a stored JSON value (a spec, setup or step setting) as a decimal: all are thousandths. */
 export function decimalsDeep(value: unknown): unknown {
-  if (typeof value === 'number') return value / 1000;
+  if (typeof value === 'number') return fromThousandths(value);
   if (Array.isArray(value)) return value.map(decimalsDeep);
   if (value && typeof value === 'object')
     return Object.fromEntries(Object.entries(value).map(([key, v]) => [key, decimalsDeep(v)]));
@@ -78,7 +78,7 @@ export function csvField(text: string): string {
 
 /** Rows as a CSV file: CRLF line ends, and a byte order mark so spreadsheets read it as UTF-8. */
 export function csvText(rows: readonly (readonly string[])[]): string {
-  return '﻿' + rows.map((r) => r.map(csvField).join(',') + '\r\n').join('');
+  return '\uFEFF' + rows.map((r) => r.map(csvField).join(',') + '\r\n').join('');
 }
 
 const whole = (value: number | null) => (value === null ? '' : String(value));
