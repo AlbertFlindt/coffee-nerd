@@ -131,3 +131,35 @@ jobs:
           image="ghcr.io/${GITHUB_REPOSITORY,,}"
           docker build --tag "$image:main" --tag "$image:sha-${GITHUB_SHA::7}" .
           docker push --all-tags "$image"
+
+  publish-pr:
+    name: Publish pull request image
+    # Every pull request from this repository becomes ghcr.io/<owner>/coffee-nerd:pr-<number>, renewed
+    # on each push once the tests pass, to try on a test server before merging (README, "Try a pull
+    # request"). The build it replaces is deleted; pr-image-cleanup.yml deletes the last one when the
+    # pull request is merged or closed.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: [checks, docker]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io --username "${{ github.actor }}" --password-stdin
+      - name: Build and push, then delete the build it replaces
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          versions="/users/${{ github.repository_owner }}/packages/container/coffee-nerd/versions"
+          tagged() { gh api --paginate "$versions" --jq ".[] | select(.metadata.container.tags | index(\"pr-$PR\")) | .id"; }
+          before=$(tagged)
+          docker build --tag "$image:pr-$PR" .
+          docker push "$image:pr-$PR"
+          if [ -n "$before" ] && [ "$before" != "$(tagged)" ]; then
+            gh api --method DELETE "$versions/$before"
+            echo "Deleted the previous pr-$PR build (version $before)."
+          fi

@@ -163,6 +163,41 @@ signs out every device.
 
 **Start over:** stop the app and delete its `data` volume (`docker volume rm coffee-nerd_data`).
 
+### Try a pull request
+
+Every open pull request from this repository is published as
+`ghcr.io/albertflindt/coffee-nerd:pr-<number>` once its tests pass, renewed on each push and
+deleted when the pull request is merged or closed. To try one before it is merged, run a second
+container next to the real one, with its own data. Save this as `compose.yaml` in a folder called
+`coffee-nerd-test`:
+
+```yaml
+services:
+  coffee-nerd-test:
+    image: ghcr.io/albertflindt/coffee-nerd:pr-82
+    ports:
+      - '3001:3000'
+    volumes:
+      - data:/data
+    restart: unless-stopped
+
+volumes:
+  data:
+```
+
+To switch it to another pull request, change the tag in `image:` (`pr-82` is an example), run
+`docker compose pull && docker compose up -d` in that folder, and open `http://<server>:3001`.
+
+- **Its data is its own.** A pull request can change the database, and that change is applied to the
+  test data when it starts. To try one with your real shots, restore a backup into the test
+  container (see below, with the volume `coffee-nerd-test_data`). If an older pull request then won't start, start the test data over:
+  `docker compose down -v`.
+- **Open it at another address than the real app**, such as the server's IP address when the real
+  app has a name. Both use the same sign-in cookie, and a browser shares cookies between the ports
+  of one address, so signing in to one would sign you out of the other.
+- Over plain http it opens in the browser but doesn't install or work offline; give it its own
+  https name on the reverse proxy to try that.
+
 ## Back up and restore
 
 **Back up** in the app: Settings › **Download backup** saves the whole database as one file,

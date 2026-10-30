@@ -92,6 +92,8 @@ request template.
   covers it, ask before building.
 - Releases: every pull request that changes the app bumps the version (the `release` skill);
   merging it tags and publishes the release and the Docker image.
+- Trying a pull request: every pull request from this repository is published as `:pr-<number>`
+  once its tests pass (README, "Try a pull request"); a phone check runs it in a test container.
 - Keep this file and `docs/SPEC.md` current in the same pull request.
 
 ## Known issues / limitations
@@ -136,5 +138,8 @@ request template.
   screenshot differs from its reference.
 - **The Journal end-to-end test** would see one more day in a run that crosses midnight in
   Copenhagen (the seed's time zone).
+- **Pull request images** leave untagged leftovers in the package if a build pushes more than one
+  manifest (an attestation): only the tagged version is deleted. Prune by hand in the package
+  settings if they pile up.
 - **`npm audit`:** 4 moderate advisories from an old esbuild inside drizzle-kit (development only,
   not in the Docker image). Recheck when drizzle-kit updates.
