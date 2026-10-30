@@ -16,6 +16,9 @@ app, and Settings with steps, backup and exports.
   and Android's gesture bar is dark. Offline use works in Chrome, Vanadium and Firefox.
 - On a Pixel 8a (2026-10-27): the app left open across an update, then opened in airplane mode,
   runs the new version's own scripts.
+- No secrets in the git history (2026-10-30): every commit on every branch searched for keys,
+  tokens, private keys, passwords and committed `.env` or database files. Only `.env.example` and
+  the published test passwords turned up.
 
 **Not verified:**
 - Safari on iPhone and iPad.
@@ -53,12 +56,12 @@ app, and Settings with steps, backup and exports.
 ### 1.1
 1. A public Docker image and the real install guide in the README in place of the private-image
    steps: claim the account right after starting, https behind a reverse proxy (forward
-   `X-Forwarded-Proto`, and `X-Forwarded-Host` if the proxy changes the host), updating. (to confirm)
-2. Take `scripts/seed.mjs` out of the runtime image. (to confirm)
-3. Check the whole history for secrets, then make the repository public and protect `main`. The
-   GitHub page gets a description, topics and a preview image. (to confirm)
-4. A contributing guide, a code of conduct, a security policy and issue templates. (to confirm)
-5. A designed sign-in and "Create your account" page. (to confirm)
+   `X-Forwarded-Proto`, and `X-Forwarded-Host` if the proxy changes the host), updating.
+2. Take `scripts/seed.mjs` out of the runtime image.
+3. Make the repository public and protect `main`. The GitHub page gets a description, topics and
+   a preview image.
+4. A contributing guide, a code of conduct and issue templates.
+5. A designed sign-in and "Create your account" page.
 
 ### 1.2
 1. Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency) and the

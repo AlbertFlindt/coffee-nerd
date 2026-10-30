@@ -187,6 +187,10 @@ docker compose up --build   # the production image on port 3000
 SvelteKit (Svelte 5, TypeScript), SQLite with Drizzle ORM, Vitest and Playwright. How the app works
 inside, from the data model to recipe matching and Insights, is in [docs/SPEC.md](docs/SPEC.md).
 
+## Security
+
+To report a vulnerability, see [SECURITY.md](SECURITY.md).
+
 ## Changes
 
 See [CHANGELOG.md](CHANGELOG.md) and the [releases](https://github.com/AlbertFlindt/coffee-nerd/releases).
