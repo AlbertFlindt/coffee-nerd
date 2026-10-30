@@ -1,12 +1,12 @@
 # Screens
 
-Every designed screen, exported from the UX canvas (https://claude.ai/artifact/24VoMGemZnPse9G8EDzQbv) at the reference size, Pixel 8a **412 × 915** (PNGs at 2× pixel density).
+Every designed screen, exported from the separate Coffee Nerd UX canvas at the reference size, Pixel 8a **412 × 915** (PNGs at 2× pixel density).
 
 - `<Screen>.png` — what the screen must look like. Compare your screenshot against it.
 - `<Screen>.html` — the same screen as static HTML with inline styles: exact sizes, colors, spacing and copy. Read it for measurements; never import it into the app (the app uses `design-system/` classes and tokens instead).
 - `index.json` — screen order and titles. Numbers in titles match the canvas.
 
-These are **reference only**: never edit them by hand. When a screen changes, it is changed on the canvas and re-exported, by the owner or by Claude (D-69, D-183). Data shown (bean names, scores) is sample data.
+These are **reference only**: never edit them by hand. When a screen changes, it is changed on the canvas and re-exported. Data shown (bean names, scores) is sample data.
 
 | # | Screen | File |
 |---|---|---|
@@ -75,8 +75,8 @@ These are **reference only**: never edit them by hand. When a screen changes, it
 | 63 | Tags — Merge into Caramel? | `TagMergeConfirm` |
 | 64 | Tags — Remove a tag | `TagRemove` |
 
-`Equipment` is the canvas file name for the Gear page; the UI says "Gear" (D-39).
+`Equipment` is the canvas file name for the Gear page; the UI says "Gear".
 
-Screens 27–64 draw the states that were first built without a design (D-183); `docs/open-items.md` lists which item each one settles.
+Screens 27–64 draw states that were first built without a design. States that are still built without a design are listed in `PROGRESS.md`.
 
-Not designed yet (see open topics in the decision log): recipe detail, Home's other three graphs, more Dial-in cards, settings, login, the Journal's "waiting to sync" state, tablet layouts. Build these from the design system's components and patterns, and flag them in the pull request for review.
+Not designed yet: recipe detail, Home's other three graphs, more Dial-in cards, Settings, sign-in, the waiting-to-send states, tablet layouts. Build these from the design system's components and patterns, and say so in the pull request.

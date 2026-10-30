@@ -1,4 +1,4 @@
-> **Synced copy — read-only in this repository.** The master is the "Coffee Nerd" design system artifact (https://claude.ai/artifact/AkUAMm121zboY6UumaF41d, D-58). Visual changes are made there first and re-exported here (D-69). Claude Code does not edit this folder.
+> **Synced copy — read-only in this repository.** The source is the separate "Coffee Nerd" design system. Visual changes are made there first and re-exported here; don't edit this folder by hand.
 >
 > | File | What it is |
 > |---|---|
@@ -14,25 +14,25 @@
 
 **Data that backs up the home barista** — from dialing in a single shot to discovering which beans and origins you prefer. Coffee Nerd is a self-hosted, privacy-friendly web app (installable PWA) used on a phone or tablet at the brew station: wet hands, early mornings, a scale and a machine within reach.
 
-This design system is the single source for how Coffee Nerd looks and behaves. Every decision here traces back to `docs/ux-decision-log.md` (D-numbers in brackets).
+This design system is the single source for how Coffee Nerd looks and behaves.
 
 ## Content fundamentals
 
-- **Plain words, no abbreviations** [D-20]. "Preinfusion 4 s", never "PI 4 s". Units are standard symbols: °C, g, s, bar, mm.
-- **One word per concept** [D-39]. Machines, grinders and baskets are **Gear** everywhere. A shot's intent is its **recipe**; what came out is its **result** [D-13].
+- **Plain words, no abbreviations**. "Preinfusion 4 s", never "PI 4 s". Units are standard symbols: °C, g, s, bar, mm.
+- **One word per concept**. Machines, grinders and baskets are **Gear** everywhere. A shot's intent is its **recipe**; what came out is its **result**.
 - **Sentence case** for titles, buttons and labels: "Save shot", "Add your own feature".
-- **Say what happened and why.** "New recipe · grind changed", not just "New recipe" [D-16]. "Recipe chosen from Library" with "Use last shot recipe" [D-43].
-- **Findings first, numbers second.** Insights open with a sentence ("You score natural coffees 1.1 points higher than washed ones") and then show the chart and its basis [D-55].
-- **Honest about data.** Show how many shots a number rests on; call out small samples; free-text notes are "Just for you · not used in Insights" [D-27].
+- **Say what happened and why.** "New recipe · grind changed", not just "New recipe". "Recipe chosen from Library" with "Use last shot recipe".
+- **Findings first, numbers second.** Insights open with a sentence ("You score natural coffees 1.1 points higher than washed ones") and then show the chart and its basis.
+- **Honest about data.** Show how many shots a number rests on; call out small samples; free-text notes are "Just for you · not used in Insights".
 - A little warmth is allowed where it costs nothing: Library is "The nerdy basement".
 
 ## Visual foundations
 
-**Dark-first, coffee-toned, surface-based** [D-18]. The page is dark roast (`bg`); cards, rows and fields are one step lighter (`surface`). Separation comes from surfaces and spacing, **never borders or dividers**. Corners are soft (`radius-md` to `radius-xl`), spacing generous, and each task screen has **one** full-width primary action at the bottom.
+**Dark-first, coffee-toned, surface-based**. The page is dark roast (`bg`); cards, rows and fields are one step lighter (`surface`). Separation comes from surfaces and spacing, **never borders or dividers**. Corners are soft (`radius-md` to `radius-xl`), spacing generous, and each task screen has **one** full-width primary action at the bottom.
 
 **Cream is rare.** `cream` marks the single thing that should stand out on a page — the roast-age block, the My setup card, the selected tab, the duplicate-finder card. More than one cream element per screen dilutes it.
 
-### Accent colors have one job each [D-19]
+### Accent colors have one job each
 
 | Token | Job | Used for |
 |---|---|---|
@@ -48,20 +48,20 @@ Color is never the only signal: deltas carry a number, tags carry text, previous
 
 ### Layout
 
-- **Reference phone: Pixel 8a, 412 × 915** [D-36 context]. Side gutter `space-5` (20px), rhythm `space-3` (12px), card padding `space-4`.
-- **Screens fit the device; only lists scroll; no visible scrollbars** [D-36]. A flexible region (a graph, a list) absorbs height differences.
-- **Touch targets ≥ 44px** (`touch-min`). Steppers over keyboards; every −/+ shows its step and unit ("+ 0.1 g") [D-07].
-- **Bottom tab bar**: Home · Journal · **+** · Library · Insights [D-30]. The + is the only way to add a shot [D-31].
-- **Sheets** for secondary detail; on the shot form a sheet stops above Save [D-21].
-- **Previews** in a dashed frame show what a custom setting will look like [D-46].
+- **Reference phone: Pixel 8a, 412 × 915**. Side gutter `space-5` (20px), rhythm `space-3` (12px), card padding `space-4`.
+- **Screens fit the device; only lists scroll; no visible scrollbars**. A flexible region (a graph, a list) absorbs height differences.
+- **Touch targets ≥ 44px** (`touch-min`). Steppers over keyboards; every −/+ shows its step and unit ("+ 0.1 g").
+- **Bottom tab bar**: Home · Journal · **+** · Library · Insights. The + is the only way to add a shot.
+- **Sheets** for secondary detail; on the shot form a sheet stops above Save.
+- **Previews** in a dashed frame show what a custom setting will look like.
 
-### Charts [D-56]
+### Charts
 
 Box plots, mean ± σ, lines with a ± σ band, bell curves and σ bars — this is a nerd's app. Score data in `amber`, other measures in `cream`, secondary marks in `chart-secondary`, grid in `chart-grid`, labels in `ink-muted`. Groups are named on the axis, not by color. Bars start at zero. One axis per chart. Every chart gets a tap tooltip in the app.
 
 ## Iconography
 
-- **Logo**: a coffee bean wearing round glasses (`logo/coffee-nerd-mark.svg`), shown left of the name **Coffee Nerd** in the Home banner only [D-34]. It uses `bean`, `bean-crease`, `cream` and `ink` — never the accents.
+- **Logo**: a coffee bean wearing round glasses (`logo/coffee-nerd-mark.svg`), shown left of the name **Coffee Nerd** in the Home banner only. It uses `bean`, `bean-crease`, `cream` and `ink` — never the accents.
 - **UI icons**: simple inline stroke icons, 2px stroke, round caps and joins, 22px in the tab bar, 16–20px inline, colored by their text (`currentColor`). No emoji, no filled icon sets.
 
 ## Components
@@ -72,4 +72,4 @@ ValueCard · RowStepper · ScoreRow · Chip · Segmented · Switch · PrimaryBut
 
 - A light theme (the app is dark-first; a light theme would get its own validated steps, not an inverted copy).
 - Hover/tooltip and focus-ring specs for charts and controls.
-- App icon for the PWA home screen (open topic 17).
+- App icon for the PWA home screen.

@@ -2,6 +2,9 @@
 import type { SignedInUser } from '#lib/server/auth/session.ts';
 
 declare global {
+  /** The release from package.json, e.g. "1.0.0" (defined in vite.config.ts). */
+  const __APP_VERSION__: string;
+
   namespace App {
     interface Locals {
       /** The signed-in user, or null. */
