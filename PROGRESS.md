@@ -21,6 +21,8 @@ request template.
 - No secrets in the git history (2026-10-30): every commit on every branch searched for keys,
   tokens, private keys, passwords and committed `.env` or database files. Only `.env.example` and
   the published test passwords turned up.
+- The Docker image is public (2026-10-30): `ghcr.io/albertflindt/coffee-nerd:latest` and `:1.0.2`
+  download without signing in.
 
 **Not verified:**
 - Safari on iPhone and iPad.
@@ -59,10 +61,7 @@ request template.
 ## Next steps
 
 ### 1.1
-1. Make the image on GitHub's container registry public (the README's install guide already
-   pulls it without signing in), then check `docker pull ghcr.io/albertflindt/coffee-nerd:latest`
-   from a machine that isn't signed in.
-2. Make the repository public and protect `main`. The GitHub page gets a description, topics and
+1. Make the repository public and protect `main`. The GitHub page gets a description, topics and
    a preview image.
 
 ### 1.2
