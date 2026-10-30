@@ -2,6 +2,12 @@
 
 All notable changes to Coffee Nerd. Each version is a tag and a GitHub release.
 
+## 1.2.0 (2026-10-30)
+
+### Added
+- **Home:** on the score per shot graph, tapping the highlighted point again opens that shot. Its
+  Back returns to Home.
+
 ## 1.1.0 (2026-10-30)
 
 ### Added
