@@ -7,7 +7,9 @@ How things work: `docs/SPEC.md`.
 
 The whole app is built: the shot form, the Journal and shot detail, the Library (Beans, Gear,
 Puck prep, Tags), My setup, Home, Insights, the step-by-step start, offline use as an installed
-app, and Settings with steps, backup and exports.
+app, and Settings with steps, backup and exports. For contributors: `CONTRIBUTING.md`,
+`CODE_OF_CONDUCT.md`, and in `.github/` the bug report and feature request forms and the pull
+request template.
 
 **Verified:**
 - Every screen has an end-to-end test at 412 × 915 against the production build, on an empty
@@ -59,8 +61,7 @@ app, and Settings with steps, backup and exports.
    from a machine that isn't signed in.
 2. Make the repository public and protect `main`. The GitHub page gets a description, topics and
    a preview image.
-3. A contributing guide, a code of conduct and issue templates.
-4. A designed sign-in and "Create your account" page.
+3. A designed sign-in and "Create your account" page.
 
 ### 1.2
 1. Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency) and the
@@ -115,6 +116,8 @@ app, and Settings with steps, backup and exports.
 - **Range fields** open the decimal keypad; an iPhone's has no dash, so "0-5" can't be typed there.
 - **The manifest and `theme-color`** repeat the dark background color as a fixed value: change them
   by hand if the background token changes.
+- **Reported content:** the code of conduct asks people to report content to the repository.
+  Turn on Settings › Moderation options › Reported content when the repository goes public.
 - **`main` isn't protected by GitHub** while the repository is private. The push-guard hook is the
   only safeguard, and it doesn't see merges made through the GitHub API.
 - **The push guard** also blocks a command whose commit text looks like a push to `main`. Safe side.

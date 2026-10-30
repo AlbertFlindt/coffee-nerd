@@ -1,0 +1,26 @@
+name: Feature request
+description: An idea that would make Coffee Nerd better at the brew station.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the next steps in PROGRESS.md first: your idea may already be planned for a version.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you're trying to do
+      description: Start from what happens at the machine, not from a solution.
+      placeholder: When I switch beans I want to see my last recipe for the new one before I grind.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How it could work
+      description: Which screen it belongs on, and what you would tap.
+  - type: textarea
+    id: today
+    attributes:
+      label: What you do today
+      description: How you work around it now, if at all.
