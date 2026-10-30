@@ -10,7 +10,7 @@ let page: Page;
 async function signIn(p: Page) {
   await p.goto('/login');
   await p.getByLabel('Name').fill('Demo');
-  await p.getByLabel('Password').fill('coffee-nerd');
+  await p.getByLabel('Password', { exact: true }).fill('coffee-nerd');
   await p.getByRole('button', { name: 'Sign in' }).click();
   await expect(p.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
 }

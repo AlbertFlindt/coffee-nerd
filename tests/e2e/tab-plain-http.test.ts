@@ -16,7 +16,7 @@ test.beforeAll(async ({ browser, baseURL }) => {
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/login');
   await page.getByLabel('Name').fill('Demo');
-  await page.getByLabel('Password').fill('coffee-nerd');
+  await page.getByLabel('Password', { exact: true }).fill('coffee-nerd');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
   expect(await page.evaluate(() => isSecureContext)).toBe(false);

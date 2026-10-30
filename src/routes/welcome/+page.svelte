@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import AuthScreen from '#lib/components/AuthScreen.svelte';
+  import PasswordField from '#lib/components/PasswordField.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import type { PageProps } from './$types';
 
@@ -14,8 +15,9 @@
 
 <AuthScreen
   title="Create your account"
-  intro="One account protects your Coffee Nerd."
+  intro="One account keeps your journal private."
   action="Create account"
+  note="Everything stays on this server. Nothing is sent anywhere else."
   error={form?.error}
 >
   <TextField
@@ -26,20 +28,19 @@
     required
     value={form?.name ?? ''}
   />
-  <TextField
-    label="Password · at least 8 characters"
+  <PasswordField
+    label="Password"
+    hint="At least 8 characters"
     id="password"
     name="password"
-    type="password"
     autocomplete="new-password"
     minlength={8}
     required
   />
-  <TextField
+  <PasswordField
     label="Password again"
     id="repeat"
     name="repeat"
-    type="password"
     autocomplete="new-password"
     required
   />

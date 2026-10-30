@@ -1,5 +1,6 @@
 <script lang="ts">
   import AuthScreen from '#lib/components/AuthScreen.svelte';
+  import PasswordField from '#lib/components/PasswordField.svelte';
   import TextField from '#lib/components/TextField.svelte';
   import type { PageProps } from './$types';
 
@@ -10,8 +11,9 @@
 
 <AuthScreen
   title="Sign in"
-  intro="Welcome back to Coffee Nerd."
+  intro="Welcome back. Your journal is where you left it."
   action="Sign in"
+  note="Forgot your password? The README shows how to reset it."
   error={form?.error}
 >
   <TextField
@@ -22,11 +24,10 @@
     required
     value={form?.name ?? ''}
   />
-  <TextField
+  <PasswordField
     label="Password"
     id="password"
     name="password"
-    type="password"
     autocomplete="current-password"
     required
   />

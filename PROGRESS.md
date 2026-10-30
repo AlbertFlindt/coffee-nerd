@@ -1,6 +1,6 @@
 # Progress / handoff
 
-**Last updated:** 2026-10-30. **Latest release:** 1.0.1 (details in `CHANGELOG.md`).
+**Last updated:** 2026-10-30. **Latest release:** 1.0.2 (details in `CHANGELOG.md`).
 How things work: `docs/SPEC.md`.
 
 ## Current state
@@ -36,7 +36,10 @@ request template.
   to send" and "Not saved" on shots, the "Not saved" message and "Discard change" in the shot form,
   the Sign out sheet while shots wait, "This page could not open" and "This page is not on the
   phone yet".
-- The Settings page, and the sign-in and "Create your account" pages (built simple).
+- The Settings page (built simple).
+- The sign-in and "Create your account" pages follow a design agreed from screenshots of the app
+  (2026-10-30): the logo above the name and tagline, a show/hide button on password fields, one
+  caption under the button. `docs/screens/` doesn't draw them yet.
 - Home: the Last shot card without the values not entered, empty states, the Dial-in progress
   graph's captions, grid and short-history states.
 - Confirmations as dialogs in the middle of the screen with the red delete choice; the screens
@@ -61,7 +64,6 @@ request template.
    from a machine that isn't signed in.
 2. Make the repository public and protect `main`. The GitHub page gets a description, topics and
    a preview image.
-3. A designed sign-in and "Create your account" page.
 
 ### 1.2
 1. Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency) and the

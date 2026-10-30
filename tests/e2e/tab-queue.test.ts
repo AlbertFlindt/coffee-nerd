@@ -68,7 +68,7 @@ test.beforeAll(async ({ browser }) => {
   page = await context.newPage();
   await page.goto('/login');
   await page.getByLabel('Name').fill('Demo');
-  await page.getByLabel('Password').fill('coffee-nerd');
+  await page.getByLabel('Password', { exact: true }).fill('coffee-nerd');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
   await page.evaluate(() => navigator.serviceWorker.ready);
