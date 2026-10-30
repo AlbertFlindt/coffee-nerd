@@ -226,6 +226,24 @@ export function routineParts(
 }
 
 /**
+ * The puck prep on the shot detail, as "Daily routine: WDT 20 s · Distributor · Tamp 15 kg": the
+ * routine's name, then every step in order, one without a setting by its name alone. `label` names a
+ * list option. Null without a routine.
+ */
+export function prepDetail(
+  routine: SetupSnapshot['routine'],
+  label: (stepId: string, optionId: string) => string
+): string | null {
+  if (!routine) return null;
+  const steps = routine.steps.map((step) =>
+    step.value === null
+      ? step.name
+      : `${step.name} ${typeof step.value === 'string' ? label(step.stepId, step.value) : trimmed(step.value, step.unit)}`
+  );
+  return steps.length ? `${routine.name}: ${steps.join(' · ')}` : routine.name;
+}
+
+/**
  * Each feature of a setup in the shot detail's order, switched-off ones as "Preinfusion off", for
  * telling recipes apart. A feature still waiting for its value is left out.
  */

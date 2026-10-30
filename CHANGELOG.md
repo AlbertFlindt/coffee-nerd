@@ -2,13 +2,20 @@
 
 All notable changes to Coffee Nerd. Each version is a tag and a GitHub release.
 
-## 1.0.3 (2026-10-30)
+## 1.1.1 (2026-10-30)
 
 ### Fixed
 - **Leaving a sheet:** the phone's back gesture closes an open sheet or confirmation instead of
   leaving the page, so it no longer throws away the shot you are logging. From a list inside the
   Setup sheet (Basket, Puck prep) it goes back to Setup first. A sheet also closes when you swipe
   it down anywhere, not only by its handle, as long as its content is scrolled to the top.
+
+## 1.1.0 (2026-10-30)
+
+### Added
+- **Shot detail shows the puck prep:** under the setup, the routine you used and each of its steps
+  with its setting, as "Daily routine: WDT 20 s · Distributor · Tamp 15 kg · Puck screen". The
+  routine's name moved there from the gear line.
 
 ## 1.0.2 (2026-10-30)
 

@@ -3,7 +3,7 @@ import { and, asc, desc, eq, inArray, lt, or } from 'drizzle-orm';
 import { describeChange, type RecipeMatch } from '../../domain/fingerprint';
 import { recipeFilterLabel, setupDifferences, shotsThisWeek } from '../../domain/journal';
 import type { GrinderSpec, MachineSpec, PrepStepSetting } from '../../domain/schemas';
-import { routineParts, setupDetail, setupParts } from '../../domain/shot-form';
+import { prepDetail, routineParts, setupDetail, setupParts } from '../../domain/shot-form';
 import type { Thousandths } from '../../domain/units';
 import type { Queryable } from './client';
 import { bean, gear, prepStep, recipe, shot, shotTag, tag, userSettings } from './schema';
@@ -102,20 +102,7 @@ export function loadJournal(
     const gearRows = db.select().from(gear).where(eq(gear.ownerId, ownerId)).all();
     const gearOf = new Map(gearRows.map((g) => [g.id, g]));
     // A step value that differs names it too; a list option by its label.
-    const settingOf = new Map(
-      db
-        .select({ id: prepStep.id, setting: prepStep.setting })
-        .from(prepStep)
-        .where(eq(prepStep.ownerId, ownerId))
-        .all()
-        .map((s) => [s.id, s.setting as PrepStepSetting])
-    );
-    const optionLabel = (stepId: string, optionId: string) => {
-      const setting = settingOf.get(stepId);
-      return setting?.kind === 'choice'
-        ? (setting.options.find((o) => o.id === optionId)?.label ?? optionId)
-        : optionId;
-    };
+    const optionLabel = optionLabels(db, ownerId);
     const differences = setupDifferences(
       ofRecipe.map((row) => {
         const named = [
@@ -192,10 +179,12 @@ export type ShotDetail = {
   brewedAt: number;
   beanName: string;
   roastDate: string;
-  /** "Lelit Bianca · Timemore 064S · VST · 18 g · Daily routine". */
+  /** "Lelit Bianca · Timemore 064S · VST · 18 g". */
   gear: string;
   /** The pressure profile and other features. */
   setup: string;
+  /** "Daily routine: WDT 20 s · Distributor · Tamp 15 kg"; null without puck prep. */
+  prep: string | null;
   recipeTag: RecipeMatch;
   grind: Thousandths;
   grindStep: Thousandths;
@@ -263,10 +252,9 @@ export function loadShotDetail(db: Queryable, ownerId: string, shotId: string): 
     brewedAt: s.brewedAt,
     beanName: row.beanName,
     roastDate: row.roastDate,
-    gear: [machine.name, grinder.name, basket?.name, r.setup.routine?.name]
-      .filter((part) => part)
-      .join(' · '),
+    gear: [machine.name, grinder.name, basket?.name].filter((part) => part).join(' · '),
     setup: setupDetail(r.setup, (machine.spec as MachineSpec).features),
+    prep: prepDetail(r.setup.routine, optionLabels(db, ownerId)),
     recipeTag:
       earlier === 0
         ? { kind: 'new', changes: changesSincePrevious(db, ownerId, r, s) }
@@ -318,6 +306,27 @@ function changesSincePrevious(
     .orderBy(desc(shot.brewedAt), desc(shot.id))
     .get();
   return previous ? describeChange(r, previous.recipe) : [];
+}
+
+/** Names a list option of a puck prep step by its label; any other value as it is. */
+function optionLabels(
+  db: Queryable,
+  ownerId: string
+): (stepId: string, optionId: string) => string {
+  const settingOf = new Map(
+    db
+      .select({ id: prepStep.id, setting: prepStep.setting })
+      .from(prepStep)
+      .where(eq(prepStep.ownerId, ownerId))
+      .all()
+      .map((s) => [s.id, s.setting as PrepStepSetting])
+  );
+  return (stepId, optionId) => {
+    const setting = settingOf.get(stepId);
+    return setting?.kind === 'choice'
+      ? (setting.options.find((o) => o.id === optionId)?.label ?? optionId)
+      : optionId;
+  };
 }
 
 /** Brewed before the other shot; the same moment falls back to the id, which is time-ordered (UUID v7). */

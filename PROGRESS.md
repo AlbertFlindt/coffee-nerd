@@ -1,6 +1,6 @@
 # Progress / handoff
 
-**Last updated:** 2026-10-30. **Latest release:** 1.0.3 (details in `CHANGELOG.md`).
+**Last updated:** 2026-10-30. **Latest release:** 1.1.1 (details in `CHANGELOG.md`).
 How things work: `docs/SPEC.md`.
 
 ## Current state
@@ -52,6 +52,8 @@ request template.
 - Insights: the tap tooltip, cards without enough data, no shots yet, gaps in the weekly line.
 - Gear: the "Add gear" sheet, archive confirmations, "Not set" values, basket size and grinder
   range fields, problem lines. Add your own feature and Edit My setup beyond the one example drawn.
+- Shot detail: the puck prep line under the setup ("Daily routine: WDT 20 s · Distributor · Tamp
+  15 kg · Puck screen"); the routine's name moved there from the gear line the screen draws.
 - The step-by-step start (built from the existing pages, with "Step 1 of 5").
 - Puck prep and Tags: empty states, the step sheet's edit mode, the routine builder's sheets and
   problem lines, the tag sheet with Merge and Remove, and the duplicate-tag card.
