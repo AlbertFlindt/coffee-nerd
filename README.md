@@ -8,7 +8,7 @@
 - Installable as an app on your phone or tablet (PWA); opens offline, and shots saved offline are sent when you're back online.
 - Built for coffee nerds: recipe matching across your whole history, σ and distributions in Insights, any machine described by hand.
 
-> **Status:** the shot form, the Journal, the shot detail, the whole Library (Beans, Gear, Puck prep, Tags), My setup, Home and Insights work, with a step-by-step start after creating the account (milestones M3 to M9). The app can be installed on a phone's home screen over https and opens offline (M10, in progress); saving shots offline comes next. Not ready for daily use yet. Private for now; it will become open source once it is mature.
+> **Status:** the shot form, the Journal, the shot detail, the whole Library (Beans, Gear, Puck prep, Tags), My setup, Home and Insights work, with a step-by-step start after creating the account (milestones M3 to M9). The app can be installed on a phone's home screen over https, opens offline and keeps shots saved offline until they can be sent (M10). Settings with backup and export are being built (M11). Not ready for daily use yet. Private for now; it will become open source once it is mature.
 
 ## Try the latest build on your server (Dockge)
 
@@ -38,6 +38,25 @@ Every merge to `main` is published as the image `ghcr.io/albertflindt/coffee-ner
 5. **Update to the latest build:** press **Update** on the stack. Dockge pulls the new image and restarts it; your shots stay in the `data` volume, and database changes are applied when the app starts.
 
 To start over, stop the stack and delete its `data` volume (`docker volume rm coffee-nerd_data`), then deploy and seed again.
+
+## Back up and restore
+
+**Back up** in the app: Home's gear › **Download backup** saves the whole database as one file, `coffee-nerd-backup-<date>.db` (D-251). Keep it somewhere private: it holds everything, including your password in scrambled form. **Export shots** (a CSV for spreadsheets) and **Export everything** (JSON) sit next to it (D-252).
+
+**Restore** on the server, as a deliberate step: it replaces all data in the app with the backup.
+
+1. Stop the stack (in Dockge: **Stop**).
+2. Put the backup file in a folder on the server, open a terminal there and run, with your file's name:
+
+   ```sh
+   docker run --rm -v coffee-nerd_data:/data -v "$PWD":/backup debian:bookworm-slim sh -c \
+     'rm -f /data/coffee-nerd.db-wal /data/coffee-nerd.db-shm &&
+      cp /backup/coffee-nerd-backup-2026-10-30.db /data/coffee-nerd.db &&
+      chown 1000:1000 /data/coffee-nerd.db'
+   ```
+
+   Removing the `-wal` and `-shm` files matters: they belong to the old database.
+3. Start the stack again. A backup from an older version is brought up to date when the app starts. Every device signs in again.
 
 ## Documentation
 

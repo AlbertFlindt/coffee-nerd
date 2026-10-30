@@ -77,7 +77,7 @@ Every table also has `created_at` and `updated_at`. Decimal quantities are in th
 | `default_grind`, `default_dose`, `default_yield` | starting values for a bean's first shot |
 | `default_features` | JSON, same shape as a recipe's feature values (temperature, pressure profile) |
 | `time_zone` | IANA name, e.g. `Europe/Copenhagen` |
-| `dose_step`, `yield_step`, `time_step` | −/+ steps for the shot form and Edit My setup; default 100, 100 and 1000 (0.1 g, 0.1 g, 1 s) (D-89) |
+| `dose_step`, `yield_step`, `time_step` | −/+ steps for the shot form and Edit My setup; default 100, 100 and 1000 (0.1 g, 0.1 g, 1 s) (D-89); chosen in Settings from 100, 500 and 1000 (D-249) |
 
 ### `app_state`
 | Column | Notes |
