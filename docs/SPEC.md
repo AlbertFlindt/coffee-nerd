@@ -1,0 +1,289 @@
+# Coffee Nerd — specification
+
+How Coffee Nerd works today: the data model, recipe matching, prefill, best recipe, the Insights
+query system and the offline queue. Release history is in `CHANGELOG.md`; open work is in
+`PROGRESS.md`.
+
+---
+
+## 1. Principles
+
+1. **Recipe = intent, shot = result**. A recipe is never edited. Saving a shot with different values finds or creates another recipe.
+2. **History never changes**. A recipe stores a snapshot of its setup values together with the labels and units as they were.
+3. **Hand-set and custom things are JSON**, each shape checked by one schema (Zod) in shared TypeScript code. Things Insights filters or groups by constantly get real columns.
+4. **Decimal numbers are stored as whole numbers in thousandths.** 18.0 g is stored as `18000`, grind 1.6 as `1600`. Floating-point values drift (0.1 + 0.2 is not exactly 0.3), and drift would break recipe matching. The code converts at the edges; nobody sees thousandths in the UI.
+5. **IDs are UUID version 7** strings. They can be made on the phone (needed for the offline queue), never collide, and sort by creation time.
+6. **Everything a person creates belongs to their account** (`owner_id`). Library items also carry `shared` (off by default, no UI yet).
+7. **Things that shots point to are archived, not deleted** (`archived_at`). Archived beans, gear, steps and routines disappear from pickers, but past shots keep their links. Gear and routines that My setup uses cannot be archived. A bean that no shot points to can be deleted.
+8. **Times are stored in UTC** (milliseconds). The user's time zone decides what "Today" and "this week" mean; weeks start on Monday (ISO weeks).
+9. **Brew method is recorded from day one.** Recipes carry `method` (only `espresso` for now), so pour-over later is an addition, not a migration.
+
+---
+
+## 2. Entities at a glance
+
+| Entity | What it is | Main links |
+|---|---|---|
+| `user` | An account | owns everything below |
+| `user_settings` | My setup defaults and preferences | one per user; points to gear and a routine |
+| `app_state` | Fast-changing state: Home's bean, Brew next, last graph | one per user; points to a bean and a recipe |
+| `bean` | One bag of coffee | may point to an earlier bag ("Same as before") |
+| `gear` | A machine, grinder or basket | used by recipes |
+| `prep_step` | One puck prep step and its setting | used inside routines |
+| `routine` | An ordered list of steps with values | used by recipes |
+| `recipe` | What you set: bean, gear, routine, grind, dose, setup | has many shots |
+| `shot` | What you got: yield, time, taste | belongs to one recipe |
+| `tag` | A flavor note in a fixed family | linked to shots |
+| `shot_tag` | Which flavor notes a shot has | shot ↔ tag |
+
+```mermaid
+erDiagram
+  USER ||--|| USER_SETTINGS : "has"
+  USER ||--|| APP_STATE : "has"
+  USER ||--o{ BEAN : "owns"
+  USER ||--o{ GEAR : "owns"
+  USER ||--o{ PREP_STEP : "owns"
+  USER ||--o{ ROUTINE : "owns"
+  USER ||--o{ TAG : "owns"
+  BEAN |o--o{ BEAN : "re-buy of"
+  BEAN ||--o{ RECIPE : "dialed in as"
+  GEAR ||--o{ RECIPE : "machine, grinder, basket"
+  ROUTINE |o--o{ RECIPE : "puck prep"
+  ROUTINE }o--o{ PREP_STEP : "ordered steps (JSON)"
+  RECIPE ||--o{ SHOT : "attempts"
+  SHOT ||--o{ SHOT_TAG : "tagged"
+  TAG ||--o{ SHOT_TAG : "used in"
+  APP_STATE |o--o| RECIPE : "brew next"
+  APP_STATE |o--o| BEAN : "current bean"
+```
+
+---
+
+## 3. Entities in detail
+
+Every table also has `created_at` and `updated_at`. Decimal quantities are in thousandths (principle 4).
+
+### `user`
+`id`, `name`, `email` (optional, unused for now), `password_hash`.
+
+### `session`
+`id` (a hash of the token in the sign-in cookie; the token itself is never stored), `user_id`, `expires_at`. Renewed on each visit; deleted on sign-out and by the password reset.
+
+### `user_settings` — My setup
+| Column | Notes |
+|---|---|
+| `user_id` | primary key |
+| `default_machine_id`, `default_grinder_id`, `default_basket_id` | → `gear` |
+| `default_routine_id` | → `routine` |
+| `default_grind`, `default_dose`, `default_yield` | starting values for a bean's first shot |
+| `default_features` | JSON, same shape as a recipe's feature values (temperature, pressure profile) |
+| `time_zone` | IANA name, e.g. `Europe/Copenhagen` |
+| `dose_step`, `yield_step`, `time_step` | −/+ steps for the shot form and Edit My setup; default 100, 100 and 1000 (0.1 g, 0.1 g, 1 s); chosen in Settings from 100, 500 and 1000 |
+
+### `app_state`
+| Column | Notes |
+|---|---|
+| `user_id` | primary key |
+| `current_bean_id` | Home's bean scope |
+| `brew_next_recipe_id` | Brew next. One column, so there can only ever be one mark |
+| `home_graph` | last chosen graph on Home |
+| `basket_step_skipped` | The step-by-step start's basket step was skipped, so it is not asked again |
+| `next_routine_id` | Set by "Use it for new shots"; the next shot starts with this routine. Cleared by the next saved shot, and by saving My setup with another routine. No foreign key; ignored when archived or gone |
+
+Kept apart from settings because it changes with almost every visit.
+
+### `bean`
+| Column | Notes |
+|---|---|
+| `id`, `owner_id`, `shared` | |
+| `rebuy_of_id` | → `bean`. Set by "Same as before" |
+| `name` | required |
+| `roaster`, `region`, `variety` | optional text |
+| `country_code` | ISO 3166-1 two-letter code from the country picker |
+| `process` | `washed` · `natural` · `honey` · `anaerobic` · `other` |
+| `altitude_min_m`, `altitude_max_m` | optional; one value fills both |
+| `roast_level` | `light` · `medium_light` · `medium` · `dark` |
+| `roast_date` | required, a calendar date |
+| `bag_weight` | optional |
+| `status` | `open` · `finished` |
+| `finished_at`, `finished_automatically` | the second one drives the undo message |
+
+**Never stored, always calculated:** roast age, grams left (bag weight minus the doses of its shots), best score, number of recipes and shots.
+
+### `gear`
+One table for all Gear, because Gear is one concept. A future kind (scales) needs a new spec shape, not a new table.
+
+| Column | Notes |
+|---|---|
+| `id`, `owner_id`, `shared`, `archived_at` | |
+| `kind` | `machine` · `grinder` · `basket` |
+| `name` | |
+| `spec` | JSON; its shape depends on `kind` (below) |
+
+**Spec shapes** (sizes in millimetres are decimals, stored in thousandths like every decimal):
+
+- **Machine:** `type` (`automatic` · `semi_auto` · `lever` · `manual`), `groupSizeMm`, `features` (a list of feature definitions).
+- **Grinder:** `type` (`electric` · `hand`), `burrs` (`flat` · `conical`), `burrSizeMm`, `dial` (`mode`: `stepped` or `stepless`, `step`, `finest`, `coarsest`).
+- **Basket:** `brand`, optional `sizeG` (the row's `name` is kept as "VST · 18 g" for lists and old shots), `type` (`precision` · `standard` · `pressurized`), `shotSize` (`single` · `double` · `triple`), `diameterMm`, optional `doseRange` (`from`, `to`).
+
+**Feature definition** (built-in and custom):
+
+| Field | Notes |
+|---|---|
+| `key` | stable ID that never changes: `temperature`, `flat_pressure`, `preinfusion`, `low_bar_start`, `low_bar_end`, or `custom-<uuid>` |
+| `label` | what the UI shows; can be renamed freely |
+| `builtIn` | true for the five above. New machines offer only `temperature`, `flat_pressure` and `preinfusion`; `low_bar_start` and `low_bar_end` stay on a machine that has them switched on |
+| `enabled` | the switch in "What it can do" |
+| `switchable` | whether it has an on/off switch per shot: true for phases and custom features, false for temperature and flat pressure |
+| `value` | a value definition (below) |
+
+**Value definition** (shared by machine features and puck prep steps, so both behave alike):
+
+| `kind` | Extra fields |
+|---|---|
+| `number` | `unit`, `step`, optional `min` / `max` |
+| `seconds` | `step`, optional `min` / `max` |
+| `toggle` | none (on/off only) |
+| `choice` | `options`: list of `{ id, label }` |
+| `phase` | `step` for seconds, optional `pressure` (`step`, `min`, `max`) — the pressure profile phases; built-in only for now |
+
+### `prep_step`
+`id`, `owner_id`, `shared`, `archived_at`, `name`, `setting` (JSON: a value definition, or `{ kind: "none" }`, plus `startsAt`).
+
+### `routine`
+`id`, `owner_id`, `shared`, `archived_at`, `name`, `steps` (JSON: an ordered list of `{ stepId, value }`).
+A routine is a straight line, so an ordered list matches it exactly. Editing a routine only affects future recipes.
+
+### `recipe`
+| Column | Notes |
+|---|---|
+| `id`, `owner_id` | |
+| `method` | `espresso` |
+| `bean_id`, `machine_id` | the matching scope |
+| `grinder_id`, `basket_id`, `routine_id` | basket and routine can be empty (e.g. a bean-to-cup machine) |
+| `grind`, `dose` | the dose of the recipe's first shot; shots within 0.2 g of it belong to it |
+| `setup` | JSON snapshot (below) |
+| `fingerprint` | a hash of everything that makes the recipe what it is, except the dose |
+
+**Unique:** `owner_id` + `bean_id` + `machine_id` + `fingerprint` + `dose`. The database guarantees one recipe per identical setup and dose; matching keeps doses of one setup more than 0.2 g apart (§4.1).
+
+**Setup snapshot:**
+```json
+{
+  "features": {
+    "temperature":   { "label": "Temperature", "unit": "°C", "on": true, "value": 93000 },
+    "preinfusion":   { "label": "Preinfusion", "on": true, "value": 4000, "pressure": 2000 },
+    "low_bar_end":   { "label": "Low bar end", "on": false },
+    "custom-7f3a…":  { "label": "Paddle position", "on": true, "choice": "mid" }
+  },
+  "routine": {
+    "name": "Daily routine",
+    "steps": [
+      { "stepId": "…", "name": "WDT", "unit": "s", "value": 20000 },
+      { "stepId": "…", "name": "Tamp", "unit": "kg", "value": 15000 }
+    ]
+  }
+}
+```
+
+**Fingerprint** = SHA-256 of a canonical (sorted, fixed-format) list of: grinder, basket, routine, grind, every feature's `key` with its `on`/`value`/`pressure`/`choice`, and every routine step's `stepId` and `value` in order. **Labels, units and names are left out**, so renaming a feature or step never creates a new recipe. A switched-off feature counts only as "off", whatever value it had. The dose is left out: it is matched within 0.2 g instead (§4.1).
+
+### `shot`
+| Column | Notes |
+|---|---|
+| `id` | UUID version 7, may be made on the phone (offline queue) |
+| `owner_id`, `recipe_id` | |
+| `brewed_at` | |
+| `dose` | the exact dose brewed, for the ratio and grams left; within 0.2 g of its recipe's dose |
+| `yield`, `time` | the result |
+| `score` | 1–10 whole numbers; empty = "not rated" |
+| `balance` | −10 (sour) … 0 (balanced) … +10 (bitter); whole numbers; empty = not set |
+| `body`, `sweetness`, `aftertaste` | 0–10; whole numbers; empty = not set |
+| `notes` | free text, never used by Insights |
+
+**Never stored, always calculated:** ratio (yield ÷ the shot's dose), roast age at the time (brew date minus roast date).
+
+### `tag` and `shot_tag`
+`tag`: `id`, `owner_id`, `shared`, `archived_at`, `name`, `family` (`fruity` · `sweet` · `floral` · `nutty_roasty` · `other`, a fixed list in code), `built_in`. Names are unique per account, ignoring case. A removed note that shots used is archived; one no shot used is deleted. Typing an archived note's name brings it back.
+`tag_pair_kept`: `owner_id`, `tag_id`, `other_tag_id` (the lower id first): two notes the duplicate finder no longer suggests merging, after "Keep both".
+`tag_merged`: `tag_id` (primary key), `owner_id`, `into_tag_id`: a note merged into another, which is deleted. A shot saved later with the old id (an open form, a shot waiting offline) gets the note it went into, following merges in turn; a note deleted since is left off the shot. No foreign keys to `tag`.
+`shot_tag`: `shot_id` + `tag_id`.
+These are real tables rather than JSON on purpose: usage counts are one query, and merging two tags is one update.
+
+---
+
+## 4. How the key behaviors work
+
+### 4.1 Recipe matching
+1. While you edit the shot form, a shared function `recipeFingerprint(form)` runs in the browser.
+2. It looks the fingerprint up among this bean's recipes on this machine (cached on the phone, so it also works offline).
+   **Dose:** a recipe matches when the fingerprint is equal and its dose is within 0.2 g (200 thousandths) of the form's; the closest dose wins, and on a tie the recipe brewed most recently (then the one made first). A new recipe takes the shot's dose. The shot stores its own exact dose. Databases from before dose matching are matched again once when the server starts (`PRAGMA user_version` 1): in order of creation, a recipe within 0.2 g of an earlier one with the same new fingerprint gives it its shots and Brew next mark and is deleted.
+3. **Found** → "Recipe reused N×" (N = the recipe's shot count). The faint previous-score marker is the score of that recipe's latest rated shot.
+4. **Not found** → "New recipe · grind changed": the form is compared field by field with the recipe of **this bean's last shot** to name what changed (grind, dose, machine, grinder, basket, routine, or a feature by its label); with several changes, the first two are named and the rest counted, in the order grind, dose, machine, grinder, basket, routine, features; with nothing to name, just "New recipe".
+5. **On save** the server recomputes the fingerprint itself (it never trusts the browser's), then finds or creates the recipe and saves the shot, in one transaction. Flavor notes added on the Tasting tab are created in that transaction too, in the family Other, or matched to an existing note ignoring case.
+6. **Editing a shot** runs step 5 again. The shot may move to another recipe. A recipe left with no shots is removed, unless it is marked Brew next. **Deleting a shot** does the same for its recipe, in the same transaction.
+
+### 4.2 Prefill — one pure, tested function
+In this order:
+1. **Brew next is set** → that recipe's bean, values and setup; yield and time from its latest shot. The form shows "Recipe chosen from Library".
+2. **Otherwise, the current bean has shots** → the latest shot's recipe, yield and time.
+3. **Otherwise, the bean is a re-buy** ("Same as before") → follow the chain of earlier bags back to the nearest one with shots; its best recipe, with yield and time from that recipe's latest shot (without rated shots: its latest shot), as a new recipe for this bag. Its scores are not carried over.
+4. **Otherwise** → My setup defaults, with the current bean. Time starts empty. A yield or time with nothing to copy starts empty; −/+ count from 0.
+
+Taste always starts empty. Features switched on since the copied shot start from My setup if it has a value, otherwise switched off (a feature without an off switch starts on with an empty value). Features since switched off on the machine are left out. Archived gear or an archived routine is replaced by My setup's. A routine chosen with "Use it for new shots" (`app_state.next_routine_id`) replaces the copied routine in steps 2 and 3, not for Brew next. The routine starts as it is now: current steps, copied values where a step is still there, the routine's values for new steps.
+
+### 4.3 Best recipe
+Among a bean's recipes, the highest average score among those with at least 3 rated shots. If none has 3 yet, the highest single score. Ties: more rated shots, then most recent. Calculated, never stored.
+
+### 4.4 Brew next
+`app_state.brew_next_recipe_id`. Saving a shot clears it (and `next_routine_id`) in the same transaction, and makes the shot's bean `current_bean_id`. Tapping the button again or "Use last shot recipe" also clears it. Whenever the mark is cleared or moves, a recipe that only the mark kept (no shots) is removed (§4.1, step 6). On a finished bean, marking a recipe reopens the bean.
+
+### 4.5 Custom features and step settings
+Definitions live on the gear (`spec.features`) and on the step (`setting`); values live in the recipe's setup snapshot under the feature `key` or the `stepId`. One set of schemas checks all of them, in the browser and on the server.
+
+### 4.6 Grams left and finishing a bean
+After a shot is saved: if the bean has a bag weight and the doses add up to it, the bean is marked finished with `finished_automatically`, and the response tells the app to show the undo.
+
+---
+
+## 5. Insights query system
+
+Four layers, each testable on its own:
+
+1. **`shot_facts` view** — one wide row per shot with everything a chart might need: IDs (shot, recipe, bean, machine, grinder, basket, routine) and their names, brew time, score and all taste values, dose, yield, time, grind, the recipe's dose, bean facts (roast date, process, country, roaster, roast level), how many shots the recipe has, and the setup JSON. Values stay as stored. Reading it for one account (`src/lib/server/insights/facts.ts`) adds what needs the user's time zone or the units module: the local day, the week (named by its Monday), the roast age in days and the ratio. Home's graphs read from it too. The view is not made by a migration: the server drops it before migrating and creates it again after, because SQLite cannot rebuild a table (as drizzle-kit does for a column change) while a view reads it.
+2. **Registry of measures and dimensions** (TypeScript), each reading a shot's facts; the database query filters by account, bean, recipe and time:
+   - *Measures:* score, time, yield, dose, ratio, grind, balance, body, sweetness, aftertaste.
+   - *Dimensions:* bean, process, country, roaster, roast level, recipe, routine, grinder, basket, week, roast age range (not built yet: its ranges are decided with the first card that needs them), **`feature:<key>`** (any machine feature, read from the JSON) and **`step:<stepId>`** (any step setting).
+   - *Filters:* bean, recipe, date range, rated shots only, reused recipes only.
+   - *Hold constant:* compare only within the same bean or the same recipe — the "fair comparison" rule. Comparing routines holds the bean and every other part of the recipe constant (machine, grinder, grind, dose within 0.2 g, basket, setup), since the routine is part of the recipe. "Within 0.2 g" is not transitive, so recipes are taken from the most brewed down (the first brewed on a tie) and each joins the closest one within reach, as §4.1 matches a dose to the closest recipe. A bean's consistency is the pooled σ within its reused recipes.
+   - A query is `{ measure, groupBy, filters, holdConstant }` and returns the values per group.
+3. **Statistics module** (pure TypeScript): count, mean, sample standard deviation (σ, divided by n − 1), median and quartiles (one documented method), range, histogram bins, fitted normal curve, how many σ one shot is from its recipe's average, and pooled σ within groups (for "hold constant").
+4. **Insight definitions** — data, not code: `{ id, topic, query, chart, minimum shots per group, sentence template, "not enough data" message }`. Chart types: box plot, mean ± σ, line with σ band, bell curve, σ bars.
+
+A new insight is a new definition. A new kind of data becomes usable everywhere by adding one registry entry.
+*Why statistics in TypeScript, not SQL:* SQLite has no standard deviation or percentiles, the data is small (thousands of rows), and pure functions are easy to test exactly.
+*Speed:* indexes on shots by account and time, shots by recipe, and the recipe's unique key. If one JSON dimension gets heavy use, an index can be added on that JSON path without changing the schema.
+
+---
+
+## 6. Offline queue
+
+- Needs https or localhost; over plain http the app works online only.
+- The service worker caches the app and what the shot form needs: open beans, their recipes and latest shots, gear, routines, tags, My setup and app state. Home, the shot form and the Journal always open offline; other pages already visited open read only. It keeps them as the pages and their data (`__data.json`) as the server renders them: Home, the Journal and the shot form for every open bean from a list the server gives (`/offline`), fetched as copies that take no "Shot saved" message and set no cookie; other pages as they are opened. Changes offline are not sent.
+- A shot saved offline (new or edited, or a score from the Rate sheet) goes into a queue on the device (IndexedDB, one entry per shot, the latest change winning) with its own ID and its account, and is sent in order when the connection returns (`POST /queue`, one change at a time). A new shot gets the phone's time at Save as its brew time, never later than the server's clock; an edit or a score keeps the shot's brew time. Sending the same shot twice changes nothing. An entry is only sent for its own account.
+- The next shot starts from the newest waiting shot.
+- A queued shot the server refuses stays on the device, marked "Not saved", until it is fixed or deleted.
+- The shot form keeps a local draft, so reloading the page never loses input; Save and Back end it.
+- Library changes need a connection.
+- With one user, the latest change wins if the same shot was edited twice.
+- The Journal and Home's Last shot card mark shots that are still waiting.
+- Signing out removes the cache, the draft and the queue, after asking when shots are waiting. A new app version takes over only when the app next opens.
+
+---
+
+## 7. Not modelled yet
+
+- Measuring gear such as scales and refractometers — a new gear kind plus result fields.
+- Burr change and recalibration markers — a dated `gear_event` table.
+- Household sharing — the `shared` columns are in place; rules and UI are not.
+- Other brew methods — `recipe.method` is in place; each method gets its own setup shape.

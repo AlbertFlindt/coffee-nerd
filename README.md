@@ -63,7 +63,7 @@ To start over, stop the stack and delete its `data` volume (`docker volume rm co
 | Document | What it is |
 |---|---|
 | [`docs/ux-decision-log.md`](docs/ux-decision-log.md) | Every product and technical decision (D-01 …), with the reasons |
-| [`docs/data-model.md`](docs/data-model.md) | Entities, recipe matching, prefill and the Insights query system |
+| [`docs/SPEC.md`](docs/SPEC.md) | Entities, recipe matching, prefill and the Insights query system |
 | [`docs/roadmap.md`](docs/roadmap.md) | Build order and acceptance criteria per milestone |
 | [`docs/screens/`](docs/screens/) | All designed screens at 412 × 915 |
 | [`design-system/`](design-system/) | Tokens, component CSS and guidelines, logo |

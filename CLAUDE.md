@@ -7,7 +7,7 @@ Self-hosted, privacy-friendly espresso journal. SvelteKit (Svelte 5, TypeScript 
 Read the relevant one before changing behavior or visuals. Do not import them here; open them when needed.
 
 - `docs/ux-decision-log.md`: every product decision (D-01 …) and open topics. Behavior must match it.
-- `docs/data-model.md`: entities, recipe matching, prefill, best recipe, Insights query system.
+- `docs/SPEC.md`: entities, recipe matching, prefill, best recipe, Insights query system.
 - `design-system/`: tokens, `components.css` (`cn-` classes), `components.md`. Synced with the design-system artifact; change it only as part of a sync (D-146).
 - `docs/screens/`: every designed screen as PNG + static HTML at 412 × 915. Match them.
 - `docs/roadmap.md`: milestones with acceptance criteria, built in order (parallel threads: D-240).
@@ -47,7 +47,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - A recipe is immutable. Saving a shot finds or creates its recipe by fingerprint on the server, in the same transaction (D-63).
 - The fingerprint ignores labels, units and names (D-65). Changing what goes into it changes recipe identity: that needs a decision.
 - Taste is never prefilled (D-11). Not rated is `null`, never `0`.
-- Every user-created row has `owner_id`; Library rows also `shared`. Rows that shots point to are archived (`archived_at`), never deleted. Only exception: a recipe left with no shots is deleted unless it is marked Brew next (data-model §4.1).
+- Every user-created row has `owner_id`; Library rows also `shared`. Rows that shots point to are archived (`archived_at`), never deleted. Only exception: a recipe left with no shots is deleted unless it is marked Brew next (SPEC §4.1).
 - A new insight is a definition in the registry, not ad-hoc SQL (D-64). σ is the sample standard deviation (n − 1).
 - UI copy: plain words, no abbreviations, sentence case; "Gear", never "Equipment" (D-20, D-39).
 - Screens fit the viewport; only lists scroll; no visible scrollbars (D-36). Touch targets ≥ 44 px.
