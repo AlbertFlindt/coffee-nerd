@@ -8,7 +8,7 @@ Everything that is unanswered, not designed yet, or deliberately left for later,
 
 The decision log keeps the history of product topics; this file is the working list.
 
-Last updated: 2026-10-27
+Last updated: 2026-10-30
 
 ---
 
@@ -26,7 +26,6 @@ Last updated: 2026-10-27
 | As built, without a design (D-221), approved by the owner by screenshot on 26 October 2026: a shot waiting on the phone shows a clock icon and "Waiting to send" in muted caption type after its recipe tag, on its Journal row and on Home's Last shot card; one the server refused shows a circle with a line and "Not saved". Its form says "Not saved: the server did not take this shot. Change it and save again, or delete it." above Save, and the delete question is the same as for a saved shot | When the canvas designs it | D-221, D-224, D-231 |
 | As built, without a design (D-225), approved by the owner by screenshot on 26 October 2026: Sign out while shots wait opens a sheet "1 shot is still waiting to send" (or "N shots are"), "Signing out deletes it from the phone. Stay signed in and open the app with a connection to send it first.", with "Sign out and delete" and "Stay signed in" | When the canvas designs it | D-225 |
 | As built, without a design (D-237, D-238), approved by the owner by screenshot on 26 October 2026: the server's reason under the "Not saved" message in the shot form, "The server could not save it" for a shot the server kept failing on, and "Discard change" on a waiting or "Not saved" change to a saved shot | When the canvas designs it | D-237, D-238 |
-| As built, without a design: the version line at the bottom of Settings ("Version of 26 October 2026, 13:19") in muted caption type | M11 | D-234 |
 | As built, without a design, approved by the owner by screenshot on 26 October 2026: a page that could not open shows "This page could not open", the reason, and "Back to Home". Offline, a page the phone has not kept gives "This page is not on the phone yet. Open it once with a connection to keep it."; opened from outside the app (a link, a reload) it opens Home instead | When the canvas designs it | D-219 |
 | Proper design for the sign-in and "Create your account" pages (built simple for now) | Before release (M12) | D-84 |
 | Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency), and the chip row that comes back with the second graph | After M9 | Open topic 15, D-32, D-193 |
@@ -41,7 +40,6 @@ Last updated: 2026-10-27
 | Weekly line: screen 24 labels its first week "12 weeks ago", but 12 weeks ending with this week start 11 weeks ago. Built as drawn | When the owner decides | D-212 |
 | Most consistent beans shows the 4 steadiest beans, as screen 25 draws; the others are left out. A bean name longer than about 14 letters runs into the bars | When the owner decides | D-56, D-202 |
 | The weekly line's basis line names no week "to treat with care" (D-203): every week has few shots by nature, so naming them would say nothing | When the owner decides | D-203 |
-| Settings (units, backup, export, and the dose, yield and time steps of D-89) | M11 | Roadmap M11, D-89 |
 | Tablet layouts, light theme, focus and hover styles | Not scheduled | Open topic 5, design-system README |
 | Edit My setup with several of your own features: each adds a 56 px row under the pressure profile; at 412 × 915 two fit, more make the form area scroll inside itself (on a 780 px tall phone browser, two already do) | When the canvas designs it | D-161, D-36 |
 | Shorter screens: the shot form tightens its spacing below 880 px and 760 px of height (D-36). Below about 740 px it no longer fits and the form area scrolls inside itself, so Setup and Tasting can scroll out of view; a design for small phones is still to do | When the canvas designs small phones | D-36 |
@@ -73,6 +71,7 @@ Last updated: 2026-10-27
 | Households: own Library each, or a share toggle | Not scheduled | Open topic 22, D-60 |
 | Open source: contributing guide, code of conduct (license: AGPL-3.0, D-246) | M12 | Open topic 26, D-243 |
 | Optional: `@claude` in GitHub issues and pull requests | Not scheduled | Open topic 27 |
+| A choice of units (degrees Fahrenheit, ounces): metric only for now | After the release, when someone asks | D-250 |
 
 ## 4. Code and tooling to revisit
 
