@@ -60,6 +60,7 @@ async function setSlider(name: string, value: number, min: number, max: number) 
 }
 
 const recipeTag = () => page.locator('.cn-tag');
+const grind = () => page.getByRole('button', { name: /^Grind, .*tap to type$/ }).innerText();
 const save = async () => {
   await page.getByRole('button', { name: 'Save shot' }).click();
   await expect(page.getByRole('status')).toContainText('Shot saved');
@@ -484,6 +485,108 @@ test('the sheet slides; with reduced motion it just appears; saving with it open
   await page.getByRole('button', { name: 'Close Setup' }).click({ position: { x: 200, y: 20 } });
   await expect(page.getByRole('region', { name: 'Setup', exact: true })).toBeHidden();
   await page.emulateMedia({ reducedMotion: null });
+});
+
+/** A one-finger swipe made of real touch events, as on the phone. */
+async function swipe(from: { x: number; y: number }, dx: number, dy: number) {
+  const touch = await page.context().newCDPSession(page);
+  const at = (i: number) => [{ x: from.x + (dx * i) / 8, y: from.y + (dy * i) / 8 }];
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: at(0) });
+  for (let i = 1; i <= 8; i++) {
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: at(i) });
+  }
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await touch.detach();
+}
+
+test("the phone's back gesture closes the sheet, not the shot", async () => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'New shot' }).click();
+  await page.getByRole('button', { name: 'Grind plus 0.1' }).click();
+  const entered = await grind();
+  const sheet = page.getByRole('region', { name: 'Setup', exact: true });
+
+  await page.getByRole('button', { name: 'Setup', exact: true }).click();
+  await expect(sheet).toBeVisible();
+  await page.goBack();
+  await expect(sheet).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Save shot' })).toBeVisible();
+  expect(await grind()).toBe(entered);
+
+  // From a list inside the sheet, back returns to Setup first.
+  await page.getByRole('button', { name: 'Setup', exact: true }).click();
+  await sheet.getByRole('button', { name: /^Basket/ }).click();
+  await expect(sheet.getByRole('button', { name: 'Back to Setup' })).toBeVisible();
+  await page.goBack();
+  await expect(sheet.getByText('Pressure profile')).toBeVisible();
+  await page.goBack();
+  await expect(sheet).toBeHidden();
+
+  // Closed another way, the sheet leaves nothing behind: the next back leaves the form.
+  await page.getByRole('button', { name: 'Setup', exact: true }).click();
+  await sheet.getByRole('button', { name: /^Basket/ }).click();
+  await page.getByRole('button', { name: 'Close Setup' }).click({ position: { x: 200, y: 20 } });
+  await expect(sheet).toBeHidden();
+  await settled();
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
+
+  // Reloaded with the sheet open: one back leaves the form.
+  await page.getByRole('link', { name: 'New shot' }).click();
+  await page.getByRole('button', { name: 'Setup', exact: true }).click();
+  await expect(sheet).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Save shot' })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
+
+  // Left with the sheet open (as Save does): back from Home opens the form once, not twice.
+  await page.getByRole('link', { name: 'New shot' }).click();
+  await page.getByRole('button', { name: 'Setup', exact: true }).click();
+  await expect(sheet).toBeVisible();
+  await page.getByRole('link', { name: 'Back without saving' }).dispatchEvent('click');
+  await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole('button', { name: 'Save shot' })).toBeVisible();
+  await expect(sheet).toBeHidden();
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
+});
+
+test('swiping the sheet down closes it, but not on a slider', async () => {
+  await page.goto('/shot/new');
+  const entered = await grind();
+  await page.getByRole('button', { name: 'Tasting', exact: true }).click();
+  const tasting = page.getByRole('region', { name: 'Tasting', exact: true });
+  await expect(tasting).toBeVisible();
+  await settled();
+  // Across a slider the finger sets the slider; the sheet stays.
+  const slider = (await tasting
+    .getByRole('slider', { name: 'Body, light to heavy' })
+    .boundingBox())!;
+  await swipe({ x: slider.x + 20, y: slider.y + slider.height / 2 }, 120, 30);
+  await expect(tasting).toBeVisible();
+  await expect(tasting).toHaveCSS('transform', 'none');
+  await page.getByRole('button', { name: 'Close Tasting' }).click({ position: { x: 200, y: 20 } });
+
+  // Down from a −/+ row: the sheet goes, and the row's value stays as it was.
+  await page.getByRole('button', { name: 'Setup', exact: true }).click();
+  const setup = page.getByRole('region', { name: 'Setup', exact: true });
+  await settled();
+  const minus = setup.getByRole('button', { name: 'Temperature minus 1 °C' });
+  const box = (await minus.boundingBox())!;
+  // A short swipe springs back.
+  await swipe({ x: box.x + box.width / 2, y: box.y + box.height / 2 }, 0, 40);
+  await expect(setup).toBeVisible();
+  await expect(setup).toHaveCSS('transform', 'none');
+  await swipe({ x: box.x + box.width / 2, y: box.y + box.height / 2 }, 0, 200);
+  await expect(setup).toBeHidden();
+  await expect(recipeTag()).toHaveText(/^Recipe reused/);
+  expect(await grind()).toBe(entered);
+  // Its history entry went with it.
+  await settled();
+  await page.goBack();
+  await expect(page.getByRole('button', { name: 'Save shot' })).toBeHidden();
 });
 
 test('Flavor notes folds away, and stays folded on this phone', async () => {
