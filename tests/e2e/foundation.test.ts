@@ -48,10 +48,41 @@ test('the app uses the design system and self-hosted Figtree, with no external r
   expect(external).toEqual([]);
 });
 
+test('creating the account shows the welcome, the password rule and the privacy note', async ({
+  page
+}) => {
+  await page.goto('/welcome');
+
+  await expect(page.getByText('Data that backs up the home barista')).toBeVisible();
+  await expect(page.getByText('At least 8 characters')).toBeVisible();
+  await expect(
+    page.getByText('Everything stays on this server. Nothing is sent anywhere else.')
+  ).toBeVisible();
+  await expectNoPageScroll(page);
+  await page.screenshot({ path: 'screenshots/CreateAccount.png' });
+});
+
+test('the eye button shows and hides a password', async ({ page }) => {
+  await page.goto('/welcome');
+  const password = page.getByLabel('Password', { exact: true });
+  await password.fill(PASSWORD);
+  const show = page.getByRole('button', { name: 'Show password' }).first();
+
+  await expect(password).toHaveAttribute('type', 'password');
+  await show.click();
+  await expect(show).toHaveAttribute('aria-pressed', 'true');
+  await expect(password).toHaveAttribute('type', 'text');
+  await expect(password).toHaveValue(PASSWORD);
+  await show.click();
+  await expect(password).toHaveAttribute('type', 'password');
+  // The repeat field has its own button and stays hidden.
+  await expect(page.getByLabel('Password again')).toHaveAttribute('type', 'password');
+});
+
 test('the two passwords must match', async ({ page }) => {
   await page.goto('/welcome');
   await page.getByLabel('Name').fill(NAME);
-  await page.getByLabel('Password · at least 8 characters').fill(PASSWORD);
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
   await page.getByLabel('Password again').fill('something-else');
   await page.getByRole('button', { name: 'Create account' }).click();
 
@@ -62,7 +93,7 @@ test('the two passwords must match', async ({ page }) => {
 test('creating the account signs you in', async ({ page }) => {
   await page.goto('/welcome');
   await page.getByLabel('Name').fill(NAME);
-  await page.getByLabel('Password · at least 8 characters').fill(PASSWORD);
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
   await page.getByLabel('Password again').fill(PASSWORD);
   await page.getByRole('button', { name: 'Create account' }).click();
 
@@ -79,7 +110,7 @@ test('step by step from the machine to a ready shot form; leaving halfway resume
 }) => {
   await page.goto('/login');
   await page.getByLabel('Name').fill(NAME);
-  await page.getByLabel('Password').fill(PASSWORD);
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
 
@@ -185,13 +216,17 @@ test('after first run, signed-out visits lead to sign-in, and /welcome is gone',
 
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  await expect(
+    page.getByText('Forgot your password? The README shows how to reset it.')
+  ).toBeVisible();
   await expectNoPageScroll(page);
+  await page.screenshot({ path: 'screenshots/SignIn.png' });
 });
 
 test('a wrong password does not sign in', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('Name').fill(NAME);
-  await page.getByLabel('Password').fill('wrong-password');
+  await page.getByLabel('Password', { exact: true }).fill('wrong-password');
   await page.getByRole('button', { name: 'Sign in' }).click();
 
   await expect(page.getByRole('alert')).toHaveText('That name and password do not match.');
@@ -203,7 +238,7 @@ test('with its first shot, a new account sees on Insights what each card needs',
 }) => {
   await page.goto('/login');
   await page.getByLabel('Name').fill(NAME);
-  await page.getByLabel('Password').fill(PASSWORD);
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.getByRole('link', { name: 'Insights' }).click();
 
@@ -222,7 +257,7 @@ test('with its first shot, a new account sees on Insights what each card needs',
 test('sign in, stay signed in, sign out', async ({ page, context }) => {
   await page.goto('/login');
   await page.getByLabel('Name').fill(NAME.toLowerCase());
-  await page.getByLabel('Password').fill(PASSWORD);
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page.getByRole('heading', { name: 'Coffee Nerd' })).toBeVisible();
 
