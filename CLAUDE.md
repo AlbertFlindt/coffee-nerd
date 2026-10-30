@@ -17,9 +17,10 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - `npm run dev`: dev server on port 5173. `npm run build` / `npm start`: production build in `build/`, port 3000.
 - `npm run check`: svelte-check + TypeScript. `npm run lint`: Prettier check, ESLint and `node scripts/version.mjs check`. `npm run format` fixes formatting.
 - `npm test`: Vitest (`src/**/*.test.ts`), then the hook tests (`.claude/hooks/*.test.mjs`). One file: `npx vitest run <path>`.
-- `npm run test:e2e`: Playwright (`tests/e2e/`) at 412 × 915 against `node build`, two projects with fresh
-  databases in `test-results/`: `first-run` (empty, `foundation.test.ts`) and `seeded` (`npm run db:seed`
-  first; screen tests save screenshots to `screenshots/`). Tests in a file run in order. One project: `npx playwright test --project=seeded`.
+- `npm run test:e2e`: Playwright (`tests/e2e/`) at 412 × 915 against `node build`, three projects with fresh
+  databases in `test-results/`: `first-run` (empty, `foundation.test.ts`), `seeded` (`npm run db:seed` first;
+  screen tests save screenshots to `screenshots/`) and `insights` (the seed with `--history`). Tests in a file
+  run in order. One project: `npx playwright test --project=seeded`.
 - `npm run screenshot -- <route> [name]`: 412 × 915 screenshot (2×) into `screenshots/`; needs `npm run dev` (or `BASE_URL`).
 - `npm run db:generate`: new migration in `drizzle/` from `src/lib/server/db/schema.ts`. Migrations run when the
   server starts (`npm run db:migrate` without starting it); the database is `DATABASE_PATH` (default `./data/coffee-nerd.db`).
