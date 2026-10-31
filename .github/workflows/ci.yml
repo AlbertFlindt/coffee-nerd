@@ -95,10 +95,10 @@ jobs:
           base="origin/${{ github.base_ref }}"
           changed=$(git diff --name-only "$base"...HEAD)
           echo "Changed files:"; echo "$changed" | sed 's/^/  /'
-          # Docs, CI, the license and Claude Code files alone don't need a release.
-          app=$(echo "$changed" | grep -Ev '^(\.github/|\.claude/|docs/|[^/]+\.md$|LICENSE$|scripts/version\.mjs$)' || true)
+          # Docs, CI, end-to-end tests, the license and Claude Code files alone don't need a release.
+          app=$(echo "$changed" | grep -Ev '^(\.github/|\.claude/|docs/|tests/|[^/]+\.md$|LICENSE$|scripts/version\.mjs$)' || true)
           if [ -z "$app" ]; then
-            echo "Only docs or CI changed: no release needed."; exit 0
+            echo "Only docs, CI or tests changed: no release needed."; exit 0
           fi
           new=$(node scripts/version.mjs get)
           old=$(git show "$base":package.json | node -e 'let s="";process.stdin.on("data",(d)=>s+=d).on("end",()=>console.log(JSON.parse(s).version))')

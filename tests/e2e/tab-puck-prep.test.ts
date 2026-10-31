@@ -281,6 +281,9 @@ test('once a shot used it, the routine is archived, and so is its step', async (
     .getByRole('dialog', { name: 'Archive this routine' })
     .getByRole('button', { name: 'Archive' })
     .click();
+  // Archiving is a plain form post: the Puck prep page loads anew. Its heading shows before the
+  // page has started, when the step chips do not open their sheet yet, so wait for the load.
+  await page.waitForURL('/library/puck-prep');
   await expect(page.getByRole('heading', { name: 'Puck prep', level: 1 })).toBeVisible();
   await expect(page.getByRole('link', { name: /^Light roast/ })).toHaveCount(0);
 
