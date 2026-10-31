@@ -39,8 +39,14 @@ import {
 } from './schema';
 
 type Process = (typeof bean.$inferSelect)['process'];
-/** A bean in the shot form's bean list, with its roast age today. */
-export type BeanChoice = { id: string; name: string; process: Process; roastAgeDays: number };
+/** A bean in the shot form's bean list, with its roaster and its roast age today. */
+export type BeanChoice = {
+  id: string;
+  name: string;
+  roaster: string | null;
+  process: Process;
+  roastAgeDays: number;
+};
 
 export type ShotFormData = {
   state: 'ready';
@@ -506,10 +512,16 @@ function tagsByUse(
     .all();
 }
 
-const CHOICE = { id: bean.id, name: bean.name, process: bean.process, roastDate: bean.roastDate };
+const CHOICE = {
+  id: bean.id,
+  name: bean.name,
+  roaster: bean.roaster,
+  process: bean.process,
+  roastDate: bean.roastDate
+};
 
 function beanChoice(
-  row: { id: string; name: string; process: Process; roastDate: string },
+  row: { id: string; name: string; roaster: string | null; process: Process; roastDate: string },
   timeZone: string,
   now: number
 ): BeanChoice {

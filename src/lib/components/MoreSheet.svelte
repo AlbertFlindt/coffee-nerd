@@ -1,8 +1,8 @@
 <script lang="ts">
   // The Setup or the Tasting sheet, each opened by its own button on the shot form. Setup:
   // temperature, pressure profile, basket, puck prep, changes since the last shot in
-  // sage. Tasting: balance, body, sweetness, aftertaste, flavor notes that fold away
-  // and notes; all start empty. Tasting scrolls as a whole.
+  // sage. Tasting: balance, body, sweetness, aftertaste and flavor notes that fold away; all start
+  // empty. Tasting scrolls as a whole. Notes are on the shot form itself.
   import { untrack } from 'svelte';
   import { closeOnBack } from '#lib/back-closes.ts';
   import BottomSheet from './BottomSheet.svelte';
@@ -473,18 +473,6 @@
           </div>
         </div>
       </div>
-      <div class="notes-block">
-        <div class="notes-head">
-          <label for="shot-notes" class="strong">Notes</label>
-          <span id="notes-hint" class="cn-caption">Just for you · not used in Insights</span>
-        </div>
-        <textarea
-          id="shot-notes"
-          aria-describedby="notes-hint"
-          placeholder="Anything worth remembering about this shot"
-          value={shot.notes ?? ''}
-          oninput={(e) => (shot.notes = e.currentTarget.value || null)}></textarea>
-      </div>
     </div>
   {/if}
 </BottomSheet>
@@ -679,38 +667,11 @@
     outline: none;
   }
 
-  .notes-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-
-  textarea {
-    flex: none;
-    height: 72px;
-    padding: 12px 14px;
-    border: none;
-    border-radius: var(--radius-md);
-    background: var(--surface-sheet-field);
-    color: var(--ink);
-    font-family: inherit;
-    font-size: 16px;
-    resize: none;
-  }
-
-  textarea::placeholder {
-    color: var(--ink-muted);
-  }
-
   /* Tighter on shorter screens. */
   @media (max-height: 880px) {
     .tasting,
     .sliders {
       gap: var(--space-2);
-    }
-
-    textarea {
-      height: 56px;
     }
   }
 
