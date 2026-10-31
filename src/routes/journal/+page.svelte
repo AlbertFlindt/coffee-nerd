@@ -121,7 +121,7 @@
     onclose={() => (beanSheet = false)}
   >
     <h2 class="cn-type-heading sheet-title">Beans</h2>
-    <!-- Not designed yet: a plain list of the beans that have shots. -->
+    <!-- Not designed yet: a plain list of the beans that have shots, with their roaster. -->
     <form class="beans" method="GET" action={resolve('/journal')}>
       {#if journal.unrated}<input type="hidden" name="unrated" value="1" />{/if}
       <button
@@ -137,8 +137,11 @@
           value={b.id}
           class="bean cn-tap"
           onclick={() => (beanSheet = false)}
-          aria-pressed={b.id === journal.beanId}>{b.name}</button
+          aria-pressed={b.id === journal.beanId}
         >
+          <!-- The roaster after the name, as in the shot form's bean list. -->
+          {b.name}{#if b.roaster}<span class="soft">&nbsp;· {b.roaster}</span>{/if}
+        </button>
       {/each}
     </form>
   </BottomSheet>
@@ -279,5 +282,10 @@
 
   .bean[aria-pressed='true'] {
     color: var(--amber);
+  }
+
+  .soft {
+    font-weight: 400;
+    color: var(--ink-muted);
   }
 </style>

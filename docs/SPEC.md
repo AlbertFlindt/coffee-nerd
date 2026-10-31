@@ -112,6 +112,8 @@ Kept apart from settings because it changes with almost every visit.
 
 **Never stored, always calculated:** roast age, grams left (bag weight minus the doses of its shots), best score, number of recipes and shots.
 
+**Bags of one bean:** bags with the same name and roaster (ignoring case and surrounding spaces) are one bean where bags are listed together: "Same as before" offers it once, as its latest bag, and the Journal's bean filter shows it once, named by the bag brewed last, with the shots of every bag. In that filter, recipes of different bags with the same machine and fingerprint and doses within 0.2 g are one recipe. Everywhere else, including recipe matching (§4.1), each bag stays its own.
+
 ### `gear`
 One table for all Gear, because Gear is one concept. A future kind (scales) needs a new spec shape, not a new table.
 

@@ -62,6 +62,8 @@ request template.
   swipe down anywhere on them while their content is at the top; the design only drags the handle.
 - The shot form's Notes field under Setup and Tasting (the screens draw notes in the Tasting
   sheet), and the roaster after each bean's name in the bean list.
+- The Journal's bean filter: bags with the same name and roaster are one entry, with the roaster
+  after the name, and the same recipe brewed from several bags is one entry in the recipe filter.
 - The shot form's Setup and Tasting rows, the sheets without tabs, folding flavor notes, the "Use it
   for new shots?" sheet, and the Archived lists of Gear, Puck prep and Tags.
 - Where a screen in `docs/screens/` differs from the app in a detail (a "Delete feature" on a used

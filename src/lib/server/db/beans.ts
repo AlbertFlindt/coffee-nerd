@@ -2,6 +2,7 @@
 // scoped to the signed-in account.
 import { and, desc, eq } from 'drizzle-orm';
 import {
+  beanIdentity,
   bestScoreText,
   gramsLeft,
   gramsLeftText,
@@ -232,7 +233,7 @@ export function rebuyChoices(
   const seen = new Set<string>();
   const choices: { id: string; name: string; origin: string }[] = [];
   for (const row of rows) {
-    const key = JSON.stringify([row.name.trim().toLowerCase(), row.roaster?.trim().toLowerCase()]);
+    const key = beanIdentity(row.name, row.roaster);
     if (seen.has(key)) continue;
     seen.add(key);
     choices.push({ id: row.id, name: row.name, origin: originLine(row) });

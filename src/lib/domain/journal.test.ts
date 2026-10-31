@@ -8,6 +8,7 @@ import {
   coreValuesText,
   dayLabel,
   groupByDay,
+  groupRecipes,
   journalTasteText,
   roastAgeText,
   shotsThisWeek
@@ -247,5 +248,37 @@ describe('setupDifferences', () => {
         { values: 'b', setup: [temp('94 °C')] }
       ])
     ).toEqual([[], []]);
+  });
+});
+
+describe('groupRecipes', () => {
+  const r = (id: string, fingerprint: string, dose: number, machineId = 'm1') => ({
+    id,
+    machineId,
+    fingerprint,
+    dose
+  });
+
+  it('recipes of different bags of one bean with the same setup and dose are one', () => {
+    expect(groupRecipes([r('new', 'f1', 18000), r('old', 'f1', 18100)])).toEqual([
+      { id: 'new', ids: ['new', 'old'] }
+    ]);
+  });
+
+  it('another setup, machine or dose further than 0.2 g apart stays apart, in the order given', () => {
+    expect(
+      groupRecipes([
+        r('a', 'f1', 18000),
+        r('b', 'f2', 18000),
+        r('c', 'f1', 18000, 'm2'),
+        r('d', 'f1', 18300),
+        r('e', 'f1', 17900)
+      ])
+    ).toEqual([
+      { id: 'a', ids: ['a', 'e'] },
+      { id: 'b', ids: ['b'] },
+      { id: 'c', ids: ['c'] },
+      { id: 'd', ids: ['d'] }
+    ]);
   });
 });

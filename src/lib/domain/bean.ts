@@ -142,3 +142,11 @@ export function roastDateText(roastDate: string, today: string): { date: string;
     ago: days === 0 ? 'Today' : days === 1 ? 'Yesterday' : `${days} days ago`
   };
 }
+
+/**
+ * What makes bags one bean: the same name and roaster, ignoring case and surrounding spaces.
+ * The Journal shows them as one bean and "Same as before" offers them once.
+ */
+export function beanIdentity(name: string, roaster: string | null): string {
+  return JSON.stringify([name.trim().toLowerCase(), roaster?.trim().toLowerCase() || null]);
+}
