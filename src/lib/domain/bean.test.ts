@@ -80,15 +80,13 @@ describe('gramsLeft and shouldAutoFinish', () => {
 });
 
 describe('bestScoreText', () => {
-  it('the best recipe’s average with one decimal once it has 3 rated shots', () => {
-    expect(bestScoreText({ recipeId: 'r', basis: 'average', score: 23 / 3, ratedShots: 3 })).toBe(
-      '7.7'
-    );
-    expect(bestScoreText({ recipeId: 'r', basis: 'average', score: 8, ratedShots: 4 })).toBe('8.0');
+  it('the best recipe’s average with one decimal', () => {
+    expect(bestScoreText({ recipeId: 'r', score: 23 / 3, ratedShots: 3 })).toBe('7.7');
+    expect(bestScoreText({ recipeId: 'r', score: 8, ratedShots: 2 })).toBe('8.0');
   });
 
-  it('otherwise its highest single score, a whole number', () => {
-    expect(bestScoreText({ recipeId: 'r', basis: 'single', score: 8, ratedShots: 1 })).toBe('8');
+  it('with one rated shot, its score as a whole number', () => {
+    expect(bestScoreText({ recipeId: 'r', score: 8, ratedShots: 1 })).toBe('8');
   });
 
   it('no rated shot, no best score', () => {

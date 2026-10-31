@@ -107,9 +107,9 @@ describe('loadBeans', () => {
     });
   });
 
-  it('the best score is the best recipe’s average once it has 3 rated shots', () => {
+  it('the best score is the best recipe’s average', () => {
     for (const [i, score] of [8, 8, 7].entries()) shot(T0 - (5 - i) * DAY, { taste: taste(score) });
-    shot(T0 - DAY, { taste: taste(9), grind: 1500 });
+    shot(T0 - DAY, { taste: taste(7), grind: 1500 });
     expect(loadBeans(db, ids.userId, T0).open[0].best).toBe('7.7');
   });
 
@@ -286,7 +286,7 @@ describe('loadBeanDetail', () => {
         'Heirloom · 1,900–2,100 m · Light',
         'Roasted 5 Sep · Open'
       ],
-      best: '9',
+      best: '8.0',
       recipeCount: 2,
       shotCount: 3
     });

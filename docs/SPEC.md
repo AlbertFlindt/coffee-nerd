@@ -237,7 +237,7 @@ In this order:
 Taste always starts empty. Features switched on since the copied shot start from My setup if it has a value, otherwise switched off (a feature without an off switch starts on with an empty value). Features since switched off on the machine are left out. Archived gear or an archived routine is replaced by My setup's. A routine chosen with "Use it for new shots" (`app_state.next_routine_id`) replaces the copied routine in steps 2 and 3, not for Brew next. The routine starts as it is now: current steps, copied values where a step is still there, the routine's values for new steps.
 
 ### 4.3 Best recipe
-Among a bean's recipes, the highest average score among those with at least 3 rated shots. If none has 3 yet, the highest single score. Ties: more rated shots, then most recent. Calculated, never stored.
+Among a bean's recipes, the one with the highest average score over its rated shots. A recipe rated once counts with that score, so with a single rated shot its recipe is the best recipe. Unrated shots do not count. Ties: more rated shots, then most recent. The bean's best score is that average with one decimal ("7.7"), or a whole number when the recipe has one rated shot ("8"). The bean detail page lists recipes in the same order ("Best first"); each row still shows its highest single score ("9 best"). Calculated, never stored.
 
 ### 4.4 Brew next
 `app_state.brew_next_recipe_id`. Saving a shot clears it (and `next_routine_id`) in the same transaction, and makes the shot's bean `current_bean_id`. Tapping the button again or "Use last shot recipe" also clears it. Whenever the mark is cleared or moves, a recipe that only the mark kept (no shots) is removed (§4.1, step 6). On a finished bean, marking a recipe reopens the bean.

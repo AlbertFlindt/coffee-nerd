@@ -138,7 +138,7 @@ describe('loadHome', () => {
   it('the best recipe with its score, values, setup line and reuse', () => {
     for (const [i, score] of [7, 8, 8].entries())
       save(shotAt(T0 - (i + 1) * DAY, { taste: taste(score) }));
-    save(shotAt(T0 - 5 * MINUTE, { grind: 1500, taste: taste(9) }));
+    save(shotAt(T0 - 5 * MINUTE, { grind: 1500, taste: taste(7) }));
     expect(ready().best).toEqual({
       score: '7.7 / 10',
       title: 'Grind 1.6 · 18.0 g → 36.0 g · 28.0 s',
@@ -146,7 +146,7 @@ describe('loadHome', () => {
     });
   });
 
-  it('until a recipe has 3 rated shots, the highest single score', () => {
+  it('a recipe rated once counts with its score', () => {
     save(shotAt(T0 - DAY, { taste: taste(6) }));
     save(shotAt(T0 - 5 * MINUTE, { grind: 1500, taste: taste(9), time: null }));
     expect(ready().best).toMatchObject({ score: '9 / 10', title: 'Grind 1.5 · 18.0 g → 36.0 g' });
