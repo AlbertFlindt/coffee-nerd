@@ -2,6 +2,15 @@
 
 All notable changes to Coffee Nerd. Each version is a tag and a GitHub release.
 
+## 1.3.0 (2026-10-31)
+
+### Changed
+- **Notes are on the shot form:** the Notes field moved from the Tasting sheet to the form itself,
+  under Setup and Tasting, since notes are about the shot as a whole. It starts as one line and
+  grows a little as you type.
+- **The bean list shows the roaster:** each open bean in the shot form's bean list shows its
+  roaster after its name, so bags with the same name (say, two called "Crema") tell apart.
+
 ## 1.2.1 (2026-10-30)
 
 ### Fixed
