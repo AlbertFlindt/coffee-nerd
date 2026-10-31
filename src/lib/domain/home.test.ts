@@ -57,16 +57,12 @@ describe('thisWeekText', () => {
 });
 
 describe('bestScoreOutOfTen', () => {
-  it('the average with one decimal once the recipe has 3 rated shots', () => {
-    expect(
-      bestScoreOutOfTen({ recipeId: 'r', basis: 'average', score: 23 / 3, ratedShots: 3 })
-    ).toBe('7.7 / 10');
+  it('the average with one decimal', () => {
+    expect(bestScoreOutOfTen({ recipeId: 'r', score: 23 / 3, ratedShots: 3 })).toBe('7.7 / 10');
   });
 
-  it('otherwise the highest single score', () => {
-    expect(bestScoreOutOfTen({ recipeId: 'r', basis: 'single', score: 8, ratedShots: 2 })).toBe(
-      '8 / 10'
-    );
+  it('with one rated shot, its score', () => {
+    expect(bestScoreOutOfTen({ recipeId: 'r', score: 8, ratedShots: 1 })).toBe('8 / 10');
   });
 });
 

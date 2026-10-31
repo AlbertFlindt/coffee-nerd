@@ -6,47 +6,45 @@ const shots = (scores: (number | null)[], start = 0) =>
   scores.map((score, i) => ({ score, brewedAt: start + i * day }));
 
 describe('bestRecipe', () => {
-  it('the highest average score among recipes with at least 3 rated shots', () => {
+  it('the recipe with the highest average score', () => {
     const recipes: RecipeShots[] = [
       { recipeId: 'steady', shots: shots([8, 8, 8, 8]) },
-      { recipeId: 'lucky', shots: shots([9, 9]) },
+      { recipeId: 'mixed', shots: shots([9, 6]) },
       { recipeId: 'ok', shots: shots([7, 8, 7]) }
     ];
-    expect(bestRecipe(recipes)).toEqual({
-      recipeId: 'steady',
-      basis: 'average',
-      score: 8,
-      ratedShots: 4
-    });
+    expect(bestRecipe(recipes)).toEqual({ recipeId: 'steady', score: 8, ratedShots: 4 });
   });
 
-  it('one lucky 9 does not beat a recipe that reliably scores 8', () => {
+  it('one great shot does not make a recipe best when its other shots are poor', () => {
     const recipes: RecipeShots[] = [
-      { recipeId: 'lucky', shots: shots([9]) },
-      { recipeId: 'steady', shots: shots([8, 8, 8]) }
+      { recipeId: 'peak', shots: shots([10, 5, 6]) },
+      { recipeId: 'steady', shots: shots([8, 8]) }
     ];
     expect(bestRecipe(recipes)?.recipeId).toBe('steady');
   });
 
-  it('until a recipe has 3 rated shots, the highest single score is shown', () => {
+  it('a recipe rated once counts with that score', () => {
     const recipes: RecipeShots[] = [
       { recipeId: 'a', shots: shots([6, 7]) },
       { recipeId: 'b', shots: shots([8]) }
     ];
-    expect(bestRecipe(recipes)).toEqual({
-      recipeId: 'b',
-      basis: 'single',
-      score: 8,
+    expect(bestRecipe(recipes)).toEqual({ recipeId: 'b', score: 8, ratedShots: 1 });
+  });
+
+  it('with only one shot, that shot’s recipe is the best recipe', () => {
+    expect(bestRecipe([{ recipeId: 'only', shots: shots([4]) }])).toEqual({
+      recipeId: 'only',
+      score: 4,
       ratedShots: 1
     });
   });
 
-  it('unrated shots do not count toward the 3 rated shots', () => {
+  it('unrated shots do not count toward the average', () => {
     const recipes: RecipeShots[] = [
       { recipeId: 'mostly-unrated', shots: shots([9, null, null, 9]) },
-      { recipeId: 'rated', shots: shots([7, 7]) }
+      { recipeId: 'rated', shots: shots([8, 8, 8]) }
     ];
-    expect(bestRecipe(recipes)).toMatchObject({ recipeId: 'mostly-unrated', basis: 'single' });
+    expect(bestRecipe(recipes)).toEqual({ recipeId: 'mostly-unrated', score: 9, ratedShots: 2 });
   });
 
   it('ties go to the recipe with more rated shots', () => {
@@ -80,15 +78,15 @@ describe('bestRecipe', () => {
 });
 
 describe('rankRecipes', () => {
-  it('averages of recipes with 3 rated shots first, then single best scores, unrated last', () => {
+  it('by average score, unrated last', () => {
     const recipes: RecipeShots[] = [
       { recipeId: 'unrated', shots: shots([null, null], 9 * day) },
-      { recipeId: 'lucky', shots: shots([9]) },
+      { recipeId: 'peak', shots: shots([10, 5]) },
       { recipeId: 'steady', shots: shots([8, 8, 8]) },
       { recipeId: 'ok', shots: shots([7, 7, 7, 7]) },
       { recipeId: 'fine', shots: shots([6]) }
     ];
-    expect(rankRecipes(recipes)).toEqual(['steady', 'ok', 'lucky', 'fine', 'unrated']);
+    expect(rankRecipes(recipes)).toEqual(['steady', 'peak', 'ok', 'fine', 'unrated']);
   });
 
   it('the first is the best recipe; ties by more rated shots, then the latest', () => {

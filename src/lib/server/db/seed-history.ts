@@ -246,6 +246,8 @@ export function seedShotHistory(db: Db, ids: SeededIds, now: number): void {
       else if (gujiShot % 7 === 5) grind = 1700;
       else if (gujiShot % 5 === 0) routineId = lightRoast;
     } else if (random.next() < 0.3) grind = random.next() < 0.5 ? 1500 : 1700;
+    // Guji's 1.5 and 1.7 taste a point less, so 1.6 stays its best recipe by average.
+    const tasted = !b && grind !== 1600 ? Math.max(1, score - 1) : score;
     const time =
       Math.round(
         (27.9 + (1600 - grind) / 25 + random.normal() * (routineId === lightRoast ? 2.1 : 1.4)) * 10
@@ -267,7 +269,7 @@ export function seedShotHistory(db: Db, ids: SeededIds, now: number): void {
         yield: 36000 + Math.round(random.normal() * 8) * 100,
         time,
         taste: rated
-          ? { score, balance: 0, body: null, sweetness: null, aftertaste: null }
+          ? { score: tasted, balance: 0, body: null, sweetness: null, aftertaste: null }
           : { score: null, balance: null, body: null, sweetness: null, aftertaste: null },
         tagIds: [],
         notes: null,

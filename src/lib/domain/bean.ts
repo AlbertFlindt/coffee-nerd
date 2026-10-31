@@ -77,12 +77,12 @@ export const ROAST_LEVEL_LABEL = {
 } as const;
 
 /**
- * A bean's best score: its best recipe's average with one decimal ("7.7") once that recipe has
- * 3 rated shots, otherwise the highest single score ("8"). Null without a rated shot ("Not rated yet").
+ * A bean's best score: its best recipe's average with one decimal ("7.7"), or the score of its one
+ * rated shot as a whole number ("8"). Null without a rated shot ("Not rated yet").
  */
 export function bestScoreText(best: BestRecipe | null): string | null {
   if (best === null) return null;
-  return best.basis === 'average' ? best.score.toFixed(1) : String(best.score);
+  return best.ratedShots > 1 ? best.score.toFixed(1) : String(best.score);
 }
 
 /** "120 g left" in whole grams; null without a bag weight. */
