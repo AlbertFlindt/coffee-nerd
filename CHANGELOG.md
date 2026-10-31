@@ -2,6 +2,15 @@
 
 All notable changes to Coffee Nerd. Each version is a tag and a GitHub release.
 
+## 1.3.1 (2026-10-31)
+
+### Fixed
+- **One entry per bean in the Journal:** bags of the same bean (the same name and roaster) are
+  one bean in the Journal's bean list, with the shots of every bag, instead of two entries you
+  can't tell apart. The same recipe brewed from several bags is one entry in the recipe list too.
+- **The Journal's bean list shows the roaster:** each bean shows its roaster after its name, as
+  in the shot form's bean list.
+
 ## 1.3.0 (2026-10-31)
 
 ### Changed

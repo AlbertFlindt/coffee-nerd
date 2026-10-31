@@ -1,12 +1,12 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { openDatabase, type Db } from './client';
 import { newId } from './ids';
 import { loadJournal, loadShotDetail } from './journal';
-import { bean, tag, user, userSettings } from './schema';
+import { bean, recipe, tag, user, userSettings } from './schema';
 import { REFERENCE, seedReferenceSetup, type SeededIds } from './seed';
 import { saveShot, type ShotInput } from './shots';
 
@@ -68,6 +68,24 @@ function secondBean(): string {
       ownerId: ids.userId,
       name: 'Kiambu AA',
       roastDate: '2026-10-01',
+      status: 'open',
+      createdAt: T0,
+      updatedAt: T0
+    })
+    .run();
+  return id;
+}
+
+/** A new bag of the seeded Guji Hambela from Nordlys Roasters, roasted later. */
+function newBag(): string {
+  const id = newId(T0 + 1);
+  db.insert(bean)
+    .values({
+      id,
+      ownerId: ids.userId,
+      name: 'Guji Hambela',
+      roaster: 'Nordlys Roasters',
+      roastDate: '2026-10-12',
       status: 'open',
       createdAt: T0,
       updatedAt: T0
@@ -146,6 +164,50 @@ describe('loadJournal', () => {
     const filtered = loadJournal(db, ids.userId, { beanId: kiambu }, T0);
     expect(filtered.shots.map((s) => s.beanName)).toEqual(['Kiambu AA']);
     expect(filtered.beanId).toBe(kiambu);
+  });
+
+  it('bags of the same bean are one bean in the list, named by the bag brewed last', () => {
+    const bag = newBag();
+    const kiambu = secondBean();
+    save(shotAt(T0 - 3 * DAY));
+    save(shotAt(T0 - 2 * DAY, { beanId: kiambu }));
+    save(shotAt(T0 - DAY, { beanId: bag }));
+    const all = loadJournal(db, ids.userId, {}, T0);
+    expect(all.beans).toEqual([
+      { id: bag, name: 'Guji Hambela', roaster: 'Nordlys Roasters' },
+      { id: kiambu, name: 'Kiambu AA', roaster: null }
+    ]);
+    // Either bag chooses the bean, with the shots of both bags.
+    for (const beanId of [bag, ids.beanId]) {
+      const guji = loadJournal(db, ids.userId, { beanId }, T0);
+      expect(guji.beanId).toBe(bag);
+      expect(guji.shots.map((s) => s.brewedAt)).toEqual([T0 - DAY, T0 - 3 * DAY]);
+    }
+  });
+
+  it('the same recipe brewed from two bags is one recipe in the filter', () => {
+    const bag = newBag();
+    save(shotAt(T0 - 4 * DAY));
+    save(shotAt(T0 - 3 * DAY, { grind: 1500 }));
+    save(shotAt(T0 - 2 * DAY, { beanId: bag }));
+    save(shotAt(T0 - DAY, { beanId: bag, dose: 18100 }));
+    const guji = loadJournal(db, ids.userId, { beanId: bag }, T0);
+    expect(guji.recipes.map((r) => r.label)).toEqual([
+      '1.6 · 18.0 g · Daily routine · 3 shots',
+      '1.5 · 18.0 g · Daily routine · 1 shot'
+    ]);
+    const same = loadJournal(db, ids.userId, { beanId: bag, recipeId: guji.recipes[0].id }, T0);
+    expect(same.shots.map((s) => s.brewedAt)).toEqual([T0 - DAY, T0 - 2 * DAY, T0 - 4 * DAY]);
+    // The older bag chooses the same bean, and its recipe the same entry.
+    expect(loadJournal(db, ids.userId, { beanId: ids.beanId }, T0).recipes).toEqual(guji.recipes);
+    const oldRecipeId = db
+      .select({ id: recipe.id })
+      .from(recipe)
+      .where(and(eq(recipe.beanId, ids.beanId), eq(recipe.grind, 1600)))
+      .get()!.id;
+    expect(loadJournal(db, ids.userId, { beanId: bag, recipeId: oldRecipeId }, T0).recipeId).toBe(
+      guji.recipes[0].id
+    );
   });
 
   it('with a bean chosen, its recipes, most recently brewed first, filter the list', () => {

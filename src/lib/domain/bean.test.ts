@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   altitudeText,
   bestScoreText,
+  beanIdentity,
   gramsLeft,
   gramsLeftText,
   localDate,
@@ -154,5 +155,24 @@ describe('roastDateText', () => {
 
   it('a date in another year names the year', () => {
     expect(roastDateText('2025-12-30', '2026-01-02').date).toBe('30 Dec 2025');
+  });
+});
+
+describe('beanIdentity', () => {
+  it('bags with the same name and roaster are one bean, ignoring case and spaces', () => {
+    expect(beanIdentity('Guji Hambela', 'Nordlys Roasters')).toBe(
+      beanIdentity(' guji hambela', 'NORDLYS ROASTERS ')
+    );
+    expect(beanIdentity('Guji Hambela', null)).toBe(beanIdentity('Guji Hambela', null));
+  });
+
+  it('another roaster, or none, makes another bean', () => {
+    expect(beanIdentity('Guji Hambela', 'Nordlys Roasters')).not.toBe(
+      beanIdentity('Guji Hambela', 'Prolog')
+    );
+    expect(beanIdentity('Guji Hambela', 'Nordlys Roasters')).not.toBe(
+      beanIdentity('Guji Hambela', null)
+    );
+    expect(beanIdentity('Guji Hambela', '')).toBe(beanIdentity('Guji Hambela', null));
   });
 });
