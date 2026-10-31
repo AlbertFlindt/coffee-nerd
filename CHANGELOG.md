@@ -2,6 +2,15 @@
 
 All notable changes to Coffee Nerd. Each version is a tag and a GitHub release.
 
+## 1.4.0 (2026-10-31)
+
+### Changed
+- **Best recipe is picked by average:** a bean's best recipe is now the one with the highest
+  average score across its rated shots, not the one with the single highest score. A recipe you
+  have rated once counts with that score, so with only one shot, that shot's recipe is the best.
+  The best score on Home and in the Library, the re-buy starting point and the "Best first" order
+  all follow it.
+
 ## 1.3.0 (2026-10-31)
 
 ### Changed
