@@ -1,6 +1,9 @@
 name: PR text
 
 # Commits and pull requests stand on their own: no links to Claude sessions, projects or threads.
+# The tool that opens a pull request for Claude adds such a link to the description by itself, so
+# this workflow removes those lines from the description instead of failing on them. A commit
+# message or a title with one still fails: those are rewritten by hand.
 # Runs again when the description is edited, without the full CI.
 on:
   pull_request:
@@ -8,29 +11,60 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   links:
     name: No Claude session links
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    env:
+      PATTERN: 'claude\.ai/code|claude-projects-attribution|Claude-Session:|Requested by \*\*'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Check the description and the commit messages
+      - name: Remove Claude session links from the description
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          # A pull request from a fork gets a read-only token: its description is only checked.
+          SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          printf '%s' "$BODY" > "$RUNNER_TEMP/body.md"
+          # Drop each line with a link, then the "---" and blank lines a dropped footer leaves at the end.
+          node -e '
+            const fs = require("fs");
+            const pattern = new RegExp(process.env.PATTERN, "i");
+            const lines = fs.readFileSync(process.argv[1], "utf8").split(/\r?\n/);
+            const kept = lines.filter((line) => !pattern.test(line));
+            while (kept.length && /^\s*$/.test(kept[0])) kept.shift();
+            while (kept.length && /^\s*(-{3,})?\s*$/.test(kept.at(-1))) kept.pop();
+            fs.writeFileSync(process.argv[2], kept.join("\n") + "\n");
+          ' "$RUNNER_TEMP/body.md" "$RUNNER_TEMP/cleaned.md"
+          if grep -Eiq "$PATTERN" "$RUNNER_TEMP/body.md"; then
+            if [ "$SAME_REPO" = true ]; then
+              gh pr edit "$NUMBER" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/cleaned.md"
+              echo "::notice::Removed Claude session links from the description."
+              cp "$RUNNER_TEMP/cleaned.md" "$RUNNER_TEMP/body.md"
+            fi
+          fi
+      - name: Check the title, the description and the commit messages
         env:
           TITLE: ${{ github.event.pull_request.title }}
-          BODY: ${{ github.event.pull_request.body }}
           BASE: origin/${{ github.base_ref }}
         run: |
-          pattern='claude\.ai/code|claude-projects-attribution|Claude-Session:|Requested by \*\*'
           failed=0
-          if printf '%s\n%s\n' "$TITLE" "$BODY" | grep -Ein "$pattern"; then
+          if printf '%s\n' "$TITLE" | grep -Ein "$PATTERN"; then
+            echo "::error::The pull request title links to a Claude session or project. Remove it."
+            failed=1
+          fi
+          if grep -Ein "$PATTERN" "$RUNNER_TEMP/body.md"; then
             echo "::error::The pull request description links to a Claude session or project. Remove it."
             failed=1
           fi
-          if git log --format='%h %B' "$BASE"..HEAD | grep -Ei "$pattern"; then
+          if git log --format='%h %B' "$BASE"..HEAD | grep -Ei "$PATTERN"; then
             echo "::error::A commit message links to a Claude session or project. Reword the commit."
             failed=1
           fi
