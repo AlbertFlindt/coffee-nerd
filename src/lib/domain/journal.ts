@@ -1,5 +1,6 @@
 // The Journal and the shot detail: days, times and the short texts on a shot's row.
 import { localDate, roastAgeDays } from './bean';
+import { sameDose } from './fingerprint';
 import { mean, standardDeviation } from './statistics';
 import { tasteWords } from './taste';
 import { decimalsFor, formatQuantity, type Thousandths } from './units';
@@ -185,4 +186,26 @@ export function setupDifferences(
 function dayNumber(isoDate: string): number {
   const [year, month, day] = isoDate.split('-').map(Number);
   return Date.UTC(year, month - 1, day) / 86_400_000;
+}
+
+/**
+ * Recipes of one bean, its bags together, as the Journal's recipe filter shows them: recipes with the
+ * same machine and fingerprint and a dose within 0.2 g of the first one are one, so a new bag brewed
+ * the same way is not a second recipe in the list. In the order given; each group is named by its first.
+ */
+export function groupRecipes(
+  recipes: readonly { id: string; machineId: string; fingerprint: string; dose: Thousandths }[]
+): { id: string; ids: string[] }[] {
+  const groups: { first: (typeof recipes)[number]; ids: string[] }[] = [];
+  for (const recipe of recipes) {
+    const group = groups.find(
+      ({ first }) =>
+        first.machineId === recipe.machineId &&
+        first.fingerprint === recipe.fingerprint &&
+        sameDose(first.dose, recipe.dose)
+    );
+    if (group) group.ids.push(recipe.id);
+    else groups.push({ first: recipe, ids: [recipe.id] });
+  }
+  return groups.map(({ first, ids }) => ({ id: first.id, ids }));
 }

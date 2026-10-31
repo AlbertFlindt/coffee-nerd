@@ -1,7 +1,13 @@
 // The Journal and the shot detail. Every query is scoped to the signed-in account.
 import { and, asc, desc, eq, inArray, lt, or } from 'drizzle-orm';
 import { describeChange, type RecipeMatch } from '../../domain/fingerprint';
-import { recipeFilterLabel, setupDifferences, shotsThisWeek } from '../../domain/journal';
+import { beanIdentity } from '../../domain/bean';
+import {
+  groupRecipes,
+  recipeFilterLabel,
+  setupDifferences,
+  shotsThisWeek
+} from '../../domain/journal';
 import type { GrinderSpec, MachineSpec, PrepStepSetting } from '../../domain/schemas';
 import { prepDetail, routineParts, setupDetail, setupParts } from '../../domain/shot-form';
 import type { Thousandths } from '../../domain/units';
@@ -30,13 +36,19 @@ export type JournalShot = {
 
 export type Journal = {
   shots: JournalShot[];
-  /** Beans that have shots, most recently brewed first, for the bean filter. */
+  /**
+   * Beans that have shots, most recently brewed first, for the bean filter. Bags with the same name
+   * and roaster are one bean, named by the bag brewed last.
+   */
   beans: { id: string; name: string }[];
-  /** The bean filter in effect; null for all beans (an unknown bean is ignored). */
+  /** The bean filter in effect, as its entry in `beans` (any of its bags chooses it); null for all beans (an unknown bean is ignored). */
   beanId: string | null;
-  /** The chosen bean's recipes, most recently brewed first, for the recipe filter; empty without a bean. */
+  /**
+   * The chosen bean's recipes, most recently brewed first, for the recipe filter; empty without a bean.
+   * The same recipe brewed from several bags is one entry.
+   */
   recipes: { id: string; label: string }[];
-  /** The recipe filter in effect: only with a bean, and only one of its recipes. */
+  /** The recipe filter in effect, as its entry in `recipes`: only with a bean, and only one of its recipes. */
   recipeId: string | null;
   unrated: boolean;
   /** Unrated shots within the bean and recipe filters: "Unrated · N". */
@@ -65,7 +77,9 @@ export function loadJournal(
       recipeId: shot.recipeId,
       beanId: recipe.beanId,
       beanName: bean.name,
+      roaster: bean.roaster,
       grind: recipe.grind,
+      fingerprint: recipe.fingerprint,
       // A shot shows the dose it was brewed with; recipe labels show the recipe's.
       dose: shot.dose,
       recipeDose: recipe.dose,
@@ -88,16 +102,39 @@ export function loadJournal(
     .all();
 
   const tags = recipeTags(rows);
+  // Bags of the same bean are one bean: each row's bean, named by its bag brewed last.
   const beans: Journal['beans'] = [];
-  for (const row of rows)
-    if (!beans.some((b) => b.id === row.beanId)) beans.push({ id: row.beanId, name: row.beanName });
-  const beanId = beans.some((b) => b.id === filter.beanId) ? filter.beanId! : null;
-  const ofBean = rows.filter((r) => beanId === null || r.beanId === beanId);
+  const beanOf = new Map<string, string>();
+  for (const row of rows) {
+    const identity = beanIdentity(row.beanName, row.roaster);
+    if (!beanOf.has(identity)) {
+      beanOf.set(identity, row.beanId);
+      beans.push({ id: row.beanId, name: row.beanName });
+    }
+  }
+  const beanOfRow = (row: (typeof rows)[number]) =>
+    beanOf.get(beanIdentity(row.beanName, row.roaster))!;
+  const chosen = rows.find((r) => r.beanId === filter.beanId);
+  const beanId = chosen ? beanOfRow(chosen) : null;
+  const ofBean = rows.filter((r) => beanId === null || beanOfRow(r) === beanId);
   const recipes: Journal['recipes'] = [];
+  // Each recipe id of the chosen bean, to its entry in `recipes`.
+  const recipeOf = new Map<string, string>();
   if (beanId !== null) {
-    const ofRecipe = ofBean.filter(
+    const distinct = ofBean.filter(
       (row, i) => ofBean.findIndex((r) => r.recipeId === row.recipeId) === i
     );
+    // The same recipe brewed from several bags is one: its group's ids, named by the one brewed last.
+    const groups = groupRecipes(
+      distinct.map((r) => ({
+        id: r.recipeId,
+        machineId: r.machineId,
+        fingerprint: r.fingerprint,
+        dose: r.recipeDose
+      }))
+    );
+    for (const group of groups) for (const id of group.ids) recipeOf.set(id, group.id);
+    const ofRecipe = groups.map((group) => distinct.find((r) => r.recipeId === group.id)!);
     // Two recipes with the same values say which setup values tell them apart.
     const gearRows = db.select().from(gear).where(eq(gear.ownerId, ownerId)).all();
     const gearOf = new Map(gearRows.map((g) => [g.id, g]));
@@ -129,7 +166,7 @@ export function loadJournal(
           grind: row.grind,
           dose: row.recipeDose,
           routine: row.setup.routine?.name ?? null,
-          shotCount: ofBean.filter((r) => r.recipeId === row.recipeId).length,
+          shotCount: ofBean.filter((r) => recipeOf.get(r.recipeId) === row.recipeId).length,
           differences: differences[i]
         },
         { grind: (row.grinderSpec as GrinderSpec).dial.step, dose: steps.dose }
@@ -137,8 +174,8 @@ export function loadJournal(
       recipes.push({ id: row.recipeId, label });
     });
   }
-  const recipeId = recipes.some((r) => r.id === filter.recipeId) ? filter.recipeId! : null;
-  const filtered = ofBean.filter((r) => recipeId === null || r.recipeId === recipeId);
+  const recipeId = (filter.recipeId && recipeOf.get(filter.recipeId)) || null;
+  const filtered = ofBean.filter((r) => recipeId === null || recipeOf.get(r.recipeId) === recipeId);
   const unrated = filter.unrated === true;
 
   return {
