@@ -216,6 +216,19 @@ describe('loadShotForm', () => {
     expect(form.openBeans[0]).toMatchObject({ name: 'Guji Hambela', roastAgeDays: 14 });
   });
 
+  it('each open bean in the list has its roaster, so bags with the same name tell apart', () => {
+    addBean({ name: 'Crema', roaster: 'Kaffeværket' });
+    addBean({ name: 'Crema' });
+    const form = ready(loadShotForm(db, ids.userId));
+    expect(form.openBeans.map((b) => [b.name, b.roaster])).toEqual(
+      expect.arrayContaining([
+        ['Guji Hambela', 'Nordlys Roasters'],
+        ['Crema', 'Kaffeværket'],
+        ['Crema', null]
+      ])
+    );
+  });
+
   it('choosing another open bean starts from that bean; Brew next of another bean waits', () => {
     const marked = save({}, 1);
     db.update(appState).set({ brewNextRecipeId: marked.recipeId }).run();

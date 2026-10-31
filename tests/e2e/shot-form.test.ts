@@ -245,7 +245,8 @@ test('MoreTasting: the Tasting sheet, balance first', async () => {
     'aria-pressed',
     'true'
   );
-  await expect(sheet.getByText('Just for you · not used in Insights')).toBeVisible();
+  // Notes are on the form, not in the Tasting sheet.
+  await expect(sheet.getByRole('textbox', { name: 'Notes' })).toHaveCount(0);
   await expectNoPageScroll();
   await screenshot('MoreTasting');
 
@@ -266,12 +267,17 @@ test('MoreTasting: the Tasting sheet, balance first', async () => {
   // Tapping the dimmed form closes the sheet.
   await page.getByRole('button', { name: 'Close Tasting' }).click({ position: { x: 200, y: 40 } });
   await expect(sheet).toBeHidden();
+  // Notes belong to the shot: typed on the form, saved with it.
+  const notes = page.getByRole('textbox', { name: 'Notes' });
+  await expect(notes).toHaveAccessibleDescription('Just for you, not used in Insights');
+  await notes.fill('Ran a little fast');
+  await expectNoPageScroll();
   await save();
 
   const db = new Database(DATABASE, { readonly: true });
   const saved = db
     .prepare(
-      `select s.score, s.balance, s.body, s.sweetness, s.yield, s.time,
+      `select s.score, s.balance, s.body, s.sweetness, s.yield, s.time, s.notes,
          (select group_concat(t.name, ',') from shot_tag st join tag t on t.id = st.tag_id
           where st.shot_id = s.id) as tags
        from shot s order by s.brewed_at desc limit 1`
@@ -285,6 +291,7 @@ test('MoreTasting: the Tasting sheet, balance first', async () => {
     sweetness: null,
     yield: 38500,
     time: 25500,
+    notes: 'Ran a little fast',
     tags: expect.stringMatching(/^(?=.*Berry)(?=.*Dark chocolate)(?=.*Blood orange)/)
   });
 });
@@ -318,6 +325,10 @@ test('the bean card lists the open beans', async () => {
   await expect(sheet.getByRole('button', { name: /Guji Hambela/ })).toHaveAttribute(
     'aria-pressed',
     'true'
+  );
+  // Each bean with its roaster, so bags with the same name tell apart.
+  await expect(sheet.getByRole('button', { name: /Guji Hambela/ })).toContainText(
+    'Guji Hambela · Nordlys Roasters · Natural ·'
   );
   await page
     .getByRole('button', { name: 'Close bean list' })

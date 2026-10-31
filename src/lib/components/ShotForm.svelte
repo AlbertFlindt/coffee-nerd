@@ -1,6 +1,6 @@
 <script lang="ts">
   // The shot form: bean card, the four core values, ratio, score, Setup and Tasting side by side,
-  // Save. The recipe tag, deltas and earlier score are worked out in the browser on every
+  // notes, Save. The recipe tag, deltas and earlier score are worked out in the browser on every
   // change (docs/SPEC.md §4.1).
   // With `data.edit` it edits a saved shot: "Save changes", back to the shot, and the bean
   // card moves the shot to another bean while keeping the values.
@@ -67,10 +67,11 @@
   const NOT_SAVED_WAITING =
     'Not saved: the server did not take this shot. Change it and save again, or delete it.';
 
-  /** "Natural · 12 days" after a bean's name in the bean list. */
+  /** "Nordlys Roasters · Natural · 12 days" after a bean's name in the bean list: the roaster tells
+   *  apart bags with the same name. */
   function beanDetail(b: ShotFormData['openBeans'][number]): string {
     const age = `${b.roastAgeDays} ${b.roastAgeDays === 1 ? 'day' : 'days'}`;
-    return b.process ? `${PROCESS_LABEL[b.process]} · ${age}` : age;
+    return [b.roaster, b.process && PROCESS_LABEL[b.process], age].filter(Boolean).join(' · ');
   }
 
   function initial(): ShotState {
@@ -431,6 +432,17 @@
           </button>
         {/each}
       </div>
+
+      <!-- Notes belong to the shot, so they sit on the form; one line that grows a little. -->
+      <span id="notes-hint" hidden>Just for you, not used in Insights</span>
+      <textarea
+        class="notes"
+        aria-label="Notes"
+        aria-describedby="notes-hint"
+        rows="1"
+        placeholder="Notes · anything worth remembering"
+        value={shot.notes ?? ''}
+        oninput={(e) => (shot.notes = e.currentTarget.value || null)}></textarea>
     </main>
 
     {#if sheet === 'setup' || sheet === 'tasting'}
@@ -777,6 +789,26 @@
     color: var(--ink-muted);
   }
 
+  .notes {
+    flex: none;
+    field-sizing: content;
+    min-height: 52px;
+    max-height: 96px;
+    padding: 14px var(--space-4);
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.5;
+    resize: none;
+  }
+
+  .notes::placeholder {
+    color: var(--ink-muted);
+  }
+
   footer {
     flex: none;
     padding: var(--space-2) var(--space-5) var(--space-6);
@@ -877,6 +909,13 @@
 
     .more {
       min-height: var(--touch-min);
+    }
+
+    .notes {
+      min-height: var(--touch-min);
+      max-height: 72px;
+      padding-top: 10px;
+      padding-bottom: 10px;
     }
 
     footer {

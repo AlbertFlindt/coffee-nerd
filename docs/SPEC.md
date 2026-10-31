@@ -201,7 +201,7 @@ A routine is a straight line, so an ordered list matches it exactly. Editing a r
 | `score` | 1–10 whole numbers; empty = "not rated" |
 | `balance` | −10 (sour) … 0 (balanced) … +10 (bitter); whole numbers; empty = not set |
 | `body`, `sweetness`, `aftertaste` | 0–10; whole numbers; empty = not set |
-| `notes` | free text, never used by Insights |
+| `notes` | free text, never used by Insights; entered on the shot form itself, under Setup and Tasting |
 
 **Never stored, always calculated:** ratio (yield ÷ the shot's dose), roast age at the time (brew date minus roast date).
 
