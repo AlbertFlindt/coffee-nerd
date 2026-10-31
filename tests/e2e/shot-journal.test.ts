@@ -141,6 +141,10 @@ test('the bean filter lists the beans that have shots', async () => {
     'aria-pressed',
     'true'
   );
+  // Each bean with its roaster, as in the shot form's bean list.
+  await expect(sheet.getByRole('button', { name: 'Guji Hambela' })).toHaveText(
+    'Guji Hambela · Nordlys Roasters'
+  );
   await sheet.getByRole('button', { name: 'Guji Hambela' }).click();
   const chip = page.getByRole('group', { name: 'Filters' }).getByRole('button', {
     name: 'Guji Hambela'

@@ -37,10 +37,10 @@ export type JournalShot = {
 export type Journal = {
   shots: JournalShot[];
   /**
-   * Beans that have shots, most recently brewed first, for the bean filter. Bags with the same name
-   * and roaster are one bean, named by the bag brewed last.
+   * Beans that have shots, most recently brewed first, for the bean filter, with their roaster. Bags
+   * with the same name and roaster are one bean, named by the bag brewed last.
    */
-  beans: { id: string; name: string }[];
+  beans: { id: string; name: string; roaster: string | null }[];
   /** The bean filter in effect, as its entry in `beans` (any of its bags chooses it); null for all beans (an unknown bean is ignored). */
   beanId: string | null;
   /**
@@ -109,7 +109,7 @@ export function loadJournal(
     const identity = beanIdentity(row.beanName, row.roaster);
     if (!beanOf.has(identity)) {
       beanOf.set(identity, row.beanId);
-      beans.push({ id: row.beanId, name: row.beanName });
+      beans.push({ id: row.beanId, name: row.beanName, roaster: row.roaster || null });
     }
   }
   const beanOfRow = (row: (typeof rows)[number]) =>

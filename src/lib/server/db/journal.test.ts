@@ -174,8 +174,8 @@ describe('loadJournal', () => {
     save(shotAt(T0 - DAY, { beanId: bag }));
     const all = loadJournal(db, ids.userId, {}, T0);
     expect(all.beans).toEqual([
-      { id: bag, name: 'Guji Hambela' },
-      { id: kiambu, name: 'Kiambu AA' }
+      { id: bag, name: 'Guji Hambela', roaster: 'Nordlys Roasters' },
+      { id: kiambu, name: 'Kiambu AA', roaster: null }
     ]);
     // Either bag chooses the bean, with the shots of both bags.
     for (const beanId of [bag, ids.beanId]) {
