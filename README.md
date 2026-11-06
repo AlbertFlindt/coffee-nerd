@@ -103,7 +103,8 @@ on Home.
 ## Installation
 
 Coffee Nerd is one container with one data volume. Each release is published as
-`ghcr.io/albertflindt/coffee-nerd:<version>` and `:latest`; every merge to `main` as `:main`.
+`ghcr.io/albertflindt/coffee-nerd:<version>` and `:latest`. Pre-releases of the next version, to try
+before it's out, are `:<version>-pre.<n>`; every merge to `main` is also `:main`.
 
 1. **Start it.** Save this as `compose.yaml` in a folder called `coffee-nerd` and run
    `docker compose up -d`:
@@ -247,6 +248,7 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 ## Changes
 
 See [CHANGELOG.md](CHANGELOG.md) and the [releases](https://github.com/AlbertFlindt/coffee-nerd/releases).
+What's planned: [ROADMAP.md](ROADMAP.md).
 
 ## License
 

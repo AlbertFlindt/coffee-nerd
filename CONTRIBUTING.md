@@ -68,11 +68,12 @@ and read just as well for people.
 4. For a screen, put your screenshot in the pull request next to its reference from
    `docs/screens/` (`npm run screenshot -- <route>` takes one at 412 × 915).
 5. Keep [docs/SPEC.md](docs/SPEC.md) and [PROGRESS.md](PROGRESS.md) current in the same pull request.
-6. **Every merge that changes the app is a release.** Bump the version in the pull request:
-   `node scripts/version.mjs bump X.Y.Z` (patch for fixes, minor for features, major for changes
-   that break a backup, an export or an install), and write the `CHANGELOG.md` section by hand.
-   CI's "Version bumped" check fails a pull request that changes the app without one. Changes to
-   docs, CI or `.claude/` alone need no bump. Merging tags the release and publishes the Docker image.
+6. **Every merge that changes the app is a pre-release.** Add a line to the `## X.Y.Z (unreleased)`
+   section at the top of `CHANGELOG.md`. If the top section is dated, start the next version with
+   `node scripts/version.mjs bump X.Y.Z` (patch for fixes, minor for features; major versions are the
+   milestones in [ROADMAP.md](ROADMAP.md)). CI's "Version and changelog" check fails a pull request
+   that changes the app without one. Changes to docs, CI or `.claude/` alone need neither. Merging
+   publishes `vX.Y.Z-pre.N` and its Docker image; stable releases are made by the maintainer.
 
 Commit subjects are plain sentences ("Show grams left on the bean card"), with a short body saying
 what changed and why.

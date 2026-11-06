@@ -1,8 +1,10 @@
 name: Release
 
-# After CI passes on main: if package.json names a version that has no tag yet, tag it, publish
-# the GitHub release with that version's CHANGELOG section, and tag the image CI just pushed
-# (ghcr.io/<owner>/coffee-nerd:sha-<commit>) as :X.Y.Z and :latest.
+# After CI passes on main. A dated CHANGELOG section with no tag yet is a stable release: tag
+# vX.Y.Z, publish it, and tag the image CI just pushed (ghcr.io/<owner>/coffee-nerd:sha-<commit>)
+# as :X.Y.Z and :latest. An "(unreleased)" version whose app files changed since the last tag gets
+# the next pre-release, vX.Y.Z-pre.N (a GitHub pre-release, so "latest" stays stable), and the
+# image tag :X.Y.Z-pre.N.
 on:
   workflow_run:
     workflows: [CI]
@@ -30,27 +32,40 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - name: Tag and publish if the version is new
+      - name: Publish a stable release or a pre-release
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
           SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          version=$(node scripts/version.mjs get)
-          if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
-            echo "v$version is already released; nothing to do."; exit 0
-          fi
           node scripts/version.mjs check
+          version=$(node scripts/version.mjs get)
           node scripts/version.mjs notes > "$RUNNER_TEMP/notes.md"
-          gh release create "v$version" --target "$SHA" \
-            --title "Coffee Nerd $version" --notes-file "$RUNNER_TEMP/notes.md"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-      - name: Tag the image as the release and latest
-        if: steps.release.outputs.version
+          if [ "$(node scripts/version.mjs state)" = stable ]; then
+            if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+              echo "v$version is already released; nothing to do."; exit 0
+            fi
+            gh release create "v$version" --target "$SHA" \
+              --title "Coffee Nerd $version" --notes-file "$RUNNER_TEMP/notes.md"
+            echo "tags=$version latest" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          last=$(git describe --tags --abbrev=0 "$SHA" 2>/dev/null || true)
+          app=$(git diff --name-only "$last" "$SHA" | grep -Ev '^(\.github/|\.claude/|docs/|tests/|[^/]+\.md$|LICENSE$|scripts/(version|docs-check)\.mjs$)' || true)
+          if [ -z "$app" ]; then
+            echo "No app changes since $last: no pre-release."; exit 0
+          fi
+          tag="$version-pre.$(( $(git tag -l "v$version-pre.*" | wc -l) + 1 ))"
+          gh release create "v$tag" --target "$SHA" --prerelease \
+            --title "Coffee Nerd $tag" --notes-file "$RUNNER_TEMP/notes.md"
+          echo "tags=$tag" >> "$GITHUB_OUTPUT"
+      - name: Tag the image
+        if: steps.release.outputs.tags
         env:
-          VERSION: ${{ steps.release.outputs.version }}
+          TAGS: ${{ steps.release.outputs.tags }}
           SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io --username "${{ github.actor }}" --password-stdin
           image="ghcr.io/${GITHUB_REPOSITORY,,}"
-          docker buildx imagetools create --tag "$image:$VERSION" --tag "$image:latest" "$image:sha-${SHA::7}"
+          args=(); for tag in $TAGS; do args+=(--tag "$image:$tag"); done
+          docker buildx imagetools create "${args[@]}" "$image:sha-${SHA::7}"
