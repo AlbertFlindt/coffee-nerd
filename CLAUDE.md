@@ -3,7 +3,7 @@
 Self-hosted, privacy-friendly espresso journal: SvelteKit (Svelte 5, TypeScript strict) + SQLite
 via Drizzle, one Docker image, installable PWA. Used one-handed on a phone at the brew station;
 reference device Pixel 8a, 412 × 915. Tests and CI are the safety net.
-Handoff state, known issues, next steps: @PROGRESS.md.
+Handoff state, known issues, next steps: @PROGRESS.md. Milestones: `ROADMAP.md` (not loaded).
 How it works: `docs/SPEC.md` (not loaded; read the section before changing that behavior, and
 update it with the change). Release history: `CHANGELOG.md` (not loaded).
 Looks: `design-system/` (tokens, `components.css` with `cn-` classes, `components.md`) and
@@ -13,7 +13,7 @@ covers a behavior, ask before inventing it.
 ## Commands
 Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are declared in
 `src/env.ts` and read from `$app/env/private`; import from `src/lib` as `#lib/<path>.ts`.
-- **Before a pull request: `npm run check && npm run lint && npm test && npm run test:e2e`.**
+- **Before a pull request: `npm run check && npm run lint && node scripts/docs-check.mjs && npm test && npm run test:e2e`.**
 - `npm run dev`: dev server on port 5173. `npm run build` / `npm start`: production build in `build/`, port 3000.
 - `npm run check`: svelte-check + TypeScript. `npm run lint`: Prettier check, ESLint and `node scripts/version.mjs check`. `npm run format` fixes formatting.
 - `npm test`: Vitest (`src/**/*.test.ts`), then the hook tests (`.claude/hooks/*.test.mjs`). One file: `npx vitest run <path>`.
@@ -60,11 +60,13 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
   GitHub is reached through its connector (`mcp__github__*`), not `gh`.
 - Domain logic: write the failing test first; name tests after the behavior they protect.
 - Screens: use the `build-screen` skill. Not done until your screenshot matches the PNG in `docs/screens/`.
-- **Every merge that changes the app is a release.** Bump the version in the pull request with the `release`
-  skill; once CI passes on `main`, `.github/workflows/release.yml` tags `vX.Y.Z`, publishes the GitHub release and the
-  Docker image tags. CI's "Version bumped" check fails a pull request that changes the app without a bump.
-- Keep `PROGRESS.md` (state, known issues, states built without a design, next steps) and `docs/SPEC.md` current
-  in the same pull request.
+- **Every merge that changes the app is a pre-release; stable releases only when asked.** Set the version and
+  add the CHANGELOG entry in the pull request with the `release` skill; once CI passes on `main`,
+  `.github/workflows/release.yml` publishes `vX.Y.Z-pre.N` and its image tag. Major versions are `ROADMAP.md` milestones.
+- Keep `PROGRESS.md`, `docs/design-gaps.md` (states built without a design) and `docs/SPEC.md` current in the same pull request.
+- Docs: `node scripts/docs-check.mjs` (run in CI) holds `CLAUDE.md`, `PROGRESS.md` and `ROADMAP.md` to a line budget (`scripts/docs-check.mjs`).
+  `PROGRESS.md` is the present: delete an entry the moment it's no longer true (history is git and `CHANGELOG.md`).
+  Write the decision and its reason, never who made it or who asked for it. One fact lives in one file.
 - Report work with evidence: the commands you ran and their results, and screenshots next to their reference for UI.
 - Commit subjects are plain sentences, with a short body saying what and why.
 - Commits, pull requests and comments stand on their own: no links to Claude sessions, projects or

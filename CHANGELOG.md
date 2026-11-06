@@ -1,6 +1,7 @@
 # Changelog
 
-All notable changes to Coffee Nerd. Each version is a tag and a GitHub release.
+All notable changes to Coffee Nerd. Each version is a tag and a GitHub release; the version at the
+top marked "(unreleased)" is out as pre-releases (`vX.Y.Z-pre.N`).
 
 ## 1.4.0 (2026-10-31)
 

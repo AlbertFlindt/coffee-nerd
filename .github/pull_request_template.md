@@ -7,7 +7,7 @@
 - [ ] `npm run check && npm run lint && npm test && npm run test:e2e` pass
 - [ ] Screens: my screenshot next to its reference in `docs/screens/`
 - [ ] `docs/SPEC.md` and `PROGRESS.md` are current
-- [ ] The app changed: version bumped and `CHANGELOG.md` section written (`node scripts/version.mjs bump X.Y.Z`)
+- [ ] The app changed: a line in the `(unreleased)` section of `CHANGELOG.md` (and `node scripts/version.mjs bump X.Y.Z` if the top section was dated)
 
 ## Screenshots
 
