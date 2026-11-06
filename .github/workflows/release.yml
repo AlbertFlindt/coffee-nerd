@@ -2,9 +2,10 @@ name: Release
 
 # After CI passes on main. A dated CHANGELOG section with no tag yet is a stable release: tag
 # vX.Y.Z, publish it, and tag the image CI just pushed (ghcr.io/<owner>/coffee-nerd:sha-<commit>)
-# as :X.Y.Z and :latest. An "(unreleased)" version whose app files changed since the last tag gets
-# the next pre-release, vX.Y.Z-pre.N (a GitHub pre-release, so "latest" stays stable), and the
-# image tag :X.Y.Z-pre.N.
+# as :X.Y.Z, :latest and :prerelease. An "(unreleased)" version whose app files changed since the
+# last tag gets the next pre-release, vX.Y.Z-pre.N (a GitHub pre-release, so "latest" stays
+# stable), and the image tags :X.Y.Z-pre.N and :prerelease. So :prerelease is always the newest
+# release of either kind, and :latest the newest stable one.
 on:
   workflow_run:
     workflows: [CI]
@@ -47,7 +48,7 @@ jobs:
             fi
             gh release create "v$version" --target "$SHA" \
               --title "Coffee Nerd $version" --notes-file "$RUNNER_TEMP/notes.md"
-            echo "tags=$version latest" >> "$GITHUB_OUTPUT"
+            echo "tags=$version latest prerelease" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           last=$(git describe --tags --abbrev=0 "$SHA" 2>/dev/null || true)
@@ -58,7 +59,7 @@ jobs:
           tag="$version-pre.$(( $(git tag -l "v$version-pre.*" | wc -l) + 1 ))"
           gh release create "v$tag" --target "$SHA" --prerelease \
             --title "Coffee Nerd $tag" --notes-file "$RUNNER_TEMP/notes.md"
-          echo "tags=$tag" >> "$GITHUB_OUTPUT"
+          echo "tags=$tag prerelease" >> "$GITHUB_OUTPUT"
       - name: Tag the image
         if: steps.release.outputs.tags
         env:

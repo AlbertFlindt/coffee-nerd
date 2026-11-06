@@ -6,9 +6,10 @@ argument-hint: "[X.Y.Z]"
 `main` carries the version being worked towards, with a `## X.Y.Z (unreleased)` section at the
 top of `CHANGELOG.md`. Once CI passes on `main` after a merge that changes the app,
 `.github/workflows/release.yml` publishes the pre-release `vX.Y.Z-pre.N` (GitHub marks it
-pre-release; "latest" stays stable) and the image `ghcr.io/albertflindt/coffee-nerd:X.Y.Z-pre.N`.
+pre-release; "latest" stays stable) and the image `ghcr.io/albertflindt/coffee-nerd:X.Y.Z-pre.N`,
+also tagged `:prerelease`.
 A stable release is a release pull request that dates the section; it publishes `:X.Y.Z` and
-`:latest`. CI's "Version and changelog" check fails a pull request that changes the app without
+`:latest`, and moves `:prerelease` along. CI's "Version and changelog" check fails a pull request that changes the app without
 a version above the latest stable one and a CHANGELOG entry.
 
 ## Versions
