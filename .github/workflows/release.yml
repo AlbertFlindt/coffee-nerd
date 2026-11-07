@@ -60,8 +60,9 @@ jobs:
           fi
           last=$(git describe --tags --abbrev=0 "$SHA" 2>/dev/null || true)
           app=$(git diff --name-only "$last" "$SHA" | grep -Ev '^(\.github/|\.claude/|docs/|tests/|[^/]+\.md$|LICENSE$|scripts/(version|docs-check)\.mjs$)' || true)
-          if [ -z "$app" ]; then
-            echo "No app changes since $last: no pre-release."; exit 0
+          # Without app changes there is nothing new to try, unless the version has no vX.Y.Z-pre yet.
+          if [ -z "$app" ] && git rev-parse -q --verify "refs/tags/v$version-pre" >/dev/null; then
+            echo "No app changes since $last: no new pre-release."; exit 0
           fi
           tag="$version-pre"
           printf '\n\nBuilt from %s.\n' "${SHA::7}" >> "$RUNNER_TEMP/notes.md"
