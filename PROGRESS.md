@@ -1,6 +1,6 @@
 # Progress / handoff
 
-**Last updated:** 2026-10-31. **Latest release:** 1.4.0 (details in `CHANGELOG.md`).
+**Last updated:** 2026-11-07. **Latest release:** 1.4.0 (details in `CHANGELOG.md`).
 How things work: `docs/SPEC.md`.
 
 ## Current state
@@ -68,6 +68,9 @@ The immediate ones. The milestones after them are in `ROADMAP.md`.
   different recipe for the tag.
 - **A routine kept only by a Brew next mark** counts as used, so it is archived, not deleted.
 - **"+" on a Library page** returns to Home after saving the shot, not to the Library page.
+- **Home's graph chips** are 36 px tall as screen 6 draws them, and the Roast age and Consistency
+  rows 30 px, under the 44 px target. Two recipes with the same grind and dose read the same on
+  Consistency, the second with "(2)".
 - **Insights tap targets** are under 44 px: chart rows are 30–40 px, each week of the weekly line
   about 25 px. The weekly line's first week reads "12 weeks ago" though it starts 11 weeks ago.
   Most consistent beans shows the 4 steadiest; a name over about 14 letters runs into the bars.

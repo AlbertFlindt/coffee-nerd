@@ -13,7 +13,9 @@ you build a state no design covers (after asking); remove it when a design sync 
   caption under the button. `docs/screens/` doesn't draw them yet.
 - Home: the Last shot card without the values not entered, empty states, the Dial-in progress
   graph's captions, grid and short-history states, and the chevron in a point's tooltip: tapping
-  the highlighted point again opens that shot, whose Back returns to Home.
+  the highlighted point again opens that shot, whose Back returns to Home. The graphs behind the Time vs.
+  yield, Roast age and Consistency chips (screen 6 draws only the chips), their captions, legend and
+  empty states, and the chip row scrolling sideways.
 - Confirmations as dialogs in the middle of the screen with the red delete choice; the screens
   still draw bottom sheets.
 - The "Shot saved" bar, and the messages when a shot or a score could not be saved.

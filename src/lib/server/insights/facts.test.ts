@@ -179,6 +179,8 @@ describe('loadShotFacts', () => {
       loadShotFacts(db, ids.userId, ZONE, { recipeId: all[1].recipeId }).map((f) => f.shotId)
     ).toEqual([late]);
     expect(loadShotFacts(db, ids.userId, ZONE, { beanId: 'none' })).toEqual([]);
+    expect(loadShotFacts(db, ids.userId, ZONE, { beanIds: [ids.beanId, 'none'] })).toHaveLength(2);
+    expect(loadShotFacts(db, ids.userId, ZONE, { beanIds: [] })).toEqual([]);
   });
 });
 

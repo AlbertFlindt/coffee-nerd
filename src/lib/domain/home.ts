@@ -2,9 +2,16 @@
 import type { BestRecipe } from './best-recipe';
 import { bestScoreText } from './bean';
 import { isThisWeek } from './journal';
-import { mean } from './statistics';
+import { CLEAR_POINTS, scoreAxis, timeAxis, type Axis, type DotRow } from './insights';
+import { mean, standardDeviation } from './statistics';
 import { tasteWords } from './taste';
-import { decimalsFor, formatQuantity, formatRatio, type Thousandths } from './units';
+import {
+  decimalsFor,
+  formatQuantity,
+  formatRatio,
+  fromThousandths,
+  type Thousandths
+} from './units';
 
 export type Week = { shots: number; rated: number; average: number | null };
 
@@ -110,5 +117,191 @@ export function dialInProgress(
       newRecipe: i > 0 && s.recipeId !== rated[i - 1].recipeId
     })),
     ticks: [start, start + step, start + 2 * step]
+  };
+}
+
+export type HomeGraphId = 'dial-in' | 'time-yield' | 'roast-age' | 'consistency';
+
+/** The graph chips on Home (screen 6), in their order; Home opens on the one chosen last. */
+export const HOME_GRAPHS: readonly { id: HomeGraphId; label: string }[] = [
+  { id: 'dial-in', label: 'Dial-in' },
+  { id: 'time-yield', label: 'Time vs. yield' },
+  { id: 'roast-age', label: 'Roast age' },
+  { id: 'consistency', label: 'Consistency' }
+];
+
+/** The stored choice (`app_state.home_graph`) as a graph; Dial-in without one. */
+export function homeGraphId(stored: string | null | undefined): HomeGraphId {
+  return HOME_GRAPHS.find((g) => g.id === stored)?.id ?? 'dial-in';
+}
+
+const TIME_YIELD_SHOTS = 30;
+/** A score of 8 or more is a shot you liked: amber on Time vs. yield. */
+export const LIKED_SCORE = 8;
+
+export type TimeYieldPoint = {
+  shotId: string;
+  /** Seconds and grams. */
+  time: number;
+  yield: number;
+  score: number | null;
+  liked: boolean;
+};
+
+export type TimeYieldGraph = { points: TimeYieldPoint[]; time: Axis; yield: Axis };
+
+/**
+ * Time vs. yield: the bean's last 30 shots with a time and a yield, oldest first, time across
+ * and yield up. Shots scored 8 or more are the liked ones. Fewer than 2 such shots give no graph.
+ */
+export function timeVsYield(
+  newestFirst: readonly {
+    shotId: string;
+    time: Thousandths | null;
+    yield: Thousandths | null;
+    score: number | null;
+  }[]
+): TimeYieldGraph | null {
+  const points = newestFirst
+    .flatMap((s) =>
+      s.time === null || s.yield === null
+        ? []
+        : [
+            {
+              shotId: s.shotId,
+              time: fromThousandths(s.time),
+              yield: fromThousandths(s.yield),
+              score: s.score,
+              liked: s.score !== null && s.score >= LIKED_SCORE
+            }
+          ]
+    )
+    .slice(0, TIME_YIELD_SHOTS)
+    .reverse();
+  if (points.length < 2) return null;
+  return {
+    points,
+    time: roundAxis(
+      points.map((p) => p.time),
+      's'
+    ),
+    yield: roundAxis(
+      points.map((p) => p.yield),
+      'g'
+    )
+  };
+}
+
+/**
+ * An axis on round numbers around the values: the smallest step of 1, 2, 5, 10 or 20 that needs
+ * at most 6 steps, a label at each. Values all alike still get a step either side.
+ */
+function roundAxis(values: readonly number[], unit: string): Axis {
+  const low = Math.min(...values);
+  const high = Math.max(...values);
+  const bounds = (step: number) => {
+    let from = Math.floor(low / step) * step;
+    let to = Math.ceil(high / step) * step;
+    if (from === to) {
+      from -= step;
+      to += step;
+    }
+    return { from: Math.max(0, from), to };
+  };
+  const step = [1, 2, 5, 10, 20].find((s) => {
+    const { from, to } = bounds(s);
+    return (to - from) / s <= 6;
+  })!;
+  const { from, to } = bounds(step);
+  const ticks: number[] = [];
+  for (let t = from; t <= to; t += step) ticks.push(t);
+  return { from, to, ticks, unit };
+}
+
+/** Roast age in whole weeks since roast; shots after four weeks are one range. */
+export const ROAST_AGE_RANGES: readonly { from: number; to: number | null; label: string }[] = [
+  { from: 0, to: 6, label: '0–6 days' },
+  { from: 7, to: 13, label: '7–13 days' },
+  { from: 14, to: 20, label: '14–20 days' },
+  { from: 21, to: 27, label: '21–27 days' },
+  { from: 28, to: null, label: '28+ days' }
+];
+
+/** Each roast age range needs this many rated shots for an average and a spread. */
+const RANGE_MINIMUM = 2;
+
+/**
+ * Roast age: the average score ± 1 σ per range of days since roast, in range order. A range needs
+ * 2 rated shots, and the chart 2 ranges to compare. The best range is amber when it leads the next
+ * by more than half a point.
+ */
+export function scoreByRoastAge(
+  shots: readonly { roastAgeDays: number; score: number | null }[]
+): { rows: DotRow[]; axis: Axis } | null {
+  const rows = ROAST_AGE_RANGES.flatMap(({ from, to, label }) => {
+    const scores = shots.flatMap((s) =>
+      s.score !== null && s.roastAgeDays >= from && (to === null || s.roastAgeDays <= to)
+        ? [s.score]
+        : []
+    );
+    if (scores.length < RANGE_MINIMUM) return [];
+    return [
+      {
+        label,
+        n: scores.length,
+        mean: mean(scores)!,
+        sigma: standardDeviation(scores)!,
+        top: false
+      }
+    ];
+  });
+  if (rows.length < 2) return null;
+  markClearBest(rows);
+  return { rows, axis: scoreAxis(Math.min(...rows.map((r) => r.mean - r.sigma))) };
+}
+
+/** The highest average is the top row when it leads the next by more than CLEAR_POINTS. */
+function markClearBest(rows: DotRow[]) {
+  const [first, second] = [...rows].sort((a, b) => b.mean - a.mean);
+  if (first.mean - second.mean > CLEAR_POINTS) first.top = true;
+}
+
+/** A recipe needs this many shots with a time to show how steady it is. */
+export const CONSISTENCY_MINIMUM = 3;
+const CONSISTENCY_ROWS = 4;
+
+/**
+ * Consistency: the shot time ± 1 σ of each recipe brewed 3 times or more with a time, the 4 with
+ * the most shots, most first, in the order given on a tie. The best recipe is amber. Recipes that read the same get a number,
+ * "1.6 · 18.0 g (2)", so each row has its own name. None to show gives no chart.
+ */
+export function recipeConsistency(
+  recipes: readonly { label: string; times: readonly Thousandths[]; best: boolean }[]
+): { rows: DotRow[]; axis: Axis } | null {
+  const steady = recipes
+    .filter((r) => r.times.length >= CONSISTENCY_MINIMUM)
+    .map((r, i) => ({ ...r, i }))
+    .sort((a, b) => b.times.length - a.times.length || a.i - b.i)
+    .slice(0, CONSISTENCY_ROWS);
+  if (steady.length === 0) return null;
+  const seen = new Map<string, number>();
+  const rows = steady.map((r) => {
+    const seconds = r.times.map(fromThousandths);
+    const nth = (seen.get(r.label) ?? 0) + 1;
+    seen.set(r.label, nth);
+    return {
+      label: nth === 1 ? r.label : `${r.label} (${nth})`,
+      n: seconds.length,
+      mean: mean(seconds)!,
+      sigma: standardDeviation(seconds)!,
+      top: r.best
+    };
+  });
+  return {
+    rows,
+    axis: timeAxis(
+      Math.min(...rows.map((r) => r.mean - r.sigma)),
+      Math.max(...rows.map((r) => r.mean + r.sigma))
+    )
   };
 }

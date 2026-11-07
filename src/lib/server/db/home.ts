@@ -1,23 +1,37 @@
 // Home (screen 6): the bean on Home, its last shot, quick numbers and best recipe. Every query is
 // scoped to the signed-in account.
-import { and, desc, eq } from 'drizzle-orm';
-import { gramsLeft, gramsLeftText, PROCESS_LABEL, roastAgeDays } from '../../domain/bean';
+import { and, desc, eq, inArray } from 'drizzle-orm';
+import {
+  beanIdentity,
+  gramsLeft,
+  gramsLeftText,
+  PROCESS_LABEL,
+  roastAgeDays
+} from '../../domain/bean';
 import { recipeHistory, recipeTitle } from '../../domain/bean-detail';
 import { bestRecipe } from '../../domain/best-recipe';
 import type { RecipeMatch } from '../../domain/fingerprint';
 import {
   bestScoreOutOfTen,
   dialInProgress,
+  homeGraphId,
   lastShotValues,
+  recipeConsistency,
+  scoreByRoastAge,
   thisWeek,
+  timeVsYield,
   type DialInGraph,
+  type HomeGraphId,
   type ShotValue,
+  type TimeYieldGraph,
   type Week
 } from '../../domain/home';
+import type { Axis, DotRow } from '../../domain/insights';
+import { groupRecipes } from '../../domain/journal';
 import type { GrinderSpec, MachineSpec } from '../../domain/schemas';
 import { setupSummary } from '../../domain/shot-form';
 import { decimalsFor, formatQuantity, type Thousandths } from '../../domain/units';
-import { loadShotFacts } from '../insights/facts';
+import { loadShotFacts, type ShotFact } from '../insights/facts';
 import type { Db, Queryable } from './client';
 import { appState, bean, gear, recipe, shot, userSettings } from './schema';
 
@@ -53,10 +67,21 @@ export type Home =
       week: Week;
       /** The best recipe, its score as on the Beans pages; null without a rated shot. */
       best: { score: string; title: string; detail: string } | null;
+      /** The graph chip chosen last; Dial-in at first. */
+      graphChoice: HomeGraphId;
       /** Dial-in progress; null with fewer than 2 rated shots. */
       graph: DialInGraph | null;
       /** How many of this bean's shots are rated, for what the graph still needs. */
       ratedShots: number;
+      /**
+       * The other graphs read every bag of this bean (same name and roaster, as in the Journal).
+       * Time vs. yield: null with fewer than 2 shots with a time and a yield.
+       */
+      timeYield: TimeYieldGraph | null;
+      /** Roast age: null without 2 ranges of days since roast with 2 rated shots each. */
+      roastAge: { rows: DotRow[]; axis: Axis } | null;
+      /** Consistency: null without a recipe brewed 3 times with a time. */
+      consistency: { rows: DotRow[]; axis: Axis } | null;
       timeZone: string;
     };
 
@@ -72,7 +97,11 @@ export function homeBeans(db: Queryable, ownerId: string) {
     .orderBy(desc(bean.createdAt), desc(bean.id))
     .all();
   const state = db.select().from(appState).where(eq(appState.userId, ownerId)).get();
-  return { open, current: open.find((b) => b.id === state?.currentBeanId) ?? open[0] };
+  return {
+    open,
+    current: open.find((b) => b.id === state?.currentBeanId) ?? open[0],
+    graph: state?.homeGraph ?? null
+  };
 }
 
 /**
@@ -83,7 +112,7 @@ export function loadHome(db: Queryable, ownerId: string, now: number): Home {
   const settings = db.select().from(userSettings).where(eq(userSettings.userId, ownerId)).get();
   if (!settings) throw new Error('Signed-in user without settings');
   const { timeZone } = settings;
-  const { open, current } = homeBeans(db, ownerId);
+  const { open, current, graph } = homeBeans(db, ownerId);
   if (!current) return { state: 'no-bean' };
 
   const choice = (b: (typeof open)[number]): HomeBean => {
@@ -142,6 +171,12 @@ export function loadHome(db: Queryable, ownerId: string, now: number): Home {
     };
   }
 
+  const best = bestOf(db, ownerId, current.id, shots, steps);
+  // Home's graphs read the same shot facts as Insights (docs/SPEC.md §5), oldest first.
+  const bags = bagsOf(db, ownerId, current);
+  const facts = loadShotFacts(db, ownerId, timeZone, { beanIds: bags });
+  const newestFirst = facts.toReversed();
+
   return {
     state: 'ready',
     bean: {
@@ -158,12 +193,91 @@ export function loadHome(db: Queryable, ownerId: string, now: number): Home {
     openBeans: open.map(choice),
     lastShot,
     week: thisWeek(shots, now, timeZone),
-    best: bestOf(db, ownerId, current.id, shots, steps),
-    // Home's graphs read the same shot facts as Insights (docs/SPEC.md §5); newest first for the dial-in graph.
-    graph: dialInProgress(loadShotFacts(db, ownerId, timeZone, { beanId: current.id }).reverse()),
+    best: best && { score: best.score, title: best.title, detail: best.detail },
+    graphChoice: homeGraphId(graph),
+    // Dial-in follows this bag: its recipes start again with each bag.
+    graph: dialInProgress(newestFirst.filter((f) => f.beanId === current.id)),
     ratedShots: shots.filter((s) => s.score !== null).length,
+    timeYield: timeVsYield(newestFirst),
+    roastAge: scoreByRoastAge(facts),
+    consistency: consistencyOf(db, ownerId, newestFirst, best?.recipeId ?? null, steps.dose),
     timeZone
   };
+}
+
+/** Every bag of the bean: your beans with its name and roaster, open or finished. */
+function bagsOf(
+  db: Queryable,
+  ownerId: string,
+  current: { name: string; roaster: string | null }
+): string[] {
+  const identity = beanIdentity(current.name, current.roaster);
+  return db
+    .select({ id: bean.id, name: bean.name, roaster: bean.roaster })
+    .from(bean)
+    .where(eq(bean.ownerId, ownerId))
+    .all()
+    .filter((b) => beanIdentity(b.name, b.roaster) === identity)
+    .map((b) => b.id);
+}
+
+/**
+ * Consistency: the shot times of each recipe, the same recipe brewed from several bags as one (as
+ * in the Journal's recipe filter), named "1.6 · 18.0 g" by the one brewed last. The best recipe's
+ * group is amber.
+ */
+function consistencyOf(
+  db: Queryable,
+  ownerId: string,
+  newestFirst: readonly ShotFact[],
+  bestRecipeId: string | null,
+  doseStep: Thousandths
+) {
+  const recipeIds = [...new Set(newestFirst.map((f) => f.recipeId))];
+  if (recipeIds.length === 0) return null;
+  const rows = db
+    .select({
+      id: recipe.id,
+      machineId: recipe.machineId,
+      fingerprint: recipe.fingerprint,
+      dose: recipe.dose
+    })
+    .from(recipe)
+    .where(and(eq(recipe.ownerId, ownerId), inArray(recipe.id, recipeIds)))
+    .all();
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const groups = groupRecipes(recipeIds.map((id) => byId.get(id)!));
+  return recipeConsistency(
+    groups.map((group) => {
+      const named = newestFirst.find((f) => f.recipeId === group.id)!;
+      const grind = formatQuantity(named.grind, {
+        decimals: decimalsFor(named.grind, named.grindStep)
+      });
+      const dose = formatQuantity(named.recipeDose, {
+        decimals: Math.max(1, decimalsFor(named.recipeDose, doseStep)),
+        unit: 'g'
+      });
+      return {
+        label: `${grind} · ${dose}`,
+        times: newestFirst.flatMap((f) =>
+          group.ids.includes(f.recipeId) && f.time !== null ? [f.time] : []
+        ),
+        best: bestRecipeId !== null && group.ids.includes(bestRecipeId)
+      };
+    })
+  );
+}
+
+/**
+ * The graph chip chosen on Home, kept for next time. False for a graph Home doesn't have.
+ */
+export function chooseHomeGraph(db: Db, ownerId: string, graph: string, now: number): boolean {
+  if (homeGraphId(graph) !== graph) return false;
+  db.insert(appState)
+    .values({ userId: ownerId, homeGraph: graph, createdAt: now, updatedAt: now })
+    .onConflictDoUpdate({ target: appState.userId, set: { homeGraph: graph, updatedAt: now } })
+    .run();
+  return true;
 }
 
 /**
@@ -184,7 +298,7 @@ function bestOf(
   beanId: string,
   shots: readonly BeanShot[],
   steps: { dose: Thousandths; yield: Thousandths; time: Thousandths }
-): { score: string; title: string; detail: string } | null {
+): { score: string; title: string; detail: string; recipeId: string } | null {
   const recipeIds = [...new Set(shots.map((s) => s.recipeId))];
   const best = bestRecipe(
     recipeIds.map((recipeId) => ({
@@ -223,6 +337,7 @@ function bestOf(
         });
   const setup = setupSummary(r.setup, machine?.features ?? []);
   return {
+    recipeId: best.recipeId,
     score: bestScoreOutOfTen(best),
     title: time === null ? core : `${core} · ${time}`,
     detail: [setup, recipeHistory(its.length).text].filter((p) => p).join(' · ')

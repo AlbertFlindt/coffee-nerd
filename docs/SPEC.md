@@ -88,7 +88,7 @@ The first visit creates the one account on "Create your account" (a name, and a 
 | `user_id` | primary key |
 | `current_bean_id` | Home's bean scope |
 | `brew_next_recipe_id` | Brew next. One column, so there can only ever be one mark |
-| `home_graph` | last chosen graph on Home |
+| `home_graph` | last chosen graph on Home: `dial-in`, `time-yield`, `roast-age` or `consistency` (§4.7); Dial-in when unset |
 | `basket_step_skipped` | The step-by-step start's basket step was skipped, so it is not asked again |
 | `next_routine_id` | Set by "Use it for new shots"; the next shot starts with this routine. Cleared by the next saved shot, and by saving My setup with another routine. No foreign key; ignored when archived or gone |
 
@@ -248,6 +248,13 @@ Definitions live on the gear (`spec.features`) and on the step (`setting`); valu
 ### 4.6 Grams left and finishing a bean
 After a shot is saved: if the bean has a bag weight and the doses add up to it, the bean is marked finished with `finished_automatically`, and the response tells the app to show the undo.
 
+### 4.7 Home's graphs
+A chip row picks one of four graphs for the bean on Home; the choice is kept in `app_state.home_graph`. Each reads the shot facts (§5) and is calculated, never stored. Dial-in reads only the bag on Home, since its recipes start again with each bag; the other three read every bag of the bean (the same name and roaster, as the Journal does), with the same recipe brewed from several bags as one (§4.1's dose rule).
+- **Dial-in:** the score of the last 12 rated shots, oldest first, a recipe change marked where the recipe differs from the shot before. Needs 2 rated shots.
+- **Time vs. yield:** the last 30 shots with a time and a yield, time across and yield up; shots scored 8 or more are amber. Needs 2 such shots.
+- **Roast age:** average score ± 1 σ per whole week since roast (0–6, 7–13, 14–20, 21–27, 28+ days). A range needs 2 rated shots, the graph 2 ranges. The best range is amber when it leads the next by more than half a point.
+- **Consistency:** shot time ± 1 σ of each recipe with 3 or more timed shots, the 4 with the most shots (the one brewed last first on a tie), named "1.6 · 18.0 g" (grind and dose; "(2)" after a second recipe that reads the same). The best recipe (§4.3) is amber.
+
 ---
 
 ## 5. Insights query system
@@ -257,7 +264,7 @@ Four layers, each testable on its own:
 1. **`shot_facts` view** — one wide row per shot with everything a chart might need: IDs (shot, recipe, bean, machine, grinder, basket, routine) and their names, brew time, score and all taste values, dose, yield, time, grind, the recipe's dose, bean facts (roast date, process, country, roaster, roast level), how many shots the recipe has, and the setup JSON. Values stay as stored. Reading it for one account (`src/lib/server/insights/facts.ts`) adds what needs the user's time zone or the units module: the local day, the week (named by its Monday), the roast age in days and the ratio. Home's graphs read from it too. The view is not made by a migration: the server drops it before migrating and creates it again after, because SQLite cannot rebuild a table (as drizzle-kit does for a column change) while a view reads it.
 2. **Registry of measures and dimensions** (TypeScript), each reading a shot's facts; the database query filters by account, bean, recipe and time:
    - *Measures:* score, time, yield, dose, ratio, grind, balance, body, sweetness, aftertaste.
-   - *Dimensions:* bean, process, country, roaster (names typed differently in case or spacing are one roaster), roast level, recipe, routine, grinder, basket, week, roast age range (not built yet: its ranges are decided with the first card that needs them), **`feature:<key>`** (any machine feature, read from the JSON) and **`step:<stepId>`** (any step setting).
+   - *Dimensions:* bean, process, country, roaster (names typed differently in case or spacing are one roaster), roast level, recipe, routine, grinder, basket, week, roast age range (not in the registry yet; Home's Roast age graph uses whole weeks since roast: 0–6, 7–13, 14–20, 21–27 and 28+ days), **`feature:<key>`** (any machine feature, read from the JSON) and **`step:<stepId>`** (any step setting).
    - *Filters:* bean, recipe, date range, rated shots only, reused recipes only.
    - *Hold constant:* compare only within the same bean or the same recipe — the "fair comparison" rule. Comparing routines holds the bean and every other part of the recipe constant (machine, grinder, grind, dose within 0.2 g, basket, setup), since the routine is part of the recipe. "Within 0.2 g" is not transitive, so recipes are taken from the most brewed down (the first brewed on a tie) and each joins the closest one within reach, as §4.1 matches a dose to the closest recipe. A bean's consistency is the pooled σ within its reused recipes.
    - A query is `{ measure, groupBy, filters, holdConstant }` and returns the values per group.

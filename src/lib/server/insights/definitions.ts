@@ -2,6 +2,7 @@
 // and its wording for every outcome. A new insight is a new entry here.
 import {
   careText,
+  CLEAR_POINTS,
   count,
   scoreAxis,
   decimalText,
@@ -48,8 +49,6 @@ export type InsightDefinition = {
 /** Score by process and by origin need 2 groups with 5 rated shots each. */
 const GROUP_MINIMUM = 5;
 const GROUPS_NEEDED = 2;
-/** Medians (process) and averages (origin) within 0.5 points are "no clear difference". */
-const CLEAR_POINTS = 0.5;
 /** A σ within 0.2 (seconds for routines, points for beans) is "no clear difference". */
 const CLEAR_SIGMA = 0.2;
 

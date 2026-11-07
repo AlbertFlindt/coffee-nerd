@@ -170,6 +170,58 @@ test('InsightsCompare: Comparisons shows routines and the steadiest beans', asyn
   await page.screenshot({ path: 'screenshots/InsightsCompare.png' });
 });
 
+test('HomeGraphs: on a long history, Home shows time vs. yield, roast age and consistency', async () => {
+  await page.goto('/');
+  const graphs = page.getByRole('region', { name: 'Graphs' });
+  const chips = graphs.getByRole('tablist', { name: 'Graph' });
+  await expect(chips.getByRole('tab', { name: 'Dial-in' })).toHaveAttribute(
+    'aria-selected',
+    'true'
+  );
+
+  // The last 30 shots with a time and a yield; tapping a point shows its numbers.
+  await chips.getByRole('tab', { name: 'Time vs. yield' }).click();
+  await expect(graphs).toContainText('Yield against time · last 30 shots');
+  await expect(
+    graphs.getByRole('img', { name: /^Yield against time for the last 30 shots, oldest first: / })
+  ).toBeVisible();
+  await expect(graphs).toContainText('Score 8 or more');
+  await graphs
+    .getByRole('button', { name: /^\d+\.\d s, \d+\.\d g, / })
+    .last()
+    .click();
+  await expect(graphs.getByText(/^\d+\.\d s · \d+\.\d g/)).toBeVisible();
+  await expectNoPageScroll();
+  await page.screenshot({ path: 'screenshots/HomeTimeYield.png' });
+
+  // Average score ± 1 σ per week since roast, every bag of the bean together.
+  await chips.getByRole('tab', { name: 'Roast age' }).click();
+  await expect(graphs).toContainText('Average score by days since roast');
+  const ranges = graphs.getByRole('button', { name: /^(\d+–\d+|28\+) days: average / });
+  expect(await ranges.count()).toBeGreaterThanOrEqual(2);
+  await expectNoPageScroll();
+  await page.screenshot({ path: 'screenshots/HomeRoastAge.png' });
+
+  // Shot time ± 1 σ of the recipes brewed 3 times or more, at most 4.
+  await chips.getByRole('tab', { name: 'Consistency' }).click();
+  await expect(graphs).toContainText('Shot time per recipe brewed 3 times or more');
+  const recipes = graphs.getByRole('button', { name: /^\d\.\d · \d+\.\d g( \(\d\))?: average / });
+  await expect(recipes).toHaveCount(4);
+  await expectNoPageScroll();
+  await page.screenshot({ path: 'screenshots/HomeConsistency.png' });
+
+  // Home opens on the graph chosen last.
+  await page.reload();
+  await expect(page.getByRole('tab', { name: 'Consistency' })).toHaveAttribute(
+    'aria-selected',
+    'true'
+  );
+  await page.getByRole('tab', { name: 'Dial-in' }).click();
+  await expect(page.getByRole('region', { name: 'Graphs' })).toContainText('Score per shot');
+  await page.reload();
+  await expect(page.getByRole('tab', { name: 'Dial-in' })).toHaveAttribute('aria-selected', 'true');
+});
+
 test('Insights opens on What I like each time', async () => {
   await page.goto('/insights');
   await expect(page.getByRole('tab', { name: 'What I like' })).toHaveAttribute(

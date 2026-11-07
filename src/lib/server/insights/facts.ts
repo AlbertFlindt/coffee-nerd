@@ -1,6 +1,6 @@
 // Shot facts (docs/SPEC.md §5): the `shot_facts` view read for one account, with what needs the user's
 // time zone or the units module added: the ratio, the local day, the week and the roast age.
-import { and, asc, eq, getViewSelectedFields, gte, lt, type SQL } from 'drizzle-orm';
+import { and, asc, eq, getViewSelectedFields, gte, inArray, lt, type SQL } from 'drizzle-orm';
 import { localDate, ratio, roastAgeDays } from '../../domain/bean';
 import type { MachineSpec, SetupSnapshot } from '../../domain/schemas';
 import type { Thousandths } from '../../domain/units';
@@ -51,6 +51,8 @@ export type ShotFact = {
 
 export type FactFilters = {
   beanId?: string;
+  /** Any of these beans: the bags of one bean on Home. */
+  beanIds?: readonly string[];
   recipeId?: string;
   /** Brewed at or after this UTC time. */
   from?: number;
@@ -69,6 +71,7 @@ export function loadShotFacts(
   const { ownerId: owner, ...columns } = getViewSelectedFields(shotFacts);
   const where: SQL[] = [eq(owner, ownerId)];
   if (filters.beanId !== undefined) where.push(eq(shotFacts.beanId, filters.beanId));
+  if (filters.beanIds !== undefined) where.push(inArray(shotFacts.beanId, [...filters.beanIds]));
   if (filters.recipeId !== undefined) where.push(eq(shotFacts.recipeId, filters.recipeId));
   if (filters.from !== undefined) where.push(gte(shotFacts.brewedAt, filters.from));
   if (filters.to !== undefined) where.push(lt(shotFacts.brewedAt, filters.to));

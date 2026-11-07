@@ -5,7 +5,17 @@
   import { decimalText, statText, type Chart, type DotRow } from '../domain/insights';
   import RowChart from './RowChart.svelte';
 
-  let { chart }: { chart: Extract<Chart, { kind: 'mean-sigma' }> } = $props();
+  let {
+    chart,
+    plotLeft,
+    spacing = 34
+  }: {
+    chart: Extract<Chart, { kind: 'mean-sigma' }>;
+    /** Where the plot starts; by default further in for a measure with a unit (screen 25). */
+    plotLeft?: number;
+    /** Row centres this far apart; Home packs its rows a little closer (built without a design). */
+    spacing?: number;
+  } = $props();
 
   const unit = $derived(chart.unit ? ` ${chart.unit}` : '');
   const describe = (r: DotRow) =>
@@ -24,9 +34,9 @@
   {rows}
   axis={chart.axis}
   {label}
-  spacing={34}
+  {spacing}
   gridTop={6}
-  plotLeft={chart.unit ? 86 : 53}
+  plotLeft={plotLeft ?? (chart.unit ? 86 : 53)}
   plotRight={50}
   rightSize={12}
 >
