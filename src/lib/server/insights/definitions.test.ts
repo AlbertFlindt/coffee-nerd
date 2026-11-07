@@ -39,7 +39,7 @@ describe('score by process (screen 23)', () => {
       axis: { from: 0, to: 10 }
     });
     expect(result.basis).toBe(
-      'Score by process · box = middle 50% · amber line = median · whiskers = full range · ' +
+      'Score by bean process · box = middle 50% · amber line = median · whiskers = full range · ' +
         'Natural and Washed have few shots, so treat with care'
     );
   });
@@ -49,9 +49,9 @@ describe('score by process (screen 23)', () => {
       ...shots(10, { process: 'natural' }, [8]),
       ...shots(10, { process: 'honey' }, [7, 8])
     ]);
-    expect(result.title).toBe('No clear favorite process');
+    expect(result.title).toBe('No clear favorite bean process');
     expect(result.sentence).toBe(
-      'Your processes score about the same: their medians are within half a point.'
+      'Your bean processes score about the same: their medians are within half a point.'
     );
   });
 
@@ -68,13 +68,13 @@ describe('score by process (screen 23)', () => {
     expect(process([])).toEqual({
       id: 'score-by-process',
       topic: 'like',
-      title: 'Score by process',
-      sentence: 'Rate 5 shots each from two processes to compare.',
+      title: 'Score by bean process',
+      sentence: 'Rate 5 shots each from two bean processes to compare.',
       chart: null,
       basis: null
     });
     expect(process(shots(5, { process: 'natural' })).sentence).toBe(
-      'Rate 5 shots of another process to compare.'
+      'Rate 5 shots of another bean process to compare.'
     );
     expect(
       process([...shots(7, { process: 'natural' }), ...shots(2, { process: 'washed' })]).sentence
@@ -167,6 +167,60 @@ describe('score by origin (screen 23)', () => {
     ).toBe('Rate 4 more shots from Kenya to compare.');
     expect(origin(shots(3, { countryCode: null })).sentence).toBe(
       'Rate 5 shots each from two origins to compare.'
+    );
+  });
+});
+
+describe('score by roaster', () => {
+  const roaster = (facts: ShotFact[]) => card('score-by-roaster', facts);
+
+  it('names the roaster with the highest average, as the origin card does', () => {
+    const result = roaster([
+      ...shots(10, { roaster: 'Nordlys Roasters' }, [8, 8, 9, 8]),
+      ...shots(10, { roaster: 'Coffee Collective' }, [6, 8, 7, 9])
+    ]);
+    expect(result.topic).toBe('like');
+    expect(result.title).toBe('Nordlys Roasters leads your roasters');
+    expect(result.sentence).toBe(
+      'Highest average, and the tightest spread: you rarely miss with Nordlys Roasters.'
+    );
+    expect(result.chart).toMatchObject({
+      kind: 'mean-sigma',
+      rows: [
+        { label: 'Nordlys Roasters', n: 10, top: true },
+        { label: 'Coffee Collective', n: 10, mean: 7.4, top: false }
+      ]
+    });
+    expect(result.basis).toBe('Average score ± 1 standard deviation · 20 rated shots');
+  });
+
+  it('one roaster typed two ways counts as one', () => {
+    const result = roaster([
+      ...shots(3, { roaster: 'Nordlys Roasters' }),
+      ...shots(2, { roaster: 'nordlys roasters' }),
+      ...shots(5, { roaster: 'Coffee Collective' }, [7])
+    ]);
+    expect(result.chart).toMatchObject({ rows: [{ n: 5 }, { n: 5 }] });
+  });
+
+  it('averages within half a point are no clear difference', () => {
+    const result = roaster([
+      ...shots(5, { roaster: 'Nordlys Roasters' }, [8]),
+      ...shots(5, { roaster: 'Coffee Collective' }, [8, 7, 8, 8, 8])
+    ]);
+    expect(result.title).toBe('No clear favorite roaster');
+    expect(result.sentence).toBe('Your top roasters average within half a point of each other.');
+  });
+
+  it('says how many more shots a roaster needs; beans without a roaster are left out', () => {
+    expect(
+      roaster([
+        ...shots(6, { roaster: 'Nordlys Roasters' }),
+        ...shots(2, { roaster: 'Coffee Collective' })
+      ]).sentence
+    ).toBe('Rate 3 more shots from Coffee Collective to compare.');
+    expect(roaster(shots(8, { roaster: null })).sentence).toBe(
+      'Rate 5 shots each from two roasters to compare.'
     );
   });
 });

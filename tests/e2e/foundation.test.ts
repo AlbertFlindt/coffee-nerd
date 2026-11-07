@@ -245,11 +245,14 @@ test('with its first shot, a new account sees on Insights what each card needs',
   await expect(page.getByText('From 1 shot · 1 bean')).toBeVisible();
   const card = (title: string) =>
     page.getByRole('article').filter({ has: page.getByRole('heading', { name: title }) });
-  await expect(card('Score by process')).toContainText(
-    'Rate 5 shots each from two processes to compare.'
+  await expect(card('Score by bean process')).toContainText(
+    'Rate 5 shots each from two bean processes to compare.'
   );
   await expect(card('Score by origin')).toContainText(
     'Rate 5 shots each from two origins to compare.'
+  );
+  await expect(card('Score by roaster')).toContainText(
+    'Rate 5 shots each from two roasters to compare.'
   );
   await expect(page.getByRole('img')).toHaveCount(0);
 });

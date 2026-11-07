@@ -11,6 +11,15 @@ top marked "(unreleased)" is out as pre-releases (`vX.Y.Z-pre.N`).
   last 30 shots with the ones scored 8 or more in amber. Roast age shows your average score per
   week since roast (0–6, 7–13, 14–20, 21–27 and 28+ days). Consistency shows how much the shot
   time wanders for each recipe you brewed 3 times or more. These three count every bag of the bean.
+- **Score by roaster:** a new card under What I like in Insights compares your average score
+  per roaster, the way Score by origin compares origins. It shows once two roasters have 5 rated
+  shots each. A roaster typed differently on two bags ("Nordlys Roasters", "nordlys roasters")
+  counts as one.
+
+### Changed
+- **Score by bean process:** the Insights card Score by process is now called Score by bean
+  process, so it's clear it compares how your beans were processed (natural, washed, honey),
+  as set on each bean, and not your puck prep.
 
 ## 1.4.0 (2026-10-31)
 
