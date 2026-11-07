@@ -1,6 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getDb } from '#lib/server/db/connection.ts';
-import { chooseHomeBean, loadHome } from '#lib/server/db/home.ts';
+import { chooseHomeBean, chooseHomeGraph, loadHome } from '#lib/server/db/home.ts';
 import { bean } from '#lib/server/db/schema.ts';
 import { rateShot, reopenAutoFinishedBean, ShotRejected } from '#lib/server/db/shots.ts';
 import { setFlash, takeFlash } from '#lib/server/flash.ts';
@@ -27,6 +27,14 @@ export const actions: Actions = {
     const beanId = String((await request.formData()).get('beanId') ?? '');
     if (!chooseHomeBean(getDb(), locals.user.id, beanId, Date.now())) return fail(404);
     return { chosen: true };
+  },
+
+  // A graph chip: Home opens on the graph chosen last.
+  graph: async ({ locals, request }) => {
+    if (!locals.user) error(401);
+    const graph = String((await request.formData()).get('graph') ?? '');
+    if (!chooseHomeGraph(getDb(), locals.user.id, graph, Date.now())) return fail(400);
+    return { graph };
   },
 
   // The Rate block on the Last shot card sets the shot's score.

@@ -101,6 +101,9 @@ export function listText(items: readonly string[]): string {
   return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
 }
 
+/** Medians and averages of scores within 0.5 points are "no clear difference" (Insights and Home). */
+export const CLEAR_POINTS = 0.5;
+
 /** The basis line names each group with fewer than 10 shots, to treat with care (screen 25). */
 export const CARE_BELOW = 10;
 

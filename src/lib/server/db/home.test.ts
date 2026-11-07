@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { finishBean } from './beans';
 import { openDatabase, type Db } from './client';
-import { chooseHomeBean, loadHome } from './home';
+import { chooseHomeBean, chooseHomeGraph, loadHome } from './home';
 import { newId } from './ids';
 import { appState, bean, user, userSettings } from './schema';
 import { REFERENCE, seedReferenceSetup, type SeededIds } from './seed';
@@ -18,6 +18,7 @@ afterAll(() => rmSync(dir, { recursive: true, force: true }));
 // Saturday 17 Oct 2026, 08:00 in Copenhagen (the seed's time zone).
 const T0 = Date.UTC(2026, 9, 17, 6, 0);
 const MINUTE = 60_000;
+const HOUR = 3_600_000;
 const DAY = 86_400_000;
 let db: Db;
 let ids: SeededIds;
@@ -78,6 +79,25 @@ function secondBean(createdAt = T0): string {
       name: 'Kiambu AA',
       process: 'washed',
       roastDate: '2026-10-01',
+      status: 'open',
+      createdAt,
+      updatedAt: createdAt
+    })
+    .run();
+  return id;
+}
+
+/** Another bag of the seeded bean: the same name and roaster, roasted later. */
+function newBag(createdAt = T0 - 5 * DAY): string {
+  const id = newId(createdAt);
+  db.insert(bean)
+    .values({
+      id,
+      ownerId: ids.userId,
+      name: 'Guji Hambela',
+      roaster: 'Nordlys Roasters',
+      process: 'natural',
+      roastDate: '2026-10-10',
       status: 'open',
       createdAt,
       updatedAt: createdAt
@@ -176,6 +196,66 @@ describe('loadHome', () => {
     expect(ready()).toMatchObject({ graph: null, ratedShots: 1 });
   });
 
+  it('opens on Dial-in until another graph is chosen', () => {
+    expect(ready().graphChoice).toBe('dial-in');
+    chooseHomeGraph(db, ids.userId, 'consistency', T0);
+    expect(ready().graphChoice).toBe('consistency');
+  });
+
+  it('Time vs. yield plots the shots with a time and a yield, oldest first', () => {
+    const first = save(shotAt(T0 - 3 * DAY, { time: 26500, yield: 35000, taste: taste(9) }));
+    save(shotAt(T0 - 2 * DAY, { time: null }));
+    const last = save(shotAt(T0 - DAY, { time: 29000, yield: 38500, taste: taste(null) }));
+    expect(ready().timeYield!.points).toEqual([
+      { shotId: first, time: 26.5, yield: 35, score: 9, liked: true },
+      { shotId: last, time: 29, yield: 38.5, score: null, liked: false }
+    ]);
+  });
+
+  it('Roast age compares the average score per range of days since roast', () => {
+    // The bean was roasted 42 days before T0.
+    save(shotAt(T0 - 32 * DAY, { taste: taste(6) }));
+    save(shotAt(T0 - 31 * DAY, { taste: taste(7) }));
+    save(shotAt(T0 - 2 * DAY, { taste: taste(9) }));
+    save(shotAt(T0 - DAY, { taste: taste(8) }));
+    expect(ready().roastAge!.rows.map((r) => [r.label, r.mean, r.top])).toEqual([
+      ['7–13 days', 6.5, false],
+      ['28+ days', 8.5, true]
+    ]);
+  });
+
+  it('Consistency shows the shot time of each recipe brewed 3 times, the best one marked', () => {
+    for (const [day, time] of [
+      [6, 27000],
+      [5, 28000],
+      [4, 29000]
+    ])
+      save(shotAt(T0 - day * DAY, { time, taste: taste(9) }));
+    for (const day of [3, 2, 1]) save(shotAt(T0 - day * DAY, { grind: 1800, taste: taste(6) }));
+    // As many shots each: the recipe brewed last comes first.
+    expect(ready().consistency!.rows).toEqual([
+      { label: '1.8 · 18.0 g', n: 3, mean: 28, sigma: 0, top: false },
+      { label: '1.6 · 18.0 g', n: 3, mean: 28, sigma: 1, top: true }
+    ]);
+  });
+
+  it('the other graphs read every bag of the bean; Dial-in only the bag on Home', () => {
+    save(shotAt(T0 - 3 * DAY, { taste: taste(7) }));
+    save(shotAt(T0 - 2 * DAY, { taste: taste(8) }));
+    const bag = newBag();
+    chooseHomeBean(db, ids.userId, bag, T0);
+    const fresh = (brewedAt: number, score: number) =>
+      save(shotAt(brewedAt, { beanId: bag, taste: taste(score) }));
+    fresh(T0 - 2 * HOUR, 9);
+    fresh(T0 - HOUR, 9);
+    const home = ready();
+    expect(home.bean.id).toBe(bag);
+    expect(home.graph!.points).toHaveLength(2);
+    expect(home.timeYield!.points).toHaveLength(4);
+    // The same recipe brewed from both bags is one recipe.
+    expect(home.consistency!.rows).toMatchObject([{ label: '1.6 · 18.0 g', n: 4 }]);
+  });
+
   it('grams left when the bean has a bag weight', () => {
     db.update(bean).set({ bagWeight: 250000 }).where(eq(bean.id, ids.beanId)).run();
     save(shotAt(T0 - DAY));
@@ -221,5 +301,13 @@ describe('chooseHomeBean', () => {
     expect(chooseHomeBean(db, ids.userId, other, T0)).toBe(false);
     expect(chooseHomeBean(db, ids.userId, 'not-a-bean', T0)).toBe(false);
     expect(db.select().from(appState).get()?.currentBeanId).toBe(ids.beanId);
+  });
+});
+
+describe('chooseHomeGraph', () => {
+  it('only a graph Home has can be chosen', () => {
+    expect(chooseHomeGraph(db, ids.userId, 'roast-age', T0)).toBe(true);
+    expect(chooseHomeGraph(db, ids.userId, 'pie', T0)).toBe(false);
+    expect(db.select().from(appState).get()?.homeGraph).toBe('roast-age');
   });
 });

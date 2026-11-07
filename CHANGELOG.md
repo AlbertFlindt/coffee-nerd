@@ -3,6 +3,15 @@
 All notable changes to Coffee Nerd. Each version is a tag and a GitHub release; the version at the
 top marked "(unreleased)" is out as pre-releases (`vX.Y.Z-pre.N`).
 
+## 1.5.0 (unreleased)
+
+### Added
+- **Three more graphs on Home:** chips above the graph switch between Dial-in, Time vs. yield,
+  Roast age and Consistency, and Home opens on the one you chose last. Time vs. yield plots your
+  last 30 shots with the ones scored 8 or more in amber. Roast age shows your average score per
+  week since roast (0–6, 7–13, 14–20, 21–27 and 28+ days). Consistency shows how much the shot
+  time wanders for each recipe you brewed 3 times or more. These three count every bag of the bean.
+
 ## 1.4.0 (2026-10-31)
 
 ### Changed

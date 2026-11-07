@@ -19,8 +19,6 @@ Goal: the journal works for filter and immersion coffee, not only espresso.
 - [ ] Home, the Journal and Insights per method; espresso stays the default.
 
 ## Backlog (minor releases, no milestone)
-- [ ] Home: the other three graphs (time vs. yield, score vs. roast age, recipe consistency)
-      with the chip row, and roast age ranges (e.g. 0–6, 7–13 days) decided with them.
 - [ ] More Insights Dial-in cards: grind vs. time, sour/bitter vs. ratio, roasters, flavor
       families, grinders and baskets.
 - [ ] Tap to type on the Setup sheet and pressure profile rows (−/+ only: 18 taps to 9.0 bar).

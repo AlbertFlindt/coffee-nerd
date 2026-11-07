@@ -3,7 +3,13 @@ import {
   bestScoreOutOfTen,
   dialInProgress,
   freshnessDetail,
+  HOME_GRAPHS,
+  homeGraphId,
   lastShotValues,
+  recipeConsistency,
+  ROAST_AGE_RANGES,
+  scoreByRoastAge,
+  timeVsYield,
   thisWeek,
   thisWeekText
 } from './home';
@@ -160,5 +166,161 @@ describe('dialInProgress', () => {
     expect(dialInProgress([shot(8), shot(5)])!.ticks).toEqual([5, 7, 9]);
     expect(dialInProgress([shot(10), shot(10)])!.ticks).toEqual([8, 9, 10]);
     expect(dialInProgress([shot(10), shot(1)])!.ticks).toEqual([0, 5, 10]);
+  });
+});
+
+describe('homeGraphId', () => {
+  it('the four graphs in the order of the chip row', () => {
+    expect(HOME_GRAPHS.map((g) => g.label)).toEqual([
+      'Dial-in',
+      'Time vs. yield',
+      'Roast age',
+      'Consistency'
+    ]);
+  });
+
+  it('opens on the graph chosen last, and on Dial-in when none or an unknown one is stored', () => {
+    expect(homeGraphId('roast-age')).toBe('roast-age');
+    expect(homeGraphId(null)).toBe('dial-in');
+    expect(homeGraphId('pie')).toBe('dial-in');
+  });
+});
+
+describe('timeVsYield', () => {
+  let n = 0;
+  const shot = (time: number | null, yieldG: number | null, score: number | null = null) => ({
+    shotId: `shot-${++n}`,
+    time: time === null ? null : time * 1000,
+    yield: yieldG === null ? null : yieldG * 1000,
+    score
+  });
+
+  it('the last 30 shots with a time and a yield, oldest first, in seconds and grams', () => {
+    const newestFirst = [
+      shot(28.5, 36.2),
+      shot(null, 36),
+      shot(27, null),
+      ...Array.from({ length: 40 }, () => shot(25, 40))
+    ];
+    const graph = timeVsYield(newestFirst)!;
+    expect(graph.points).toHaveLength(30);
+    expect(graph.points.at(-1)).toMatchObject({ time: 28.5, yield: 36.2 });
+  });
+
+  it('shots scored 8 or more are the liked ones; unrated shots are not', () => {
+    const graph = timeVsYield([shot(28, 36, 8), shot(27, 35, 7), shot(26, 34, null)])!;
+    expect(graph.points.map((p) => p.liked)).toEqual([false, false, true]);
+  });
+
+  it('each point knows its shot, so tapping it can open that shot', () => {
+    const newestFirst = [shot(28, 36), shot(27, 35)];
+    expect(timeVsYield(newestFirst)!.points.map((p) => p.shotId)).toEqual([
+      newestFirst[1].shotId,
+      newestFirst[0].shotId
+    ]);
+  });
+
+  it('fewer than 2 shots with a time and a yield give no graph', () => {
+    expect(timeVsYield([shot(28, 36), shot(null, 36)])).toBeNull();
+  });
+
+  it('axes on round numbers around the values, with at most 7 labels each', () => {
+    const graph = timeVsYield([shot(24.5, 33), shot(31, 41.5)])!;
+    expect(graph.time).toEqual({ from: 24, to: 32, ticks: [24, 26, 28, 30, 32], unit: 's' });
+    expect(graph.yield).toEqual({ from: 32, to: 42, ticks: [32, 34, 36, 38, 40, 42], unit: 'g' });
+  });
+
+  it('an axis has room even when every shot has the same value', () => {
+    const graph = timeVsYield([shot(28, 36), shot(28, 36)])!;
+    expect(graph.time.from).toBeLessThan(28);
+    expect(graph.time.to).toBeGreaterThan(28);
+  });
+});
+
+describe('scoreByRoastAge', () => {
+  const shots = (days: number, ...scores: (number | null)[]) =>
+    scores.map((score) => ({ roastAgeDays: days, score }));
+
+  it('ranges of whole weeks since roast, the last one open', () => {
+    expect(ROAST_AGE_RANGES.map((r) => r.label)).toEqual([
+      '0–6 days',
+      '7–13 days',
+      '14–20 days',
+      '21–27 days',
+      '28+ days'
+    ]);
+  });
+
+  it('average score ± 1 standard deviation per range, in range order', () => {
+    const chart = scoreByRoastAge([...shots(9, 8, 6), ...shots(3, 5, 7), ...shots(30, 6, 8, 7)])!;
+    expect(chart.rows.map((r) => [r.label, r.n, r.mean])).toEqual([
+      ['0–6 days', 2, 6],
+      ['7–13 days', 2, 7],
+      ['28+ days', 3, 7]
+    ]);
+    expect(chart.rows[0].sigma).toBeCloseTo(Math.SQRT2);
+  });
+
+  it('a range needs 2 rated shots; unrated shots count for nothing, never as 0', () => {
+    const chart = scoreByRoastAge([...shots(2, 7, null), ...shots(8, 6, 7), ...shots(15, 8, 9)])!;
+    expect(chart.rows.map((r) => r.label)).toEqual(['7–13 days', '14–20 days']);
+  });
+
+  it('fewer than 2 ranges to compare give no chart', () => {
+    expect(scoreByRoastAge([...shots(8, 6, 7), ...shots(15, 8)])).toBeNull();
+  });
+
+  it('the best range is amber only when it leads by more than half a point', () => {
+    const clear = scoreByRoastAge([...shots(8, 6, 7), ...shots(15, 8, 9)])!;
+    expect(clear.rows.map((r) => r.top)).toEqual([false, true]);
+    const close = scoreByRoastAge([...shots(8, 8, 8), ...shots(15, 8, 9)])!;
+    expect(close.rows.map((r) => r.top)).toEqual([false, false]);
+  });
+
+  it('a score axis to 10 with room for the whiskers', () => {
+    const chart = scoreByRoastAge([...shots(8, 6, 7), ...shots(15, 8, 9)])!;
+    expect(chart.axis.to).toBe(10);
+    expect(chart.axis.from).toBeLessThanOrEqual(6.5 - Math.SQRT1_2);
+  });
+});
+
+describe('recipeConsistency', () => {
+  const recipe = (label: string, seconds: number[], best = false) => ({
+    label,
+    times: seconds.map((s) => s * 1000),
+    best
+  });
+
+  it('shot time ± 1 standard deviation per recipe brewed 3 times or more', () => {
+    const chart = recipeConsistency([
+      recipe('1.6 · 18.0 g', [27, 28, 29]),
+      recipe('1.8 · 18.0 g', [30, 31])
+    ])!;
+    expect(chart.rows).toEqual([{ label: '1.6 · 18.0 g', n: 3, mean: 28, sigma: 1, top: false }]);
+    expect(chart.axis.unit).toBe('s');
+  });
+
+  it('the 4 recipes with the most shots, most first; the best recipe is amber', () => {
+    const chart = recipeConsistency([
+      recipe('a', [28, 28, 29]),
+      recipe('b', [28, 28, 29, 30, 30], true),
+      recipe('c', [28, 28, 29, 30]),
+      recipe('d', [28, 28, 29, 30]),
+      recipe('e', [28, 28, 29, 30, 30, 31])
+    ])!;
+    expect(chart.rows.map((r) => r.label)).toEqual(['e', 'b', 'c', 'd']);
+    expect(chart.rows.map((r) => r.top)).toEqual([false, true, false, false]);
+  });
+
+  it('recipes that read the same are told apart, so each row has its own name', () => {
+    const chart = recipeConsistency([
+      recipe('1.6 · 18.0 g', [27, 28, 29]),
+      recipe('1.6 · 18.0 g', [27, 28, 29])
+    ])!;
+    expect(chart.rows.map((r) => r.label)).toEqual(['1.6 · 18.0 g', '1.6 · 18.0 g (2)']);
+  });
+
+  it('no recipe brewed 3 times with a time gives no chart', () => {
+    expect(recipeConsistency([recipe('a', [27, 28])])).toBeNull();
   });
 });

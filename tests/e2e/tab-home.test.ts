@@ -75,13 +75,22 @@ test('Home: banner, bean pill, last shot, quick numbers and best recipe', async 
   await expect(best()).toContainText(/^Best recipe for this bean\s*\d+(\.\d)? \/ 10/);
   await expect(best()).toContainText(/Grind \d\.\d · \d+\.\d g/);
   await expect(best()).toContainText(/Reused \d+x|Tried once/);
-  // The score of the last rated shots, oldest first, as the only graph.
-  const graph = page.getByRole('region', { name: 'Dial-in progress' });
+  // The graph chips, Dial-in first: the score of the last rated shots, oldest first.
+  const graph = page.getByRole('region', { name: 'Graphs' });
   await expect(graph).toContainText(/Score per shot · last \d+ rated shots/);
   await expect(graph.getByRole('img', { name: /^Score per shot, oldest first: / })).toBeVisible();
   await expect(graph).toContainText('Last shot');
   await expect(graph).toContainText('New recipe');
-  await expect(page.getByRole('tab')).toHaveCount(0);
+  await expect(graph.getByRole('tab')).toHaveText([
+    'Dial-in',
+    'Time vs. yield',
+    'Roast age',
+    'Consistency'
+  ]);
+  await expect(graph.getByRole('tab', { name: 'Dial-in' })).toHaveAttribute(
+    'aria-selected',
+    'true'
+  );
   await expectNoPageScroll();
   await screenshot('Home');
 });
@@ -99,7 +108,7 @@ test('with more rated shots, recipe changes are marked on the graph', async () =
   unrated.forEach(({ id }, i) => sql('update shot set score = ? where id = ?', 5 + (i % 4), id));
   try {
     await page.reload();
-    const graph = page.getByRole('region', { name: 'Dial-in progress' });
+    const graph = page.getByRole('region', { name: 'Graphs' });
     await expect(graph.getByRole('img', { name: /a new recipe at shot \d+/ })).toBeVisible();
     // Tapping a point shows its score.
     const point = graph.getByRole('button', { name: /^Shot \d+ of \d+, score \d+$/ }).last();
@@ -117,7 +126,7 @@ test('with more rated shots, recipe changes are marked on the graph', async () =
     await graph.getByRole('button', { name: /, tap again to open it$/ }).click();
     await expect(page).toHaveURL(new RegExp(`/journal/${last.id}\\?from=home$`));
     await page.getByRole('link', { name: 'Back to Home' }).click();
-    await expect(page.getByRole('region', { name: 'Dial-in progress' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Graphs' })).toBeVisible();
   } finally {
     for (const { id } of unrated) sql('update shot set score = null where id = ?', id);
   }
@@ -126,9 +135,7 @@ test('with more rated shots, recipe changes are marked on the graph', async () =
 test('on a shorter screen the graph gives up height, and Home still fits', async () => {
   await page.setViewportSize({ width: 412, height: 780 });
   try {
-    await expect(
-      page.getByRole('region', { name: 'Dial-in progress' }).getByRole('img')
-    ).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Graphs' }).getByRole('img')).toBeVisible();
     await expectNoPageScroll();
   } finally {
     await page.setViewportSize({ width: 412, height: 915 });
@@ -195,11 +202,16 @@ test('switching the bean on Home changes every card and the bean "+" starts from
     await expect(numbers()).toContainText(/Bean freshness\s*5 days/);
     await expect(numbers()).toContainText(/This week\s*0 shots\s*No shots yet/);
     await expect(best()).toContainText('No shots yet');
-    await expect(page.getByRole('region', { name: 'Dial-in progress' })).toContainText(
-      'No shots yet'
-    );
+    await expect(page.getByRole('region', { name: 'Graphs' })).toContainText('No shots yet');
     await expectNoPageScroll();
     await screenshot('HomeNoShots');
+    // Every graph says so too, and Home goes back to Dial-in.
+    const graphs = page.getByRole('region', { name: 'Graphs' });
+    for (const name of ['Time vs. yield', 'Roast age', 'Consistency', 'Dial-in']) {
+      await graphs.getByRole('tab', { name }).click();
+      await expect(graphs.getByRole('tab', { name })).toHaveAttribute('aria-selected', 'true');
+      await expect(graphs).toContainText('No shots yet');
+    }
 
     await page.getByRole('link', { name: 'New shot' }).click();
     await expect(page.getByText('Huila Pink Bourbon · Washed')).toBeVisible();

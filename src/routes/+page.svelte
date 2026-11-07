@@ -6,12 +6,20 @@
   import { resolve } from '$app/paths';
   import BottomSheet from '#lib/components/BottomSheet.svelte';
   import DialInGraph from '#lib/components/DialInGraph.svelte';
+  import DotPlot from '#lib/components/DotPlot.svelte';
+  import TimeYieldGraph from '#lib/components/TimeYieldGraph.svelte';
   import RateSheet from '#lib/components/RateSheet.svelte';
   import SavedBar from '#lib/components/SavedBar.svelte';
   import TabBar from '#lib/components/TabBar.svelte';
   import WaitingLine from '#lib/components/WaitingLine.svelte';
   import { recipeTagText } from '#lib/domain/fingerprint.ts';
-  import { freshnessDetail, thisWeekText } from '#lib/domain/home.ts';
+  import {
+    CONSISTENCY_MINIMUM,
+    freshnessDetail,
+    HOME_GRAPHS,
+    thisWeekText,
+    type HomeGraphId
+  } from '#lib/domain/home.ts';
   import { clockTime, dayLabel } from '#lib/domain/journal.ts';
   import { lastShotWithWaiting, waitingFormQuery } from '#lib/domain/waiting.ts';
   import { takeSavedOnPhone, waiting } from '#lib/shot-queue.svelte.ts';
@@ -23,6 +31,9 @@
   const home = $derived(data.home);
   let beanSheet = $state(false);
   let rating = $state(false);
+  // A chip shows its graph at once and is kept for next time in the background (offline too).
+  let picked: HomeGraphId | null = $state(null);
+  const chosenGraph = $derived(picked ?? (home.state === 'ready' ? home.graphChoice : 'dial-in'));
   const now = Date.now();
   // A shot just kept on the phone shows the usual "Shot saved" bar.
   const savedOnPhone = takeSavedOnPhone();
@@ -189,23 +200,92 @@
       {/if}
     </section>
 
-    <!-- Dial-in progress is the only graph for now, so there is no chip row above it. -->
-    <section class="graph" aria-label="Dial-in progress">
-      {#if home.graph}
-        <span class="muted small">Score per shot · last {home.graph.points.length} rated shots</span
-        >
-        <DialInGraph graph={home.graph} />
-      {:else}
-        <span class="muted small">Score per shot</span>
-        <!-- Not designed yet. -->
-        <p class="muted">
-          {last === null
-            ? 'No shots yet'
-            : home.ratedShots === 1
-              ? 'Rate 1 more shot to see your progress here.'
-              : 'Rate 2 shots to see your progress here.'}
-        </p>
-      {/if}
+    <section class="graph" aria-label="Graphs">
+      <form method="POST" action="?/graph" use:enhance={() => async () => {}}>
+        <div class="cn-tabs chips" role="tablist" aria-label="Graph">
+          {#each HOME_GRAPHS as g (g.id)}
+            <button
+              type="submit"
+              name="graph"
+              value={g.id}
+              role="tab"
+              class="chip"
+              aria-selected={chosenGraph === g.id}
+              aria-controls="home-graph"
+              onclick={() => (picked = g.id)}>{g.label}</button
+            >
+          {/each}
+        </div>
+      </form>
+      <div id="home-graph" class="chart" role="tabpanel">
+        {#if chosenGraph === 'dial-in'}
+          {#if home.graph}
+            <span class="muted small"
+              >Score per shot · last {home.graph.points.length} rated shots</span
+            >
+            <DialInGraph graph={home.graph} />
+          {:else}
+            <span class="muted small">Score per shot</span>
+            <!-- Not designed yet. -->
+            <p class="muted">
+              {last === null
+                ? 'No shots yet'
+                : home.ratedShots === 1
+                  ? 'Rate 1 more shot to see your progress here.'
+                  : 'Rate 2 shots to see your progress here.'}
+            </p>
+          {/if}
+        {:else if chosenGraph === 'time-yield'}
+          <!-- Not designed yet: the chart, its caption and its empty state. -->
+          {#if home.timeYield}
+            <span class="muted small"
+              >Yield against time · last {home.timeYield.points.length} shots</span
+            >
+            <TimeYieldGraph graph={home.timeYield} />
+          {:else}
+            <span class="muted small">Yield against time</span>
+            <p class="muted">
+              {last === null
+                ? 'No shots yet'
+                : 'Enter a time and a yield on 2 shots to see them here.'}
+            </p>
+          {/if}
+        {:else if chosenGraph === 'roast-age'}
+          <!-- Not designed yet: the chart, its caption and its empty state. -->
+          <span class="muted small">Average score by days since roast</span>
+          {#if home.roastAge}
+            <DotPlot
+              chart={{ kind: 'mean-sigma', measure: 'Score', ...home.roastAge }}
+              plotLeft={84}
+              spacing={30}
+            />
+          {:else}
+            <p class="muted">
+              {last === null
+                ? 'No shots yet'
+                : 'Rate 2 shots in each of two weeks since roast to compare them here.'}
+            </p>
+          {/if}
+        {:else}
+          <!-- Not designed yet: the chart, its caption and its empty state. -->
+          <span class="muted small"
+            >Shot time per recipe brewed {CONSISTENCY_MINIMUM} times or more</span
+          >
+          {#if home.consistency}
+            <DotPlot
+              chart={{ kind: 'mean-sigma', measure: 'Shot time', unit: 's', ...home.consistency }}
+              plotLeft={100}
+              spacing={30}
+            />
+          {:else}
+            <p class="muted">
+              {last === null
+                ? 'No shots yet'
+                : `Brew a recipe ${CONSISTENCY_MINIMUM} times with a time to see how steady it is.`}
+            </p>
+          {/if}
+        {/if}
+      </div>
     </section>
   </main>
 
@@ -499,6 +579,36 @@
     padding: 14px var(--space-4) var(--space-4);
     border-radius: var(--radius-lg);
     background: var(--surface);
+  }
+
+  /* As drawn on screen 6: smaller than the Insights chips, cream when chosen (a view, not an input). */
+  .chips {
+    display: flex;
+    gap: 6px;
+    /* On a narrow phone the chips slide sideways rather than leave the card. */
+    overflow-x: auto;
+  }
+
+  .chip {
+    flex: none;
+    height: 36px;
+    padding: 0 12px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--control);
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .chart {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
   }
 
   .empty-card {
