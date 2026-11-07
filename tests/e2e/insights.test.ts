@@ -70,6 +70,10 @@ test('Insights: the tab bar opens it on What I like with the data basis', async 
   await expectNoPageScroll();
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: 'screenshots/Insights.png' });
+  // Score by roaster, below the two designed cards, drawn like score by origin.
+  const roasters = card('Nordlys Roasters leads your roasters');
+  await expect(roasters).toContainText('Highest average: 7.6 against 7 for Kaffeværket.');
+  await expect(roasters).toContainText('Average score ± 1 standard deviation · 96 rated shots');
   // No request leaves the server: the app is self-hosted and private.
   expect(external).toEqual([]);
 });

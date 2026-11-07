@@ -63,12 +63,13 @@ describe('seedShotHistory', () => {
     ).toEqual(['Daily routine', 'Light roast']);
   });
 
-  it('every card shows the finding screens 23 to 25 are drawn with', () => {
+  it('every card shows the finding screens 23 to 25 are drawn with, and a roaster leads', () => {
     const { db, ids } = seeded();
     const cards = loadInsights(db, ids.userId, T0).cards;
     expect(cards.map((c) => c.title)).toEqual([
       'Naturals are your thing',
       'Ethiopia leads your origins',
+      'Nordlys Roasters leads your roasters',
       'Better and steadier',
       'Your shot time is under control',
       'Daily routine is more repeatable',

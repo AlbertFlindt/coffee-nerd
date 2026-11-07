@@ -251,6 +251,9 @@ test('with its first shot, a new account sees on Insights what each card needs',
   await expect(card('Score by origin')).toContainText(
     'Rate 5 shots each from two origins to compare.'
   );
+  await expect(card('Score by roaster')).toContainText(
+    'Rate 5 shots each from two roasters to compare.'
+  );
   await expect(page.getByRole('img')).toHaveCount(0);
 });
 

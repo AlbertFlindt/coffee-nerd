@@ -53,6 +53,7 @@ describe('loadInsights', () => {
     expect(empty.cards.map((c) => [c.title, c.sentence, c.chart])).toEqual([
       ['Score by process', 'Rate 5 shots each from two processes to compare.', null],
       ['Score by origin', 'Rate 5 shots each from two origins to compare.', null],
+      ['Score by roaster', 'Rate 5 shots each from two roasters to compare.', null],
       ['Weekly average score', 'Rate 2 shots a week for 4 more weeks to see your progress.', null],
       [
         'Shot time',

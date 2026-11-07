@@ -171,6 +171,60 @@ describe('score by origin (screen 23)', () => {
   });
 });
 
+describe('score by roaster', () => {
+  const roaster = (facts: ShotFact[]) => card('score-by-roaster', facts);
+
+  it('names the roaster with the highest average, as the origin card does', () => {
+    const result = roaster([
+      ...shots(10, { roaster: 'Nordlys Roasters' }, [8, 8, 9, 8]),
+      ...shots(10, { roaster: 'Coffee Collective' }, [6, 8, 7, 9])
+    ]);
+    expect(result.topic).toBe('like');
+    expect(result.title).toBe('Nordlys Roasters leads your roasters');
+    expect(result.sentence).toBe(
+      'Highest average, and the tightest spread: you rarely miss with Nordlys Roasters.'
+    );
+    expect(result.chart).toMatchObject({
+      kind: 'mean-sigma',
+      rows: [
+        { label: 'Nordlys Roasters', n: 10, top: true },
+        { label: 'Coffee Collective', n: 10, mean: 7.4, top: false }
+      ]
+    });
+    expect(result.basis).toBe('Average score ± 1 standard deviation · 20 rated shots');
+  });
+
+  it('one roaster typed two ways counts as one', () => {
+    const result = roaster([
+      ...shots(3, { roaster: 'Nordlys Roasters' }),
+      ...shots(2, { roaster: 'nordlys roasters' }),
+      ...shots(5, { roaster: 'Coffee Collective' }, [7])
+    ]);
+    expect(result.chart).toMatchObject({ rows: [{ n: 5 }, { n: 5 }] });
+  });
+
+  it('averages within half a point are no clear difference', () => {
+    const result = roaster([
+      ...shots(5, { roaster: 'Nordlys Roasters' }, [8]),
+      ...shots(5, { roaster: 'Coffee Collective' }, [8, 7, 8, 8, 8])
+    ]);
+    expect(result.title).toBe('No clear favorite roaster');
+    expect(result.sentence).toBe('Your top roasters average within half a point of each other.');
+  });
+
+  it('says how many more shots a roaster needs; beans without a roaster are left out', () => {
+    expect(
+      roaster([
+        ...shots(6, { roaster: 'Nordlys Roasters' }),
+        ...shots(2, { roaster: 'Coffee Collective' })
+      ]).sentence
+    ).toBe('Rate 3 more shots from Coffee Collective to compare.');
+    expect(roaster(shots(8, { roaster: null })).sentence).toBe(
+      'Rate 5 shots each from two roasters to compare.'
+    );
+  });
+});
+
 describe('weekly average score (screen 24)', () => {
   const weekly = (facts: ShotFact[]) => card('weekly-score', facts);
   const week = (i: number, scores: number[]) =>

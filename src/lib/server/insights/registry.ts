@@ -61,7 +61,14 @@ const FIXED_DIMENSIONS = {
         ? { key: f.countryCode, label: countryName(f.countryCode) ?? f.countryCode }
         : null
   },
-  roaster: { label: 'Roaster', group: (f) => same(f.roaster) },
+  // Typed by hand on each bean: "Nordlys Roasters" and "nordlys roasters " are one roaster.
+  roaster: {
+    label: 'Roaster',
+    group: (f) => {
+      const name = f.roaster?.trim().replace(/\s+/g, ' ');
+      return name ? { key: name.toLowerCase(), label: name } : null;
+    }
+  },
   roastLevel: {
     label: 'Roast level',
     group: (f) =>
