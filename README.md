@@ -104,8 +104,8 @@ on Home.
 
 Coffee Nerd is one container with one data volume. The newest release is
 `ghcr.io/albertflindt/coffee-nerd:latest` (also `:<version>`); older releases' images are deleted.
-The next version, to try before it's out, is the pre-release `:<version>-pre`: it holds every merge
-since the latest release and moves to each new one.
+The next version, to try before it's out, is `:pre-release`: it holds every merge since the latest
+release and moves to each new one (after a stable release, it is that release).
 
 1. **Start it.** Save this as `compose.yaml` in a folder called `coffee-nerd` and run
    `docker compose up -d`:

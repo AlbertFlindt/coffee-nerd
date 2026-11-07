@@ -1,10 +1,10 @@
 name: Image cleanup
 
 # Keeps ghcr.io/<owner>/coffee-nerd to :latest (the newest stable release, also tagged :X.Y.Z),
-# the pre-release GitHub lists (:X.Y.Z-pre) and the images of open pull requests. After each
-# release run it deletes:
-# - older releases and pre-releases: release.yml deletes a pre-release once there is a newer one
-#   or the version is out, and its image goes with it;
+# :pre-release (the newest pre-release, see release.yml) and the images of open pull requests.
+# After each release run it deletes:
+# - older releases, and old version-named pre-release images (:X.Y.Z-pre, from before
+#   :pre-release);
 # - commit images (sha-<commit>, the old :main, untagged) older than an hour, unless a kept release
 #   points to them: release.yml tags a release as a manifest list that points to the sha-<commit>
 #   image, so deleting that image would break the release. The hour leaves time for release.yml to
@@ -32,7 +32,10 @@ concurrency:
 jobs:
   prune:
     name: Delete images nobody runs
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    # Not after a failed release run: it may not have moved :pre-release yet.
+    if: >-
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+      && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'failure')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -49,9 +52,8 @@ jobs:
             > "$RUNNER_TEMP/versions.jsonl"
           echo "$(wc -l < "$RUNNER_TEMP/versions.jsonl") versions in the package."
 
-          # Kept: :latest and the pre-releases GitHub still lists.
-          gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName,isPrerelease \
-            --jq '[.[] | select(.isPrerelease) | .tagName | ltrimstr("v")] + ["latest"]' > "$RUNNER_TEMP/kept.json"
+          # Kept: :latest and :pre-release.
+          echo '["latest", "pre-release"]' > "$RUNNER_TEMP/kept.json"
           defs='def kept: IN($kept[0][]);
             def release: test("^[0-9]+\\.[0-9]+\\.[0-9]+(-pre(\\.[0-9]+)?)?$");
             def build: startswith("sha-") or . == "main";'

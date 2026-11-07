@@ -2,10 +2,10 @@ name: Release
 
 # After CI passes on main. A dated CHANGELOG section with no tag yet is a stable release: tag
 # vX.Y.Z, publish it, and tag the image CI just pushed (ghcr.io/<owner>/coffee-nerd:sha-<commit>)
-# as :X.Y.Z and :latest. An "(unreleased)" version whose app files changed since the last tag gets
-# its pre-release published again at this commit: there is one, vX.Y.Z-pre (a GitHub pre-release,
-# so "latest" stays stable), and the image tag :X.Y.Z-pre moves with it. Older pre-releases are
-# deleted with their tags; image-cleanup.yml then deletes their images.
+# as :X.Y.Z, :latest and :pre-release. An "(unreleased)" version whose app files changed since the
+# last tag gets its pre-release published again at this commit: there is one, vX.Y.Z-pre (a GitHub
+# pre-release, so "latest" stays stable), and the image tag :pre-release moves with it, so a test
+# server never has to change its tag. Older pre-releases are deleted with their git tags.
 on:
   workflow_run:
     workflows: [CI]
@@ -55,28 +55,41 @@ jobs:
             drop_prereleases
             gh release create "v$version" --target "$SHA" \
               --title "Coffee Nerd $version" --notes-file "$RUNNER_TEMP/notes.md"
-            echo "tags=$version latest" >> "$GITHUB_OUTPUT"
+            echo "tags=$version latest pre-release" >> "$GITHUB_OUTPUT"
+            echo "from=sha-${SHA::7}" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           last=$(git describe --tags --abbrev=0 "$SHA" 2>/dev/null || true)
           app=$(git diff --name-only "$last" "$SHA" | grep -Ev '^(\.github/|\.claude/|docs/|tests/|[^/]+\.md$|LICENSE$|scripts/(version|docs-check)\.mjs$)' || true)
           # Without app changes there is nothing new to try, unless the version has no vX.Y.Z-pre yet.
+          # :pre-release then stays where it is; a pre-release from before :pre-release existed
+          # (only :X.Y.Z-pre) gets it here, before image-cleanup.yml deletes :X.Y.Z-pre.
           if [ -z "$app" ] && git rev-parse -q --verify "refs/tags/v$version-pre" >/dev/null; then
-            echo "No app changes since $last: no new pre-release."; exit 0
+            echo "No app changes since $last: no new pre-release."
+            echo "tags=pre-release" >> "$GITHUB_OUTPUT"
+            echo "from=pre-release $version-pre" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
           tag="$version-pre"
           printf '\n\nBuilt from %s.\n' "${SHA::7}" >> "$RUNNER_TEMP/notes.md"
           drop_prereleases
           gh release create "v$tag" --target "$SHA" --prerelease \
             --title "Coffee Nerd $tag" --notes-file "$RUNNER_TEMP/notes.md"
-          echo "tags=$tag" >> "$GITHUB_OUTPUT"
+          echo "tags=pre-release" >> "$GITHUB_OUTPUT"
+          echo "from=sha-${SHA::7}" >> "$GITHUB_OUTPUT"
       - name: Tag the image
         if: steps.release.outputs.tags
         env:
           TAGS: ${{ steps.release.outputs.tags }}
-          SHA: ${{ github.event.workflow_run.head_sha }}
+          FROM: ${{ steps.release.outputs.from }}
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io --username "${{ github.actor }}" --password-stdin
           image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          # FROM lists the image tags to copy from, first one that exists wins.
+          source=""
+          for from in $FROM; do
+            if docker buildx imagetools inspect "$image:$from" >/dev/null 2>&1; then source="$image:$from"; break; fi
+          done
+          [ -n "$source" ] || { echo "::error::No image tagged $FROM."; exit 1; }
           args=(); for tag in $TAGS; do args+=(--tag "$image:$tag"); done
-          docker buildx imagetools create "${args[@]}" "$image:sha-${SHA::7}"
+          docker buildx imagetools create "${args[@]}" "$source"
