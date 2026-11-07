@@ -93,10 +93,10 @@ const scoreByProcess: InsightDefinition = {
     const shown = qualifying(groups);
     if (shown.length < GROUPS_NEEDED)
       return {
-        title: 'Score by process',
+        title: 'Score by bean process',
         sentence: missing(groups, {
-          kinds: 'processes',
-          another: 'of another process',
+          kinds: 'bean processes',
+          another: 'of another bean process',
           shots: (n, label) => `${n} more ${label.toLowerCase()} ${n === 1 ? 'shot' : 'shots'}`
         }),
         chart: null,
@@ -122,14 +122,14 @@ const scoreByProcess: InsightDefinition = {
     const spread = (r: BoxRow) => r.max - r.min;
     const clear = top.median - second.median > CLEAR_POINTS;
     return {
-      title: clear ? `${plural(top.label)} are your thing` : 'No clear favorite process',
+      title: clear ? `${plural(top.label)} are your thing` : 'No clear favorite bean process',
       sentence: clear
         ? `Half of your ${top.label.toLowerCase()} shots score ${statText(top.median)} or more. ` +
           `${plural(bottom.label)} ${spread(bottom) > spread(top) ? 'spread wider and sit lower' : 'sit lower'}.`
-        : `Your processes score about the same: their medians are within half a point.`,
+        : `Your bean processes score about the same: their medians are within half a point.`,
       chart: { kind: 'box', measure: 'Score', rows, axis: scoreAxis() },
       basis: [
-        'Score by process · box = middle 50% · amber line = median · whiskers = full range',
+        'Score by bean process · box = middle 50% · amber line = median · whiskers = full range',
         careText(rows)
       ]
         .filter((p) => p !== null)
@@ -138,60 +138,94 @@ const scoreByProcess: InsightDefinition = {
   }
 };
 
-const scoreByOrigin: InsightDefinition = {
-  id: 'score-by-origin',
-  topic: 'like',
-  query: { measure: 'score', groupBy: 'country' },
-  evaluate(groups) {
-    const shown = qualifying(groups);
-    if (shown.length < GROUPS_NEEDED)
+/**
+ * Average score ± σ per bean fact (origin, roaster): the top group leads when it averages more
+ * than half a point above the next. `from` names a group in a sentence ("coffees from Ethiopia").
+ */
+function scoreByBeanFact({
+  id,
+  groupBy,
+  kind,
+  kinds,
+  from
+}: {
+  id: string;
+  groupBy: 'country' | 'roaster';
+  kind: string;
+  kinds: string;
+  from: (label: string) => string;
+}): InsightDefinition {
+  return {
+    id,
+    topic: 'like',
+    query: { measure: 'score', groupBy },
+    evaluate(groups) {
+      const shown = qualifying(groups);
+      if (shown.length < GROUPS_NEEDED)
+        return {
+          title: `Score by ${kind}`,
+          sentence: missing(groups, {
+            kinds,
+            another: `from another ${kind}`,
+            shots: (n, label) => `${count(n, 'more shot')} from ${label}`
+          }),
+          chart: null,
+          basis: null
+        };
+      const rows: DotRow[] = shown
+        .map((g) => ({
+          label: g.label,
+          n: g.values.length,
+          mean: mean(g.values)!,
+          sigma: standardDeviation(g.values)!,
+          top: false
+        }))
+        .sort((a, b) => b.mean - a.mean || b.n - a.n);
+      const [top, second] = rows;
+      const clear = top.mean - second.mean > CLEAR_POINTS;
+      // Amber marks a winner only when there is one.
+      top.top = clear;
+      const tightest = rows.every((r) => r.sigma >= top.sigma);
+      const shots = rows.reduce((sum, r) => sum + r.n, 0);
       return {
-        title: 'Score by origin',
-        sentence: missing(groups, {
-          kinds: 'origins',
-          another: 'from another origin',
-          shots: (n, label) => `${count(n, 'more shot')} from ${label}`
-        }),
-        chart: null,
-        basis: null
+        title: clear ? `${top.label} leads your ${kinds}` : `No clear favorite ${kind}`,
+        sentence: clear
+          ? tightest
+            ? `Highest average, and the tightest spread: you rarely miss with ${from(top.label)}.`
+            : `Highest average: ${statText(top.mean)} against ${statText(second.mean)} for ${second.label}.`
+          : `Your top ${kinds} average within half a point of each other.`,
+        chart: {
+          kind: 'mean-sigma',
+          measure: 'Score',
+          rows,
+          axis: scoreAxis(Math.min(...rows.map((r) => r.mean - r.sigma)))
+        },
+        basis: [
+          `Average score ± 1 standard deviation · ${count(shots, 'rated shot')}`,
+          careText(rows)
+        ]
+          .filter((p) => p !== null)
+          .join(' · ')
       };
-    const rows: DotRow[] = shown
-      .map((g) => ({
-        label: g.label,
-        n: g.values.length,
-        mean: mean(g.values)!,
-        sigma: standardDeviation(g.values)!,
-        top: false
-      }))
-      .sort((a, b) => b.mean - a.mean || b.n - a.n);
-    const [top, second] = rows;
-    const clear = top.mean - second.mean > CLEAR_POINTS;
-    // Amber marks a winner only when there is one.
-    top.top = clear;
-    const tightest = rows.every((r) => r.sigma >= top.sigma);
-    const shots = rows.reduce((sum, r) => sum + r.n, 0);
-    return {
-      title: clear ? `${top.label} leads your origins` : 'No clear favorite origin',
-      sentence: clear
-        ? tightest
-          ? `Highest average, and the tightest spread: you rarely miss with coffees from ${top.label}.`
-          : `Highest average: ${statText(top.mean)} against ${statText(second.mean)} for ${second.label}.`
-        : `Your top origins average within half a point of each other.`,
-      chart: {
-        kind: 'mean-sigma',
-        measure: 'Score',
-        rows,
-        axis: scoreAxis(Math.min(...rows.map((r) => r.mean - r.sigma)))
-      },
-      basis: [
-        `Average score ± 1 standard deviation · ${count(shots, 'rated shot')}`,
-        careText(rows)
-      ]
-        .filter((p) => p !== null)
-        .join(' · ')
-    };
-  }
-};
+    }
+  };
+}
+
+const scoreByOrigin = scoreByBeanFact({
+  id: 'score-by-origin',
+  groupBy: 'country',
+  kind: 'origin',
+  kinds: 'origins',
+  from: (label) => `coffees from ${label}`
+});
+
+const scoreByRoaster = scoreByBeanFact({
+  id: 'score-by-roaster',
+  groupBy: 'roaster',
+  kind: 'roaster',
+  kinds: 'roasters',
+  from: (label) => label
+});
 
 /** The weekly line needs 4 weeks with 2 rated shots each; a thinner week is a gap. */
 const WEEKS_NEEDED = 4;
@@ -468,6 +502,7 @@ const consistentBeans: InsightDefinition = {
 export const INSIGHTS: readonly InsightDefinition[] = [
   scoreByProcess,
   scoreByOrigin,
+  scoreByRoaster,
   weeklyScore,
   shotTimeBell,
   routineTime,

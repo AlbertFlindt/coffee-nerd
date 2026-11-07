@@ -3,6 +3,19 @@
 All notable changes to Coffee Nerd. Each version is a tag and a GitHub release; the version at the
 top marked "(unreleased)" is out as pre-releases (`vX.Y.Z-pre.N`).
 
+## 1.5.0 (unreleased)
+
+### Added
+- **Score by roaster:** a new card under What I like in Insights compares your average score
+  per roaster, the way Score by origin compares origins. It shows once two roasters have 5 rated
+  shots each. A roaster typed differently on two bags ("Nordlys Roasters", "nordlys roasters")
+  counts as one.
+
+### Changed
+- **Score by bean process:** the Insights card Score by process is now called Score by bean
+  process, so it's clear it compares how your beans were processed (natural, washed, honey),
+  as set on each bean, and not your puck prep.
+
 ## 1.4.0 (2026-10-31)
 
 ### Changed

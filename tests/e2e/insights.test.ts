@@ -58,7 +58,7 @@ test('Insights: the tab bar opens it on What I like with the data basis', async 
 
   // Score by process as a box plot, score by origin as average ± 1 σ, each with its basis.
   await expect(card('Naturals are your thing')).toContainText(
-    'Score by process · box = middle 50% · amber line = median · whiskers = full range'
+    'Score by bean process · box = middle 50% · amber line = median · whiskers = full range'
   );
   await expect(card('Naturals are your thing').getByRole('img')).toHaveAttribute(
     'aria-label',
@@ -70,6 +70,10 @@ test('Insights: the tab bar opens it on What I like with the data basis', async 
   await expectNoPageScroll();
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: 'screenshots/Insights.png' });
+  // Score by roaster, below the two designed cards, drawn like score by origin.
+  const roasters = card('Nordlys Roasters leads your roasters');
+  await expect(roasters).toContainText('Highest average: 7.6 against 7 for Kaffeværket.');
+  await expect(roasters).toContainText('Average score ± 1 standard deviation · 96 rated shots');
   // No request leaves the server: the app is self-hosted and private.
   expect(external).toEqual([]);
 });

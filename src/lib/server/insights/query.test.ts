@@ -191,7 +191,12 @@ describe('dimensions', () => {
     const f = fact({ roastLevel: 'medium_light' });
     expect(group('country', f)).toEqual({ key: 'ET', label: 'Ethiopia' });
     expect(group('process', f)).toEqual({ key: 'natural', label: 'Natural' });
-    expect(group('roaster', f)).toEqual({ key: 'Nordlys Roasters', label: 'Nordlys Roasters' });
+    expect(group('roaster', f)).toEqual({ key: 'nordlys roasters', label: 'Nordlys Roasters' });
+    // Typed differently on two bags, still one roaster.
+    expect(group('roaster', { ...f, roaster: ' nordlys  Roasters ' })).toMatchObject({
+      key: 'nordlys roasters'
+    });
+    expect(group('roaster', { ...f, roaster: '  ' })).toBeNull();
     expect(group('roastLevel', f)).toEqual({ key: 'medium_light', label: 'Med-light' });
     expect(group('bean', f)).toEqual({ key: 'bean-guji', label: 'Guji Hambela' });
   });

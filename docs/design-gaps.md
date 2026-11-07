@@ -17,7 +17,7 @@ you build a state no design covers (after asking); remove it when a design sync 
 - Confirmations as dialogs in the middle of the screen with the red delete choice; the screens
   still draw bottom sheets.
 - The "Shot saved" bar, and the messages when a shot or a score could not be saved.
-- Insights: the tap tooltip, cards without enough data, no shots yet, gaps in the weekly line.
+- Insights: "Score by bean process" where screen 23 says "Score by process" ("process" alone read as puck prep); the Score by roaster card (drawn like Score by origin, below it), the tap tooltip, cards without enough data, no shots yet, gaps in the weekly line.
 - Gear: the "Add gear" sheet, archive confirmations, "Not set" values, basket size and grinder
   range fields, problem lines. Add your own feature and Edit My setup beyond the one example drawn.
 - Shot detail: the puck prep line under the setup ("Daily routine: WDT 20 s · Distributor · Tamp
