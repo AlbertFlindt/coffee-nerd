@@ -1,5 +1,6 @@
 // The Journal and the shot detail: days, times and the short texts on a shot's row.
 import { localDate, roastAgeDays } from './bean';
+import { dateTimeFormat } from './intl';
 import { sameDose } from './fingerprint';
 import { mean, standardDeviation } from './statistics';
 import { tasteWords } from './taste';
@@ -13,7 +14,7 @@ export function dayLabel(brewedAt: number, now: number, timeZone: string): strin
   if (day === today - 1) return 'Yesterday';
   const sameYear =
     localDate(brewedAt, timeZone).slice(0, 4) === localDate(now, timeZone).slice(0, 4);
-  return new Intl.DateTimeFormat('en-GB', {
+  return dateTimeFormat('en-GB', {
     timeZone,
     weekday: 'short',
     day: 'numeric',
@@ -26,7 +27,7 @@ export function dayLabel(brewedAt: number, now: number, timeZone: string): strin
 
 /** "07:42": a 24-hour clock in the user's time zone. */
 export function clockTime(brewedAt: number, timeZone: string): string {
-  return new Intl.DateTimeFormat('en-GB', {
+  return dateTimeFormat('en-GB', {
     timeZone,
     hour: '2-digit',
     minute: '2-digit',

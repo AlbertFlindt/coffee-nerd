@@ -1,6 +1,7 @@
 // Values about a bean and its shots that are always calculated, never stored (docs/SPEC.md §3).
 import type { BestRecipe } from './best-recipe';
 import { countryName } from './countries';
+import { dateTimeFormat } from './intl';
 import { formatQuantity, type Thousandths } from './units';
 
 /** Yield per gram of dose, in thousandths (38.5 g from 18.0 g → 2139), for statistics and charts. Display uses `formatRatio`. */
@@ -15,7 +16,7 @@ export function ratio(
 /** The calendar date ("2026-10-17") of a UTC time in the user's time zone (docs/SPEC.md §1.8). */
 export function localDate(utcMilliseconds: number, timeZone: string): string {
   // en-CA formats dates as YYYY-MM-DD.
-  return new Intl.DateTimeFormat('en-CA', {
+  return dateTimeFormat('en-CA', {
     timeZone,
     year: 'numeric',
     month: '2-digit',

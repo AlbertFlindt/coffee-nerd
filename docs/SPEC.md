@@ -66,7 +66,7 @@ Every table also has `created_at` and `updated_at`. Decimal quantities are in th
 ### `user`
 `id`, `name`, `email` (optional, unused for now), `password_hash`.
 
-The first visit creates the one account on "Create your account" (a name, and a password of at least 8 characters typed twice); after that, signed-out visits go to "Sign in". Each password field has a button that shows or hides what was typed. A wrong name or password says only that they do not match; after 5 wrong passwords within 15 minutes, sign-in waits a minute. A forgotten password is reset on the server (`scripts/reset-password.mjs`).
+The first visit creates the one account on "Create your account" (a name, and a password of at least 8 characters typed twice); after that, signed-out visits go to "Sign in". Each password field has a button that shows or hides what was typed. A wrong name or password says only that they do not match; after 5 wrong passwords within 15 minutes, sign-in waits a minute. A forgotten password is reset on the server (`scripts/reset-password.mjs`). The password is stored as a salted scrypt hash with its parameters (N = 2^14, r = 8, p = 5, 16 MB per check); a hash made with older parameters is replaced at the next sign-in.
 
 ### `session`
 `id` (a hash of the token in the sign-in cookie; the token itself is never stored), `user_id`, `expires_at`. Renewed on each visit; deleted on sign-out and by the password reset.

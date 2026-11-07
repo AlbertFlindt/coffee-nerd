@@ -22,7 +22,14 @@ LABEL org.opencontainers.image.title="Coffee Nerd" \
 WORKDIR /app
 ENV NODE_ENV=production \
     PORT=3000 \
-    DATABASE_PATH=/data/coffee-nerd.db
+    DATABASE_PATH=/data/coffee-nerd.db \
+    NODE_OPTIONS="--max-semi-space-size=2 --max-old-space-size=96" \
+    MALLOC_ARENA_MAX=1 \
+    MALLOC_TRIM_THRESHOLD_=131072
+# Memory: by default Node sizes its heap from the host's memory and glibc keeps a malloc arena per
+# thread, so an idle app for one person held hundreds of megabytes. A small young generation (the
+# semi-space) and one arena that is trimmed often keep it around 100 MB; the old-space cap leaves
+# room for an export or backup of a large journal.
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/build ./build
 COPY --from=build /app/drizzle ./drizzle
