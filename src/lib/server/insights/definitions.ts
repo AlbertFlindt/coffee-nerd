@@ -93,10 +93,10 @@ const scoreByProcess: InsightDefinition = {
     const shown = qualifying(groups);
     if (shown.length < GROUPS_NEEDED)
       return {
-        title: 'Score by process',
+        title: 'Score by bean process',
         sentence: missing(groups, {
-          kinds: 'processes',
-          another: 'of another process',
+          kinds: 'bean processes',
+          another: 'of another bean process',
           shots: (n, label) => `${n} more ${label.toLowerCase()} ${n === 1 ? 'shot' : 'shots'}`
         }),
         chart: null,
@@ -122,14 +122,14 @@ const scoreByProcess: InsightDefinition = {
     const spread = (r: BoxRow) => r.max - r.min;
     const clear = top.median - second.median > CLEAR_POINTS;
     return {
-      title: clear ? `${plural(top.label)} are your thing` : 'No clear favorite process',
+      title: clear ? `${plural(top.label)} are your thing` : 'No clear favorite bean process',
       sentence: clear
         ? `Half of your ${top.label.toLowerCase()} shots score ${statText(top.median)} or more. ` +
           `${plural(bottom.label)} ${spread(bottom) > spread(top) ? 'spread wider and sit lower' : 'sit lower'}.`
-        : `Your processes score about the same: their medians are within half a point.`,
+        : `Your bean processes score about the same: their medians are within half a point.`,
       chart: { kind: 'box', measure: 'Score', rows, axis: scoreAxis() },
       basis: [
-        'Score by process · box = middle 50% · amber line = median · whiskers = full range',
+        'Score by bean process · box = middle 50% · amber line = median · whiskers = full range',
         careText(rows)
       ]
         .filter((p) => p !== null)

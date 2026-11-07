@@ -39,7 +39,7 @@ describe('score by process (screen 23)', () => {
       axis: { from: 0, to: 10 }
     });
     expect(result.basis).toBe(
-      'Score by process · box = middle 50% · amber line = median · whiskers = full range · ' +
+      'Score by bean process · box = middle 50% · amber line = median · whiskers = full range · ' +
         'Natural and Washed have few shots, so treat with care'
     );
   });
@@ -49,9 +49,9 @@ describe('score by process (screen 23)', () => {
       ...shots(10, { process: 'natural' }, [8]),
       ...shots(10, { process: 'honey' }, [7, 8])
     ]);
-    expect(result.title).toBe('No clear favorite process');
+    expect(result.title).toBe('No clear favorite bean process');
     expect(result.sentence).toBe(
-      'Your processes score about the same: their medians are within half a point.'
+      'Your bean processes score about the same: their medians are within half a point.'
     );
   });
 
@@ -68,13 +68,13 @@ describe('score by process (screen 23)', () => {
     expect(process([])).toEqual({
       id: 'score-by-process',
       topic: 'like',
-      title: 'Score by process',
-      sentence: 'Rate 5 shots each from two processes to compare.',
+      title: 'Score by bean process',
+      sentence: 'Rate 5 shots each from two bean processes to compare.',
       chart: null,
       basis: null
     });
     expect(process(shots(5, { process: 'natural' })).sentence).toBe(
-      'Rate 5 shots of another process to compare.'
+      'Rate 5 shots of another bean process to compare.'
     );
     expect(
       process([...shots(7, { process: 'natural' }), ...shots(2, { process: 'washed' })]).sentence

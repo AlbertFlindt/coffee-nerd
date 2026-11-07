@@ -58,7 +58,7 @@ test('Insights: the tab bar opens it on What I like with the data basis', async 
 
   // Score by process as a box plot, score by origin as average ± 1 σ, each with its basis.
   await expect(card('Naturals are your thing')).toContainText(
-    'Score by process · box = middle 50% · amber line = median · whiskers = full range'
+    'Score by bean process · box = middle 50% · amber line = median · whiskers = full range'
   );
   await expect(card('Naturals are your thing').getByRole('img')).toHaveAttribute(
     'aria-label',

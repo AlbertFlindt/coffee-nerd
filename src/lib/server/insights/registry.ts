@@ -51,7 +51,7 @@ const same = (key: string | null): Group | null => (key === null ? null : { key,
 
 const FIXED_DIMENSIONS = {
   process: {
-    label: 'Process',
+    label: 'Bean process',
     group: (f) => (f.process ? { key: f.process, label: PROCESS_LABEL[f.process] } : null)
   },
   country: {
