@@ -41,7 +41,7 @@ jobs:
           image="ghcr.io/${GITHUB_REPOSITORY,,}"
           versions="/users/${{ github.repository_owner }}/packages/container/coffee-nerd/versions"
           gh api --paginate "$versions" \
-            --jq '.[] | {id, digest: .name, created: .created_at, tags: .metadata.container.tags}' -c \
+            --jq '.[] | {id, digest: .name, created: .created_at, tags: .metadata.container.tags}' \
             > "$RUNNER_TEMP/versions.jsonl"
           echo "$(wc -l < "$RUNNER_TEMP/versions.jsonl") versions in the package."
 
