@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to Coffee Nerd. Each version is a tag and a GitHub release; the version at the
-top marked "(unreleased)" is out as pre-releases (`vX.Y.Z-pre.N`).
+top marked "(unreleased)" is out as a pre-release (`vX.Y.Z-pre`, moved to each merge).
 
 ## 1.5.0 (unreleased)
 

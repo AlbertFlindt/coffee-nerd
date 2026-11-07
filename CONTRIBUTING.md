@@ -73,7 +73,7 @@ and read just as well for people.
    `node scripts/version.mjs bump X.Y.Z` (patch for fixes, minor for features; major versions are the
    milestones in [ROADMAP.md](ROADMAP.md)). CI's "Version and changelog" check fails a pull request
    that changes the app without one. Changes to docs, CI or `.claude/` alone need neither. Merging
-   publishes `vX.Y.Z-pre.N` and its Docker image; stable releases are made by the maintainer.
+   moves the pre-release `vX.Y.Z-pre` and its Docker image to it; stable releases are made by the maintainer.
 
 Commit subjects are plain sentences ("Show grams left on the bean card"), with a short body saying
 what changed and why.

@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 # A new push to a pull request cancels its running checks. Runs on main are never cancelled: each
-# merge publishes its own image, and release.yml turns each into its own pre-release.
+# merge publishes its own image, and release.yml moves the pre-release to each of them.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -106,7 +106,7 @@ jobs:
           fi
           node scripts/version.mjs check
           new=$(node scripts/version.mjs get)
-          stable=$(git tag -l 'v*' | grep -v -- '-pre\.' | sed 's/^v//' | sort -V | tail -1)
+          stable=$(git tag -l 'v*' | grep -v -- '-pre' | sed 's/^v//' | sort -V | tail -1)
           if [ "$new" = "$stable" ] || [ "$(printf '%s\n%s\n' "$stable" "$new" | sort -V | tail -1)" != "$new" ]; then
             echo "::error::Version $new is not above the latest stable $stable. Run node scripts/version.mjs bump X.Y.Z (see the release skill)."
             exit 1
@@ -123,8 +123,9 @@ jobs:
 
   publish:
     name: Publish image
-    # Every merge to main becomes ghcr.io/<owner>/coffee-nerd:main (and :sha-<commit>, which the
-    # release workflow tags as :X.Y.Z-pre.N, or as :X.Y.Z and :latest for a stable release).
+    # Every merge to main becomes ghcr.io/<owner>/coffee-nerd:sha-<commit>, which the release
+    # workflow tags as :X.Y.Z-pre, or as :X.Y.Z and :latest for a stable release (image-cleanup.yml
+    # deletes the others).
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [checks, docker]
     runs-on: ubuntu-24.04
@@ -138,8 +139,8 @@ jobs:
       - name: Build and push
         run: |
           image="ghcr.io/${GITHUB_REPOSITORY,,}"
-          docker build --tag "$image:main" --tag "$image:sha-${GITHUB_SHA::7}" .
-          docker push --all-tags "$image"
+          docker build --tag "$image:sha-${GITHUB_SHA::7}" .
+          docker push "$image:sha-${GITHUB_SHA::7}"
 
   publish-pr:
     name: Publish pull request image

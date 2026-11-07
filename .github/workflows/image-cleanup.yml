@@ -1,10 +1,14 @@
 name: Image cleanup
 
-# Keeps ghcr.io/<owner>/coffee-nerd to what someone might run: releases (:X.Y.Z, :X.Y.Z-pre.N,
-# :latest), :main and the images of open pull requests. After each release run it deletes:
-# - images tagged only sha-<commit> (or untagged) older than a day, unless a release points to them:
-#   release.yml tags a release as a manifest list that points to the sha-<commit> image, so deleting
-#   that image would break the release;
+# Keeps ghcr.io/<owner>/coffee-nerd to :latest (the newest stable release, also tagged :X.Y.Z),
+# the pre-release GitHub lists (:X.Y.Z-pre) and the images of open pull requests. After each
+# release run it deletes:
+# - older releases and pre-releases: release.yml deletes a pre-release once there is a newer one
+#   or the version is out, and its image goes with it;
+# - commit images (sha-<commit>, the old :main, untagged) older than an hour, unless a kept release
+#   points to them: release.yml tags a release as a manifest list that points to the sha-<commit>
+#   image, so deleting that image would break the release. The hour leaves time for release.yml to
+#   tag the newest one;
 # - pull request images whose pull request is closed (pr-image-cleanup.yml can miss one when a pull
 #   request is merged before its image is pushed).
 # A pull request that changes this file runs it as a dry run: it lists what it would delete.
@@ -33,7 +37,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io --username "${{ github.actor }}" --password-stdin
-      - name: Delete old commit images and closed pull request images
+      - name: Delete old releases, commit images and closed pull request images
         env:
           GH_TOKEN: ${{ github.token }}
           DRY_RUN: ${{ github.event_name == 'pull_request' }}
@@ -45,19 +49,26 @@ jobs:
             > "$RUNNER_TEMP/versions.jsonl"
           echo "$(wc -l < "$RUNNER_TEMP/versions.jsonl") versions in the package."
 
-          # Images a release's manifest list points to.
-          release='^([0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?|latest)$'
+          # Kept: :latest and the pre-releases GitHub still lists.
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName,isPrerelease \
+            --jq '[.[] | select(.isPrerelease) | .tagName | ltrimstr("v")] + ["latest"]' > "$RUNNER_TEMP/kept.json"
+          defs='def kept: IN($kept[0][]);
+            def release: test("^[0-9]+\\.[0-9]+\\.[0-9]+(-pre(\\.[0-9]+)?)?$");
+            def build: startswith("sha-") or . == "main";'
+
+          # Images a kept release's manifest list points to.
           : > "$RUNNER_TEMP/protected"
-          for digest in $(jq -r --arg re "$release" 'select(any(.tags[]; test($re))) | .digest' "$RUNNER_TEMP/versions.jsonl"); do
+          for digest in $(jq -r --slurpfile kept "$RUNNER_TEMP/kept.json" "$defs"' select(any(.tags[]; kept)) | .digest' "$RUNNER_TEMP/versions.jsonl"); do
             docker buildx imagetools inspect --raw "$image@$digest" \
               | jq -r '.manifests[]?.digest' >> "$RUNNER_TEMP/protected"
           done
 
-          cutoff=$(date -u -d '1 day ago' +%Y-%m-%dT%H:%M:%SZ)
-          old=$(jq -r --arg cutoff "$cutoff" --rawfile protected "$RUNNER_TEMP/protected" '
+          cutoff=$(date -u -d '1 hour ago' +%Y-%m-%dT%H:%M:%SZ)
+          old=$(jq -r --arg cutoff "$cutoff" --slurpfile kept "$RUNNER_TEMP/kept.json" \
+            --rawfile protected "$RUNNER_TEMP/protected" "$defs"'
             ($protected | split("\n")) as $keep
-            | select(all(.tags[]; startswith("sha-")) and .created < $cutoff
-              and (.digest | IN($keep[]) | not))
+            | select((any(.tags[]; kept or startswith("pr-")) | not) and (.digest | IN($keep[]) | not)
+              and (any(.tags[]; release) or (all(.tags[]; build) and .created < $cutoff)))
             | "\(.id) \(.tags | join(",") | if . == "" then "untagged" else . end)"' "$RUNNER_TEMP/versions.jsonl")
 
           closed=""

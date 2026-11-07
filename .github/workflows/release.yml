@@ -3,8 +3,9 @@ name: Release
 # After CI passes on main. A dated CHANGELOG section with no tag yet is a stable release: tag
 # vX.Y.Z, publish it, and tag the image CI just pushed (ghcr.io/<owner>/coffee-nerd:sha-<commit>)
 # as :X.Y.Z and :latest. An "(unreleased)" version whose app files changed since the last tag gets
-# the next pre-release, vX.Y.Z-pre.N (a GitHub pre-release, so "latest" stays stable), and the
-# image tag :X.Y.Z-pre.N.
+# its pre-release published again at this commit: there is one, vX.Y.Z-pre (a GitHub pre-release,
+# so "latest" stays stable), and the image tag :X.Y.Z-pre moves with it. Older pre-releases are
+# deleted with their tags; image-cleanup.yml then deletes their images.
 on:
   workflow_run:
     workflows: [CI]
@@ -41,10 +42,17 @@ jobs:
           node scripts/version.mjs check
           version=$(node scripts/version.mjs get)
           node scripts/version.mjs notes > "$RUNNER_TEMP/notes.md"
+          drop_prereleases() {
+            for old in $(gh release list --limit 100 --json tagName,isPrerelease --jq '.[] | select(.isPrerelease) | .tagName'); do
+              gh release delete "$old" --yes --cleanup-tag
+              echo "Deleted the pre-release $old."
+            done
+          }
           if [ "$(node scripts/version.mjs state)" = stable ]; then
             if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
               echo "v$version is already released; nothing to do."; exit 0
             fi
+            drop_prereleases
             gh release create "v$version" --target "$SHA" \
               --title "Coffee Nerd $version" --notes-file "$RUNNER_TEMP/notes.md"
             echo "tags=$version latest" >> "$GITHUB_OUTPUT"
@@ -52,10 +60,13 @@ jobs:
           fi
           last=$(git describe --tags --abbrev=0 "$SHA" 2>/dev/null || true)
           app=$(git diff --name-only "$last" "$SHA" | grep -Ev '^(\.github/|\.claude/|docs/|tests/|[^/]+\.md$|LICENSE$|scripts/(version|docs-check)\.mjs$)' || true)
-          if [ -z "$app" ]; then
-            echo "No app changes since $last: no pre-release."; exit 0
+          # Without app changes there is nothing new to try, unless the version has no vX.Y.Z-pre yet.
+          if [ -z "$app" ] && git rev-parse -q --verify "refs/tags/v$version-pre" >/dev/null; then
+            echo "No app changes since $last: no new pre-release."; exit 0
           fi
-          tag="$version-pre.$(( $(git tag -l "v$version-pre.*" | wc -l) + 1 ))"
+          tag="$version-pre"
+          printf '\n\nBuilt from %s.\n' "${SHA::7}" >> "$RUNNER_TEMP/notes.md"
+          drop_prereleases
           gh release create "v$tag" --target "$SHA" --prerelease \
             --title "Coffee Nerd $tag" --notes-file "$RUNNER_TEMP/notes.md"
           echo "tags=$tag" >> "$GITHUB_OUTPUT"
