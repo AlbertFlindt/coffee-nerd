@@ -124,7 +124,7 @@ jobs:
   publish:
     name: Publish image
     # Every merge to main becomes ghcr.io/<owner>/coffee-nerd:sha-<commit>, which the release
-    # workflow tags as :X.Y.Z-pre, or as :X.Y.Z and :latest for a stable release (image-cleanup.yml
+    # workflow tags as :pre-release, or as :X.Y.Z, :latest and :pre-release for a stable release (image-cleanup.yml
     # deletes the others).
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [checks, docker]
@@ -145,8 +145,7 @@ jobs:
   publish-pr:
     name: Publish pull request image
     # Every pull request from this repository becomes ghcr.io/<owner>/coffee-nerd:pr-<number>, renewed
-    # on each push once the tests pass, to try on a test server before merging (README, "Try a pull
-    # request"). The build it replaces is deleted; pr-image-cleanup.yml deletes the last one when the
+    # on each push once the tests pass, to try on a test server before merging. The build it replaces is deleted; pr-image-cleanup.yml deletes the last one when the
     # pull request is merged or closed.
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     needs: [checks, docker]

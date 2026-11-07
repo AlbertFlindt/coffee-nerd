@@ -62,7 +62,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - Screens: use the `build-screen` skill. Not done until your screenshot matches the PNG in `docs/screens/`.
 - **Every merge that changes the app is a pre-release; stable releases only when asked.** Set the version and
   add the CHANGELOG entry in the pull request with the `release` skill; once CI passes on `main`,
-  `.github/workflows/release.yml` moves the one pre-release `vX.Y.Z-pre` and its image tag to it. Major versions are `ROADMAP.md` milestones.
+  `.github/workflows/release.yml` moves the one pre-release `vX.Y.Z-pre` and the image tag `:pre-release` to it. Major versions are `ROADMAP.md` milestones.
 - Keep `PROGRESS.md`, `docs/design-gaps.md` (states built without a design) and `docs/SPEC.md` current in the same pull request.
 - Docs: `node scripts/docs-check.mjs` (run in CI) holds `CLAUDE.md`, `PROGRESS.md` and `ROADMAP.md` to a line budget (`scripts/docs-check.mjs`).
   `PROGRESS.md` is the present: delete an entry the moment it's no longer true (history is git and `CHANGELOG.md`).
