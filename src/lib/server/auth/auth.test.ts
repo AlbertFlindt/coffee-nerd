@@ -6,7 +6,7 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { openDatabase, type Db } from '../db/client';
 import { appState, session, tag, user, userSettings } from '../db/schema';
 import { AccountError, attemptSignIn, createAccount, hasAccount, signIn } from './account';
-import { hashPassword, verifyPassword } from './password.js';
+import { hashPassword, needsRehash, verifyPassword } from './password.js';
 import {
   createSession,
   SESSION_LIFETIME,
@@ -42,6 +42,18 @@ describe('passwords', () => {
     expect(await verifyPassword('espresso-at-dawn', hash)).toBe(true);
     expect(await verifyPassword('espresso-at-dusk', hash)).toBe(false);
     expect(await verifyPassword('espresso-at-dawn', 'not-a-hash')).toBe(false);
+  });
+
+  it('a password check needs at most 16 MB of memory (scrypt uses 128·N·r bytes)', async () => {
+    const [, N, r] = (await hashPassword('espresso-at-dawn')).split('$').map(Number);
+    expect(128 * N * r).toBeLessThanOrEqual(16 * 1024 * 1024);
+  });
+
+  it('a hash made with other parameters still verifies and is marked for rehashing', async () => {
+    const old = await hashPassword('espresso-at-dawn', { N: 1024, r: 8, p: 1 });
+    expect(await verifyPassword('espresso-at-dawn', old)).toBe(true);
+    expect(needsRehash(old)).toBe(true);
+    expect(needsRehash(await hashPassword('espresso-at-dawn'))).toBe(false);
   });
 });
 
@@ -92,6 +104,16 @@ describe('signing in', () => {
     await account();
     expect(await signIn(db, 'Albert', 'wrong-password')).toBeNull();
     expect(await signIn(db, 'Bob', 'espresso-at-dawn')).toBeNull();
+  });
+
+  it('signing in moves a password stored with older parameters to the current ones', async () => {
+    const userId = await account();
+    const old = await hashPassword('espresso-at-dawn', { N: 1024, r: 8, p: 1 });
+    db.update(user).set({ passwordHash: old }).where(eq(user.id, userId)).run();
+    expect(await signIn(db, 'Albert', 'espresso-at-dawn')).not.toBeNull();
+    const stored = db.select().from(user).where(eq(user.id, userId)).get()!.passwordHash;
+    expect(needsRehash(stored)).toBe(false);
+    expect(await verifyPassword('espresso-at-dawn', stored)).toBe(true);
   });
 });
 

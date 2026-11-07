@@ -1,12 +1,12 @@
 // The one account of an installation: created on first run with a name and a password,
 // with the built-in flavor tags and nothing else.
 import { randomBytes } from 'node:crypto';
-import { count } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
 import { insertBuiltInTags } from '../db/built-in-tags';
 import type { Db } from '../db/client';
 import { newId } from '../db/ids';
 import { appState, user, userSettings } from '../db/schema';
-import { hashPassword, verifyPassword } from './password.js';
+import { hashPassword, needsRehash, verifyPassword } from './password.js';
 import type { SignedInUser } from './session';
 import type { SignInThrottle } from './throttle';
 
@@ -70,7 +70,12 @@ export async function signIn(db: Db, name: string, password: string): Promise<Si
     .all()
     .find((u) => u.name.toLowerCase() === wanted);
   const matches = await verifyPassword(password, row?.passwordHash ?? (await unmatchedHash));
-  return row && matches ? { id: row.id, name: row.name } : null;
+  if (!row || !matches) return null;
+  if (needsRehash(row.passwordHash)) {
+    const passwordHash = await hashPassword(password);
+    db.update(user).set({ passwordHash }).where(eq(user.id, row.id)).run();
+  }
+  return { id: row.id, name: row.name };
 }
 
 export type SignInAttempt =

@@ -2,9 +2,11 @@
 // scripts/reset-password.mjs can use it on the server without a build step.
 import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 
-// OWASP's current scrypt guidance (N = 2^17). Stored hashes carry their parameters, so they can change.
-const PARAMS = { N: 131072, r: 8, p: 1 };
-/** scrypt needs 128·N·r bytes (about 134 MB here); Node's default limit is 32 MB. */
+// One of OWASP's equally strong scrypt settings (N = 2^14, r = 8, p = 5), the one with the least memory:
+// scrypt needs 128·N·r bytes, 16 MB here, where N = 2^17, p = 1 took 134 MB per sign-in. Stored hashes
+// carry their parameters, so older ones still verify and are moved to these on the next sign-in.
+const PARAMS = { N: 16384, r: 8, p: 5 };
+/** Room for hashes stored with the earlier N = 2^17 (134 MB); Node's default limit is 32 MB. */
 const MAX_MEMORY = 256 * 1024 * 1024;
 const KEY_LENGTH = 64;
 
@@ -29,12 +31,13 @@ function derive(password, salt, params) {
 /**
  * A salted hash to store: "scrypt$N$r$p$salt$hash" (base64). The password itself is never stored.
  * @param {string} password
+ * @param {{ N: number, r: number, p: number }} [params] only tests pass other parameters
  * @returns {Promise<string>}
  */
-export async function hashPassword(password) {
+export async function hashPassword(password, params = PARAMS) {
   const salt = randomBytes(16);
-  const key = await derive(password, salt, PARAMS);
-  const { N, r, p } = PARAMS;
+  const key = await derive(password, salt, params);
+  const { N, r, p } = params;
   return ['scrypt', N, r, p, salt.toString('base64'), key.toString('base64')].join('$');
 }
 
@@ -54,4 +57,14 @@ export async function verifyPassword(password, stored) {
     p: Number(p)
   });
   return key.length === expected.length && timingSafeEqual(key, expected);
+}
+
+/**
+ * True when a stored hash was made with other parameters than the current ones.
+ * @param {string} stored
+ * @returns {boolean}
+ */
+export function needsRehash(stored) {
+  const [, N, r, p] = stored.split('$');
+  return Number(N) !== PARAMS.N || Number(r) !== PARAMS.r || Number(p) !== PARAMS.p;
 }

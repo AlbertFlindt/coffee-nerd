@@ -21,6 +21,10 @@ top marked "(unreleased)" is out as a pre-release (`vX.Y.Z-pre`, moved to each m
   process, so it's clear it compares how your beans were processed (natural, washed, honey),
   as set on each bean, and not your puck prep.
 
+### Fixed
+- **Less memory on the server:** the app now stays around 100 MB, where it used to grow to
+  several hundred megabytes, and the Journal opens faster.
+
 ## 1.4.0 (2026-10-31)
 
 ### Changed
