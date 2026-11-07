@@ -1,7 +1,10 @@
 name: Image cleanup
 
-# Keeps ghcr.io/<owner>/coffee-nerd to what someone might run: releases (:X.Y.Z, :X.Y.Z-pre.N,
-# :latest), :main and the images of open pull requests. After each release run it deletes:
+# Keeps ghcr.io/<owner>/coffee-nerd to what someone might run: releases (:X.Y.Z, :latest), the
+# current pre-release (:X.Y.Z-pre), :main and the images of open pull requests. After each release
+# run it deletes:
+# - pre-release images whose GitHub pre-release is gone (release.yml deletes a pre-release once
+#   there is a newer one or the version is out);
 # - images tagged only sha-<commit> (or untagged) older than a day, unless a release points to them:
 #   release.yml tags a release as a manifest list that points to the sha-<commit> image, so deleting
 #   that image would break the release;
@@ -45,10 +48,14 @@ jobs:
             > "$RUNNER_TEMP/versions.jsonl"
           echo "$(wc -l < "$RUNNER_TEMP/versions.jsonl") versions in the package."
 
-          # Images a release's manifest list points to.
-          release='^([0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?|latest)$'
+          # Releases: every stable version, :latest and the pre-releases GitHub still lists.
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 200 --json tagName \
+            --jq '[.[].tagName | ltrimstr("v")] + ["latest"]' > "$RUNNER_TEMP/releases.json"
+          kept='def kept: test("^[0-9]+\\.[0-9]+\\.[0-9]+$") or IN($releases[0][]);'
+
+          # Images a kept release's manifest list points to.
           : > "$RUNNER_TEMP/protected"
-          for digest in $(jq -r --arg re "$release" 'select(any(.tags[]; test($re))) | .digest' "$RUNNER_TEMP/versions.jsonl"); do
+          for digest in $(jq -r --slurpfile releases "$RUNNER_TEMP/releases.json" "$kept"' select(any(.tags[]; kept)) | .digest' "$RUNNER_TEMP/versions.jsonl"); do
             docker buildx imagetools inspect --raw "$image@$digest" \
               | jq -r '.manifests[]?.digest' >> "$RUNNER_TEMP/protected"
           done
@@ -59,6 +66,10 @@ jobs:
             | select(all(.tags[]; startswith("sha-")) and .created < $cutoff
               and (.digest | IN($keep[]) | not))
             | "\(.id) \(.tags | join(",") | if . == "" then "untagged" else . end)"' "$RUNNER_TEMP/versions.jsonl")
+
+          gone=$(jq -r --slurpfile releases "$RUNNER_TEMP/releases.json" "$kept"'
+            select((.tags | length) > 0 and all(.tags[]; test("-pre(\\.[0-9]+)?$")) and (any(.tags[]; kept) | not))
+            | "\(.id) \(.tags | join(","))"' "$RUNNER_TEMP/versions.jsonl")
 
           closed=""
           while read -r id number; do
@@ -77,5 +88,5 @@ jobs:
               gh api --method DELETE "$versions/$id" && echo "Deleted $tags (version $id)."
             fi
             deleted=$((deleted + 1))
-          done <<< "$old"$'\n'"$closed"
+          done <<< "$old"$'\n'"$gone"$'\n'"$closed"
           echo "$deleted versions $([ "$DRY_RUN" = true ] && echo 'would be' || echo) deleted."

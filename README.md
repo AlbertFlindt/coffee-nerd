@@ -103,9 +103,9 @@ on Home.
 ## Installation
 
 Coffee Nerd is one container with one data volume. Each release is published as
-`ghcr.io/albertflindt/coffee-nerd:<version>` and `:latest`. Pre-releases of the next version, to try
-before it's out, are `:<version>-pre.<n>`; every merge to `main` is also `:main`. The image of each
-commit is deleted after a day unless a release uses it.
+`ghcr.io/albertflindt/coffee-nerd:<version>` and `:latest`. The next version, to try before it's out,
+is the pre-release `:<version>-pre`, which moves to each merge that changes the app; every merge to
+`main` is also `:main`. The image of each commit is deleted after a day unless a release uses it.
 
 1. **Start it.** Save this as `compose.yaml` in a folder called `coffee-nerd` and run
    `docker compose up -d`:
