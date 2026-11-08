@@ -11,6 +11,7 @@
     action,
     note,
     error,
+    upload = false,
     children
   }: {
     title: string;
@@ -19,11 +20,13 @@
     /** One caption under the primary action. */
     note: string;
     error?: string;
+    /** The form sends a file (moving a journal in on first run). */
+    upload?: boolean;
     children: Snippet;
   } = $props();
 </script>
 
-<form method="POST" class="screen">
+<form method="POST" class="screen" enctype={upload ? 'multipart/form-data' : undefined}>
   <div class="brand">
     <img src={logo} width="64" height="64" alt="" />
     <p class="name">Coffee Nerd</p>

@@ -1,9 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // End-to-end tests run at the reference viewport, Pixel 8a 412 × 915 (CLAUDE.md).
-// Three installations: "first-run" starts empty to test creating the account; "seeded" starts from
+// Four installations: "first-run" starts empty to test creating the account; "seeded" starts from
 // the reference seed (npm run db:seed) for the screens, which use seeded data only; "insights" adds the
-// seeded shot history (npm run db:seed -- --history) for Insights.
+// seeded shot history (npm run db:seed -- --history) for Insights; "import" starts empty and moves the
+// shot history from "insights" into it with "Export everything" and "Import everything".
 export default defineConfig({
   testDir: 'tests/e2e',
   forbidOnly: !!process.env.CI,
@@ -31,10 +32,15 @@ export default defineConfig({
       name: 'insights',
       testMatch: 'insights.test.ts',
       use: { baseURL: 'http://localhost:4175', deviceScaleFactor: 2 }
+    },
+    {
+      name: 'import',
+      testMatch: 'import.test.ts',
+      use: { baseURL: 'http://localhost:4176' }
     }
   ],
   // The real production server (adapter-node), not vite preview: it is what the Docker image runs.
-  // Servers start in order, so the first one builds the app for both.
+  // Servers start in order, so the first one builds the app for all of them.
   webServer: [
     {
       command: 'rm -f test-results/e2e.db* && npm run build && node build',
@@ -53,6 +59,13 @@ export default defineConfig({
       port: 4175,
       reuseExistingServer: !process.env.CI,
       env: { DATABASE_PATH: 'test-results/e2e-insights.db', PORT: '4175' }
+    },
+    {
+      command: 'rm -f test-results/e2e-import.db* && node build',
+      port: 4176,
+      reuseExistingServer: !process.env.CI,
+      // As the Docker image sets it, so a large journal's export fits.
+      env: { DATABASE_PATH: 'test-results/e2e-import.db', PORT: '4176', BODY_SIZE_LIMIT: '16M' }
     }
   ]
 });

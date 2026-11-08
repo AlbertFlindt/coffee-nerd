@@ -6,8 +6,8 @@ in `PROGRESS.md`. Behavior for each item is agreed and written into `docs/SPEC.m
 
 ## 2.0: Your data and your login
 Goal: moving to a new server, or signing in with the homelab's login, takes no terminal.
-- [ ] Import "Export everything" (JSON) in Settings. To decide: into an empty account only, or
-      merged into an existing one (matching beans, gear and tags by name).
+- [ ] Import "Export everything" (JSON) in Settings, into a new, empty journal (for moving
+      servers; merging into a journal in use is not planned).
 - [ ] Single sign-on. To decide: OpenID Connect (Pocket ID, Authelia, Authentik), a trusted
       header from a forward-auth proxy (Tinyauth), or both. The password sign-in stays.
 

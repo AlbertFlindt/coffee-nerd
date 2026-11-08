@@ -7,7 +7,7 @@ How things work: `docs/SPEC.md`.
 
 The whole app is built: the shot form, the Journal and shot detail, the Library (Beans, Gear,
 Puck prep, Tags), My setup, Home, Insights, the step-by-step start, offline use as an installed
-app, and Settings with steps, backup and exports. For contributors: `CONTRIBUTING.md`,
+app, and Settings with steps, backup, exports and import. For contributors: `CONTRIBUTING.md`,
 `CODE_OF_CONDUCT.md`, and in `.github/` the bug report and feature request forms and the pull
 request template.
 
@@ -43,7 +43,8 @@ The immediate ones. The milestones after them are in `ROADMAP.md`.
    "Not verified" come with it.
 2. Repository settings now it's public: protect `main`, turn on Settings › Moderation options ›
    Reported content (the code of conduct promises it), add a description, topics and a preview image.
-3. Start 2.0 with import (`ROADMAP.md`).
+3. Check moving a journal on the phone: Export everything on one server, "Move my journal" on a new one.
+4. Then single sign-on, the rest of 2.0 (`ROADMAP.md`).
 
 ## Known issues / limitations
 - **Offline means the server didn't answer:** the "Offline" line also shows after a server restart
@@ -64,6 +65,8 @@ The immediate ones. The milestones after them are in `ROADMAP.md`.
   also waits on the phone.
 - **A password reset** clears a phone's kept pages only when that phone next reaches the server.
 - **The backup copies every account** on the server, password hashes included.
+- **Import** only goes into an empty journal (`docs/SPEC.md` §4.8); outside Docker, `node build`
+  takes files up to 512 KB (about 600 shots) unless `BODY_SIZE_LIMIT` is set.
 - **Editing a shot on an exact tie** between two recipes: the form and the server can pick a
   different recipe for the tag.
 - **A routine kept only by a Brew next mark** counts as used, so it is archived, not deleted.

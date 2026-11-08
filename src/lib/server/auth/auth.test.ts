@@ -85,6 +85,31 @@ describe('first run', () => {
     expect(hasAccount(db)).toBe(false);
   });
 
+  it('a journal moved in with the account fills it in the same transaction', async () => {
+    let filled = '';
+    const userId = await createAccount(
+      db,
+      { name: 'Albert', password: 'espresso-at-dawn', timeZone: 'UTC' },
+      T0,
+      (_, id) => (filled = id)
+    );
+    expect(filled).toBe(userId);
+  });
+
+  it('when moving a journal in fails, no account is made', async () => {
+    await expect(
+      createAccount(
+        db,
+        { name: 'Albert', password: 'espresso-at-dawn', timeZone: 'UTC' },
+        T0,
+        () => {
+          throw new Error('Broken file');
+        }
+      )
+    ).rejects.toThrow('Broken file');
+    expect(hasAccount(db)).toBe(false);
+  });
+
   it('an unknown time zone falls back to UTC', async () => {
     await account({ timeZone: 'Mars/Olympus' });
     expect(db.select().from(userSettings).get()?.timeZone).toBe('UTC');

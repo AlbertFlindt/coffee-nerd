@@ -7,7 +7,10 @@ you build a state no design covers (after asking); remove it when a design sync 
   to send" and "Not saved" on shots, the "Not saved" message and "Discard change" in the shot form,
   the Sign out sheet while shots wait, "This page could not open" and "This page is not on the
   phone yet".
-- The Settings page (built simple).
+- The Settings page (built simple), with the Import everything row: its line says what it does,
+  "Importing…", what came in, why a file was refused, or that it only goes into an empty journal.
+- "Create your account": the New journal / Move my journal choice, its intro line, the Export
+  everything file row and "Create account and import".
 - The sign-in and "Create your account" pages follow a design agreed from screenshots of the app
   (2026-10-30): the logo above the name and tagline, a show/hide button on password fields, one
   caption under the button. `docs/screens/` doesn't draw them yet.

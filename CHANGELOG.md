@@ -6,6 +6,10 @@ top marked "(unreleased)" is out as a pre-release (`vX.Y.Z-pre`, moved to each m
 ## 1.5.0 (unreleased)
 
 ### Added
+- **Move your journal to a new server** without a terminal. Export everything on the old server;
+  on the new one, choose "Move my journal" when you create your account and pick the file. Your
+  beans, gear, puck prep, flavor notes, recipes, shots and My setup come across as they were.
+  A new, still empty journal can also import under Settings › Import everything.
 - **Three more graphs on Home:** chips above the graph switch between Dial-in, Time vs. yield,
   Roast age and Consistency, and Home opens on the one you chose last. Time vs. yield plots your
   last 30 shots with the ones scored 8 or more in amber. Roast age shows your average score per

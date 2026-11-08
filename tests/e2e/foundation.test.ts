@@ -54,6 +54,10 @@ test('creating the account shows the welcome, the password rule and the privacy 
   await page.goto('/welcome');
 
   await expect(page.getByText('Data that backs up the home barista')).toBeVisible();
+  // A new journal is the default; moving one from another server is the other choice.
+  const choice = page.getByRole('radiogroup', { name: 'How to start' });
+  await expect(choice.getByRole('radio', { name: 'New journal' })).toBeChecked();
+  await expect(choice.getByRole('radio', { name: 'Move my journal' })).not.toBeChecked();
   await expect(page.getByText('At least 8 characters')).toBeVisible();
   await expect(
     page.getByText('Everything stays on this server. Nothing is sent anywhere else.')
