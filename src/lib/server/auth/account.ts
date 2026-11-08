@@ -3,7 +3,7 @@
 import { randomBytes } from 'node:crypto';
 import { count, eq } from 'drizzle-orm';
 import { insertBuiltInTags } from '../db/built-in-tags';
-import type { Db } from '../db/client';
+import type { Db, Queryable } from '../db/client';
 import { newId } from '../db/ids';
 import { appState, user, userSettings } from '../db/schema';
 import { hashPassword, needsRehash, verifyPassword } from './password.js';
@@ -24,11 +24,15 @@ export function hasAccount(db: Db): boolean {
   return (db.select({ n: count() }).from(user).get()?.n ?? 0) > 0;
 }
 
-/** Creates the account on first run. Throws AccountError for missing input or a second account. */
+/**
+ * Creates the account on first run. Throws AccountError for missing input or a second account.
+ * `fill` runs in the same transaction (moving a journal in), so if it throws, no account is made.
+ */
 export async function createAccount(
   db: Db,
   input: { name: string; password: string; timeZone: string },
-  now: number
+  now: number,
+  fill?: (tx: Queryable, userId: string) => void
 ): Promise<string> {
   const name = input.name.trim();
   if (!name) throw new AccountError('Enter your name.');
@@ -51,6 +55,7 @@ export async function createAccount(
       .values({ userId, ...stamps })
       .run();
     insertBuiltInTags(tx, userId, now);
+    fill?.(tx, userId);
     return userId;
   });
 }

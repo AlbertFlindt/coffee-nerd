@@ -127,8 +127,9 @@ release and moves to each new one (after a stable release, it is that release).
    To stay on one version and update by hand, use a version tag such as `:1.0.1` in place of `:latest`.
 2. **Create your account right away** at `http://<server>:3000`. Until then, anyone who can reach
    the server can claim the app: it has one account, and the first person to create it owns it.
-   The app then walks you through your machine, grinder, basket, My setup and first bean, one step
-   at a time.
+   With **New journal**, the app then walks you through your machine, grinder, basket, My setup and
+   first bean, one step at a time. Coming from another server? Choose **Move my journal** (see
+   [Back up and restore](#back-up-and-restore)).
 3. **Put it behind https** to install it on your phone and use it offline (see below).
 
 ### Behind a reverse proxy
@@ -172,9 +173,10 @@ signs out every device.
 password in scrambled form. **Export shots** (a CSV for spreadsheets) and **Export everything**
 (JSON) sit next to it.
 
-**Move to a new server** without a terminal: Settings › **Export everything** on the old one, then
-on the new one create your account, close the step-by-step start (top left), and choose the file under
-Settings › **Import everything**. Import only goes into a new, empty journal.
+**Move to a new server** without a terminal: Settings › **Export everything** on the old one. On
+the new one, choose **Move my journal** when you create your account, and pick that file. (An
+account made with a new journal can still import under Settings › **Import everything** until you
+add anything to it.)
 
 **Restore** on the server, as a deliberate step: it replaces all data in the app with the backup.
 

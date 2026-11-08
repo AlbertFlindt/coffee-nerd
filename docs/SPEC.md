@@ -66,7 +66,7 @@ Every table also has `created_at` and `updated_at`. Decimal quantities are in th
 ### `user`
 `id`, `name`, `email` (optional, unused for now), `password_hash`.
 
-The first visit creates the one account on "Create your account" (a name, and a password of at least 8 characters typed twice); after that, signed-out visits go to "Sign in". Each password field has a button that shows or hides what was typed. A wrong name or password says only that they do not match; after 5 wrong passwords within 15 minutes, sign-in waits a minute. A forgotten password is reset on the server (`scripts/reset-password.mjs`). The password is stored as a salted scrypt hash with its parameters (N = 2^14, r = 8, p = 5, 16 MB per check); a hash made with older parameters is replaced at the next sign-in.
+The first visit creates the one account on "Create your account" (a name, and a password of at least 8 characters typed twice), choosing **New journal** (the default; the step-by-step start follows) or **Move my journal** (an "Export everything" file is imported with the account, §4.8, and Home opens); after that, signed-out visits go to "Sign in". Each password field has a button that shows or hides what was typed. A wrong name or password says only that they do not match; after 5 wrong passwords within 15 minutes, sign-in waits a minute. A forgotten password is reset on the server (`scripts/reset-password.mjs`). The password is stored as a salted scrypt hash with its parameters (N = 2^14, r = 8, p = 5, 16 MB per check); a hash made with older parameters is replaced at the next sign-in.
 
 ### `session`
 `id` (a hash of the token in the sign-in cookie; the token itself is never stored), `user_id`, `expires_at`. Renewed on each visit; deleted on sign-out and by the password reset.
@@ -256,11 +256,11 @@ A chip row picks one of four graphs for the bean on Home; the choice is kept in 
 - **Consistency:** shot time ± 1 σ of each recipe with 3 or more timed shots, the 4 with the most shots (the one brewed last first on a tie), named "1.6 · 18.0 g" (grind and dose; "(2)" after a second recipe that reads the same). The best recipe (§4.3) is amber.
 
 ### 4.8 Export and import
-Settings › **Export everything** writes all the account holds as JSON: every row of §3 except the account itself, sign-ins and the tag merge records, archived rows included, with the ids kept so the links hold. Quantities are decimals in their units (thousandths divided by 1000, also inside JSON values), times are UTC in ISO 8601. **Import everything** reads such a file back, for moving to a new server:
+Settings › **Export everything** writes all the account holds as JSON: every row of §3 except the account itself, sign-ins and the tag merge records, archived rows included, with the ids kept so the links hold. Quantities are decimals in their units (thousandths divided by 1000, also inside JSON values), times are UTC in ISO 8601. Importing reads such a file back, for moving to a new server: **Move my journal** when creating the account, or Settings › **Import everything** while the journal is still empty:
 - Only into an **empty journal**: no gear, beans, puck prep steps, routines or shots. The new account's built-in flavor notes give way to the file's. Once anything is added, import is off.
 - The file's rows keep their ids and times. Decimals go back to thousandths, every JSON value is checked with the schema the app saves it with, and each recipe's fingerprint is worked out again (§4.1), never read from the file.
 - Every link must point to a row of the right kind in the same file (a recipe's grinder is a grinder), recipe identities and flavor note names must be unique, and taste values in range. Otherwise nothing is imported and the file is called "not an export, or changed after the export".
-- My setup, the −/+ steps, the time zone and Brew next come from the file; the account's name and password stay. One transaction: an import that fails changes nothing.
+- My setup, the −/+ steps, the time zone and Brew next come from the file; the account's name and password stay. One transaction: an import that fails changes nothing, and on first run makes no account.
 - The request size: the Docker image accepts files up to 16 MB (`BODY_SIZE_LIMIT`, about 20,000 shots); `node build` alone accepts 512 KB (about 600 shots) unless `BODY_SIZE_LIMIT` is set.
 
 ---

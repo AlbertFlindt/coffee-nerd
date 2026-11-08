@@ -43,7 +43,7 @@ The immediate ones. The milestones after them are in `ROADMAP.md`.
    "Not verified" come with it.
 2. Repository settings now it's public: protect `main`, turn on Settings › Moderation options ›
    Reported content (the code of conduct promises it), add a description, topics and a preview image.
-3. Check import on the phone: Export everything on one server, Import everything on a new one.
+3. Check moving a journal on the phone: Export everything on one server, "Move my journal" on a new one.
 4. Then single sign-on, the rest of 2.0 (`ROADMAP.md`).
 
 ## Known issues / limitations
