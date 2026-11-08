@@ -95,7 +95,7 @@ export function stepLabel(direction: '+' | '-', step: Thousandths, unit?: string
 
 /**
  * One tap on −/+: moves by exactly one step and stays inside the range. An empty value (time or
- * yield) counts from 0: the first + gives one step.
+ * yield) counts from 0: the first + gives one step, held inside the range.
  */
 export function applyStep(
   value: Thousandths | null,
@@ -104,9 +104,11 @@ export function applyStep(
   range: { min?: Thousandths; max?: Thousandths } = {}
 ): Thousandths {
   const { min, max } = range;
-  // An empty value counts from 0 — the first + gives one step, − stays at 0, whatever the range.
-  if (value === null) return direction === '+' ? step : 0;
-  const next = direction === '+' ? value + step : value - step;
+  // An empty value counts from 0 (the first + gives one step, − gives 0) and is then held inside
+  // the range like any value: a 15–30 s feature starts at 15, not at 1.
+  const from = value ?? 0;
+  const next =
+    value === null && direction === '-' ? 0 : direction === '+' ? from + step : from - step;
   if (min !== undefined && next < min) return min;
   if (max !== undefined && next > max) return max;
   return next;

@@ -232,7 +232,7 @@ In this order:
 1. **Brew next is set** → that recipe's bean, values and setup; yield and time from its latest shot. The form shows "Recipe chosen from Library".
 2. **Otherwise, the current bean has shots** → the latest shot's recipe, yield and time.
 3. **Otherwise, the bean is a re-buy** ("Same as before") → follow the chain of earlier bags back to the nearest one with shots; its best recipe, with yield and time from that recipe's latest shot (without rated shots: its latest shot), as a new recipe for this bag. Its scores are not carried over.
-4. **Otherwise** → My setup defaults, with the current bean. Time starts empty. A yield or time with nothing to copy starts empty; −/+ count from 0.
+4. **Otherwise** → My setup defaults, with the current bean. Time starts empty. A yield or time with nothing to copy starts empty; −/+ count from 0. A first tap on an empty value with a range lands inside it: a 15–30 s feature starts at 15.
 
 Taste always starts empty. Features switched on since the copied shot start from My setup if it has a value, otherwise switched off (a feature without an off switch starts on with an empty value). Features since switched off on the machine are left out. Archived gear or an archived routine is replaced by My setup's. A routine chosen with "Use it for new shots" (`app_state.next_routine_id`) replaces the copied routine in steps 2 and 3, not for Brew next. The routine starts as it is now: current steps, copied values where a step is still there, the routine's values for new steps.
 

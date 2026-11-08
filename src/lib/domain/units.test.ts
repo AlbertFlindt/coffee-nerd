@@ -165,6 +165,12 @@ describe('applyStep', () => {
     expect(applyStep(null, 100, '-')).toBe(0);
   });
 
+  it('an empty value counted from 0 still lands inside the range: 15–30 starts at 15', () => {
+    expect(applyStep(null, 1000, '+', { min: 15000, max: 30000 })).toBe(15000);
+    expect(applyStep(null, 1000, '-', { min: 15000, max: 30000 })).toBe(15000);
+    expect(applyStep(null, 1000, '+', { max: 500 })).toBe(500);
+  });
+
   it('a value stays inside its range', () => {
     expect(applyStep(0, 100, '-', { min: 0, max: 16000 })).toBe(0);
     expect(applyStep(16000, 100, '+', { min: 0, max: 16000 })).toBe(16000);

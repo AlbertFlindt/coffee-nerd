@@ -22,6 +22,8 @@ top marked "(unreleased)" is out as a pre-release (`vX.Y.Z-pre`, moved to each m
   as set on each bean, and not your puck prep.
 
 ### Fixed
+- **A feature with a range starts inside it:** the first + on an empty feature with a range of
+  15–30 s now gives 15 s, not 1 s.
 - **Less memory on the server:** the app now stays around 100 MB, where it used to grow to
   several hundred megabytes, and the Journal opens faster.
 
