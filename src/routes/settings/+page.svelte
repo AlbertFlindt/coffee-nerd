@@ -1,6 +1,6 @@
 <script lang="ts">
   // Settings: opened by the gear on Home. The dose, yield and time steps, the
-  // backup and the exports, "Sign out", which ends this device's session, and the
+  // backup, the exports and the import, "Sign out", which ends this device's session, and the
   // version. Built without a design.
   // Signing out clears the phone, and asks first while shots wait to be sent.
   import { version } from '$app/env';
@@ -12,9 +12,10 @@
   import { versionText } from '#lib/domain/version.ts';
   import { clearWaiting, waiting } from '#lib/shot-queue.svelte.ts';
   import { forgetDrafts } from '#lib/shot-draft.ts';
+  import type { SubmitFunction } from '$app/forms';
   import type { PageProps } from './$types';
 
-  let { data }: PageProps = $props();
+  let { data, form }: PageProps = $props();
 
   let asking = $state(false);
   let leaving = $state(false);
@@ -42,6 +43,36 @@
       line: 'All your data as a JSON file'
     }
   ];
+
+  // "Import everything" sends the file as soon as it is chosen.
+  let importing = $state(false);
+  let importProblem = $state<string | null>(null);
+  const imported = $derived(form && 'imported' in form ? form.imported : null);
+  const importLine = $derived(
+    importing
+      ? 'Importing…'
+      : (importProblem ??
+          (imported
+            ? `Imported ${imported.shots === 1 ? '1 shot' : `${imported.shots} shots`} and ${imported.beans === 1 ? '1 bean' : `${imported.beans} beans`}`
+            : data.canImport
+              ? 'Move your journal from another Coffee Nerd'
+              : 'Only into a new, empty journal'))
+  );
+
+  const sendImport: SubmitFunction = () => {
+    importing = true;
+    importProblem = null;
+    return async ({ result, update }) => {
+      importing = false;
+      if (result.type === 'failure') importProblem = String(result.data?.problem ?? '');
+      else if (result.type === 'error')
+        importProblem =
+          result.status === 413
+            ? 'This file is too big for the server. Nothing was changed.'
+            : 'This file could not be imported. Nothing was changed.';
+      await update({ reset: true });
+    };
+  };
 
   async function signOut(event: SubmitEvent) {
     event.preventDefault();
@@ -118,6 +149,20 @@
         </button>
       </form>
     {/each}
+    <form method="POST" action="?/import" enctype="multipart/form-data" use:enhance={sendImport}>
+      <label class="data cn-tap" class:off={!data.canImport || importing}>
+        <span class="data-name">Import everything</span>
+        <span class="data-line" class:problem={!!importProblem} role="status">{importLine}</span>
+        <input
+          class="file"
+          type="file"
+          name="file"
+          accept=".json,application/json"
+          disabled={!data.canImport || importing}
+          onchange={(event) => event.currentTarget.form?.requestSubmit()}
+        />
+      </label>
+    </form>
   </section>
 
   <form class="sign-out" method="POST" action="/logout" onsubmit={signOut}>
@@ -229,6 +274,27 @@
 
   .data-line {
     font-size: 13px;
+    color: var(--ink-muted);
+  }
+
+  .data-line.problem {
+    color: var(--ink-soft);
+  }
+
+  /* The file picker opens from the whole row; the input itself is not drawn. */
+  .file {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .data.off {
+    cursor: default;
+  }
+
+  .data.off .data-name {
     color: var(--ink-muted);
   }
 

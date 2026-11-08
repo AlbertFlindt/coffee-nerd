@@ -101,7 +101,7 @@ export async function attemptSignIn(
 }
 
 /** An IANA time zone the runtime knows, or UTC (docs/SPEC.md §1.8). */
-function validTimeZone(timeZone: string): string {
+export function validTimeZone(timeZone: string): string {
   try {
     new Intl.DateTimeFormat('en', { timeZone });
     return timeZone;

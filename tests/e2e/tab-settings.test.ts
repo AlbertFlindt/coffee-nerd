@@ -52,6 +52,11 @@ test('Settings: steps, your data, Sign out and the version, on one screen', asyn
   await expect(steps('Time').getByRole('radio', { checked: true })).toHaveText('1 s');
   for (const name of ['Download backup', 'Export shots', 'Export everything', 'Sign out'])
     await expect(page.getByRole('button', { name: new RegExp(`^${name}`) })).toBeVisible();
+  // Import only goes into a new, empty journal; the demo journal has shots.
+  await expect(page.getByLabel('Import everything')).toBeDisabled();
+  await expect(page.locator('label', { hasText: 'Import everything' })).toContainText(
+    'Only into a new, empty journal'
+  );
   await expect(page.getByText(/^Version /)).toBeVisible();
   await settled();
   const overflow = await page.evaluate(() =>

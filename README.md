@@ -37,7 +37,7 @@
 | **Home** | The last shot, bean freshness, this week, the best recipe for your bean and your dial-in progress. |
 | **Insights** | What you like, your progress, dial-in and fair comparisons, with σ and distributions. |
 | **Offline** | Install it on your phone's home screen. It opens offline and sends shots saved offline later. |
-| **Your data** | A full backup in one file, and exports as CSV and JSON. |
+| **Your data** | A full backup in one file, exports as CSV and JSON, and import of the JSON on a new server. |
 
 Coffee Nerd stores everything on your own server and makes no outside requests.
 
@@ -92,8 +92,8 @@ server answers.
 
 ### Settings
 
-The −/+ steps for dose, yield and time, the backup, the exports and sign-out. Open it from the gear
-on Home.
+The −/+ steps for dose, yield and time, the backup, the exports, the import and sign-out. Open it
+from the gear on Home.
 
 ## Requirements
 
@@ -171,6 +171,10 @@ signs out every device.
 `coffee-nerd-backup-<date>.db`. Keep it somewhere private: it holds everything, including your
 password in scrambled form. **Export shots** (a CSV for spreadsheets) and **Export everything**
 (JSON) sit next to it.
+
+**Move to a new server** without a terminal: Settings › **Export everything** on the old one, then
+on the new one create your account, close the step-by-step start (top left), and choose the file under
+Settings › **Import everything**. Import only goes into a new, empty journal.
 
 **Restore** on the server, as a deliberate step: it replaces all data in the app with the backup.
 

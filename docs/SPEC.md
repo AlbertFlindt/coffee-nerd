@@ -255,6 +255,14 @@ A chip row picks one of four graphs for the bean on Home; the choice is kept in 
 - **Roast age:** average score ± 1 σ per whole week since roast (0–6, 7–13, 14–20, 21–27, 28+ days). A range needs 2 rated shots, the graph 2 ranges. The best range is amber when it leads the next by more than half a point.
 - **Consistency:** shot time ± 1 σ of each recipe with 3 or more timed shots, the 4 with the most shots (the one brewed last first on a tie), named "1.6 · 18.0 g" (grind and dose; "(2)" after a second recipe that reads the same). The best recipe (§4.3) is amber.
 
+### 4.8 Export and import
+Settings › **Export everything** writes all the account holds as JSON: every row of §3 except the account itself, sign-ins and the tag merge records, archived rows included, with the ids kept so the links hold. Quantities are decimals in their units (thousandths divided by 1000, also inside JSON values), times are UTC in ISO 8601. **Import everything** reads such a file back, for moving to a new server:
+- Only into an **empty journal**: no gear, beans, puck prep steps, routines or shots. The new account's built-in flavor notes give way to the file's. Once anything is added, import is off.
+- The file's rows keep their ids and times. Decimals go back to thousandths, every JSON value is checked with the schema the app saves it with, and each recipe's fingerprint is worked out again (§4.1), never read from the file.
+- Every link must point to a row of the right kind in the same file (a recipe's grinder is a grinder), recipe identities and flavor note names must be unique, and taste values in range. Otherwise nothing is imported and the file is called "not an export, or changed after the export".
+- My setup, the −/+ steps, the time zone and Brew next come from the file; the account's name and password stay. One transaction: an import that fails changes nothing.
+- The request size: the Docker image accepts files up to 16 MB (`BODY_SIZE_LIMIT`, about 20,000 shots); `node build` alone accepts 512 KB (about 600 shots) unless `BODY_SIZE_LIMIT` is set.
+
 ---
 
 ## 5. Insights query system
