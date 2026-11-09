@@ -1,10 +1,8 @@
 # Progress / handoff
-
 **Last updated:** 2026-11-07. **Latest release:** 1.4.0 (details in `CHANGELOG.md`).
 How things work: `docs/SPEC.md`.
 
 ## Current state
-
 The whole app is built: the shot form, the Journal and shot detail, the Library (Beans, Gear,
 Puck prep, Tags), My setup, Home, Insights, the step-by-step start, offline use as an installed
 app, and Settings with steps, backup, exports and import. For contributors: `CONTRIBUTING.md`,
@@ -26,25 +24,10 @@ request template.
 
 **Not verified:**
 - Safari on iPhone and iPad.
-- Vanadium and Firefox only add a shortcut (with their badge), they don't install the app. The
-  page now turns off the browser's stretch and pull-to-reload; check on the phone that Vanadium
-  no longer moves the screen when dragged.
-- Daily use at a real brew station.
-- On the phone: the back gesture closing a sheet, and swiping a sheet down from its content.
-  Tested in Chromium with touch events at 412 × 915.
 - Phones shorter than about 740 px: the shot form then scrolls inside itself, so Setup and Tasting
   can scroll out of view.
 
 **Built without a design:** listed in `docs/design-gaps.md`.
-
-## Next steps
-The immediate ones. The milestones after them are in `ROADMAP.md`.
-1. Host it behind https in the homelab and use it daily at the machine; the phone checks under
-   "Not verified" come with it.
-2. Repository settings now it's public: protect `main`, turn on Settings › Moderation options ›
-   Reported content (the code of conduct promises it), add a description, topics and a preview image.
-3. Check moving a journal on the phone: Export everything on one server, "Move my journal" on a new one.
-4. Then single sign-on, the rest of 2.0 (`ROADMAP.md`).
 
 ## Known issues / limitations
 - **Offline means the server didn't answer:** the "Offline" line also shows after a server restart
