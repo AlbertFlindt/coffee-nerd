@@ -3,7 +3,8 @@
 Self-hosted, privacy-friendly espresso journal: SvelteKit (Svelte 5, TypeScript strict) + SQLite
 via Drizzle, one Docker image, installable PWA. Used one-handed on a phone at the brew station;
 reference device Pixel 8a, 412 × 915. Tests and CI are the safety net.
-Handoff state, known issues, next steps: @PROGRESS.md. Milestones: `ROADMAP.md` (not loaded).
+Handoff state, known issues, next steps: @PROGRESS.md. Milestones and backlog: the `Coffee Nerd Roadmap`
+note in the Obsidian vault (repo `AlbertFlindt/obsidian`, not in this repo).
 How it works: `docs/SPEC.md` (not loaded; read the section before changing that behavior, and
 update it with the change). Release history: `CHANGELOG.md` (not loaded).
 Looks: `design-system/` (tokens, `components.css` with `cn-` classes, `components.md`) and
@@ -62,9 +63,9 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - Screens: use the `build-screen` skill. Not done until your screenshot matches the PNG in `docs/screens/`.
 - **Every merge that changes the app is a pre-release; stable releases only when asked.** Set the version and
   add the CHANGELOG entry in the pull request with the `release` skill; once CI passes on `main`,
-  `.github/workflows/release.yml` moves the one pre-release `vX.Y.Z-pre` and the image tag `:pre-release` to it. Major versions are `ROADMAP.md` milestones.
-- Keep `PROGRESS.md`, `docs/design-gaps.md` (states built without a design) and `docs/SPEC.md` current in the same pull request.
-- Docs: `node scripts/docs-check.mjs` (run in CI) holds `CLAUDE.md`, `PROGRESS.md` and `ROADMAP.md` to a line budget (`scripts/docs-check.mjs`).
+  `.github/workflows/release.yml` moves the one pre-release `vX.Y.Z-pre` and the image tag `:pre-release` to it. Major versions are roadmap milestones.
+- Keep `PROGRESS.md` and `docs/SPEC.md` current in the same pull request.
+- Docs: `node scripts/docs-check.mjs` (run in CI) holds `CLAUDE.md` and `PROGRESS.md` to a line budget (`scripts/docs-check.mjs`).
   `PROGRESS.md` is the present: delete an entry the moment it's no longer true (history is git and `CHANGELOG.md`).
   Write the decision and its reason, never who made it or who asked for it. One fact lives in one file.
 - Report work with evidence: the commands you ran and their results, and screenshots next to their reference for UI.
