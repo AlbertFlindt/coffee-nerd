@@ -23,22 +23,6 @@
   <a href="#running-from-source">Running from source</a>
 </p>
 
-<p align="center">
-  <img src="docs/screens/Rated.png" alt="The shot form with grind, dose, yield and time, the changed values in green, and a score of 7" width="260">
-  <img src="docs/screens/Journal.png" alt="The Journal with this week's shots grouped by day, their scores and recipe tags" width="260">
-  <img src="docs/screens/Insights.png" alt="Insights showing score by process as box plots and origins as average ± standard deviation" width="260">
-</p>
-
-| Feature       | What it does                                                                                               |
-| ------------- | ---------------------------------------------------------------------------------------------------------- |
-| **Shot form** | Starts from your best recipe, so a shot is a few taps. Shows what changed and whether you reused a recipe. |
-| **Journal**   | Every shot by day, filtered by bean, recipe or unrated. Open one to see, edit or delete it.                |
-| **Library**   | Your beans, gear (machines, grinders, baskets), puck prep routines and flavor tags.                        |
-| **Home**      | The last shot, bean freshness, this week, the best recipe for your bean and your dial-in progress.         |
-| **Insights**  | What you like, your progress, dial-in and fair comparisons, with σ and distributions.                      |
-| **Offline**   | Install it on your phone's home screen. It opens offline and sends shots saved offline later.              |
-| **Your data** | A full backup in one file, exports as CSV and JSON, and import of the JSON on a new server.                |
-
 Coffee Nerd stores everything on your own server and makes no outside requests.
 
 ## Features
