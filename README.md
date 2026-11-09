@@ -7,6 +7,7 @@
 <p align="center">
   Data that backs up the home barista. A self-hosted espresso journal for your phone:<br>
   log a shot in seconds at the machine, see what changed, and learn which beans and recipes you like.
+  Coffee Nerd stores everything on your own server and makes no outside requests.
 </p>
 
 <p align="center">
@@ -22,8 +23,6 @@
   <a href="#back-up-and-restore">Back up and restore</a> ·
   <a href="#running-from-source">Running from source</a>
 </p>
-
-Coffee Nerd stores everything on your own server and makes no outside requests.
 
 ## Features
 
