@@ -27,8 +27,6 @@ request template.
 - Phones shorter than about 740 px: the shot form then scrolls inside itself, so Setup and Tasting
   can scroll out of view.
 
-**Built without a design:** listed in `docs/design-gaps.md`.
-
 ## Known issues / limitations
 - **Offline means the server didn't answer:** the "Offline" line also shows after a server restart
   (a Docker update) and goes at the next page that reaches it. After 4 seconds without an answer a

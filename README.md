@@ -121,7 +121,6 @@ To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
 ## Changes
 See [CHANGELOG.md](CHANGELOG.md) and the [releases](https://github.com/AlbertFlindt/coffee-nerd/releases).
-What's planned: [ROADMAP.md](ROADMAP.md).
 
 ## License
 Coffee Nerd is free software, licensed under the GNU Affero General Public License, version 3

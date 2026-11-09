@@ -13,9 +13,10 @@ A stable release is a release pull request that dates the section; it publishes 
 a version above the latest stable one and a CHANGELOG entry.
 
 ## Versions
+The roadmap is the `Coffee Nerd Roadmap` note in the Obsidian vault (repo `AlbertFlindt/obsidian`).
 - **Patch** (1.4.0 → 1.4.1): fixes and small changes.
 - **Minor** (1.4.x → 1.5.0): a new feature.
-- **Major** (1.x → 2.0.0): a milestone in `ROADMAP.md` is done. Never for anything else. A change
+- **Major** (1.x → 2.0.0): a milestone in the roadmap is done. Never for anything else. A change
   that breaks a backup, an export or an install waits for one, and the CHANGELOG says so.
 
 ## In every pull request that changes the app
@@ -33,12 +34,12 @@ When asked whether it's time, check these and say which don't hold:
   as it's verified on the phone.
 - Every entry in the section is verified, or listed under "Not verified" in `PROGRESS.md`.
 - No feature in the section is half done.
-- For a major: every item of its milestone in `ROADMAP.md` is checked.
+- For a major: every item of its milestone in the roadmap is checked.
 
 Then, on a release branch:
 1. `node scripts/version.mjs release`: dates the section and sets "Latest release" in `PROGRESS.md`.
 2. Prune `PROGRESS.md`: delete what this release made true or obsolete (shipped next steps, fixed
-   issues, items now verified). In `ROADMAP.md`, check the shipped items; drop a finished milestone.
+   issues, items now verified). List the shipped roadmap items and finished milestones in the pull request, to be checked in the vault.
 3. `npm run lint`, commit "Release X.Y.Z: <summary>", open the pull request.
 4. After the merge, confirm the release appeared (`mcp__github__get_release_by_tag`, or
    `gh release view vX.Y.Z`). If the workflow failed, rerun it from the Actions tab.

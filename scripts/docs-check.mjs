@@ -10,18 +10,13 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const BUDGET = { 'CLAUDE.md': 85, 'PROGRESS.md': 110, 'ROADMAP.md': 50 };
+const BUDGET = { 'CLAUDE.md': 85, 'PROGRESS.md': 110 };
 const NO_PEOPLE = /\b(Albert|the owner|owner's)\b/;
 const markdown = (dir) =>
   readdirSync(join(ROOT, dir), { recursive: true })
     .filter((file) => file.endsWith('.md'))
     .map((file) => join(dir, file));
-const checked = [
-  ...Object.keys(BUDGET),
-  'docs/SPEC.md',
-  'docs/design-gaps.md',
-  ...markdown('.claude')
-];
+const checked = [...Object.keys(BUDGET), 'docs/SPEC.md', ...markdown('.claude')];
 
 const errors = [];
 for (const [file, limit] of Object.entries(BUDGET)) {
