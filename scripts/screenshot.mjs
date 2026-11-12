@@ -1,4 +1,4 @@
-// Saves a 412 × 915 screenshot of a route to screenshots/, for comparing with docs/screens/.
+// Saves a 412 × 915 screenshot of a route to screenshots/.
 // Usage: npm run screenshot -- <route> [name]. Needs a running server (npm run dev); override with BASE_URL.
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -15,7 +15,7 @@ const fileName = `${name ?? (route.replace(/^\/|\/$/g, '').replaceAll('/', '-') 
 const out = join('screenshots', fileName);
 mkdirSync('screenshots', { recursive: true });
 
-// The reference PNGs in docs/screens/ are 412 × 915 at 2× pixel density.
+// 2× pixel density, as on the reference phone.
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({

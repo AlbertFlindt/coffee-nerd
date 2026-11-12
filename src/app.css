@@ -20,8 +20,8 @@ body {
 
 /*
  * The design system sizes every element with border-box (.cn-root *), but not ::before and ::after, so the
- * hollow dot of "New recipe" (.cn-tag--new) grew by its border and lost its round shape. The screens draw
- * it border-box (docs/screens/Journal.html).
+ * hollow dot of "New recipe" (.cn-tag--new) grew by its border and lost its round shape. The design draws
+ * it border-box.
  */
 .cn-root *::before,
 .cn-root *::after {
