@@ -62,7 +62,7 @@ request template.
 - **Range fields** open the decimal keypad; an iPhone's has no dash, so "0-5" can't be typed there.
 - **The manifest and `theme-color`** repeat the dark background color as a fixed value: change them
   by hand if the background token changes.
-- **`main` isn't protected by GitHub** yet (Next steps). The push-guard hook is the only safeguard,
+- **`main` isn't protected by GitHub** yet (on the roadmap). The push-guard hook is the only safeguard,
   and it doesn't see merges made through the GitHub API.
 - **The push guard** also blocks a command whose commit text looks like a push to `main`. Safe side.
 - **Seeded end-to-end files** share one database and run in name order (`shot-*`, then `tab-*`);
