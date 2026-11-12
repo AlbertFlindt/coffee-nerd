@@ -3,8 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { bestRecipe } from '../../src/lib/domain/best-recipe';
 
 // The Library tab on the shots logged by shot-form.test.ts and shot-journal.test.ts, which run
-// first (files run in name order, one worker). Each designed screen is saved to screenshots/ for comparing
-// with docs/screens/.
+// first (files run in name order, one worker). Each screen is saved to screenshots/.
 test.describe.configure({ mode: 'serial' });
 
 const DATABASE = 'test-results/e2e-seeded.db';

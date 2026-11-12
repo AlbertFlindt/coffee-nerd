@@ -41,5 +41,5 @@ Then, on a release branch:
 2. Prune `PROGRESS.md`: delete what this release made true or obsolete (shipped next steps, fixed
    issues, items now verified). List the shipped roadmap items and finished milestones in the pull request, to be checked in the vault.
 3. `npm run lint`, commit "Release X.Y.Z: <summary>", open the pull request.
-4. After the merge, confirm the release appeared (`mcp__github__get_release_by_tag`, or
-   `gh release view vX.Y.Z`). If the workflow failed, rerun it from the Actions tab.
+4. After the merge, confirm the release appeared (`mcp__github__get_release_by_tag`). If the
+   workflow failed, rerun it from the Actions tab.
