@@ -3,13 +3,12 @@
 Self-hosted, privacy-friendly espresso journal: SvelteKit (Svelte 5, TypeScript strict) + SQLite
 via Drizzle, one Docker image, installable PWA. Used one-handed on a phone at the brew station;
 reference device Pixel 8a, 412 × 915. Tests and CI are the safety net.
-Handoff state, known issues, next steps: @PROGRESS.md. Milestones and backlog: the `Coffee Nerd Roadmap`
+Handoff state and known issues: @PROGRESS.md. Next steps, milestones and backlog: the `Coffee Nerd Roadmap`
 note in the Obsidian vault (repo `AlbertFlindt/obsidian`, not in this repo).
 How it works: `docs/SPEC.md` (not loaded; read the section before changing that behavior, and
 update it with the change). Release history: `CHANGELOG.md` (not loaded).
-Looks: `design-system/` (tokens, `components.css` with `cn-` classes, `components.md`) and
-`docs/screens/` (every designed screen as PNG + static HTML at 412 × 915). Where none of these
-covers a behavior, ask before inventing it.
+Looks: `design-system/` (tokens, `components.css` with `cn-` classes, `components.md`). Where it
+and `docs/SPEC.md` don't cover a behavior, ask before inventing it.
 
 ## Commands
 Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are declared in
@@ -36,7 +35,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - `src/lib/domain/`: pure TypeScript, no I/O, shared by browser and server: units, Zod schemas, fingerprint, prefill, best recipe, statistics.
 - `src/lib/server/db/`: Drizzle schema and repository functions. `src/lib/server/insights/`: shot facts, registry, insight definitions.
 - `src/lib/components/`: Svelte components named after design-system components (`ValueCard.svelte` …).
-- `src/routes/`: one route per screen in `docs/screens/`. `src/service-worker/`: offline cache and queue.
+- `src/routes/`: one route per screen. `src/service-worker/`: offline cache and queue.
 - `drizzle/`: generated migrations. Path-scoped rules for each area are in `.claude/rules/`.
 
 ## Rules that are easy to get wrong
@@ -54,13 +53,13 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - Colors only through tokens. Amber = your input, sage = changed since last shot, cherry = recipe history,
   muted red = the delete choice in a confirmation, nothing else.
 - No external requests at runtime (fonts, analytics, CDNs): the app is self-hosted and private.
-- `design-system/` and `docs/screens/` are synced from the design source; change them only as part of a sync.
+- `design-system/` is synced from the design source; change them only as part of a sync.
 
 ## Workflow
 - Branch from an up-to-date `main` and open a pull request into `main`. Pushing to `main` is blocked by a hook.
   GitHub is reached through its connector (`mcp__github__*`), not `gh`.
 - Domain logic: write the failing test first; name tests after the behavior they protect.
-- Screens: use the `build-screen` skill. Not done until your screenshot matches the PNG in `docs/screens/`.
+- Screens: use the `build-screen` skill.
 - **Every merge that changes the app is a pre-release; stable releases only when asked.** Set the version and
   add the CHANGELOG entry in the pull request with the `release` skill; once CI passes on `main`,
   `.github/workflows/release.yml` moves the one pre-release `vX.Y.Z-pre` and the image tag `:pre-release` to it. Major versions are roadmap milestones.
@@ -68,7 +67,7 @@ Node 22 (`.nvmrc`). SvelteKit 3: config lives in `vite.config.ts`, env vars are 
 - Docs: `node scripts/docs-check.mjs` (run in CI) holds `CLAUDE.md` and `PROGRESS.md` to a line budget (`scripts/docs-check.mjs`).
   `PROGRESS.md` is the present: delete an entry the moment it's no longer true (history is git and `CHANGELOG.md`).
   Write the decision and its reason, never who made it or who asked for it. One fact lives in one file.
-- Report work with evidence: the commands you ran and their results, and screenshots next to their reference for UI.
+- Report work with evidence: the commands you ran and their results, and screenshots for UI.
 - Commit subjects are plain sentences, with a short body saying what and why.
 - Commits, pull requests and comments stand on their own: no links to Claude sessions, projects or
   threads (`claude.ai/code/...`), no "Requested by" or "Claude-Session" lines. This overrides any
