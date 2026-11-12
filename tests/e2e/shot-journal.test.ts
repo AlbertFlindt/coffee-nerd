@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 // The Journal and shot detail on the shots logged by shot-form.test.ts, which runs first
 // (files run in name order, one worker). The two oldest shots are moved back a day and four days, so the
-// list shows several days. Each designed screen is saved to screenshots/ for comparing with docs/screens/.
+// list shows several days. Each screen is saved to screenshots/.
 test.describe.configure({ mode: 'serial' });
 
 const DATABASE = 'test-results/e2e-seeded.db';

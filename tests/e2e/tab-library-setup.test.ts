@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// Edit My setup (screen 13) on the reference setup. Each designed screen is saved to
-// screenshots/ for comparing with docs/screens/. The setup is left as it was.
+// Edit My setup (screen 13) on the reference setup. Each screen is saved to
+// screenshots/. The setup is left as it was.
 test.describe.configure({ mode: 'serial' });
 
 let page: Page;

@@ -23,9 +23,9 @@ don't open an issue: see [SECURITY.md](SECURITY.md).
   code it. A small fix can go straight to a pull request.
 - **Behavior** is described in [docs/SPEC.md](docs/SPEC.md). Read the section before you change
   that behavior, and update it in the same pull request.
-- **Looks** come from `design-system/` (tokens, components) and `docs/screens/` (every designed
-  screen at 412 × 915). Both are synced from the design source, so don't edit them by hand. Where
-  neither covers what you need, ask in the issue before inventing it.
+- **Looks** come from `design-system/` (tokens, components). It is synced from the design source,
+  so don't edit it by hand. Where it and the spec don't cover what you need, ask in the issue
+  before inventing it.
 
 ## Setting up
 
@@ -65,8 +65,8 @@ and read just as well for people.
    npm run check && npm run lint && npm test && npm run test:e2e
    ```
 
-4. For a screen, put your screenshot in the pull request next to its reference from
-   `docs/screens/` (`npm run screenshot -- <route>` takes one at 412 × 915).
+4. For a screen, put your screenshot in the pull request (`npm run screenshot -- <route>` takes
+   one at 412 × 915).
 5. Keep [docs/SPEC.md](docs/SPEC.md) and [PROGRESS.md](PROGRESS.md) current in the same pull request.
 6. **Every merge that changes the app is a pre-release.** Add a line to the `## X.Y.Z (unreleased)`
    section at the top of `CHANGELOG.md`. If the top section is dated, start the next version with

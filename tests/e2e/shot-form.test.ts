@@ -2,8 +2,8 @@ import Database from 'better-sqlite3';
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
 // The shot form on the reference seed: Lelit Bianca, Timemore 064S, VST · 18 g, Daily
-// routine, one open bean. The steps run in order and build on each other's shots. Each designed state is
-// saved to screenshots/ for comparing with docs/screens/.
+// routine, one open bean. The steps run in order and build on each other's shots. Each state is
+// saved to screenshots/.
 test.describe.configure({ mode: 'serial' });
 
 const DATABASE = 'test-results/e2e-seeded.db';

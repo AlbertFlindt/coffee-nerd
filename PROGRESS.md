@@ -68,8 +68,7 @@ request template.
 - **Seeded end-to-end files** share one database and run in name order (`shot-*`, then `tab-*`);
   a file can't run alone after an earlier one fails.
 - **The seeded shot history** (`npm run db:seed -- --history`) is tuned by hand for the Insights
-  screenshot. Early in the week (a Monday) the weekly line ends last week, and the Progress
-  screenshot differs from its reference.
+  screenshot. Early in the week (a Monday) the weekly line ends last week.
 - **The Journal end-to-end test** would see one more day in a run that crosses midnight in
   Copenhagen (the seed's time zone).
 - **`npm audit`:** 4 moderate advisories from an old esbuild inside drizzle-kit (development only,
