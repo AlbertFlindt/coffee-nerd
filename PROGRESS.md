@@ -1,5 +1,5 @@
 # Progress / handoff
-**Last updated:** 2026-11-07. **Latest release:** 1.4.0 (details in `CHANGELOG.md`).
+**Last updated:** 2026-11-12. **Latest release:** 1.4.0 (details in `CHANGELOG.md`).
 How things work: `docs/SPEC.md`.
 
 ## Current state
@@ -71,5 +71,9 @@ request template.
   screenshot. Early in the week (a Monday) the weekly line ends last week.
 - **The Journal end-to-end test** would see one more day in a run that crosses midnight in
   Copenhagen (the seed's time zone).
+- **Three code comments still mention the removed `docs/screens/`** (`src/app.css`,
+  `scripts/screenshot.mjs`, `playwright.config.ts`). The fix waits on branch `docs-screens-comments`
+  to go in with the next app change, because CI counts edits to those files as an app change that
+  needs a CHANGELOG entry.
 - **`npm audit`:** 4 moderate advisories from an old esbuild inside drizzle-kit (development only,
   not in the Docker image). Recheck when drizzle-kit updates.
